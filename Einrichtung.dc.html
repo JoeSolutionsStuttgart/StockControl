@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/styles.css">
+<script src="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/_ds_bundle.js"></script>
+<script src="doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  h1, h2, h3, h4 { font-family: var(--font-heading); }
+  h2 { font-size: 21pt; margin: 30pt 0 6pt; padding-bottom: 5pt; border-bottom: 1px solid var(--color-accent); }
+  h3 { font-size: 14pt; margin: 18pt 0 4pt; }
+  p, li, td, th { font-size: 10.5pt; line-height: 1.5; }
+  p { margin: 0 0 7pt; }
+  ol, ul { margin: 0 0 8pt; padding-left: 15pt; }
+  li { margin-bottom: 3pt; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9.5pt;
+    background: var(--color-neutral-100); padding: 1px 4px; }
+  pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9pt; line-height: 1.45;
+    background: var(--color-neutral-100); border-left: 2px solid var(--color-accent);
+    padding: 8pt 10pt; margin: 0 0 9pt; white-space: pre-wrap; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 10pt; }
+  th { text-align: left; font-family: var(--font-heading); font-size: 10pt; text-transform: uppercase;
+    letter-spacing: 0.06em; border-bottom: 1px solid var(--color-text); padding: 4pt 8pt 4pt 0; }
+  td { padding: 4pt 8pt 4pt 0; border-bottom: 1px solid var(--color-neutral-200); vertical-align: top; }
+  .note { border: 1px solid var(--color-accent); padding: 8pt 10pt; margin: 0 0 10pt; break-inside: avoid; }
+  .note b { font-family: var(--font-heading); font-size: 11pt; letter-spacing: 0.01em; }
+  .step { font-family: var(--font-heading); font-size: 12pt; color: var(--color-accent-700);
+    letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 2pt; }
+</style>
+</helmet>
+
+<doc-page margin="0.85in">
+
+<div slot="header" style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 5pt; border-bottom: 1px solid var(--color-neutral-300); font-size: 8.5pt; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">
+  <span>StockControl · Einrichtung</span>
+  <span>Internet GmbH</span>
+</div>
+
+<div slot="footer" style="padding-top: 5pt; border-top: 1px solid var(--color-neutral-300); font-size: 8.5pt; color: var(--color-neutral-600)">
+  Reihenfolge einhalten. Jeder Abschnitt endet mit einer Prüfung — erst weiter, wenn sie klappt.
+</div>
+
+<div style="margin-bottom: 20pt">
+  <div style="font-family: var(--font-heading); font-size: 11pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-700)">Handbuch zur Inbetriebnahme</div>
+  <h1 style="font-size: 32pt; line-height: 1.05; margin: 4pt 0 8pt">Welcher Dienst,<br>welcher Klick</h1>
+  <p style="font-size: 12pt; max-width: 34em; margin: 0">Vier Dienste tragen die Lagerverwaltung: <b>Supabase</b> speichert die Daten, <b>Brevo</b> verschickt die Mails, <b>Cloudflare R2</b> hält Bilder und große Dateien, <b>GitHub</b> liefert die Seite aus. Dieses Dokument geht jeden Dienst der Reihe nach durch — was du dort anklickst, was du kopierst und wo es hingehört.</p>
+</div>
+
+<div class="note">
+  <b>Was du vorher brauchst</b>
+  <p style="margin: 4pt 0 0">Konten bei Supabase, Brevo, Cloudflare und GitHub — alle vier hast du. Dazu die Projektdateien (<code>StockControl.dc.html</code>, <code>config.js</code>, <code>supabase-client.js</code>, Ordner <code>supabase/</code> und <code>.github/</code>) und auf deinem Rechner <a href="https://nodejs.org">Node.js</a> sowie die Supabase-CLI (<code>npm install -g supabase</code>). Rechne mit 60–90 Minuten.</p>
+</div>
+
+<h3>Überblick: was wo passiert</h3>
+<table>
+  <thead><tr><th style="width: 24%">Dienst</th><th style="width: 38%">Aufgabe</th><th>Was du dort einmalig tust</th></tr></thead>
+  <tbody>
+    <tr><td><b>Supabase</b></td><td>Datenbank, Konten, Anmeldung, Automatik</td><td>Projekt anlegen, Schema einspielen, Mailbestätigung einstellen, zwei Funktionen hochladen, Zeitplan setzen</td></tr>
+    <tr><td><b>Brevo</b></td><td>Mailversand</td><td>Absenderadresse verifizieren, SMTP-Daten und API-Schlüssel abholen</td></tr>
+    <tr><td><b>Cloudflare R2</b></td><td>Bilder, PDFs, Excel-Dateien</td><td>Bucket anlegen (privat), API-Token erzeugen, CORS erlauben</td></tr>
+    <tr><td><b>GitHub</b></td><td>Auslieferung der Seite</td><td>Repository anlegen, Pages auf „GitHub Actions" stellen</td></tr>
+  </tbody>
+</table>
+
+<h2>1 · Supabase — Datenbank</h2>
+<p class="step">Dienst: supabase.com</p>
+
+<h3>1.1 Projekt anlegen</h3>
+<ol>
+  <li>Auf <b>supabase.com</b> anmelden → <b>New project</b>.</li>
+  <li>Name frei wählen, z. B. <code>stockcontrol</code>. Region: <b>Frankfurt (eu-central-1)</b> — kurze Wege und EU-Datenhaltung.</li>
+  <li>Ein Datenbank-Passwort setzen und sicher ablegen. Du brauchst es selten, aber ein Verlust ist lästig.</li>
+  <li>Projekt erstellen, zwei Minuten warten.</li>
+</ol>
+
+<h3>1.2 Schlüssel notieren</h3>
+<p>Links im Menü <b>Project Settings → API</b>. Drei Werte brauchst du später:</p>
+<table>
+  <thead><tr><th style="width: 30%">Feld</th><th>Wofür</th></tr></thead>
+  <tbody>
+    <tr><td><b>Project URL</b></td><td>kommt in <code>config.js</code></td></tr>
+    <tr><td><b>anon public</b></td><td>kommt in <code>config.js</code> — darf öffentlich sein</td></tr>
+    <tr><td><b>service_role</b></td><td>bleibt geheim, nur für den Zeitplan in Schritt 2.4</td></tr>
+  </tbody>
+</table>
+<p>Die <b>Project Ref</b> (der Teil vor <code>.supabase.co</code>) brauchst du für die CLI.</p>
+
+<h3>1.3 Schema einspielen</h3>
+<ol>
+  <li>Links <b>SQL Editor</b> → <b>New query</b>.</li>
+  <li>Die Datei <code>supabase/schema.sql</code> öffnen, <b>gesamten Inhalt</b> kopieren und einfügen.</li>
+  <li><b>Run</b>. Erwartet: <i>Success. No rows returned</i>.</li>
+</ol>
+<p>Angelegt werden neun Tabellen — <code>companies</code>, <code>profiles</code>, <code>settings</code>, <code>products</code>, <code>movements</code>, <code>events</code>, <code>event_items</code>, <code>invitations</code>, <code>notifications</code> — dazu die Sicherheitsregeln und die Automatik.</p>
+
+<div class="note">
+  <b>Warum keine Firma die Daten einer anderen sieht</b>
+  <p style="margin: 4pt 0 0">Jede Zeile trägt eine <code>company_id</code>. Row Level Security lässt nur Zeilen durch, deren <code>company_id</code> zum angemeldeten Konto passt — im Browser, über die API, in jeder Abfrage. Das ist keine Einstellung in der Oberfläche, sondern eine Regel in der Datenbank: auch ein Fehler in der Anwendung kann sie nicht umgehen.</p>
+</div>
+
+<h3>1.4 Was die Datenbank von allein tut</h3>
+<table>
+  <thead><tr><th style="width: 34%">Auslöser</th><th>Reaktion</th></tr></thead>
+  <tbody>
+    <tr><td>Neue Registrierung</td><td>Firma und Profil werden angelegt, Person 1 bekommt die Rolle <code>owner</code></td></tr>
+    <tr><td>Registrierung mit gültiger Einladung (3 Std.)</td><td>Person wird der einladenden Firma zugeordnet, Rolle aus der Einladung</td></tr>
+    <tr><td>Entnahme oder Nachfüllung</td><td>Bestand wird fortgeschrieben, Status gesetzt, Person und Zeit protokolliert</td></tr>
+    <tr><td>Bestand fällt unter Mindestbestand</td><td>Eintrag in <code>notifications</code> — Grundlage der Mail</td></tr>
+    <tr><td>Buchung auf deaktiviertem Produkt</td><td>wird übersprungen: kein Tracking, keine Mail</td></tr>
+  </tbody>
+</table>
+<p>Die Oberfläche schreibt nur die Bewegung. Fortschreibung und Warnung erledigt die Datenbank — so kann keine Buchung am Protokoll vorbeigehen.</p>
+
+<h3>1.5 Prüfung</h3>
+<p>Links <b>Table Editor</b> öffnen: die neun Tabellen sind da und leer. Bei jeder hinter dem Namen das Schloss-Symbol — RLS ist aktiv.</p>
+
+<h2>2 · Brevo — Mailversand</h2>
+<p class="step">Dienst: brevo.com &amp; supabase.com</p>
+
+<h3>2.1 Absenderadresse verifizieren (Brevo)</h3>
+<ol>
+  <li>In Brevo <b>Senders, Domains &amp; Dedicated IPs → Senders → Add a sender</b>.</li>
+  <li>Adresse eintragen, z. B. <code>lager@deine-domain.de</code>, und über die Bestätigungsmail freischalten.</li>
+  <li>Besser noch: unter <b>Domains</b> die ganze Domain hinterlegen und die genannten DNS-Einträge (SPF, DKIM) setzen. Dann landen die Mails deutlich seltener im Spam.</li>
+</ol>
+<p>Ohne verifizierten Absender verweigert Brevo den Versand — das ist die häufigste Ursache, wenn später keine Mail ankommt.</p>
+
+<h3>2.2 Zugangsdaten abholen (Brevo)</h3>
+<p>Unter <b>SMTP &amp; API</b> findest du zwei Dinge, beide werden gebraucht:</p>
+<table>
+  <thead><tr><th style="width: 34%">Reiter</th><th>Wofür</th></tr></thead>
+  <tbody>
+    <tr><td><b>SMTP</b> (Login + Schlüssel)</td><td>Supabase verschickt damit Bestätigungs- und Passwortmails (Schritt 2.3)</td></tr>
+    <tr><td><b>API Keys</b> (<code>xkeysib-…</code>)</td><td>Bestandswarnung, Bestellliste und Einladung (Schritt 2.4)</td></tr>
+  </tbody>
+</table>
+
+<h3>2.3 Anmeldemails einstellen (Supabase)</h3>
+<ol>
+  <li><b>Authentication → Providers → Email</b>: <b>Confirm email</b> einschalten.</li>
+  <li><b>Authentication → URL Configuration → Site URL</b>: deine künftige Adresse, z. B.<br><code>https://deinname.github.io/stockcontrol/</code>. Steht die falsch, führen die Links im Mail ins Nichts.</li>
+  <li>Bei <b>Email OTP Expiration</b> bzw. der Linkgültigkeit <code>900</code> Sekunden eintragen — die geforderten 15 Minuten.</li>
+  <li><b>Project Settings → Authentication → SMTP Settings</b> aktivieren und Brevos SMTP-Daten eintragen:<br>
+    Host <code>smtp-relay.brevo.com</code>, Port <code>587</code>, Benutzername und Passwort aus Schritt 2.2,<br>
+    Absender: deine verifizierte Adresse, Absendername <code>StockControl</code>.</li>
+</ol>
+
+<h3>2.4 Versandfunktion hochladen (Terminal)</h3>
+<p>Im Projektordner, <code>DEIN_PROJEKT_REF</code> ersetzen:</p>
+<pre>supabase login
+supabase link --project-ref DEIN_PROJEKT_REF
+
+supabase secrets set \
+  BREVO_API_KEY=xkeysib-DEIN_SCHLUESSEL \
+  MAIL_FROM=lager@deine-domain.de \
+  MAIL_FROM_NAME="StockControl" \
+  SERVICE_NAME="StockControl" \
+  SITE_URL="https://deinname.github.io/stockcontrol/"
+
+supabase functions deploy send-mail</pre>
+<p>Der API-Schlüssel liegt damit als Secret auf dem Server und erscheint nie im Browser. Wer die Seite im Quelltext ansieht, findet ihn nicht.</p>
+
+<h3>2.5 Zeitplan für Sammelmails (Supabase, SQL Editor)</h3>
+<p>Steht in den Einstellungen „Sofort", verschickt jeder Aufruf Einzelmails; bei täglich, wöchentlich oder monatlich fasst er alles zu einer Bestellliste zusammen. Ein Zeitplan genügt für alle Fälle:</p>
+<pre>create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+select cron.schedule('stockcontrol-mails', '*/5 * * * *', $$
+  select net.http_post(
+    url     := 'https://DEIN_PROJEKT_REF.functions.supabase.co/send-mail',
+    headers := '{"Content-Type":"application/json",
+                 "Authorization":"Bearer DEIN_SERVICE_ROLE_KEY"}'::jsonb,
+    body    := '{"action":"flush"}'::jsonb);
+$$);</pre>
+<p><code>*/5 * * * *</code> heißt „alle fünf Minuten" — richtig, wenn Sofortmails wirklich sofort kommen sollen. Wer nur Sammelmails nutzt, nimmt <code>30 7 * * *</code> (täglich 7:30). Uhrzeit, Wochentag und Monatstag stellst du später in der Oberfläche ein.</p>
+
+<h3>2.6 Prüfung</h3>
+<p>In Brevo unter <b>Transactional → Logs</b> erscheinen die Versandversuche. Nach der ersten Registrierung muss dort die Bestätigungsmail stehen.</p>
+
+<h2>3 · Cloudflare R2 — Bilder und große Dateien</h2>
+<p class="step">Dienst: dash.cloudflare.com</p>
+
+<p>Produktbilder, PDFs und Excel-Dateien gehören nicht in die Datenbank. Sie liegen in R2 — in einem <b>privaten</b> Bucket mit einem eigenen Ordner pro Firma; in Postgres steht nur der Dateiname (<code>products.bild_url</code>).</p>
+
+<h3>3.1 Bucket anlegen</h3>
+<p>Cloudflare-Dashboard → <b>R2 → Create bucket</b>, Name z. B. <code>stockcontrol</code>, Location <b>Automatic</b>. Die <b>Account ID</b> steht rechts in der R2-Übersicht — notieren.</p>
+
+<h3>3.2 Privat lassen — nur nachsehen</h3>
+<p>Im Bucket <b>Settings → Public access</b> prüfen: <b>R2.dev subdomain</b> steht auf <i>Disabled</i>, keine Custom Domain verbunden. So ist ein neuer Bucket voreingestellt — hier ist nichts zu tun.</p>
+<p>Öffentlich hieße: wer die Adresse kennt, sieht das Bild ohne Anmeldung. Da jede Firma nur ihre eigenen Sachen sehen soll, bleibt die Ablage geschlossen. Bilder werden über kurzlebige signierte Adressen geladen, die die Funktion aus 3.5 nur für die eigene Firma ausstellt.</p>
+
+<h3>3.3 API-Token erzeugen</h3>
+<ol>
+  <li><b>R2 → Manage R2 API Tokens → Create API token</b>.</li>
+  <li>Berechtigung <b>Object Read &amp; Write</b>, eingeschränkt auf deinen Bucket.</li>
+  <li><b>Access Key ID</b> und <b>Secret Access Key</b> sofort kopieren — das Secret zeigt Cloudflare nur einmal.</li>
+</ol>
+
+<h3>3.4 CORS erlauben</h3>
+<p>Im Bucket <b>Settings → CORS policy</b>, damit der Browser direkt hochladen darf. Deine Pages-Adresse eintragen:</p>
+<pre>[{
+  "AllowedOrigins": ["https://deinname.github.io"],
+  "AllowedMethods": ["PUT", "GET"],
+  "AllowedHeaders": ["content-type"],
+  "MaxAgeSeconds": 3600
+}]</pre>
+<p>Fehlt dieser Eintrag, schlägt jeder Upload mit einem CORS-Fehler in der Browserkonsole fehl.</p>
+
+<h3>3.5 Upload-Funktion hochladen (Terminal)</h3>
+<pre>supabase secrets set \
+  R2_ACCOUNT_ID=deine_account_id \
+  R2_ACCESS_KEY_ID=dein_access_key \
+  R2_SECRET_ACCESS_KEY=dein_secret \
+  R2_BUCKET=stockcontrol
+
+supabase functions deploy upload-url</pre>
+
+<div class="note">
+  <b>Wie ein Upload abläuft</b>
+  <p style="margin: 4pt 0 0">Die Oberfläche fragt die Funktion nach einer Adresse. Die prüft Anmeldung und Upload-Recht, baut den Pfad <code>&lt;company_id&gt;/product/&lt;zeit&gt;-&lt;name&gt;</code> und signiert eine PUT-Adresse, die <b>10 Minuten</b> gültig ist. Damit lädt der Browser die Datei direkt zu Cloudflare — sie läuft nie über Supabase. Die R2-Schlüssel verlassen den Server nicht, und weil die <code>company_id</code> im Pfad steckt, kann keine Firma in den Ordner einer anderen schreiben.</p>
+  <p style="margin: 5pt 0 0"><b>Ansehen läuft genauso:</b> Dieselbe Funktion beantwortet die Frage „zeig mir dieses Bild". Sie vergleicht die <code>company_id</code> im Dateinamen mit der des angemeldeten Kontos — stimmt sie nicht, gibt es keine Adresse und damit kein Bild. Stimmt sie, kommt eine signierte Leseadresse für <b>eine Stunde</b> zurück. In <code>products.bild_url</code> steht nur der Dateiname, nie eine offene Adresse. Ein weitergegebener Link ist nach einer Stunde wertlos.</p>
+  <p style="margin: 5pt 0 0">Erlaubt sind JPEG, PNG, WebP, AVIF, PDF, XLSX und CSV bis 15 MB. Anpassen in <code>supabase/functions/upload-url/index.ts</code> (Listen <code>ALLOWED</code> und <code>MAX_BYTES</code>).</p>
+</div>
+
+<h2>4 · GitHub — die Seite ausliefern</h2>
+<p class="step">Dienst: github.com</p>
+
+<h3>4.1 Zugangsdaten eintragen</h3>
+<p><code>config.js</code> öffnen und die vier Werte setzen. Das ist die einzige Datei, die du anfassen musst:</p>
+<pre>export const SERVICE_NAME = "StockControl";
+export const SUPABASE_URL = "https://xxxx.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOi...";</pre>
+<p><code>SERVICE_NAME</code> ist der Name des Dienstes — er wird überall in der Oberfläche und in den Mails übernommen. Ändere ihn hier, und er ändert sich an jeder Stelle.</p>
+<p>Der Anon-Key darf öffentlich sein: er liest ohne Anmeldung nichts, dafür sorgt Row Level Security. Eine R2-Adresse steht hier bewusst nicht — der Bucket ist privat. Der <b>service_role</b>-Key, der <b>Brevo-Schlüssel</b> und die <b>R2-Zugangsdaten</b> gehören <b>niemals</b> in diese Datei; sie liegen als Secrets in Supabase.</p>
+
+<h3>4.2 Repository und Pages</h3>
+<ol>
+  <li>Auf GitHub ein Repository anlegen (privat ist möglich, Pages funktioniert trotzdem) und die Projektdateien pushen.</li>
+  <li><b>Settings → Pages → Source</b> auf <b>GitHub Actions</b> stellen. Der Workflow <code>.github/workflows/deploy.yml</code> liegt bereits im Projekt und veröffentlicht bei jedem Push auf <code>main</code>.</li>
+  <li>Unter <b>Actions</b> läuft der erste Durchlauf; nach etwa einer Minute steht die Adresse oben in <b>Settings → Pages</b>.</li>
+</ol>
+<p>Der Workflow legt automatisch eine <code>index.html</code> an, die auf die Anwendung weiterleitet, sowie eine <code>.nojekyll</code>, damit alle Dateien unverändert ausgeliefert werden.</p>
+
+<h3>4.3 Eigene Domain (optional)</h3>
+<p><b>Settings → Pages → Custom domain</b> setzen, beim Domain-Anbieter einen CNAME auf <code>deinname.github.io</code> legen. Danach die neue Adresse an drei Stellen nachtragen: Supabase <b>Site URL</b>, das Secret <code>SITE_URL</code>, die R2-CORS-Policy.</p>
+
+<h2>5 · Erster Durchlauf</h2>
+<p class="step">Zum Abschluss</p>
+<ol>
+  <li>Seite öffnen → <b>Registrieren</b>. Firmenname, E-Mail, Passwort (mindestens 10 Zeichen, Groß- und Kleinbuchstabe, Zahl, Sonderzeichen).</li>
+  <li>Bestätigungsmail abrufen und den Link binnen 15 Minuten anklicken. Kommt keine Mail: Brevo-Logs prüfen und Schritt 2.1 kontrollieren.</li>
+  <li>Anmelden. In den <b>Einstellungen</b> zeigt „Datenquelle" jetzt <b>Supabase</b> statt <b>Demo-Daten</b>. Erscheint weiter „Demo-Daten", ist <code>config.js</code> nicht ausgefüllt oder nicht veröffentlicht.</li>
+  <li>Unter <b>Produkt anlegen</b> einen Artikel speichern; er muss in Supabase im Table Editor auftauchen.</li>
+  <li>Im Produktdetail ein Bild hochladen — die Datei landet in R2, in der Zeile steht die URL.</li>
+  <li>Mindestbestand über den Istbestand setzen und eine Entnahme buchen: die Warnmail geht an die verantwortliche Person, Stellvertretungen im CC (einstellbar in den Einstellungen).</li>
+  <li>Unter <b>Team &amp; Rechte</b> jemanden aus dem Team einladen — die Einladung gilt 3 Stunden.</li>
+</ol>
+
+<h2>6 · Betrieb</h2>
+
+<h3>Rollen und Rechte</h3>
+<table>
+  <thead><tr><th style="width: 32%">Rolle</th><th>Voreinstellung</th></tr></thead>
+  <tbody>
+    <tr><td><b>Inhabende Person</b></td><td>alles, inklusive Profildaten ändern, Rechte setzen, Firmendaten pflegen</td></tr>
+    <tr><td><b>Lagerleitung</b></td><td>Produkte pflegen, buchen, importieren, Bestellstatus setzen, exportieren</td></tr>
+    <tr><td><b>Mitarbeitende Person</b></td><td>ansehen, entnehmen, nachfüllen, QR-Codes erzeugen</td></tr>
+    <tr><td><b>Lesezugriff</b></td><td>ansehen und exportieren, nicht buchen</td></tr>
+  </tbody>
+</table>
+<p>Die Rolle ist nur die Vorlage. Einzelne Rechte liegen pro Person in <code>profiles.permissions</code> und überschreiben sie — einzustellen unter <b>Team &amp; Rechte → Feinrechte</b>. Das Recht <code>upload</code> steuert, wer Dateien nach R2 schicken darf.</p>
+
+<h3>Wenn etwas nicht geht</h3>
+<table>
+  <thead><tr><th style="width: 38%">Symptom</th><th>Ursache und Abhilfe</th></tr></thead>
+  <tbody>
+    <tr><td>Einstellungen zeigen „Demo-Daten"</td><td><code>config.js</code> leer, mit Tippfehler oder noch nicht veröffentlicht</td></tr>
+    <tr><td>Keine Mail kommt an</td><td>Absender in Brevo nicht verifiziert (2.1); Logs in Brevo prüfen</td></tr>
+    <tr><td>Bestätigungslink führt ins Nichts</td><td><b>Site URL</b> in Supabase falsch (2.3)</td></tr>
+    <tr><td>Bild-Upload bricht ab</td><td>CORS-Policy in R2 fehlt oder falsche Adresse (3.4)</td></tr>
+    <tr><td>„Kein Recht zum Hochladen"</td><td>Recht <code>upload</code> für diese Person nicht gesetzt</td></tr>
+    <tr><td>Sammelmails kommen nicht</td><td>Zeitplan fehlt (2.5); in Supabase <code>select * from cron.job;</code> prüfen</td></tr>
+    <tr><td>Bestand ändert sich nicht</td><td>Schema nicht vollständig eingespielt — Trigger <code>movements_apply</code> fehlt</td></tr>
+  </tbody>
+</table>
+
+<h3>Kosten</h3>
+<p>Alle vier Dienste haben ein kostenloses Kontingent, das für ein mittleres Lager reicht. Supabase begrenzt Datenbankgröße und aktive Nutzung, Brevo die Zahl der Mails pro Tag, R2 den Speicher — aber nicht den Datenverkehr nach außen, weshalb Produktbilder günstig bleiben. GitHub Pages ist für öffentliche Repositories kostenlos.</p>
+
+<h3>Was du regelmäßig prüfen solltest</h3>
+<ul>
+  <li><b>Monatlich:</b> Team-Liste durchsehen — ausgeschiedene Personen sperren oder entfernen.</li>
+  <li><b>Vierteljährlich:</b> Brevo-Logs auf Zustellprobleme, R2-Speicherverbrauch.</li>
+  <li><b>Bei Personalwechsel:</b> Verantwortlichkeiten der Produkte umhängen, sonst gehen Warnmails an ein verwaistes Postfach.</li>
+</ul>
+
+</doc-page>
+
+</x-dc>
+</body>
+</html>

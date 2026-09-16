@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/styles.css">
+<script src="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/_ds_bundle.js"></script>
+<script src="doc-page.js"></script>
+<style>
+  doc-page:not(:defined) { visibility: hidden; }
+  h1, h2, h3 { font-family: var(--font-heading); }
+  p, li, td, th { font-size: 10.5pt; line-height: 1.55; }
+  p { margin: 0 0 6pt; }
+  ol, ul { margin: 0 0 6pt; padding-left: 15pt; }
+  li { margin-bottom: 3pt; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 9.5pt;
+    background: var(--color-neutral-100); padding: 1px 4px; }
+  pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 8.5pt; line-height: 1.5;
+    background: var(--color-neutral-100); border-left: 2px solid var(--color-accent);
+    padding: 7pt 9pt; margin: 0 0 8pt; white-space: pre-wrap; break-inside: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 0 0 8pt; }
+  th { text-align: left; font-family: var(--font-heading); font-size: 9.5pt; text-transform: uppercase;
+    letter-spacing: 0.06em; border-bottom: 1px solid var(--color-text); padding: 4pt 8pt 4pt 0; }
+  td { padding: 4pt 8pt 4pt 0; border-bottom: 1px solid var(--color-neutral-200); vertical-align: top; }
+
+  /* Abschnittstrenner: ein Dienst pro Kapitel */
+  .chapter { break-before: page; margin: 0 0 16pt; padding: 12pt 14pt;
+    background: var(--color-accent-900); color: var(--color-neutral-100); }
+  .chapter .kicker { font-family: var(--font-heading); font-size: 9.5pt; letter-spacing: 0.12em;
+    text-transform: uppercase; opacity: .8; }
+  .chapter h2 { font-size: 24pt; line-height: 1.05; margin: 3pt 0 5pt; color: var(--color-neutral-100); }
+  .chapter p { font-size: 10pt; margin: 0; opacity: .92; }
+
+  /* Ein Schritt */
+  .step { display: grid; grid-template-columns: 34pt minmax(0, 1fr); gap: 11pt;
+    margin: 0 0 15pt; break-inside: avoid; }
+  .num { font-family: var(--font-heading); font-size: 21pt; line-height: 1; text-align: right;
+    color: var(--color-accent-700); border-top: 2px solid var(--color-accent); padding-top: 4pt; }
+  .step h3 { font-size: 14pt; margin: 0 0 4pt; }
+  .where { font-size: 9.5pt; margin: 0 0 6pt; padding: 4pt 7pt;
+    background: var(--color-neutral-100); border-left: 2px solid var(--color-neutral-400); }
+  .where b { font-family: var(--font-heading); letter-spacing: 0.05em; text-transform: uppercase; font-size: 8.5pt; }
+  .why { font-size: 9.5pt; margin: 4pt 0 0; padding-left: 8pt;
+    border-left: 2px solid var(--color-accent); color: var(--color-accent-900); }
+  .why b { font-family: var(--font-heading); letter-spacing: 0.05em; text-transform: uppercase; font-size: 8.5pt; }
+  .check { font-size: 9.5pt; margin: 5pt 0 0; padding: 5pt 8pt; border: 1px solid var(--color-accent); }
+  .check b { font-family: var(--font-heading); letter-spacing: 0.05em; text-transform: uppercase; font-size: 8.5pt; }
+  .keep { border: 1px solid var(--color-text); padding: 9pt 11pt; margin: 0 0 12pt; break-inside: avoid; }
+  .keep b { font-family: var(--font-heading); font-size: 11pt; }
+</style>
+</helmet>
+
+<doc-page margin="0.8in">
+
+<div slot="header" style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 5pt; border-bottom: 1px solid var(--color-neutral-300); font-size: 8.5pt; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-neutral-600)">
+  <span>StockControl · Schritt für Schritt</span>
+  <span>Internet GmbH</span>
+</div>
+
+<div slot="footer" style="padding-top: 5pt; border-top: 1px solid var(--color-neutral-300); font-size: 8.5pt; color: var(--color-neutral-600)">
+  Von oben nach unten arbeiten. Keinen Schritt überspringen — jeder baut auf dem vorherigen auf.
+</div>
+
+<div style="margin-bottom: 18pt">
+  <div style="font-family: var(--font-heading); font-size: 11pt; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent-700)">41 Schritte, vier Dienste</div>
+  <h1 style="font-size: 34pt; line-height: 1.02; margin: 4pt 0 8pt">Schritt für Schritt<br>zur laufenden Seite</h1>
+  <p style="font-size: 12pt; max-width: 33em; margin: 0">Jeder Schritt sagt dir drei Dinge: <b>wo</b> du klicken musst, <b>was</b> du dort tust und <b>warum</b> das nötig ist. Arbeite streng von oben nach unten. Wenn ein Schritt nicht klappt, gehe nicht weiter — die späteren bauen darauf auf.</p>
+  <p style="font-size: 12pt; max-width: 33em; margin: 8pt 0 0">Nichts in diesem System ist öffentlich einsehbar. Alle Daten, Bilder und Dateien hängen an genau einer Firmenregistrierung; ohne Anmeldung ist keine einzige Zeile und keine einzige Datei erreichbar. Die Schritte 38 bis 40 zeigen dir, wie du das selbst nachprüfst.</p>
+</div>
+
+<div class="keep">
+  <b>Lege dir vorher eine leere Textdatei an</b>
+  <p style="margin: 4pt 0 0">Du sammelst unterwegs acht Werte ein (Adressen und Schlüssel). Schreibe sie in diese Datei, dann musst du nie zurückblättern. Am Ende brauchst du die Datei nicht mehr — lösche sie danach, sie enthält Geheimnisse.</p>
+  <p style="margin: 5pt 0 0">Speichere sie unter einem klaren Namen, z. B. <code>stockcontrol-zugangsdaten.txt</code>, und lege sie <b>nicht</b> in den Projektordner (sonst landet sie versehentlich auf GitHub).</p>
+</div>
+
+<h3>Was diese vier Dienste tun</h3>
+<table>
+  <thead><tr><th style="width: 22%">Dienst</th><th style="width: 30%">Übernimmt</th><th>Anschaulich gesagt</th></tr></thead>
+  <tbody>
+    <tr><td><b>Supabase</b></td><td>Datenbank und Konten</td><td>das Regal, in dem alle Daten liegen — und der Türsteher, der prüft, wer hineinsehen darf</td></tr>
+    <tr><td><b>Brevo</b></td><td>Mailversand</td><td>die Poststelle: verschickt Bestätigungen, Einladungen und Bestandswarnungen</td></tr>
+    <tr><td><b>Cloudflare R2</b></td><td>Bilder und große Dateien</td><td>die verschlossene Bildablage — schwere Dateien gehören nicht in die Datenbank, und jede Firma hat ihr eigenes Fach</td></tr>
+    <tr><td><b>GitHub</b></td><td>Auslieferung der Seite</td><td>das Schaufenster: hier liegt die Seite, die deine Leute im Browser öffnen</td></tr>
+  </tbody>
+</table>
+
+<h3>Wie lange dauert das</h3>
+<table>
+  <thead><tr><th style="width: 22%">Teil</th><th style="width: 20%">Zeit</th><th>Schritte</th></tr></thead>
+  <tbody>
+    <tr><td>Vorbereitung</td><td>10 Minuten</td><td>1–4</td></tr>
+    <tr><td>Supabase</td><td>20 Minuten</td><td>5–13</td></tr>
+    <tr><td>Brevo</td><td>25 Minuten</td><td>14–21</td></tr>
+    <tr><td>Cloudflare R2</td><td>20 Minuten</td><td>22–28</td></tr>
+    <tr><td>GitHub</td><td>15 Minuten</td><td>29–33</td></tr>
+    <tr><td>Erster Test</td><td>10 Minuten</td><td>34–37</td></tr>
+    <tr><td>Sicherheit prüfen</td><td>10 Minuten</td><td>38–40</td></tr>
+    <tr><td>Betreiberzugang</td><td>5 Minuten</td><td>41</td></tr>
+  </tbody>
+</table>
+
+<div class="chapter" style="break-before: auto">
+  <div class="kicker">Teil A · Auf deinem Rechner</div>
+  <h2>Vorbereitung</h2>
+  <p>Zwei Programme installieren, damit du später Dateien zu Supabase hochladen kannst. Ohne diesen Teil scheitern die Schritte 20 und 27.</p>
+</div>
+
+<div class="step">
+  <div class="num">1</div>
+  <div>
+    <h3>Node.js installieren</h3>
+    <p class="where"><b>Wo:</b> <code>nodejs.org</code> im Browser öffnen</p>
+    <p>Auf der Startseite den großen Knopf mit der Version und dem Zusatz <b>LTS</b> anklicken. Datei herunterladen, öffnen, dem Installationsprogramm folgen — alle Vorgaben unverändert übernehmen.</p>
+    <p class="why"><b>Warum:</b> Node.js bringt den Befehl <code>npm</code> mit. Damit installierst du im nächsten Schritt das Supabase-Werkzeug. Ohne Node.js gibt es kein <code>npm</code>.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">2</div>
+  <div>
+    <h3>Terminal öffnen</h3>
+    <p class="where"><b>Wo:</b> <b>Mac</b> — Cmd + Leertaste, „Terminal" tippen, Enter. <b>Windows</b> — Windows-Taste, „PowerShell" tippen, Enter.</p>
+    <p>Es erscheint ein Fenster mit einer Textzeile. Hier tippst du Befehle ein und drückst Enter. Mehr passiert nicht — es ist nur eine andere Art, mit dem Rechner zu sprechen.</p>
+    <p class="why"><b>Warum:</b> Drei Dinge lassen sich nicht anklicken: das Supabase-Werkzeug installieren, die Geheimnisse setzen und die beiden Funktionen hochladen. Das geht nur hier.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">3</div>
+  <div>
+    <h3>Supabase-Werkzeug installieren</h3>
+    <p class="where"><b>Wo:</b> im Terminal aus Schritt 2</p>
+    <p>Diese Zeile eintippen und Enter drücken:</p>
+    <pre>npm install -g supabase</pre>
+    <p>Es rauscht eine Weile Text durch. Warte, bis die Eingabezeile wieder erscheint. Prüfen kannst du es mit:</p>
+    <pre>supabase --version</pre>
+    <p>Kommt eine Versionsnummer, ist alles gut.</p>
+    <p class="why"><b>Warum:</b> Dieses Werkzeug schiebt später die beiden Mail- und Upload-Funktionen zu Supabase hoch und setzt dort die geheimen Schlüssel.</p>
+    <p class="check"><b>Wenn es klemmt:</b> Meldet der Rechner „permission denied", stelle <code>sudo</code> davor (Mac) oder öffne PowerShell per Rechtsklick <b>als Administrator</b> (Windows).</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">4</div>
+  <div>
+    <h3>In den Projektordner wechseln</h3>
+    <p class="where"><b>Wo:</b> im Terminal</p>
+    <p>Tippe <code>cd</code>, dann ein Leerzeichen, und zieh dann den Projektordner mit der Maus ins Terminalfenster — der Pfad wird automatisch eingefügt. Enter drücken. Prüfen mit:</p>
+    <pre>ls        (Mac)
+dir       (Windows)</pre>
+    <p>In der Liste müssen <code>config.js</code> und der Ordner <code>supabase</code> auftauchen.</p>
+    <p class="why"><b>Warum:</b> Das Supabase-Werkzeug arbeitet immer mit dem Ordner, in dem du gerade stehst. Stehst du woanders, findet es die Funktionen nicht.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil B · supabase.com</div>
+  <h2>Die Datenbank</h2>
+  <p>Hier entsteht das Herzstück: Tabellen für Produkte, Bestände, Verläufe und Konten — plus die Regel, die dafür sorgt, dass jede Firma nur ihre eigenen Daten sieht.</p>
+</div>
+
+<div class="step">
+  <div class="num">5</div>
+  <div>
+    <h3>Projekt anlegen</h3>
+    <p class="where"><b>Wo:</b> <code>supabase.com</code> → anmelden → grüner Knopf <b>New project</b> oben rechts</p>
+    <ol>
+      <li><b>Name:</b> <code>stockcontrol</code></li>
+      <li><b>Database Password:</b> ein langes Passwort — vom Rechner vorschlagen lassen und in deine Textdatei kopieren</li>
+      <li><b>Region:</b> <code>Central EU (Frankfurt)</code> aus der Liste wählen</li>
+      <li><b>Create new project</b> klicken, dann ein bis zwei Minuten warten</li>
+    </ol>
+    <p class="why"><b>Warum Frankfurt:</b> Kurze Wege bedeuten schnellere Ladezeiten, und die Daten bleiben in der EU — das erleichtert den Datenschutz erheblich.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">6</div>
+  <div>
+    <h3>Drei Werte notieren</h3>
+    <p class="where"><b>Wo:</b> linke Seitenleiste ganz unten <b>Project Settings</b> (Zahnrad) → in der Liste <b>API</b></p>
+    <p>Kopiere in deine Textdatei:</p>
+    <table>
+      <thead><tr><th style="width: 34%">Feld auf der Seite</th><th>Notiere als</th></tr></thead>
+      <tbody>
+        <tr><td><b>Project URL</b></td><td>SUPABASE_URL</td></tr>
+        <tr><td><b>anon public</b> (unter Project API keys)</td><td>SUPABASE_ANON_KEY</td></tr>
+        <tr><td><b>service_role</b> (Klick auf <i>Reveal</i>)</td><td>SERVICE_ROLE — geheim!</td></tr>
+      </tbody>
+    </table>
+    <p>Notiere zusätzlich die <b>Project Ref</b>: das ist der Teil der Project URL zwischen <code>https://</code> und <code>.supabase.co</code>.</p>
+    <p class="why"><b>Warum drei:</b> Die ersten zwei kommen in die Seite und dürfen öffentlich sein. Der <b>service_role</b> darf nie in die Seite — er umgeht alle Schutzregeln und wird nur einmal für den Zeitplan gebraucht.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">7</div>
+  <div>
+    <h3>SQL-Editor öffnen</h3>
+    <p class="where"><b>Wo:</b> linke Seitenleiste <b>SQL Editor</b> (Symbol mit Datenbank und Bleistift) → oben <b>New query</b></p>
+    <p>Es erscheint ein leeres, großes Textfeld mit einem <b>Run</b>-Knopf unten rechts.</p>
+    <p class="why"><b>Warum:</b> Hier gibst du der Datenbank Anweisungen. Statt neun Tabellen mühsam per Hand zu klicken, erledigt eine fertige Datei alles in einem Durchgang — fehlerfrei und wiederholbar.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">8</div>
+  <div>
+    <h3>Schema einspielen</h3>
+    <p class="where"><b>Wo:</b> im eben geöffneten SQL-Editor</p>
+    <ol>
+      <li>Im Projektordner die Datei <code>supabase/schema.sql</code> in einem Texteditor öffnen</li>
+      <li><b>Alles</b> markieren (Cmd+A bzw. Strg+A) und kopieren</li>
+      <li>In das Textfeld im SQL-Editor einfügen</li>
+      <li><b>Run</b> klicken (oder Cmd+Enter / Strg+Enter)</li>
+    </ol>
+    <p class="check"><b>Erwartet:</b> unten erscheint <i>Success. No rows returned</i>. Eine rote Fehlermeldung heißt meist, dass nur ein Teil kopiert wurde — Textfeld leeren und den ganzen Inhalt neu einfügen.</p>
+    <p class="why"><b>Warum:</b> Diese eine Datei legt die neun Tabellen an, schaltet den Zugriffsschutz ein und richtet die Automatik ein, die Bestände fortschreibt und Warnungen auslöst.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">9</div>
+  <div>
+    <h3>Nachsehen, was entstanden ist</h3>
+    <p class="where"><b>Wo:</b> linke Seitenleiste <b>Table Editor</b> (Tabellensymbol)</p>
+    <p>Links siehst du nun neun Tabellennamen: <code>companies</code>, <code>profiles</code>, <code>settings</code>, <code>products</code>, <code>movements</code>, <code>events</code>, <code>event_items</code>, <code>invitations</code>, <code>notifications</code>. Alle sind leer — richtig so.</p>
+    <p class="check"><b>Wichtig:</b> Hinter jedem Namen muss ein kleines <b>Schloss</b> stehen. Das Schloss bedeutet: Zugriffsschutz aktiv. Fehlt es bei einer Tabelle, ist Schritt 8 nicht komplett durchgelaufen — dann noch einmal ausführen.</p>
+    <p class="why"><b>Warum das Schloss zählt:</b> Jede Zeile trägt eine Firmenkennung. Die Regel in der Datenbank lässt nur Zeilen durch, die zur angemeldeten Firma gehören. Das gilt für die Seite, für die Schnittstelle, für jede Abfrage — selbst ein Programmierfehler in der Oberfläche könnte fremde Daten nicht sichtbar machen. Das ist die Grundlage für „jede Firma sieht nur ihre eigenen Produkte".</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">10</div>
+  <div>
+    <h3>Bestätigungsmail einschalten</h3>
+    <p class="where"><b>Wo:</b> linke Seitenleiste <b>Authentication</b> (Personensymbol) → oben Reiter <b>Providers</b> → Zeile <b>Email</b> aufklappen</p>
+    <p>Den Schalter <b>Confirm email</b> auf <b>an</b> stellen und unten <b>Save</b> klicken.</p>
+    <p class="why"><b>Warum:</b> Ohne diesen Schalter könnte sich jemand mit einer fremden oder erfundenen Adresse anmelden. Mit ihm muss die Adresse nachgewiesen werden — genau der Bestätigungslink aus deiner Anforderung.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">11</div>
+  <div>
+    <h3>Linkgültigkeit auf 15 Minuten setzen</h3>
+    <p class="where"><b>Wo:</b> <b>Authentication</b> → <b>Providers</b> → <b>Email</b>, Feld <b>Email OTP Expiration</b></p>
+    <p><code>900</code> eintragen (das sind 900 Sekunden = 15 Minuten) und <b>Save</b> klicken.</p>
+    <p class="why"><b>Warum:</b> Deine Vorgabe war: der Bestätigungslink gilt 15 Minuten, danach verfällt die Registrierung. Ein kurzes Fenster heißt außerdem, dass ein abgefangener Link schnell wertlos wird.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">12</div>
+  <div>
+    <h3>Adresse der Seite hinterlegen</h3>
+    <p class="where"><b>Wo:</b> <b>Authentication</b> → Reiter <b>URL Configuration</b> → Feld <b>Site URL</b></p>
+    <p>Trage deine künftige Adresse ein. Sie lautet <code>https://DEIN-GITHUB-NAME.github.io/stockcontrol/</code> — ersetze <code>DEIN-GITHUB-NAME</code> durch deinen GitHub-Benutzernamen und <code>stockcontrol</code> durch den Namen, den du dem Repository in Schritt 30 gibst. <b>Save</b> klicken.</p>
+    <p class="why"><b>Warum jetzt schon:</b> Diese Adresse steht in jedem Bestätigungs- und Passwortmail. Ist sie falsch, klicken deine Leute auf einen Link, der ins Leere führt — der häufigste Stolperstein überhaupt. Sollte sich die Adresse später ändern, kommst du hierher zurück.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">13</div>
+  <div>
+    <h3>Projekt mit dem Terminal verbinden</h3>
+    <p class="where"><b>Wo:</b> Terminal, im Projektordner (Schritt 4)</p>
+    <pre>supabase login</pre>
+    <p>Es öffnet sich der Browser; dort bestätigen, dann zurück ins Terminal. Anschließend — <code>DEIN_PROJEKT_REF</code> durch den Wert aus Schritt 6 ersetzen:</p>
+    <pre>supabase link --project-ref DEIN_PROJEKT_REF</pre>
+    <p class="why"><b>Warum:</b> Damit weiß das Werkzeug, in welches Projekt es später die Funktionen und Geheimnisse schicken soll. Ohne diese Verbindung wüsste es nicht, wohin.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil C · brevo.com und supabase.com</div>
+  <h2>Der Mailversand</h2>
+  <p>Zwei Wege führen zu Brevo: Supabase verschickt Anmeldemails über SMTP, die Lagerwarnungen gehen über die Schnittstelle. Beides wird hier eingerichtet.</p>
+</div>
+
+<div class="step">
+  <div class="num">14</div>
+  <div>
+    <h3>Absenderadresse eintragen</h3>
+    <p class="where"><b>Wo:</b> in Brevo oben rechts auf deinen Namen → <b>Senders, Domains &amp; Dedicated IPs</b> → Reiter <b>Senders</b> → <b>Add a sender</b></p>
+    <p>Namen (<code>StockControl</code>) und Adresse eintragen, z. B. <code>lager@deine-domain.de</code>. Brevo schickt eine Bestätigungsmail an diese Adresse — dort auf den Link klicken. Danach steht die Adresse mit grünem Haken in der Liste.</p>
+    <p class="why"><b>Warum:</b> Brevo verschickt nur von Adressen, die dir nachweislich gehören. Das verhindert Missbrauch — und ist der Grund Nummer eins, wenn später keine Mail ankommt. Notiere die Adresse in deiner Textdatei.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">15</div>
+  <div>
+    <h3>Domain hinterlegen — dringend empfohlen</h3>
+    <p class="where"><b>Wo:</b> gleiche Seite, Reiter <b>Domains</b> → <b>Add a domain</b></p>
+    <p>Deine Domain eintragen (z. B. <code>deine-domain.de</code>). Brevo zeigt dir zwei bis drei DNS-Einträge (Typ TXT und CNAME, Stichworte <b>SPF</b> und <b>DKIM</b>). Diese Einträge bei deinem Domain-Anbieter in die DNS-Verwaltung eintragen, dann in Brevo <b>Verify</b> klicken. Bis zur Gültigkeit können einige Stunden vergehen.</p>
+    <p class="why"><b>Warum:</b> Diese Einträge sind Brevos Ausweis gegenüber anderen Mailservern: „diese Domain darf ich verschicken". Fehlen sie, landen Bestandswarnungen oft im Spam — und eine Warnung im Spam-Ordner ist keine Warnung.</p>
+    <p class="check"><b>Weiterarbeiten:</b> Du kannst mit Schritt 16 fortfahren, während die DNS-Einträge sich verbreiten.</p>
+    <p class="check"><b>Datenschutz:</b> Brevo erhält nur die Mailadressen, die für den Versand nötig sind — keine Produktdaten und keine Bestände. Für die Auftragsverarbeitung findest du in Brevo unter <b>Settings → Privacy</b> den entsprechenden Vertrag (AVV).</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">16</div>
+  <div>
+    <h3>SMTP-Daten abholen</h3>
+    <p class="where"><b>Wo:</b> in Brevo oben rechts auf deinen Namen → <b>SMTP &amp; API</b> → Reiter <b>SMTP</b></p>
+    <p>Notiere in deine Textdatei:</p>
+    <ul>
+      <li><b>Login</b> — meist deine Brevo-Mailadresse</li>
+      <li><b>SMTP key value</b> — auf <b>Generate a new SMTP key</b> klicken, falls noch keiner da ist, und den Wert sofort kopieren</li>
+    </ul>
+    <p class="why"><b>Warum:</b> Supabase verschickt seine eigenen Mails (Bestätigung, Passwort zurücksetzen) auf dem klassischen Postweg SMTP. Diese zwei Werte sind die Zugangsdaten dafür.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">17</div>
+  <div>
+    <h3>API-Schlüssel erzeugen</h3>
+    <p class="where"><b>Wo:</b> gleiche Seite, Reiter <b>API Keys</b> → <b>Generate a new API key</b></p>
+    <p>Namen vergeben, z. B. <code>stockcontrol</code>. Der Schlüssel beginnt mit <code>xkeysib-</code> und wird <b>nur einmal</b> gezeigt — sofort in deine Textdatei kopieren.</p>
+    <p class="why"><b>Warum zwei verschiedene Zugänge:</b> SMTP ist für Supabases eigene Anmeldemails. Der API-Schlüssel ist für <i>deine</i> Mails — Bestandswarnung, Bestellliste, Einladung. Die brauchen Tabellen und Formatierung, das geht über die Schnittstelle besser.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">18</div>
+  <div>
+    <h3>SMTP in Supabase eintragen</h3>
+    <p class="where"><b>Wo:</b> zurück in Supabase → <b>Project Settings</b> (Zahnrad) → <b>Authentication</b> → Abschnitt <b>SMTP Settings</b> → Schalter <b>Enable Custom SMTP</b></p>
+    <table>
+      <thead><tr><th style="width: 38%">Feld</th><th>Wert</th></tr></thead>
+      <tbody>
+        <tr><td>Sender email</td><td>deine verifizierte Adresse aus Schritt 14</td></tr>
+        <tr><td>Sender name</td><td><code>StockControl</code></td></tr>
+        <tr><td>Host</td><td><code>smtp-relay.brevo.com</code></td></tr>
+        <tr><td>Port</td><td><code>587</code></td></tr>
+        <tr><td>Username</td><td>Login aus Schritt 16</td></tr>
+        <tr><td>Password</td><td>SMTP key aus Schritt 16</td></tr>
+      </tbody>
+    </table>
+    <p>Unten <b>Save</b> klicken.</p>
+    <p class="why"><b>Warum:</b> Ohne diesen Eintrag nutzt Supabase seinen eigenen Versand — der ist auf wenige Mails pro Stunde begrenzt und trägt eine fremde Absenderadresse. Mit Brevo kommen die Mails von deiner Adresse und in brauchbarer Menge.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">19</div>
+  <div>
+    <h3>Geheimnisse für den Mailversand setzen</h3>
+    <p class="where"><b>Wo:</b> Terminal, im Projektordner</p>
+    <p>Die fünf Werte aus deiner Textdatei einsetzen. Das Zeichen <code>\</code> am Zeilenende bedeutet „der Befehl geht weiter" — in PowerShell schreibe stattdessen alles in <b>eine</b> Zeile ohne die <code>\</code>:</p>
+    <pre>supabase secrets set \
+  BREVO_API_KEY=xkeysib-DEIN_SCHLUESSEL \
+  MAIL_FROM=lager@deine-domain.de \
+  MAIL_FROM_NAME="StockControl" \
+  SERVICE_NAME="StockControl" \
+  SITE_URL="https://deinname.github.io/stockcontrol/"</pre>
+    <p class="why"><b>Warum nicht in eine Datei:</b> Der API-Schlüssel darf niemals im Browser landen — jeder könnte im Quelltext nachsehen und in deinem Namen Mails verschicken. So liegt er verschlüsselt auf dem Server; nur die Funktion selbst kommt daran.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">20</div>
+  <div>
+    <h3>Versandfunktion hochladen</h3>
+    <p class="where"><b>Wo:</b> Terminal, im Projektordner</p>
+    <pre>supabase functions deploy send-mail</pre>
+    <p>Am Ende erscheint eine Erfolgsmeldung mit der Adresse der Funktion.</p>
+    <p class="check"><b>Prüfen:</b> In Supabase links <b>Edge Functions</b> — dort steht nun <code>send-mail</code>.</p>
+    <p class="why"><b>Warum eine eigene Funktion:</b> Sie ist der einzige Ort, der den Brevo-Schlüssel kennt. Die Seite bittet sie um einen Versand, sie entscheidet und verschickt. So bleibt das Geheimnis geheim, und die Mailvorlagen liegen an einer Stelle.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">21</div>
+  <div>
+    <h3>Zeitplan für die Mails einrichten</h3>
+    <p class="where"><b>Wo:</b> Supabase → <b>SQL Editor</b> → <b>New query</b></p>
+    <p>Einfügen, dabei <code>DEIN_PROJEKT_REF</code> und <code>DEIN_SERVICE_ROLE_KEY</code> (Schritt 6) ersetzen, dann <b>Run</b>:</p>
+    <pre>create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+select cron.schedule('stockcontrol-mails', '*/5 * * * *', $$
+  select net.http_post(
+    url     := 'https://DEIN_PROJEKT_REF.functions.supabase.co/send-mail',
+    headers := '{"Content-Type":"application/json",
+                 "Authorization":"Bearer DEIN_SERVICE_ROLE_KEY"}'::jsonb,
+    body    := '{"action":"flush"}'::jsonb);
+$$);</pre>
+    <p class="check"><b>Prüfen:</b> <code>select * from cron.job;</code> ausführen — eine Zeile namens <code>stockcontrol-mails</code> muss erscheinen.</p>
+    <p class="why"><b>Warum:</b> <code>*/5 * * * *</code> heißt „alle fünf Minuten nachsehen, ob etwas zu verschicken ist". Der eine Zeitplan bedient alle vier Einstellungen: bei „Sofort" gehen Einzelmails raus, bei täglich, wöchentlich oder monatlich sammelt er alles zu einer Bestellliste. Uhrzeit und Tag stellst du später bequem in der Oberfläche ein.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil D · dash.cloudflare.com</div>
+  <h2>Die Bildablage</h2>
+  <p>Produktbilder, PDFs und Excel-Dateien gehören nicht in die Datenbank. Sie liegen in R2 — in einem <b>privaten</b> Fach pro Firma, das nur über kurzlebige signierte Adressen erreichbar ist.</p>
+</div>
+
+<div class="step">
+  <div class="num">22</div>
+  <div>
+    <h3>Bucket anlegen</h3>
+    <p class="where"><b>Wo:</b> <code>dash.cloudflare.com</code> → linke Seitenleiste <b>R2</b> → <b>Create bucket</b></p>
+    <p>Name: <code>stockcontrol</code>. Location: <b>Automatic</b>. <b>Create bucket</b> klicken.</p>
+    <p class="why"><b>Was ein Bucket ist:</b> ein Ablagefach für Dateien — wie ein Ordner, nur im Netz. „Automatic" heißt, Cloudflare wählt den Standort selbst und liefert die Bilder von einem Rechenzentrum in der Nähe deiner Leute aus.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">23</div>
+  <div>
+    <h3>Account ID notieren</h3>
+    <p class="where"><b>Wo:</b> in der R2-Übersicht rechts in der Randspalte, Feld <b>Account ID</b></p>
+    <p>Wert in deine Textdatei kopieren.</p>
+    <p class="why"><b>Warum:</b> Die Upload-Funktion muss wissen, zu welchem Cloudflare-Konto der Bucket gehört. Diese Kennung ist die Adresse deines Kontos.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">24</div>
+  <div>
+    <h3>Prüfen, dass der Bucket privat bleibt</h3>
+    <p class="where"><b>Wo:</b> Bucket <code>stockcontrol</code> anklicken → Reiter <b>Settings</b> → Abschnitt <b>Public access</b></p>
+    <p>Hier ist <b>nichts zu tun</b> — nur nachsehen: <b>R2.dev subdomain</b> muss auf <b>Disabled</b> stehen, und unter <b>Custom Domains</b> darf keine Domain verbunden sein. So ist ein neuer Bucket voreingestellt. Falls doch etwas aktiv ist: abschalten bzw. trennen.</p>
+    <p class="why"><b>Warum nicht öffentlich:</b> „Öffentlich" heißt: wer die Adresse kennt, sieht das Bild — ohne Anmeldung, aus jedem Browser. Adressen wandern über Verlaufslisten, Weitergeleitetes und Suchmaschinen weiter. Deine Vorgabe ist aber: jede Firma sieht nur ihre eigenen Sachen. Deshalb bleibt die Ablage geschlossen.</p>
+    <p class="check"><b>Wie Bilder dann erscheinen:</b> Öffnet jemand eine Produktansicht, fragt die Seite die Funktion aus Schritt 28 nach einer Leseadresse. Die prüft, ob die Datei zur eigenen Firma gehört, und stellt eine Adresse aus, die <b>eine Stunde</b> gültig ist. Für die Person ist das unsichtbar — das Bild erscheint einfach. In der Datenbank steht nur der Dateiname, keine offene Adresse.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">25</div>
+  <div>
+    <h3>Schreibschlüssel erzeugen</h3>
+    <p class="where"><b>Wo:</b> in der R2-Übersicht rechts <b>Manage R2 API Tokens</b> → <b>Create API token</b></p>
+    <ol>
+      <li><b>Token name:</b> <code>stockcontrol-upload</code></li>
+      <li><b>Permissions:</b> <b>Object Read &amp; Write</b> wählen</li>
+      <li><b>Specify bucket:</b> nur <code>stockcontrol</code> auswählen</li>
+      <li><b>Create API Token</b> klicken</li>
+    </ol>
+    <p>Jetzt erscheinen <b>Access Key ID</b> und <b>Secret Access Key</b>. <b>Beide sofort</b> in deine Textdatei kopieren — das Secret zeigt Cloudflare nie wieder.</p>
+    <p class="why"><b>Warum auf einen Bucket beschränkt:</b> Käme dieser Schlüssel je abhanden, betrifft es nur diesen einen Bucket und nichts anderes in deinem Cloudflare-Konto. Rechte immer so klein wie möglich halten.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">26</div>
+  <div>
+    <h3>Browser-Uploads erlauben</h3>
+    <p class="where"><b>Wo:</b> Bucket <code>stockcontrol</code> → <b>Settings</b> → Abschnitt <b>CORS policy</b> → <b>Add CORS policy</b></p>
+    <p>Das Folgende einfügen und <code>deinname</code> durch deinen GitHub-Namen ersetzen, dann <b>Save</b>:</p>
+    <pre>[{
+  "AllowedOrigins": ["https://deinname.github.io"],
+  "AllowedMethods": ["PUT", "GET"],
+  "AllowedHeaders": ["content-type"],
+  "MaxAgeSeconds": 3600
+}]</pre>
+    <p class="why"><b>Warum:</b> Browser verweigern von sich aus, Daten an eine fremde Adresse zu senden — ein Schutz gegen Übergriffe zwischen Webseiten. Mit diesem Eintrag sagt Cloudflare: „Von genau dieser Seite nehme ich Dateien an." Fehlt er, bricht jeder Upload mit einem CORS-Fehler ab.</p>
+    <p class="check"><b>Später mit eigener Domain:</b> dann hier die neue Adresse nachtragen.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">27</div>
+  <div>
+    <h3>Geheimnisse für R2 setzen</h3>
+    <p class="where"><b>Wo:</b> Terminal, im Projektordner</p>
+    <pre>supabase secrets set \
+  R2_ACCOUNT_ID=deine_account_id \
+  R2_ACCESS_KEY_ID=dein_access_key \
+  R2_SECRET_ACCESS_KEY=dein_secret \
+  R2_BUCKET=stockcontrol</pre>
+    <p class="why"><b>Warum:</b> Gleiches Prinzip wie beim Mailschlüssel — nur der Server kennt die Zugangsdaten. Der Browser bekommt nie einen Schlüssel, mit dem er beliebig in die Ablage schreiben oder darin stöbern könnte.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">28</div>
+  <div>
+    <h3>Upload-Funktion hochladen</h3>
+    <p class="where"><b>Wo:</b> Terminal, im Projektordner</p>
+    <pre>supabase functions deploy upload-url</pre>
+    <p class="check"><b>Prüfen:</b> In Supabase unter <b>Edge Functions</b> stehen jetzt beide: <code>send-mail</code> und <code>upload-url</code>.</p>
+    <p class="why"><b>Wie ein Upload abläuft:</b> Die Seite fragt die Funktion: „darf ich diese Datei hochladen?" Die Funktion prüft Anmeldung und Upload-Recht, baut den Pfad <code>&lt;firmenkennung&gt;/product/&lt;zeit&gt;-&lt;name&gt;</code> und gibt eine Einmal-Adresse zurück, die 10 Minuten gültig ist. Damit lädt der Browser direkt zu Cloudflare. Weil die Firmenkennung im Pfad steckt, kann keine Firma in das Fach einer anderen schreiben.</p>
+    <p class="why"><b>Wie das Ansehen abläuft:</b> Dieselbe Funktion beantwortet auch „zeig mir dieses Bild". Sie vergleicht die Firmenkennung im Dateinamen mit der des angemeldeten Kontos — stimmt sie nicht, gibt es keine Adresse und damit kein Bild. Stimmt sie, kommt eine signierte Leseadresse für eine Stunde zurück. Das ist der Grund, warum der Bucket geschlossen bleiben kann.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil E · github.com</div>
+  <h2>Die Seite online stellen</h2>
+  <p>Zum Schluss werden die vorbereiteten Werte in eine Datei geschrieben und die Seite veröffentlicht.</p>
+</div>
+
+<div class="step">
+  <div class="num">29</div>
+  <div>
+    <h3>config.js ausfüllen</h3>
+    <p class="where"><b>Wo:</b> im Projektordner die Datei <code>config.js</code> im Texteditor öffnen</p>
+    <p>Die drei Anführungszeichen-Paare mit deinen Werten füllen:</p>
+    <pre>export const SERVICE_NAME = "StockControl";
+export const SUPABASE_URL = "https://xxxx.supabase.co";
+export const SUPABASE_ANON_KEY = "eyJhbGciOi...";</pre>
+    <p>Speichern. Das ist die einzige Datei, die du anfassen musst.</p>
+    <p class="check"><b>Keine R2-Adresse hier:</b> Weil der Bucket privat ist, gibt es keine öffentliche Bildadresse, die in die Seite gehört. Die Bilder holt sich die Seite über die Funktion.</p>
+    <p class="why"><b>Warum <code>SERVICE_NAME</code> hier steht:</b> Der Name wird überall aus dieser einen Variable gezogen — Kopfzeile, Anmeldeseite, Mailvorlagen. Ändere ihn hier, und er ändert sich an jeder Stelle. Genau deine Anforderung.</p>
+    <p class="check"><b>Niemals hier hinein:</b> der <b>service_role</b>-Key und der <b>Brevo-Schlüssel</b>. Die liegen als Geheimnisse in Supabase. Anon-Key und R2-Adresse hingegen sind unkritisch: der Key liest ohne Anmeldung nichts, die Adresse erlaubt nur Lesen.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">30</div>
+  <div>
+    <h3>Repository anlegen</h3>
+    <p class="where"><b>Wo:</b> <code>github.com</code> → oben rechts <b>+</b> → <b>New repository</b></p>
+    <ol>
+      <li><b>Repository name:</b> <code>stockcontrol</code> — derselbe Name wie in der Adresse aus Schritt 12</li>
+      <li><b>Public</b> oder <b>Private</b>: beides funktioniert. Privat ist bei kostenlosen Konten allerdings von Pages ausgenommen — wenn du unsicher bist, nimm <b>Public</b>. In den Dateien stehen keine Geheimnisse.</li>
+      <li><b>Create repository</b> klicken</li>
+    </ol>
+    <p class="why"><b>Warum:</b> Das Repository ist die Ablage für die Seitendateien. GitHub liest von dort und stellt die Seite ins Netz.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">31</div>
+  <div>
+    <h3>Dateien hochladen</h3>
+    <p class="where"><b>Wo:</b> im leeren Repository der Link <b>uploading an existing file</b></p>
+    <p>Alle Projektdateien und Ordner in das Feld ziehen — auch die versteckten Ordner <code>.github</code> und <code>supabase</code>. Unten eine kurze Beschreibung eintippen („Erste Version") und <b>Commit changes</b> klicken.</p>
+    <p class="check"><b>Wichtig:</b> Der Ordner <code>.github</code> beginnt mit einem Punkt und wird im Dateimanager oft versteckt. Mac: Cmd+Shift+Punkt zeigt versteckte Dateien. Windows: im Explorer unter <b>Ansicht</b> die versteckten Elemente einschalten. Fehlt dieser Ordner, veröffentlicht GitHub nichts.</p>
+    <p class="why"><b>Warum:</b> In <code>.github/workflows/deploy.yml</code> steht die Anweisung, die GitHub bei jeder Änderung ausführt. Ohne sie bliebe das Repository eine stille Dateiablage.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">32</div>
+  <div>
+    <h3>Pages einschalten</h3>
+    <p class="where"><b>Wo:</b> im Repository oben <b>Settings</b> → linke Seitenleiste <b>Pages</b> → Abschnitt <b>Build and deployment</b> → Auswahlfeld <b>Source</b></p>
+    <p>Von <b>Deploy from a branch</b> auf <b>GitHub Actions</b> umstellen. Speichern ist nicht nötig, die Auswahl greift sofort.</p>
+    <p class="why"><b>Warum diese Einstellung:</b> „Deploy from a branch" würde die Dateien unverändert ausliefern — ohne Startseite und mit einem Aufbereitungsschritt, der einige Dateien verschluckt. „GitHub Actions" führt den mitgelieferten Ablauf aus, der eine Startseite anlegt und alle Dateien unangetastet ausliefert.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">33</div>
+  <div>
+    <h3>Erste Veröffentlichung abwarten</h3>
+    <p class="where"><b>Wo:</b> im Repository oben Reiter <b>Actions</b></p>
+    <p>Dort läuft ein Eintrag mit gelbem Punkt. Nach etwa einer Minute wird er ein grüner Haken. Bei rotem Kreuz den Eintrag anklicken — die Meldung nennt die Ursache, meist eine fehlende Datei aus Schritt 31.</p>
+    <p>Ist es grün, steht die Adresse deiner Seite unter <b>Settings → Pages</b> ganz oben. Öffne sie.</p>
+    <p class="check"><b>Adresse abweichend?</b> Dann zurück zu Schritt 12 und die <b>Site URL</b> in Supabase korrigieren, und in Schritt 19 <code>SITE_URL</code> neu setzen.</p>
+    <p class="why"><b>Warum:</b> Ab jetzt genügt es, eine Datei im Repository zu ändern — GitHub veröffentlicht die neue Fassung von allein.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil F · Deine neue Seite</div>
+  <h2>Der erste Durchlauf</h2>
+  <p>Vier Schritte, die zeigen, ob alle vier Dienste zusammenspielen. Klappt das, bist du fertig.</p>
+</div>
+
+<div class="step">
+  <div class="num">34</div>
+  <div>
+    <h3>Registrieren</h3>
+    <p class="where"><b>Wo:</b> auf deiner neuen Seite, Schalter <b>Registrieren</b></p>
+    <p>Firmenname, E-Mail und Passwort eintragen. Das Passwort braucht mindestens 10 Zeichen, einen Groß- und einen Kleinbuchstaben, eine Zahl und ein Sonderzeichen — die Häkchen unter dem Feld zeigen an, was noch fehlt. Bot-Prüfung bestätigen, dann <b>Registrieren</b>.</p>
+    <p class="why"><b>Was passiert:</b> Supabase legt das Konto an, die Datenbank legt Firma und Profil an, du bekommst die Rolle „Inhabende Person" mit allen Rechten. Brevo verschickt die Bestätigungsmail.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">35</div>
+  <div>
+    <h3>Mail bestätigen</h3>
+    <p class="where"><b>Wo:</b> in deinem Mailpostfach</p>
+    <p>Die Mail von <code>StockControl</code> öffnen und den Link binnen 15 Minuten anklicken.</p>
+    <p class="check"><b>Keine Mail?</b> Erst in den Spam-Ordner sehen. Dann in Brevo unter <b>Transactional → Logs</b> nachsehen: Steht dort ein Versuch, liegt es am Mailempfang. Steht dort nichts, ist der SMTP-Eintrag aus Schritt 18 falsch oder der Absender aus Schritt 14 nicht verifiziert.</p>
+    <p class="why"><b>Warum:</b> Dieser Klick ist der Nachweis, dass die Mailadresse wirklich dir gehört — und der Beweis, dass die Kette Supabase → Brevo → Postfach funktioniert.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">36</div>
+  <div>
+    <h3>Datenquelle prüfen</h3>
+    <p class="where"><b>Wo:</b> nach dem Anmelden im Menüband <b>Verwaltung → Einstellungen</b>, Karte <b>Datenquelle</b></p>
+    <p>Dort muss <b>Supabase</b> stehen.</p>
+    <p class="check"><b>Steht „Demo-Daten"?</b> Dann ist <code>config.js</code> nicht ausgefüllt, enthält einen Tippfehler oder die Änderung ist noch nicht veröffentlicht. Datei prüfen, erneut hochladen, unter <b>Actions</b> den grünen Haken abwarten, Seite neu laden.</p>
+    <p class="why"><b>Warum dieser Test:</b> Die Oberfläche läuft auch ohne Verbindung — mit Beispieldaten, praktisch zum Vorführen. Diese Karte ist die einzige Stelle, an der du zweifelsfrei siehst, ob echte Daten im Spiel sind.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">37</div>
+  <div>
+    <h3>Rundgang machen</h3>
+    <p class="where"><b>Wo:</b> im Menüband deiner Seite</p>
+    <ol>
+      <li><b>Stammdaten → Produkt anlegen:</b> einen Artikel speichern. In Supabase muss er unter <b>Table Editor → products</b> auftauchen.</li>
+      <li><b>Produkte</b> → Artikel anklicken → <b>Bild hochladen</b>. In Cloudflare muss die Datei im Bucket liegen, im Ordner mit der Firmenkennung. Anschließend die Seite neu laden: das Bild erscheint wieder — über eine frische signierte Adresse.</li>
+      <li>Beim Artikel den Mindestbestand über den Istbestand setzen und eine <b>Entnahme buchen</b>. Die Warnmail geht an die verantwortliche Person, Stellvertretungen im CC.</li>
+      <li><b>Verwaltung → Team &amp; Rechte:</b> jemanden einladen. Die Einladung gilt 3 Stunden.</li>
+      <li><b>Stammdaten → QR-Codes:</b> Artikel auswählen, Text über und unter dem Code eintragen, drucken. Damit klebst du die Etiketten ans Regal.</li>
+    </ol>
+    <p class="why"><b>Warum dieser Rundgang:</b> Er berührt alle vier Dienste — Datenbank, Bildablage, Mailversand und die Seite selbst. Läuft er durch, ist die Einrichtung abgeschlossen.</p>
+  </div>
+</div>
+
+<div class="chapter">
+  <div class="kicker">Teil G · Zum Abschluss</div>
+  <h2>Sicherheit prüfen</h2>
+  <p>Drei Kontrollen, die belegen, dass nichts öffentlich einsehbar ist und jede Firma nur ihre eigenen Daten sieht. Zum Schluss richtest du den Betreiberzugang der Internet GmbH ein.</p>
+</div>
+
+<div class="step">
+  <div class="num">38</div>
+  <div>
+    <h3>Ohne Anmeldung nachsehen</h3>
+    <p class="where"><b>Wo:</b> Supabase → <b>SQL Editor</b> → <b>New query</b></p>
+    <p>Diese Abfrage ausführen:</p>
+    <pre>select grantee, table_name, privilege_type
+  from information_schema.role_table_grants
+ where grantee = 'anon' and table_schema = 'public';</pre>
+    <p class="check"><b>Erwartet:</b> <b>keine einzige Zeile.</b> Kommen Zeilen, wurde Schritt 8 mit einer älteren Fassung ausgeführt — Schema neu einspielen.</p>
+    <p class="why"><b>Warum:</b> <code>anon</code> ist die Rolle, unter der ein nicht angemeldeter Aufruf läuft. Hat sie auf keine Tabelle Rechte, kann niemand ohne Anmeldung Daten abrufen — auch nicht mit dem öffentlichen Schlüssel aus <code>config.js</code>, auch nicht direkt über die Schnittstelle.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">39</div>
+  <div>
+    <h3>Zeilenschutz auf allen Tabellen bestätigen</h3>
+    <p class="where"><b>Wo:</b> weiter im SQL-Editor</p>
+    <pre>select relname, relrowsecurity, relforcerowsecurity
+  from pg_class
+ where relname in ('companies','profiles','settings','products',
+                   'movements','events','event_items',
+                   'invitations','notifications');</pre>
+    <p class="check"><b>Erwartet:</b> neun Zeilen, in beiden Spalten überall <code>true</code>.</p>
+    <p class="why"><b>Warum beide Spalten:</b> Die erste schaltet den Zeilenschutz ein. Die zweite (<i>force</i>) sorgt dafür, dass er selbst für die Eigentümerin der Tabelle gilt — sonst gäbe es einen Weg, ihn zu umgehen.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">40</div>
+  <div>
+    <h3>Die Trennung selbst ausprobieren</h3>
+    <p class="where"><b>Wo:</b> auf deiner Seite, in einem <b>privaten Fenster</b> des Browsers</p>
+    <ol>
+      <li>Im privaten Fenster eine <b>zweite Firma</b> mit einer anderen Mailadresse registrieren und bestätigen.</li>
+      <li>In dieser zweiten Firma die Produktliste öffnen: sie ist <b>leer</b>. Die Artikel der ersten Firma sind nicht zu sehen — auch nicht in Events, Bestellliste, Verlauf oder Team.</li>
+      <li>Kopiere im ersten Fenster die Adresse eines Produktbildes (Rechtsklick auf das Bild → <i>Bildadresse kopieren</i>) und öffne sie im privaten Fenster. Sie funktioniert zunächst, weil sie signiert ist — <b>nach einer Stunde nicht mehr</b>. Ohne diese Adresse gibt es keinen Weg zur Datei.</li>
+      <li>Danach die Testfirma wieder löschen — in der <b>Betriebs-Konsole</b>, Zeile der Testfirma → <b>Löschen</b>. Diese Konsole erscheint nur, wenn dein Konto in Schritt 41 als Betreiberzugang eingetragen ist.</li>
+    </ol>
+    <p class="why"><b>Warum dieser Test:</b> Er ist der einzige, der die Trennung so prüft, wie deine Kundschaft sie erlebt. Alles andere ist Theorie — das hier ist der Beweis.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="num">41</div>
+  <div>
+    <h3>Betreiberzugang für die Internet GmbH eintragen</h3>
+    <p class="where"><b>Wo:</b> Supabase → <b>SQL Editor</b> → <b>New query</b></p>
+    <p>Deine Mailadresse einsetzen und ausführen:</p>
+    <pre>insert into platform_admins (profile_id)
+select id from profiles where email = 'deine@internet-gmbh.de';</pre>
+    <p class="check"><b>Prüfen:</b> Auf der Seite neu anmelden. Im Menüband erscheint unter <b>Verwaltung</b> jetzt <b>Betriebs-Konsole</b> mit allen registrierten Firmen.</p>
+    <p class="why"><b>Warum eine ausdrückliche Liste:</b> Der Betreiberzugang ist keine Rolle, in die man hineinwachsen kann — er steht namentlich in einer eigenen Tabelle. Wer dort nicht eingetragen ist, hat ihn nicht, auch nicht als inhabende Person einer Firma.</p>
+    <p class="why"><b>Was der Zugang kann und was nicht:</b> Er sieht <b>Firmen und Personen</b> — Name, Abo, Anzahl Personen, Anzahl Artikel — und kann sperren, löschen und Passwort-Mails anfordern. Die Artikelzahl ist dabei eine reine Zahl, keine Liste. Er sieht <b>keine Produktdaten</b>: die Zugriffsregeln auf Produkte, Bewegungen und Events bleiben auf die jeweils eigene Firma beschränkt, der Betreiberzugang kommt darin bewusst nicht vor. Beim Löschen verschwinden Firma, Personen, Produkte und Verlauf; die Anmeldekonten bleiben bestehen, verlieren aber jedes Profil und damit jeden Zugriff.</p>
+  </div>
+</div>
+
+<h2 style="break-before: page; font-size: 22pt; margin: 0 0 8pt; padding-bottom: 5pt; border-bottom: 1px solid var(--color-accent)">Nachschlagen</h2>
+
+<h3>Wie die Trennung technisch funktioniert</h3>
+<p>Fünf Riegel greifen ineinander. Jeder allein würde schon schützen; zusammen bleibt keine Lücke.</p>
+<table>
+  <thead><tr><th style="width: 26%">Riegel</th><th>Was er verhindert</th></tr></thead>
+  <tbody>
+    <tr><td><b>Keine Rechte für Unangemeldete</b></td><td>Der öffentliche Schlüssel in der Seite kann ohne Anmeldung nichts abrufen — die Rolle <code>anon</code> hat auf keine Tabelle Zugriff.</td></tr>
+    <tr><td><b>Zeilenschutz je Firma</b></td><td>Jede Abfrage liefert nur Zeilen der eigenen Firma. Das gilt in der Datenbank selbst, also auch für direkte Zugriffe an der Seite vorbei.</td></tr>
+    <tr><td><b>Firmenzuordnung serverseitig</b></td><td>Beim Anlegen setzt die Datenbank die Firmenkennung selbst; ein manipulierter Aufruf kann nichts in eine fremde Firma schreiben. Nachträglich verschieben ist gesperrt.</td></tr>
+    <tr><td><b>Privater Dateispeicher</b></td><td>Der R2-Bucket ist geschlossen. Eine Leseadresse gibt es nur für angemeldete Konten, nur für Dateien der eigenen Firma, und nur für eine Stunde.</td></tr>
+    <tr><td><b>Geheimnisse serverseitig</b></td><td>Brevo-Schlüssel, R2-Zugangsdaten und der Dienstschlüssel liegen als Secrets in Supabase. Im Browser ist keines davon zu finden.</td></tr>
+    <tr><td><b>Betreiberzugang ohne Dateneinsicht</b></td><td>Die Internet GmbH kann Firmen und Personen verwalten, sieht aber keine Produktdaten — die Regeln auf Produkte, Bewegungen und Events kennen den Betreiberzugang nicht.</td></tr>
+  </tbody>
+</table>
+
+<h3>Was zusätzlich abgesichert ist</h3>
+<ul>
+  <li><b>Gesperrte Konten und Firmen</b> verlieren den Zugriff sofort und vollständig — eine einzige Prüfung im Kern der Zugriffsregel deckt alle Tabellen ab.</li>
+  <li><b>Niemand kann sich selbst hochstufen:</b> Rolle, Status und Feinrechte darf nur die inhabende Person ändern; die Datenbank weist andere Versuche ab.</li>
+  <li><b>Der Verlauf ist fälschungssicher:</b> Bewegungen lassen sich anlegen, aber nicht ändern und nicht löschen — auch nicht von der inhabenden Person.</li>
+  <li><b>Ausgeschiedene Personen</b> werden auf „entfernt" gesetzt, nicht gelöscht. So bleibt nachvollziehbar, wer wann was entnommen hat.</li>
+  <li><b>Nur die eigene Seite darf die Funktionen aufrufen</b> — geprüft am Secret <code>SITE_URL</code>. Eine fremde Webseite kann sie nicht ansprechen.</li>
+  <li><b>Einladungstoken</b> erscheinen nie im Browser; sie gehen direkt an die Mailfunktion und verfallen nach 3 Stunden.</li>
+</ul>
+
+<h3>Wo Daten liegen</h3>
+<table>
+  <thead><tr><th style="width: 34%">Art der Daten</th><th style="width: 26%">Ort</th><th>Zugänglich für</th></tr></thead>
+  <tbody>
+    <tr><td>Produkte, Bestände, Verlauf, Events, Team</td><td>Supabase, Frankfurt</td><td>angemeldete, aktive Konten der eigenen Firma</td></tr>
+    <tr><td>Bilder, PDFs, Excel-Dateien</td><td>Cloudflare R2, privat</td><td>dieselben, über signierte Adresse für 1 Stunde</td></tr>
+    <tr><td>Mailadressen im Versand</td><td>Brevo</td><td>nur zum Zustellen, keine Weitergabe</td></tr>
+    <tr><td>Die Seite selbst (HTML, Javascript)</td><td>GitHub Pages</td><td>öffentlich — enthält aber keine Daten und kein Geheimnis</td></tr>
+  </tbody>
+</table>
+
+<h3>Wenn etwas nicht geht</h3>
+<table>
+  <thead><tr><th style="width: 34%">Symptom</th><th style="width: 34%">Ursache</th><th>Zurück zu</th></tr></thead>
+  <tbody>
+    <tr><td>Einstellungen zeigen „Demo-Daten"</td><td><code>config.js</code> leer oder nicht veröffentlicht</td><td>Schritt 29, 33</td></tr>
+    <tr><td>Bild erscheint nicht mehr</td><td>Leseadresse abgelaufen — Seite neu laden holt eine neue</td><td>—</td></tr>
+    <tr><td>Keine Mail kommt an</td><td>Absender nicht verifiziert</td><td>Schritt 14</td></tr>
+    <tr><td>Mails landen im Spam</td><td>SPF/DKIM fehlen</td><td>Schritt 15</td></tr>
+    <tr><td>Bestätigungslink führt ins Leere</td><td>Site URL falsch</td><td>Schritt 12</td></tr>
+    <tr><td>Bild-Upload bricht ab (CORS)</td><td>CORS-Eintrag fehlt oder falsche Adresse</td><td>Schritt 26</td></tr>
+    <tr><td>„Kein Recht zum Hochladen"</td><td>Recht <code>upload</code> nicht gesetzt</td><td>Team &amp; Rechte → Feinrechte</td></tr>
+    <tr><td>Sammelmails kommen nicht</td><td>Zeitplan fehlt</td><td>Schritt 21</td></tr>
+    <tr><td>Bestand ändert sich nicht</td><td>Schema unvollständig eingespielt</td><td>Schritt 8</td></tr>
+    <tr><td>Seite bleibt weiß</td><td>Veröffentlichung fehlgeschlagen</td><td>Schritt 33 (Actions-Meldung)</td></tr>
+  </tbody>
+</table>
+
+<h3>Deine acht Werte im Überblick</h3>
+<table>
+  <thead><tr><th style="width: 30%">Wert</th><th style="width: 22%">Geholt in</th><th>Verwendet in</th></tr></thead>
+
+  <tbody>
+    <tr><td>SUPABASE_URL</td><td>Schritt 6</td><td><code>config.js</code></td></tr>
+    <tr><td>SUPABASE_ANON_KEY</td><td>Schritt 6</td><td><code>config.js</code></td></tr>
+    <tr><td>SERVICE_ROLE (geheim)</td><td>Schritt 6</td><td>Zeitplan, Schritt 21</td></tr>
+    <tr><td>Brevo SMTP-Login und -Key</td><td>Schritt 16</td><td>Supabase SMTP, Schritt 18</td></tr>
+    <tr><td>Brevo API-Key (geheim)</td><td>Schritt 17</td><td>Geheimnis, Schritt 19</td></tr>
+    <tr><td>R2 Account ID</td><td>Schritt 23</td><td>Geheimnis, Schritt 27</td></tr>
+    <tr><td>R2 Access Key und Secret</td><td>Schritt 25</td><td>Geheimnis, Schritt 27</td></tr>
+    <tr><td>R2 Bucket-Name</td><td>Schritt 22</td><td>Geheimnis, Schritt 27</td></tr>
+  </tbody>
+</table>
+<p>Ist alles erledigt und getestet: <b>lösche die Textdatei</b>. Die Geheimnisse liegen jetzt sicher in Supabase, die öffentlichen Werte in <code>config.js</code>.</p>
+
+<h3>Rollen und Rechte</h3>
+<table>
+  <thead><tr><th style="width: 32%">Rolle</th><th>Darf standardmäßig</th></tr></thead>
+  <tbody>
+    <tr><td><b>Inhabende Person</b></td><td>alles — auch Profildaten ändern, Rechte setzen, Team einladen</td></tr>
+    <tr><td><b>Lagerleitung</b></td><td>Produkte pflegen, buchen, importieren, Bestellstatus setzen, exportieren</td></tr>
+    <tr><td><b>Mitarbeitende Person</b></td><td>ansehen, entnehmen, nachfüllen, QR-Codes erzeugen</td></tr>
+    <tr><td><b>Lesezugriff</b></td><td>ansehen und exportieren, nicht buchen</td></tr>
+  </tbody>
+</table>
+<p>Die Rolle ist nur eine Vorlage. Unter <b>Team &amp; Rechte → Feinrechte</b> lässt sich jedes einzelne Recht pro Person abweichend erlauben oder sperren.</p>
+
+<h3>Was regelmäßig zu tun ist</h3>
+<ul>
+  <li><b>Monatlich:</b> Team-Liste durchsehen; ausgeschiedene Personen sperren oder entfernen.</li>
+  <li><b>Vierteljährlich:</b> Brevo-Logs auf Zustellprobleme prüfen, R2-Speicherverbrauch ansehen.</li>
+  <li><b>Bei jedem Personalwechsel:</b> Verantwortlichkeiten der Produkte umhängen — sonst gehen Warnmails an ein verwaistes Postfach.</li>
+</ul>
+
+<h3>Kosten</h3>
+<p>Alle vier Dienste haben ein kostenloses Kontingent, das für ein mittleres Lager ausreicht. Supabase begrenzt Datenbankgröße und Nutzung, Brevo die Mails pro Tag, R2 den Speicher — aber nicht den Datenverkehr nach außen, weshalb Produktbilder günstig bleiben. GitHub Pages ist für öffentliche Repositories kostenlos.</p>
+
+</doc-page>
+
+</x-dc>
+</body>
+</html>

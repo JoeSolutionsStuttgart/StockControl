@@ -1,0 +1,2247 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/styles.css">
+<script src="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/_ds_bundle.js"></script>
+<script src="image-slot.js"></script>
+<style>
+  html, body { margin: 0; }
+  html[data-sc-theme="dark"] {
+    --color-bg: #15191d;
+    --color-surface: #1d242b;
+    --color-text: #eaeef2;
+    --color-accent: #8fb3d6;
+    --color-accent-100: #223244;
+    --color-accent-2-100: #223244;
+    --color-accent-700: #a9c6e2;
+    --color-accent-800: #c4d8ec;
+    --color-accent-900: #223244;
+    --color-accent-2-800: #c4d8ec;
+    --color-neutral-100: #262d34;
+    --color-neutral-800: #dfe6ed;
+    --color-divider: color-mix(in srgb, #eaeef2 20%, transparent);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+    --shadow-md: 0 3px 10px rgba(0,0,0,.55);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,.6);
+  }
+  html[data-sc-theme="dark"] .input { background: #121619; }
+  html[data-sc-theme="dark"] .btn-primary { color: #11151a; }
+  /* Weichere Haut über der Industry-Basis: runde Ecken, gefüllte Flächen, klare Abhebung */
+  :root { --sc-card: #ffffff; --sc-ground: #ebebec; --sc-radius: 12px; }
+  html[data-sc-theme="dark"] { --sc-card: #1d242b; --sc-ground: #121619; }
+  .blueprint > .corner { display: none; }
+  .card, .dialog, .blueprint, .input, .btn, .seg, select, textarea { border-radius: var(--sc-radius); }
+  .btn-icon { border-radius: var(--sc-radius); }
+  .tag { border-radius: 999px; padding: 4px 11px; }
+  .card, .blueprint {
+    background: var(--sc-card);
+    border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent);
+    box-shadow: var(--shadow-sm);
+  }
+  .card { padding: var(--space-4); gap: var(--space-3); }
+  .input { background: var(--sc-ground); border-color: color-mix(in srgb, var(--color-text) 14%, transparent); }
+  .seg { overflow: hidden; background: var(--sc-ground); }
+  .table th { border-bottom-color: color-mix(in srgb, var(--color-text) 14%, transparent); }
+  .table tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 7%, transparent); }
+  [data-zebra] tbody tr:nth-child(even) { background: color-mix(in srgb, var(--color-text) 4.5%, transparent); }
+  [data-zebra] tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+  [data-shell] { display: flex; flex-direction: column; min-height: 100vh; background: var(--sc-ground); }
+  [data-burger] { display: none; width: 44px; height: 44px; }
+  [data-burger-panel] .btn { min-height: 44px; justify-content: flex-start; }
+  [data-cols] { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); }
+  [data-two] { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  @media (max-width: 900px) {
+    [data-topnav] { display: none !important; }
+    [data-burger] { display: inline-flex !important; }
+    [data-headrow] { padding-left: var(--space-3) !important; padding-right: var(--space-3) !important; gap: 6px !important; }
+    [data-brand] { margin-right: 0 !important; }
+    [data-brandword] { display: none !important; }
+    [data-langsel] { width: 62px !important; }
+    [data-two] { grid-template-columns: minmax(0, 1fr); }
+    [data-wide-only] { display: none !important; }
+  }
+  @keyframes sc-scan { 0% { top: 4%; } 100% { top: 92%; } }
+  @keyframes sc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media print {
+    [data-print-hide] { display: none !important; }
+    [data-print-sheet] { position: fixed; inset: 0; margin: 0; padding: 0; background: #fff; }
+  }
+</style>
+</helmet>
+
+<div style="font-family: var(--font-body); background: var(--sc-ground); color: var(--color-text); min-height: 100vh">
+
+<sc-if value="{{ authed }}" hint-placeholder-val="{{ true }}">
+<div data-shell>
+
+  <header data-print-hide style="position: sticky; top: 0; z-index: 30; background: var(--sc-card); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); box-shadow: var(--shadow-sm)">
+    <div data-headrow style="display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-6); min-width: 0">
+      <div data-brand style="display: flex; align-items: center; gap: 9px; margin-right: var(--space-4); min-width: 0">
+        <div style="width: 28px; height: 28px; border-radius: 9px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 15px; color: var(--sc-card)">S</div>
+        <div data-brandword style="font-family: var(--font-heading); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; white-space: nowrap">{{ serviceName }}</div>
+      </div>
+
+      <nav data-topnav style="display: flex; align-items: center; gap: 2px">
+        <div style="position: relative" onMouseEnter="{{ hoverLager }}" onMouseLeave="{{ closeMenu }}">
+          <button class="btn" style="{{ grpLager }}" onClick="{{ toggleLager }}"><span data-i18n>Lager</span><span style="font-size: 10px; opacity: .7">▾</span></button>
+          <sc-if value="{{ menuLager }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); left: 0; min-width: 215px; background: var(--sc-card); padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; z-index: 40">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <button class="btn" style="{{ navDashboard }}" onClick="{{ goDashboard }}"><span data-i18n>Übersicht</span></button>
+              <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
+              <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
+              <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="position: relative" onMouseEnter="{{ hoverStamm }}" onMouseLeave="{{ closeMenu }}">
+          <button class="btn" style="{{ grpStamm }}" onClick="{{ toggleStamm }}"><span data-i18n>Stammdaten</span><span style="font-size: 10px; opacity: .7">▾</span></button>
+          <sc-if value="{{ menuStamm }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); left: 0; min-width: 215px; background: var(--sc-card); padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; z-index: 40">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produkt anlegen</span></button>
+              <button class="btn" style="{{ navImport }}" onClick="{{ goNew }}"><span data-i18n>Excel-Import</span></button>
+              <button class="btn" style="{{ navQr }}" onClick="{{ goQr }}"><span data-i18n>QR-Codes</span></button>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="position: relative" onMouseEnter="{{ hoverVerw }}" onMouseLeave="{{ closeMenu }}">
+          <button class="btn" style="{{ grpVerw }}" onClick="{{ toggleVerw }}"><span data-i18n>Verwaltung</span><span style="font-size: 10px; opacity: .7">▾</span></button>
+          <sc-if value="{{ menuVerw }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); left: 0; min-width: 235px; background: var(--sc-card); padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; z-index: 40">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
+              <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+              <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ false }}">
+                <button class="btn" style="{{ navAdmin }}" onClick="{{ goAdmin }}"><span data-i18n>Betriebs-Konsole</span></button>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </nav>
+
+      <div style="margin-left: auto; display: flex; align-items: center; gap: var(--space-2)">
+        <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+        </button>
+        <select data-langsel class="input" style="width: 78px; flex: none; padding-inline: 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
+          <option value="de">DE</option>
+          <option value="en">EN</option>
+          <option value="sv">SV</option>
+        </select>
+        <div style="position: relative" onMouseEnter="{{ hoverUser }}" onMouseLeave="{{ closeMenu }}">
+          <button class="btn btn-secondary" style="gap: 8px" onClick="{{ toggleUser }}">
+            <span style="width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 18%, transparent); color: var(--color-accent-700); display: grid; place-items: center; font-size: 10px; font-weight: 500">{{ meInitials }}</span>
+            <span data-wide-only>{{ meName }}</span>
+            <span style="font-size: 10px; opacity: .7">▾</span>
+          </button>
+          <sc-if value="{{ menuUser }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); right: 0; min-width: 250px; background: var(--sc-card); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); z-index: 40">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div>
+                <div style="font-size: 13px; font-weight: 500">{{ meName }}</div>
+                <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ roleLabel }} · {{ companyName }}</div>
+              </div>
+              <div class="field">
+                <label data-i18n>Demo-Rolle wechseln</label>
+                <select class="input" value="{{ role }}" onChange="{{ setRole }}">
+                  <option value="owner">Inhabende Person (Person 1)</option>
+                  <option value="manager">Lagerleitung</option>
+                  <option value="worker">Mitarbeitende Person</option>
+                  <option value="reader">Lesezugriff</option>
+                  <option value="super">Internet GmbH · Betrieb</option>
+                </select>
+              </div>
+              <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+              <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ logout }}"><span data-i18n>Abmelden</span></button>
+            </div>
+          </sc-if>
+        </div>
+
+        <button class="btn btn-secondary btn-icon" data-burger onClick="{{ toggleBurger }}" aria-label="Menü">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="20" y2="17"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <sc-if value="{{ burgerOpen }}" hint-placeholder-val="{{ false }}">
+      <div data-burger-panel style="border-top: 1px solid var(--color-divider); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: var(--space-3)">
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Lager</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
+            <button class="btn" style="{{ navDashboard }}" onClick="{{ goDashboard }}"><span data-i18n>Übersicht</span></button>
+            <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
+            <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
+            <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Stammdaten</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
+            <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produkt anlegen</span></button>
+            <button class="btn" style="{{ navImport }}" onClick="{{ goNew }}"><span data-i18n>Excel-Import</span></button>
+            <button class="btn" style="{{ navQr }}" onClick="{{ goQr }}"><span data-i18n>QR-Codes</span></button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Verwaltung</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
+            <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
+            <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+            <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ false }}">
+              <button class="btn" style="{{ navAdmin }}" onClick="{{ goAdmin }}"><span data-i18n>Betriebs-Konsole</span></button>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </header>
+
+  <main style="min-width: 0; display: flex; flex-direction: column">
+
+    <div data-print-hide style="padding: var(--space-4) var(--space-6) 0">
+      <h3 style="margin: 0">{{ screenTitle }}</h3>
+    </div>
+
+    <div style="padding: var(--space-4) var(--space-6) var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); flex: 1">
+
+      <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Übersicht" style="display: flex; flex-direction: column; gap: var(--space-6)">
+        <div data-cols>
+          <div class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Artikel im Lager</div>
+            <div style="font-family: var(--font-heading); font-size: 38px; line-height: 1">{{ kpiTotal }}</div>
+            <div class="card-meta"><span data-i18n>in</span> {{ kpiLocations }} <span data-i18n>Lagerorten</span></div>
+          </div>
+          <div class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Unter Mindestbestand</div>
+            <div style="font-family: var(--font-heading); font-size: 38px; line-height: 1; color: var(--color-accent-700)">{{ kpiLow }}</div>
+            <div class="card-meta" data-i18n>Benachrichtigung ausgelöst</div>
+          </div>
+          <div class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Bestellt, offen</div>
+            <div style="font-family: var(--font-heading); font-size: 38px; line-height: 1">{{ kpiOrdered }}</div>
+            <div class="card-meta" data-i18n>warten auf Lieferung</div>
+          </div>
+          <div class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Entnahmen heute</div>
+            <div style="font-family: var(--font-heading); font-size: 38px; line-height: 1">{{ kpiToday }}</div>
+            <div class="card-meta">{{ mailModeLabel }}</div>
+          </div>
+        </div>
+
+        <div data-two>
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+              <h4 style="margin: 0" data-i18n>Bestellliste</h4>
+              <span class="text-muted" style="font-size: 12px" data-i18n>Alles unter Mindestbestand, gesammelt für die nächste Bestellung</span>
+            </div>
+            <div style="overflow-x: auto; max-width: 100%">
+            <table class="table" style="min-width: 540px">
+              <thead>
+                <tr>
+                  <th data-i18n>Artikel</th>
+                  <th data-i18n>Ist</th>
+                  <th data-i18n>Min</th>
+                  <th data-i18n>Bestellmenge</th>
+                  <th data-i18n>Lieferant</th>
+                  <th data-i18n>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ orderList }}" as="row" hint-placeholder-count="4">
+                  <tr>
+                    <td style="font-weight: 500">{{ row.name }}</td>
+                    <td>{{ row.ist }}</td>
+                    <td>{{ row.min }}</td>
+                    <td>{{ row.bestellmenge }}</td>
+                    <td class="text-muted">{{ row.lieferant }}</td>
+                    <td><span class="{{ row.tagClass }}">{{ row.statusLabel }}</span></td>
+                    <td style="text-align: right"><button class="btn btn-ghost" onClick="{{ row.toggleOrdered }}">{{ row.action }}</button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+              <button class="btn btn-secondary" onClick="{{ exportOrderCsv }}"><span data-i18n>Als Excel exportieren</span></button>
+              <button class="btn btn-secondary" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
+            </div>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Letzte Bewegungen</h4>
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <sc-for list="{{ movements }}" as="m" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: var(--space-3); align-items: start; padding-bottom: var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <div style="font-family: var(--font-heading); font-size: 18px; color: var(--color-accent)">{{ m.delta }}</div>
+                  <div style="min-width: 0">
+                    <div style="font-size: 13px; font-weight: 500">{{ m.name }}</div>
+                    <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.who }} · {{ m.when }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onProducts }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Produktliste" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+          <div class="field" style="flex: 1; min-width: 200px">
+            <label data-i18n>Suche</label>
+            <input class="input" type="search" data-i18n-ph placeholder="Name, EAN, Lieferant …" onInput="{{ setQuery }}">
+          </div>
+          <div class="field" style="width: 190px">
+            <label data-i18n>Lagerort</label>
+            <select class="input" onChange="{{ setPlace }}">
+              <option value="">Alle Lagerorte</option>
+              <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+                <option value="{{ pl }}">{{ pl }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div class="field" style="width: 190px">
+            <label data-i18n>Status</label>
+            <select class="input" onChange="{{ setStatus }}">
+              <option value="">Alle</option>
+              <option value="ok">Bestand ok</option>
+              <option value="low">Unter Mindestbestand</option>
+              <option value="ordered">Ist bestellt</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onClick="{{ goNew }}"><span data-i18n>Neues Produkt</span></button>
+        </div>
+
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <table class="table" data-zebra>
+            <thead>
+              <tr>
+                <th data-i18n>Name</th>
+                <th style="text-align: right" data-i18n>Istbestand</th>
+                <th style="text-align: right" data-i18n>Mindestbestand</th>
+                <th data-i18n>Status</th>
+                <th data-i18n>Lagerort</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ filtered }}" as="p" hint-placeholder-count="8">
+                <tr style="cursor: pointer; {{ p.rowStyle }}" onClick="{{ p.open }}">
+                  <td style="font-weight: 500">
+                    {{ p.name }}
+                    <div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
+                  </td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ p.ist }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ p.min }}</td>
+                  <td><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
+                  <td class="text-muted">{{ p.ort }}</td>
+                  <td style="text-align: right"><span style="color: var(--color-accent); font-size: 12px" data-i18n>Details</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <div class="card-meta" style="margin-top: var(--space-2)">{{ filteredCount }} <span data-i18n>von</span> {{ visibleTotal }} <span data-i18n>sichtbaren Artikeln</span> · {{ inactiveVisible }} <span data-i18n>deaktiviert</span></div>
+        </section>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onDetail }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Produktdetail" data-two>
+        <section class="card blueprint" style="animation: sc-in .18s ease-out">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap">
+            <div style="width: 226px; flex: none; display: flex; flex-direction: column; gap: 6px">
+              <div class="blueprint" style="width: 226px; aspect-ratio: 3 / 2; overflow: hidden; display: grid; place-items: center">
+                <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}">
+                  <img src="{{ photoUrl }}" alt="{{ current.name }}" style="width: 100%; height: 100%; object-fit: cover; display: block">
+                </sc-if>
+                <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}">
+                  <image-slot id="sc-product-photo" shape="rect" placeholder="Bild ablegen"></image-slot>
+                </sc-if>
+              </div>
+              <label class="btn btn-secondary" style="font-size: 12px; justify-content: center; cursor: pointer">
+                <span data-i18n>Bild hochladen</span>
+                <input type="file" accept="image/*" style="display: none" onChange="{{ uploadPhoto }}">
+              </label>
+              <div style="font-size: 10px; text-align: center; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ storageLabel }}</div>
+            </div>
+            <div style="flex: 1; min-width: 200px">
+              <div class="card-kicker">{{ current.ean }}</div>
+              <h3 style="margin: 0 0 var(--space-2)">{{ current.name }}</h3>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+                <span class="{{ current.tagClass }}">{{ current.statusLabel }}</span>
+                <sc-for list="{{ current.kategorien }}" as="k" hint-placeholder-count="2">
+                  <span class="tag tag-outline">{{ k }}</span>
+                </sc-for>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4)">
+                <div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Istbestand</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ current.ist }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Mindestbestand</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ current.min }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestellmenge</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ current.bestellmenge }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-4) var(--space-6)">
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Lagerort</div><div style="font-size: 14px">{{ current.ort }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Verantwortlich</div><div style="font-size: 14px">{{ current.verantwortlich }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Stellvertretung</div><div style="font-size: 14px">{{ current.vertretung }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>MHD</div><div style="font-size: 14px">{{ current.mhd }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Preis</div><div style="font-size: 14px">{{ current.preis }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Quantität</div><div style="font-size: 14px">{{ current.quantitaet }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Lieferant</div><div style="font-size: 14px">{{ current.lieferant }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Letzte Entnahme</div><div style="font-size: 14px">{{ current.entnahme }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Letzte Auffüllung</div><div style="font-size: 14px">{{ current.auffuell }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.</p>
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
+              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ dec }}">−</button>
+              <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
+              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
+            </div>
+            <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+            <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
+            <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
+            </sc-if>
+            <button class="btn btn-secondary btn-block" onClick="{{ toggleActive }}">{{ activeBtnLabel }}</button>
+            <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary btn-block" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
+            </sc-if>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>QR-Code dieses Produkts</h4>
+            <div style="display: flex; gap: var(--space-4); align-items: center">
+              <div class="blueprint" style="padding: 8px; background: #fff; flex: none">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                {{ current.qr }}
+              </div>
+              <div style="min-width: 0; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+                <div style="font-family: var(--font-heading); font-size: 15px; color: var(--color-text)">{{ current.id }}</div>
+                <div data-i18n>Nur dieses Produkt. Scan öffnet direkt diese Detailansicht.</div>
+                <button class="btn btn-ghost" style="margin-top: 6px; padding: 0" onClick="{{ goQr }}"><span data-i18n>Etikett drucken</span></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Bestandsverlauf</h4>
+            {{ current.chart }}
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-secondary" onClick="{{ exportHistoryCsv }}">Excel</button>
+              <button class="btn btn-secondary" onClick="{{ printPage }}">PDF</button>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onScan }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Scannen" style="display: flex; flex-direction: column; align-items: center; gap: var(--space-6)">
+        <p class="text-muted" style="max-width: 420px; text-align: center; margin: 0" data-i18n>Am Lagerort den QR-Code am Regal scannen. Der Code passt nur auf ein Produkt und öffnet dessen Detailansicht.</p>
+        <div class="blueprint" style="width: 330px; max-width: 100%; padding: 14px; background: var(--color-surface)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="position: relative; aspect-ratio: 9 / 16; background: var(--color-accent-900); overflow: hidden; display: flex; flex-direction: column">
+            <div style="padding: 10px 12px; display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums">
+              <span>9:41</span><span>{{ serviceName }}</span><span>100 %</span>
+            </div>
+            <div style="flex: 1; position: relative; display: grid; place-items: center">
+              <div style="width: 68%; aspect-ratio: 1; border: 2px solid rgba(255,255,255,.85); position: relative">
+                <div style="position: absolute; left: 0; right: 0; height: 2px; background: var(--color-accent-300); animation: sc-scan 1.9s ease-in-out infinite alternate"></div>
+              </div>
+              <div style="position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,.8)" data-i18n>QR-Code im Rahmen halten</div>
+            </div>
+            <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,.28)">
+              <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Demo: Code auswählen</div>
+              <sc-for list="{{ scanTargets }}" as="s" hint-placeholder-count="3">
+                <button class="btn" style="justify-content: flex-start; border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px" onClick="{{ s.open }}">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onEvents }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Events" data-two>
+        <section class="card">
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0">{{ eventName }}</h4>
+            <span class="text-muted" style="font-size: 12px">{{ eventMeta }}</span>
+          </div>
+          <div class="card-meta">{{ evPosTotal }} <span data-i18n>Positionen</span> · {{ evMissingTotal }} <span data-i18n>davon nachzubestellen</span></div>
+          <div style="overflow-x: auto; max-width: 100%">
+            <table class="table" data-zebra style="min-width: 560px">
+              <thead>
+                <tr>
+                  <th style="cursor: pointer" onClick="{{ sortByName }}">{{ thName }}</th>
+                  <th style="text-align: right" data-i18n>Benötigt</th>
+                  <th style="text-align: right" data-i18n>Bestand</th>
+                  <th style="text-align: right; cursor: pointer" onClick="{{ sortByMissing }}">{{ thMissing }}</th>
+                  <th style="cursor: pointer" onClick="{{ sortBySupplier }}">{{ thSupplier }}</th>
+                  <th style="cursor: pointer" onClick="{{ sortByPlace }}">{{ thPlace }}</th>
+                  <th data-i18n>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ evRows }}" as="r" hint-placeholder-count="4">
+                  <tr style="{{ r.rowStyle }}">
+                    <td style="font-weight: 500">{{ r.name }}<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ r.id }} {{ r.offLabel }}</div></td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.benoetigt }}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.bestand }}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 500">{{ r.fehlt }}</td>
+                    <td class="text-muted">{{ r.lieferant }}</td>
+                    <td class="text-muted">{{ r.ort }}</td>
+                    <td><span class="{{ r.tagClass }}">{{ r.statusLabel }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+            <button class="btn btn-secondary" onClick="{{ exportEventList }}"><span data-i18n>Als Excel exportieren</span></button>
+            <button class="btn btn-secondary" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <section class="card">
+            <h4 style="margin: 0" data-i18n>Geplante Events</h4>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+              <sc-for list="{{ events }}" as="e" hint-placeholder-count="2">
+                <button class="btn btn-secondary" style="flex-direction: column; align-items: flex-start; gap: 2px; padding: var(--space-3); text-align: left; {{ e.style }}" onClick="{{ e.pick }}">
+                  <span style="font-family: var(--font-heading); font-size: 16px">{{ e.name }}</span>
+                  <span style="font-size: 12px; opacity: .7">{{ e.meta }} · {{ e.count }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+
+          <section class="card">
+            <h4 style="margin: 0" data-i18n>Neues Event planen</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Artikel und Mengen eintragen — auch deaktivierte. Beim Anlegen entsteht automatisch die Bedarfs- und Bestellliste mit den Fehlmengen.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3)">
+              <div class="field"><label data-i18n>Name des Events</label><input class="input" value="{{ evName }}" onChange="{{ setEvName }}" data-i18n-ph placeholder="z. B. Sommerfest"></div>
+              <div class="field"><label data-i18n>Datum</label><input class="input" type="date" value="{{ evDate }}" onChange="{{ setEvDate }}"></div>
+              <div class="field"><label data-i18n>Ort</label><input class="input" value="{{ evPlace }}" onChange="{{ setEvPlace }}" data-i18n-ph placeholder="Werkstatt & Hof"></div>
+            </div>
+            <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
+              <div class="field" style="flex: 1; min-width: 170px">
+                <label data-i18n>Artikel</label>
+                <select class="input" value="{{ evPick }}" onChange="{{ setEvPick }}">
+                  <sc-for list="{{ evProducts }}" as="p" hint-placeholder-count="6">
+                    <option value="{{ p.id }}">{{ p.label }}</option>
+                  </sc-for>
+                </select>
+              </div>
+              <div class="field" style="width: 92px"><label data-i18n>Menge</label><input class="input" type="number" min="1" value="{{ evQty }}" onChange="{{ setEvQty }}"></div>
+              <button class="btn btn-secondary" onClick="{{ addEvItem }}"><span data-i18n>Hinzufügen</span></button>
+            </div>
+            <sc-if value="{{ hasDraft }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <sc-for list="{{ evDraft }}" as="d" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                    <span style="flex: 1; min-width: 0; font-size: 13px">{{ d.name }}</span>
+                    <span style="font-family: var(--font-heading); font-size: 15px">{{ d.qty }}</span>
+                    <button class="btn btn-ghost" style="padding: 0 6px" onClick="{{ d.remove }}">×</button>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <button class="btn btn-primary btn-block" style="height: 44px" onClick="{{ createEvent }}"><span data-i18n>Event anlegen und Bedarfsliste erstellen</span></button>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onNew }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Produkt anlegen" data-two>
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Einzelnes Produkt anlegen</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3)">
+            <div class="field"><label data-i18n>Name</label><input class="input" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg"></div>
+            <div class="field"><label data-i18n>EAN</label><input class="input" placeholder="4001234567890"></div>
+            <div class="field">
+              <label data-i18n>Verantwortliche Person</label>
+              <select class="input">
+                <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
+                  <option value="{{ c.name }}">{{ c.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field">
+              <label data-i18n>Stellvertretung 1</label>
+              <select class="input">
+                <option value="">— keine —</option>
+                <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
+                  <option value="{{ c.name }}">{{ c.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field">
+              <label data-i18n>Stellvertretung 2</label>
+              <select class="input">
+                <option value="">— keine —</option>
+                <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
+                  <option value="{{ c.name }}">{{ c.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field">
+              <label data-i18n>Stellvertretung 3</label>
+              <select class="input">
+                <option value="">— keine —</option>
+                <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
+                  <option value="{{ c.name }}">{{ c.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div style="grid-column: 1 / -1; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
+            <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" value="10"></div>
+            <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" value="0"></div>
+            <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" value="20"></div>
+            <div class="field"><label data-i18n>Quantität</label><input class="input" data-i18n-ph placeholder="Einzelflasche, Kasten …"></div>
+            <div class="field"><label data-i18n>Lagerort</label><select class="input"><option>Keller · Regal B2</option><option>Serverraum · Schrank 3</option><option>Küche · Oberschrank</option><option>Lager Nord · Palette 7</option><option>Werkstatt · Schublade 12</option></select></div>
+            <div class="field"><label data-i18n>MHD</label><input class="input" type="date"></div>
+            <div class="field"><label data-i18n>Preis</label><input class="input" placeholder="8,49 €"></div>
+            <div class="field"><label data-i18n>Lieferant</label><input class="input" data-i18n-ph placeholder="Getränke Nord GmbH"></div>
+            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Link zum Produkt</label><input class="input" type="url" placeholder="https://"></div>
+            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Kategorien</label><input class="input" data-i18n-ph placeholder="Getränke, Küche, Verbrauchsmaterial — mit Komma trennen"></div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+            <button class="btn btn-primary" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
+            <button class="btn btn-secondary" onClick="{{ goProducts }}"><span data-i18n>Abbrechen</span></button>
+          </div>
+        </section>
+
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Viele Produkte per Excel importieren</h4>
+          <ol style="margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 6px">
+            <li data-i18n>Vorlage mit allen Feldern herunterladen</li>
+            <li data-i18n>Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt</li>
+            <li data-i18n>Datei hier hochladen, Spalten prüfen, importieren</li>
+          </ol>
+          <button class="btn btn-secondary" onClick="{{ downloadTemplate }}"><span data-i18n>Excel-Vorlage herunterladen</span></button>
+          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>.xlsx oder .csv, bis 5 MB</div>
+            <button class="btn btn-secondary" style="margin-top: var(--space-3)" onClick="{{ simulateImport }}"><span data-i18n>Beispieldatei prüfen</span></button>
+          </div>
+          <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
+              <table class="table">
+                <thead><tr><th data-i18n>Spalte in Datei</th><th data-i18n>Feld im System</th><th data-i18n>Prüfung</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="4">
+                    <tr><td>{{ r.col }}</td><td class="text-muted">{{ r.field }}</td><td><span class="{{ r.tagClass }}">{{ r.check }}</span></td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <button class="btn btn-primary" onClick="{{ runImport }}">{{ importBtnLabel }}</button>
+            </div>
+          </sc-if>
+        </section>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onQr }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="QR-Codes" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <section class="card blueprint" data-print-hide>
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-3); align-items: end">
+            <div class="field"><label data-i18n>Text über dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Keller · Regal B2" onInput="{{ setQrTop }}"></div>
+            <div class="field"><label data-i18n>Text unter dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Bei Entnahme scannen" onInput="{{ setQrBottom }}"></div>
+            <div class="field"><label data-i18n>Etikettgröße</label>
+              <select class="input" value="{{ qrSize }}" onChange="{{ setQrSize }}">
+                <option value="s">Klein · 35 mm</option>
+                <option value="m">Mittel · 50 mm</option>
+                <option value="l">Groß · 70 mm</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-secondary" onClick="{{ selectAllQr }}">{{ selectAllLabel }}</button>
+              <button class="btn btn-primary" onClick="{{ printPage }}"><span data-i18n>Drucken / PDF</span></button>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-3)">
+            <label class="radio" style="gap: 8px">
+              <input type="checkbox" checked="{{ showName }}" onChange="{{ toggleShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+              <span data-i18n>Produktname auf dem Etikett</span>
+            </label>
+            <label class="radio" style="gap: 8px">
+              <input type="checkbox" checked="{{ showId }}" onChange="{{ toggleShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+              <span data-i18n>Artikel-ID auf dem Etikett</span>
+            </label>
+          </div>
+
+          <div style="margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2)">
+            <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
+              <div class="field" style="flex: 1; min-width: 190px">
+                <label data-i18n>Artikel auswählen</label>
+                <input class="input" type="search" data-i18n-ph placeholder="Suchen nach Name, EAN, Lagerort …" onInput="{{ setQrQuery }}">
+              </div>
+              <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); padding-bottom: 10px">{{ qrCountLabel }}</div>
+            </div>
+            <div style="max-height: 232px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); border-radius: var(--sc-radius); background: var(--sc-ground)">
+              <sc-for list="{{ qrPickList }}" as="q" hint-placeholder-count="7">
+                <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
+                  <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                  <span style="flex: 1; min-width: 0; font-size: 13px">{{ q.name }}</span>
+                  <span style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ q.meta }}</span>
+                </label>
+              </sc-for>
+            </div>
+          </div>
+        </section>
+
+        <section data-print-sheet style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--space-4)">
+          <sc-for list="{{ qrSheet }}" as="q" hint-placeholder-count="4">
+            <div class="blueprint" style="padding: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; color: #1d1f20; break-inside: avoid">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font-size: 11px; text-align: center; min-height: 14px">{{ q.top }}</div>
+              {{ q.svg }}
+              <sc-if value="{{ q.withName }}" hint-placeholder-val="{{ true }}">
+                <div style="font-family: var(--font-heading); font-size: 14px; text-align: center; line-height: 1.15">{{ q.name }}</div>
+              </sc-if>
+              <sc-if value="{{ q.withId }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size: 10px; letter-spacing: 0.06em; text-align: center; color: #5d5d60">{{ q.id }}</div>
+              </sc-if>
+              <div style="font-size: 11px; text-align: center; min-height: 14px">{{ q.bottom }}</div>
+            </div>
+          </sc-for>
+        </section>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onTeam }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Team und Rechte" style="display: flex; flex-direction: column; gap: var(--space-6)">
+        <div data-two>
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Team</h4>
+            <div style="overflow-x: auto; max-width: 100%">
+            <table class="table" style="min-width: 430px">
+              <thead><tr><th data-i18n>Person</th><th data-i18n>Rolle</th><th data-i18n>Status</th><th></th></tr></thead>
+              <tbody>
+                <sc-for list="{{ members }}" as="u" hint-placeholder-count="5">
+                  <tr>
+                    <td><div style="font-weight: 500">{{ u.name }}</div><div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ u.email }}</div></td>
+                    <td>
+                      <select class="input" style="width: 150px" value="{{ u.role }}" onChange="{{ u.setRole }}">
+                        <option value="owner">Inhabende Person</option>
+                        <option value="manager">Lagerleitung</option>
+                        <option value="worker">Mitarbeitende Person</option>
+                        <option value="reader">Lesezugriff</option>
+                      </select>
+                    </td>
+                    <td><span class="{{ u.tagClass }}">{{ u.statusLabel }}</span></td>
+                    <td style="text-align: right"><button class="btn btn-ghost" onClick="{{ u.pick }}"><span data-i18n>Feinrechte</span></button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+            </div>
+            <div class="hr"></div>
+            <h5 style="margin: 0" data-i18n>Team einladen</h5>
+            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.</p>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+              <div class="field" style="flex: 1; min-width: 190px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setInvite }}"></div>
+              <div class="field" style="width: 172px"><label data-i18n>Rolle</label><select class="input"><option>Mitarbeitende Person</option><option>Lagerleitung</option><option>Lesezugriff</option></select></div>
+              <button class="btn btn-primary" onClick="{{ sendInvite }}"><span data-i18n>Einladung senden</span></button>
+            </div>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Profil und Feinrechte</div>
+            <h4 style="margin: 0">{{ pickedName }}</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Scheidet jemand aus dem Unternehmen aus, können Profildaten hier geändert, der Zugang gesperrt oder die Person entfernt werden.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: var(--space-3)">
+              <div class="field"><label data-i18n>Name</label><input class="input" value="{{ pickedNameVal }}" onChange="{{ setPickedName }}" disabled="{{ cannotManage }}"></div>
+              <div class="field"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="{{ pickedEmail }}" onChange="{{ setPickedEmail }}" disabled="{{ cannotManage }}"></div>
+              <div class="field"><label data-i18n>Rolle</label>
+                <select class="input" value="{{ pickedRole }}" onChange="{{ setPickedRole }}" disabled="{{ cannotManage }}">
+                  <option value="owner">Inhabende Person</option>
+                  <option value="manager">Lagerleitung</option>
+                  <option value="worker">Mitarbeitende Person</option>
+                  <option value="reader">Lesezugriff</option>
+                </select>
+              </div>
+              <div class="field"><label data-i18n>Zugang</label>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                  <button class="btn btn-secondary" onClick="{{ toggleBlockMember }}" disabled="{{ cannotManage }}">{{ blockMemberLabel }}</button>
+                  <button class="btn btn-secondary" onClick="{{ removeMember }}" disabled="{{ cannotManage }}"><span data-i18n>Entfernen</span></button>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ cannotManage }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-accent-700)" data-i18n>Profildaten und Rechte darf nur die inhabende Person ändern.</div>
+            </sc-if>
+            <div class="hr"></div>
+            <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Feinrechte</div>
+            <div style="display: flex; flex-direction: column; gap: 2px; max-height: 330px; overflow-y: auto">
+              <sc-for list="{{ perms }}" as="pm" hint-placeholder-count="10">
+                <label class="radio" style="justify-content: space-between; width: 100%; padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <span style="font-size: 13px">{{ pm.label }}</span>
+                  <input type="checkbox" checked="{{ pm.on }}" onChange="{{ pm.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+                </label>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+              <button class="btn btn-secondary" onClick="{{ allowAll }}"><span data-i18n>Alles erlauben</span></button>
+              <button class="btn btn-secondary" onClick="{{ denyAll }}"><span data-i18n>Alles sperren</span></button>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onSettings }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Einstellungen" data-two>
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC.</p>
+          <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailNow }}"><span class="dot"></span><span data-i18n>Sofort bei jeder Unterschreitung</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailDay }}"><span class="dot"></span><span data-i18n>Einmal am Tag, gesammelt</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailWeek }}"><span class="dot"></span><span data-i18n>Einmal in der Woche</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-2)">
+            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="07:30"></div>
+            <div class="field"><label data-i18n>Wochentag</label><select class="input"><option>Montag</option><option>Dienstag</option><option>Mittwoch</option><option>Donnerstag</option><option>Freitag</option></select></div>
+            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" value="1" min="1" max="28"></div>
+          </div>
+          <div class="field" style="margin-top: var(--space-2)">
+            <label data-i18n>Wer bekommt die Mail?</label>
+            <div>
+              <div class="seg">
+                <label class="seg-opt" style="{{ segCcOn }}"><input type="radio" name="sc-cc" onChange="{{ setCcOn }}"><span data-i18n>Verantwortliche + Stellvertretung im CC</span></label>
+                <label class="seg-opt" style="{{ segCcOff }}"><input type="radio" name="sc-cc" onChange="{{ setCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
+              </div>
+            </div>
+            <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: 6px" data-i18n>Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.</div>
+          </div>
+          <div class="blueprint" style="padding: var(--space-3); margin-top: var(--space-2)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Aktuell aktiv</div>
+            <div style="font-size: 14px">{{ mailModeLabel }}</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>Bei gesammelten Mails entsteht automatisch eine Bestellliste mit allen Produktinfos.</div>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Sprache und Darstellung</h4>
+            <div class="field"><label data-i18n>Sprache dieses Kontos</label>
+              <select class="input" value="{{ lang }}" onChange="{{ setLang }}">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                <option value="sv">Svenska</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Design</label>
+              <div>
+                <div class="seg">
+                  <label class="seg-opt" style="{{ segLight }}"><input type="radio" name="sc-theme2" onChange="{{ setLight }}"><span data-i18n>Hell</span></label>
+                  <label class="seg-opt" style="{{ segDark }}"><input type="radio" name="sc-theme2" onChange="{{ setDark }}"><span data-i18n>Dunkel</span></label>
+                  <label class="seg-opt" style="{{ segSystem }}"><input type="radio" name="sc-theme2" onChange="{{ setSystem }}"><span data-i18n>System</span></label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Passwort ändern</h4>
+            <div class="field"><label data-i18n>Aktuelles Passwort</label><input class="input" type="password"></div>
+            <div class="field"><label data-i18n>Neues Passwort</label><input class="input" type="password" onInput="{{ setPw }}"></div>
+            <div class="field"><label data-i18n>Neues Passwort wiederholen</label><input class="input" type="password" onInput="{{ setPw2 }}"></div>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
+              <sc-for list="{{ pwRulesList }}" as="r" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
+                  <span style="width: 13px; height: 13px; flex: none; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; line-height: 1">{{ r.mark }}</span>
+                  <span>{{ r.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <button class="btn btn-primary" style="margin-top: var(--space-2)" onClick="{{ savePassword }}"><span data-i18n>Passwort speichern</span></button>
+          </section>
+
+          <section class="card">
+            <div class="card-kicker" data-i18n>Systemdienste</div>
+            <h4 style="margin: 0" data-i18n>Datenquelle</h4>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+              <span class="{{ sourceTagClass }}">{{ sourceLabel }}</span>
+              <span class="tag tag-neutral">Supabase</span>
+              <span class="tag tag-neutral">Brevo</span>
+              <span class="tag tag-neutral">Cloudflare R2</span>
+              <span class="tag tag-neutral">GitHub Pages</span>
+            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Produkte, Bestände, Verläufe und Konten liegen in Supabase, die Mails verschickt Brevo, Bilder und große Dateien liegen in Cloudflare R2, und die Seite selbst läuft auf GitHub Pages. Keiner dieser Dienste wird hier bedient — sie werden einmalig eingerichtet: Zugangsdaten stehen in config.js, die geheimen Schlüssel als Secrets in Supabase. Die Schritte stehen in SETUP.md.</p>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onAdmin }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Betriebs-Konsole" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <div class="blueprint" style="padding: var(--space-3) var(--space-4); background: color-mix(in srgb, var(--color-accent) 12%, transparent)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="card-kicker">Internet GmbH</div>
+          <div style="font-size: 14px" data-i18n>Betriebszugang: Firmen und Personen sperren, löschen, Passwort-Neuanforderung schicken. Produktdaten der Firmen sind hier nicht sichtbar — jede Firma sieht nur ihr eigenes Lager.</div>
+          <sc-if value="{{ adminDemo }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size: 12.5px; margin-top: 6px; color: var(--color-accent-700)" data-i18n>Demo-Daten: Im verbundenen Betrieb stehen hier die echten Firmen. Zugang erhält nur, wer in der Liste platform_admins eingetragen ist.</div>
+          </sc-if>
+        </div>
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Firmen</h4>
+          <div style="overflow-x: auto; max-width: 100%">
+          <table class="table" style="min-width: 680px">
+            <thead><tr><th data-i18n>Firma</th><th data-i18n>Abo</th><th data-i18n>Personen</th><th data-i18n>Artikel</th><th data-i18n>Angelegt</th><th data-i18n>Status</th><th></th></tr></thead>
+            <tbody>
+              <sc-for list="{{ companies }}" as="c" hint-placeholder-count="6">
+                <tr>
+                  <td><div style="font-weight: 500">{{ c.name }}</div><div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ c.admin }}</div></td>
+                  <td><span class="tag tag-neutral">{{ c.plan }}</span></td>
+                  <td>{{ c.users }}</td>
+                  <td>{{ c.items }}</td>
+                  <td class="text-muted">{{ c.created }}</td>
+                  <td><span class="{{ c.tagClass }}">{{ c.statusLabel }}</span></td>
+                  <td style="text-align: right">
+                    <button class="btn btn-ghost" onClick="{{ c.toggleBlock }}">{{ c.blockLabel }}</button>
+                    <button class="btn btn-ghost" onClick="{{ c.resetPw }}"><span data-i18n>Passwort</span></button>
+                    <button class="btn btn-ghost" onClick="{{ c.remove }}"><span data-i18n>Löschen</span></button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          </div>
+        </section>
+      </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+</sc-if>
+
+<sc-if value="{{ inAuth }}" hint-placeholder-val="{{ false }}">
+<div style="min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: var(--space-8) var(--space-4)">
+  <div style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: var(--space-4)">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); color: var(--sc-card)">S</div>
+      <div style="font-family: var(--font-heading); font-size: 22px">{{ serviceName }}</div>
+    </div>
+
+    <div class="seg" style="width: 100%">
+      <label class="seg-opt" style="{{ segLogin }}; flex: 1; justify-content: center"><input type="radio" name="sc-auth" onChange="{{ viewLogin }}"><span data-i18n>Anmelden</span></label>
+      <label class="seg-opt" style="{{ segRegister }}; flex: 1; justify-content: center"><input type="radio" name="sc-auth" onChange="{{ viewRegister }}"><span data-i18n>Registrieren</span></label>
+      <label class="seg-opt" style="{{ segInvite }}; flex: 1; justify-content: center"><input type="radio" name="sc-auth" onChange="{{ viewInvite }}"><span data-i18n>Einladung</span></label>
+    </div>
+
+    <section class="card blueprint" style="padding: var(--space-6)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+      <sc-if value="{{ authIsLogin }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <h4 style="margin: 0 0 4px" data-i18n>Anmelden</h4>
+          <p class="card-body" style="margin: 0 0 var(--space-4)" data-i18n>Zugang zum Lager deiner Firma.</p>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setAuthEmail }}"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Passwort</label><input class="input" type="password" onInput="{{ setAuthPw }}"></div>
+          <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint" style="padding: 10px 12px; margin-bottom: 10px; font-size: 12.5px; background: color-mix(in srgb, var(--color-accent) 12%, transparent)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <span data-i18n>Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.</span>
+            </div>
+          </sc-if>
+          <button class="btn btn-primary btn-block" style="height: 44px" disabled="{{ locked }}" onClick="{{ doLogin }}"><span data-i18n>Anmelden</span></button>
+          <div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; flex-wrap: wrap">
+            <button class="btn btn-ghost" style="padding: 0" onClick="{{ viewForgot }}"><span data-i18n>Passwort vergessen?</span></button>
+            <button class="btn btn-ghost" style="padding: 0" onClick="{{ addFail }}">{{ failLabel }}</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ authIsRegister }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <h4 style="margin: 0 0 4px" data-i18n>Firma registrieren</h4>
+          <p class="card-body" style="margin: 0 0 var(--space-4)" data-i18n>Eine Person aus dem Unternehmen legt den Zugang an und schließt das Abo ab. Alle Abos sind derzeit gratis.</p>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Firmenname</label><input class="input" placeholder="Internet GmbH" onInput="{{ setRegCompany }}"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setAuthEmail }}"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Passwort</label><input class="input" type="password" onInput="{{ setRegPw }}"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Passwort wiederholen</label><input class="input" type="password" onInput="{{ setRegPw2 }}"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
+            <sc-for list="{{ regRules }}" as="r" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
+                <span style="width: 13px; height: 13px; flex: none; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; line-height: 1">{{ r.mark }}</span>
+                <span>{{ r.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <label class="radio" style="gap: 9px; margin: 10px 0 4px; font-size: 13px">
+            <input type="checkbox" onChange="{{ setBot }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+            <span data-i18n>Ich bin kein Bot — Prüfung bestanden</span>
+          </label>
+          <button class="btn btn-primary btn-block" style="height: 44px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Registrieren und Mail erhalten</span></button>
+          <div class="text-muted" style="font-size: 11px; margin-top: 10px" data-i18n>Abo: Gratis-Tarif, jederzeit kündbar. Später kostenpflichtig — wir melden uns vorher.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ authIsConfirm }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div class="card-kicker" data-i18n>Schritt 2 von 2</div>
+          <h4 style="margin: 0 0 4px" data-i18n>E-Mail bestätigen</h4>
+          <p class="card-body" style="margin: 0 0 var(--space-4)" data-i18n>Wir haben dir einen Bestätigungslink geschickt. Der Link gilt 15 Minuten — danach verfällt die Registrierung.</p>
+          <div class="blueprint" style="padding: 14px; text-align: center; margin-bottom: 12px">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family: var(--font-heading); font-size: 34px; line-height: 1; color: {{ clockColor }}">{{ clock }}</div>
+            <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
+          </div>
+          <sc-if value="{{ linkAlive }}" hint-placeholder-val="{{ true }}">
+            <button class="btn btn-primary btn-block" style="height: 44px" onClick="{{ doConfirm }}"><span data-i18n>Link jetzt bestätigen (Demo)</span></button>
+          </sc-if>
+          <sc-if value="{{ linkDead }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-secondary btn-block" style="height: 44px" onClick="{{ resetClock }}"><span data-i18n>Neue Bestätigungsmail anfordern</span></button>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ authIsForgot }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <h4 style="margin: 0 0 4px" data-i18n>Passwort zurücksetzen</h4>
+          <p class="card-body" style="margin: 0 0 var(--space-4)" data-i18n>Gib deine E-Mail-Adresse ein. Wir schicken einen Link, der 15 Minuten gültig ist.</p>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setAuthEmail }}"></div>
+          <button class="btn btn-primary btn-block" style="height: 44px" onClick="{{ sendReset }}"><span data-i18n>Link senden</span></button>
+          <button class="btn btn-ghost btn-block" onClick="{{ viewLogin }}"><span data-i18n>Zurück zur Anmeldung</span></button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ authIsInvite }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div class="card-kicker" data-i18n>Einladung von Marie Kohl</div>
+          <h4 style="margin: 0 0 4px" data-i18n>Zugang einrichten</h4>
+          <p class="card-body" style="margin: 0 0 var(--space-4)" data-i18n>Du wurdest zu Internet GmbH eingeladen. Die Einladung läuft in 2 Stunden 41 Minuten ab.</p>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Name</label><input class="input" placeholder="Anke Reuß"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
+          <div class="field" style="margin-bottom: 10px"><label data-i18n>Passwort</label><input class="input" type="password" onInput="{{ setRegPw }}"></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
+            <sc-for list="{{ inviteRules }}" as="r" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
+                <span style="width: 13px; height: 13px; flex: none; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; line-height: 1">{{ r.mark }}</span>
+                <span>{{ r.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <button class="btn btn-primary btn-block" style="height: 44px" disabled="{{ inviteDisabled }}" onClick="{{ doInvite }}"><span data-i18n>Zugang aktivieren</span></button>
+        </div>
+      </sc-if>
+    </section>
+
+    <div class="text-muted" style="font-size: 11px; text-align: center; line-height: 1.5" data-i18n>Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 50; width: min(370px, calc(100vw - 32px)); animation: sc-in .2s ease-out">
+    <div class="blueprint elev-lg" style="padding: var(--space-4); background: var(--sc-card)">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="card-kicker">{{ toastKicker }}</div>
+      <div style="font-family: var(--font-heading); font-size: 16px">{{ toastTitle }}</div>
+      <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ toastBody }}</div>
+      <button class="btn btn-ghost" style="padding: 0; margin-top: 4px" onClick="{{ closeToast }}"><span data-i18n>Schließen</span></button>
+    </div>
+  </div>
+</sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;serviceName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;StockControl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marke&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Übersicht&quot;,&quot;Produkte&quot;,&quot;Scannen&quot;,&quot;Events&quot;,&quot;QR-Codes&quot;,&quot;Produkt anlegen&quot;,&quot;Team &amp; Rechte&quot;,&quot;Einstellungen&quot;,&quot;Anmeldung&quot;],&quot;default&quot;:&quot;Übersicht&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;demoRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Inhabende Person&quot;,&quot;Lagerleitung&quot;,&quot;Mitarbeitende Person&quot;,&quot;Lesezugriff&quot;,&quot;Betrieb&quot;],&quot;default&quot;:&quot;Inhabende Person&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hell&quot;,&quot;Dunkel&quot;,&quot;System&quot;],&quot;default&quot;:&quot;Hell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+const DICT = {
+  en: {
+    "Übersicht": "Overview", "Produkte": "Products", "Scannen": "Scan", "Produkt anlegen": "Add product",
+    "QR-Codes": "QR codes", "Team & Rechte": "Team & rights", "Einstellungen": "Settings",
+    "Betriebs-Konsole": "Operator console", "Angemeldet als": "Signed in as", "Abmelden": "Sign out",
+    "Hell": "Light", "Dunkel": "Dark", "System": "System", "Artikel im Lager": "Items in stock",
+    "in": "across", "Lagerorten": "locations", "Unter Mindestbestand": "Below minimum",
+    "Benachrichtigung ausgelöst": "notification triggered", "Bestellt, offen": "Ordered, open",
+    "warten auf Lieferung": "awaiting delivery", "Entnahmen heute": "Withdrawals today",
+    "Bestellliste": "Order list", "Alles unter Mindestbestand, gesammelt für die nächste Bestellung": "Everything below minimum, collected for the next order",
+    "Artikel": "Item", "Ist": "Actual", "Min": "Min", "Bestellmenge": "Order qty", "Lieferant": "Supplier",
+    "Status": "Status", "Als Excel exportieren": "Export to Excel", "Als PDF drucken": "Print as PDF",
+    "Letzte Bewegungen": "Recent movements", "Suche": "Search", "Lagerort": "Location", "Name": "Name",
+    "Istbestand": "Actual stock", "Mindestbestand": "Minimum stock", "Details": "Details", "von": "of",
+    "Artikeln": "items", "Neues Produkt": "New product", "Entnehmen oder nachfüllen": "Withdraw or refill",
+    "Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.": "Enter a quantity and book it. Every booking is logged with person and timestamp.",
+    "Entnahme buchen": "Book withdrawal", "Nachfüllung buchen": "Book refill",
+    "QR-Code dieses Produkts": "QR code for this product",
+    "Nur dieses Produkt. Scan öffnet direkt diese Detailansicht.": "This product only. Scanning opens this detail view.",
+    "Etikett drucken": "Print label", "Bestandsverlauf": "Stock history", "Verantwortlich": "Responsible",
+    "Stellvertretung": "Deputies", "MHD": "Best before", "Preis": "Price", "Quantität": "Unit",
+    "Letzte Entnahme": "Last withdrawal", "Letzte Auffüllung": "Last refill", "Geändert von": "Changed by",
+    "Produktlink": "Product link",
+    "Am Lagerort den QR-Code am Regal scannen. Der Code passt nur auf ein Produkt und öffnet dessen Detailansicht.": "Scan the shelf QR code at the location. Each code matches exactly one product and opens its detail view.",
+    "QR-Code im Rahmen halten": "Hold the QR code in the frame", "Demo: Code auswählen": "Demo: pick a code",
+    "Einzelnes Produkt anlegen": "Add a single product", "EAN": "EAN",
+    "Verantwortliche Person": "Responsible person", "Kategorien": "Categories",
+    "Link zum Produkt": "Product link", "Produkt speichern": "Save product", "Abbrechen": "Cancel",
+    "Viele Produkte per Excel importieren": "Import many products from Excel",
+    "Vorlage mit allen Feldern herunterladen": "Download the template with every field",
+    "Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt": "Fill it in row by row — one row is one product",
+    "Datei hier hochladen, Spalten prüfen, importieren": "Upload the file, check the columns, import",
+    "Excel-Vorlage herunterladen": "Download Excel template", "Datei hierher ziehen": "Drag a file here",
+    ".xlsx oder .csv, bis 5 MB": ".xlsx or .csv, up to 5 MB", "Beispieldatei prüfen": "Check sample file",
+    "Spalte in Datei": "Column in file", "Feld im System": "Field in system", "Prüfung": "Check",
+    "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
+    "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
+    "Rolle": "Role", "Feinrechte": "Fine-grained rights", "Team einladen": "Invite someone",
+    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "The invitation is valid for 3 hours. If it expires you can invite again.",
+    "E-Mail-Adresse": "Email address", "Einladung senden": "Send invitation",
+    "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "The role sets the default. Individual rights can be allowed or blocked here.",
+    "Alles erlauben": "Allow everything", "Alles sperren": "Block everything",
+    "Benachrichtigung bei Unterschreitung": "Notification when stock runs low",
+    "Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC.": "The mail goes to the responsible person, deputies are in CC.",
+    "Sofort bei jeder Unterschreitung": "Immediately, every time", "Einmal am Tag, gesammelt": "Once a day, collected",
+    "Einmal in der Woche": "Once a week", "Einmal im Monat": "Once a month", "Uhrzeit": "Time",
+    "Wochentag": "Weekday", "Tag im Monat": "Day of month", "Aktuell aktiv": "Currently active",
+    "Bei gesammelten Mails entsteht automatisch eine Bestellliste mit allen Produktinfos.": "Collected mails automatically produce an order list with all product details.",
+    "Sprache und Darstellung": "Language and appearance", "Sprache dieses Kontos": "Language of this account",
+    "Design": "Appearance", "Passwort ändern": "Change password", "Aktuelles Passwort": "Current password",
+    "Neues Passwort": "New password", "Neues Passwort wiederholen": "Repeat new password",
+    "Passwort speichern": "Save password", "Firmen": "Companies", "Firma": "Company", "Abo": "Plan",
+    "Personen": "People", "Angelegt": "Created", "Passwort": "Password", "Löschen": "Delete",
+    "Betriebszugang: Firmen und Personen sperren, löschen, Passwort-Neuanforderung schicken. Produktdaten der Firmen sind hier nicht sichtbar — jede Firma sieht nur ihr eigenes Lager.": "Operator access: block or delete companies and people, trigger password resets. Company product data is not visible here — each company only ever sees its own stock.",
+    "Anmelden": "Sign in", "Registrieren": "Register", "Einladung": "Invitation", "Schließen": "Close",
+    "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registration and sign-in are protected by rate limiting, a bot check and a lockout after five failed attempts."
+  },
+  sv: {
+    "Übersicht": "Översikt", "Produkte": "Produkter", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
+    "QR-Codes": "QR-koder", "Team & Rechte": "Team & rättigheter", "Einstellungen": "Inställningar",
+    "Betriebs-Konsole": "Operatörskonsol", "Angemeldet als": "Inloggad som", "Abmelden": "Logga ut",
+    "Hell": "Ljust", "Dunkel": "Mörkt", "System": "System", "Artikel im Lager": "Artiklar i lager",
+    "in": "i", "Lagerorten": "lagerplatser", "Unter Mindestbestand": "Under miniminivå",
+    "Benachrichtigung ausgelöst": "avisering skickad", "Bestellt, offen": "Beställt, öppet",
+    "warten auf Lieferung": "väntar på leverans", "Entnahmen heute": "Uttag idag",
+    "Bestellliste": "Beställningslista", "Alles unter Mindestbestand, gesammelt für die nächste Bestellung": "Allt under miniminivå, samlat för nästa beställning",
+    "Artikel": "Artikel", "Ist": "Faktisk", "Min": "Min", "Bestellmenge": "Beställn.antal", "Lieferant": "Leverantör",
+    "Status": "Status", "Als Excel exportieren": "Exportera till Excel", "Als PDF drucken": "Skriv ut som PDF",
+    "Letzte Bewegungen": "Senaste rörelser", "Suche": "Sök", "Lagerort": "Lagerplats", "Name": "Namn",
+    "Istbestand": "Faktiskt lager", "Mindestbestand": "Miniminivå", "Details": "Detaljer", "von": "av",
+    "Artikeln": "artiklar", "Neues Produkt": "Ny artikel", "Entnehmen oder nachfüllen": "Ta ut eller fylla på",
+    "Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.": "Ange antal och bokför. Varje bokning loggas med person och tidsstämpel.",
+    "Entnahme buchen": "Bokför uttag", "Nachfüllung buchen": "Bokför påfyllning",
+    "QR-Code dieses Produkts": "QR-kod för denna artikel",
+    "Nur dieses Produkt. Scan öffnet direkt diese Detailansicht.": "Endast denna artikel. Skanning öppnar denna detaljvy.",
+    "Etikett drucken": "Skriv ut etikett", "Bestandsverlauf": "Lagerhistorik", "Verantwortlich": "Ansvarig",
+    "Stellvertretung": "Ersättare", "MHD": "Bäst före", "Preis": "Pris", "Quantität": "Enhet",
+    "Letzte Entnahme": "Senaste uttag", "Letzte Auffüllung": "Senaste påfyllning", "Geändert von": "Ändrad av",
+    "Produktlink": "Produktlänk",
+    "Am Lagerort den QR-Code am Regal scannen. Der Code passt nur auf ein Produkt und öffnet dessen Detailansicht.": "Skanna QR-koden på hyllan. Varje kod hör till en enda artikel och öppnar dess detaljvy.",
+    "QR-Code im Rahmen halten": "Håll QR-koden i ramen", "Demo: Code auswählen": "Demo: välj en kod",
+    "Einzelnes Produkt anlegen": "Lägg till en artikel", "EAN": "EAN",
+    "Verantwortliche Person": "Ansvarig person", "Kategorien": "Kategorier",
+    "Link zum Produkt": "Länk till produkten", "Produkt speichern": "Spara artikel", "Abbrechen": "Avbryt",
+    "Viele Produkte per Excel importieren": "Importera många artiklar via Excel",
+    "Vorlage mit allen Feldern herunterladen": "Ladda ner mallen med alla fält",
+    "Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt": "Fyll i rad för rad — en rad är en artikel",
+    "Datei hier hochladen, Spalten prüfen, importieren": "Ladda upp filen, kontrollera kolumnerna, importera",
+    "Excel-Vorlage herunterladen": "Ladda ner Excel-mall", "Datei hierher ziehen": "Dra en fil hit",
+    ".xlsx oder .csv, bis 5 MB": ".xlsx eller .csv, upp till 5 MB", "Beispieldatei prüfen": "Kontrollera exempelfil",
+    "Spalte in Datei": "Kolumn i filen", "Feld im System": "Fält i systemet", "Prüfung": "Kontroll",
+    "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
+    "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
+    "Rolle": "Roll", "Feinrechte": "Detaljrättigheter", "Team einladen": "Bjud in någon",
+    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
+    "E-Mail-Adresse": "E-postadress", "Einladung senden": "Skicka inbjudan",
+    "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "Rollen sätter standarden. Enskilda rättigheter kan tillåtas eller blockeras här.",
+    "Alles erlauben": "Tillåt allt", "Alles sperren": "Blockera allt",
+    "Benachrichtigung bei Unterschreitung": "Avisering när lagret är lågt",
+    "Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC.": "Mejlet går till ansvarig person, ersättare står som CC.",
+    "Sofort bei jeder Unterschreitung": "Direkt, varje gång", "Einmal am Tag, gesammelt": "En gång om dagen, samlat",
+    "Einmal in der Woche": "En gång i veckan", "Einmal im Monat": "En gång i månaden", "Uhrzeit": "Klockslag",
+    "Wochentag": "Veckodag", "Tag im Monat": "Dag i månaden", "Aktuell aktiv": "Aktivt nu",
+    "Bei gesammelten Mails entsteht automatisch eine Bestellliste mit allen Produktinfos.": "Samlade mejl skapar automatiskt en beställningslista med alla artikeluppgifter.",
+    "Sprache und Darstellung": "Språk och utseende", "Sprache dieses Kontos": "Kontots språk",
+    "Design": "Utseende", "Passwort ändern": "Byt lösenord", "Aktuelles Passwort": "Nuvarande lösenord",
+    "Neues Passwort": "Nytt lösenord", "Neues Passwort wiederholen": "Upprepa nytt lösenord",
+    "Passwort speichern": "Spara lösenord", "Firmen": "Företag", "Firma": "Företag", "Abo": "Abonnement",
+    "Personen": "Personer", "Angelegt": "Skapad", "Passwort": "Lösenord", "Löschen": "Ta bort",
+    "Betriebszugang: Firmen und Personen sperren, löschen, Passwort-Neuanforderung schicken. Produktdaten der Firmen sind hier nicht sichtbar — jede Firma sieht nur ihr eigenes Lager.": "Operatörsåtkomst: blockera eller ta bort företag och personer, begär nytt lösenord. Företagens artikeldata syns inte här — varje företag ser bara sitt eget lager.",
+    "Anmelden": "Logga in", "Registrieren": "Registrera", "Einladung": "Inbjudan", "Schließen": "Stäng",
+    "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registrering och inloggning skyddas av hastighetsgräns, botkontroll och låsning efter fem misslyckade försök."
+  }
+};
+
+const PH = {
+  en: { "Name, EAN, Lieferant …": "Name, EAN, supplier …", "z. B. Kaffeebohnen 1 kg": "e.g. coffee beans 1 kg",
+    "Einzelflasche, Kasten …": "Single bottle, crate …", "Getränke Nord GmbH": "Supplier name",
+    "Getränke, Küche, Verbrauchsmaterial — mit Komma trennen": "Drinks, kitchen, consumables — comma separated",
+    "z. B. Keller · Regal B2": "e.g. Basement · Shelf B2", "z. B. Bei Entnahme scannen": "e.g. Scan when taking stock" },
+  sv: { "Name, EAN, Lieferant …": "Namn, EAN, leverantör …", "z. B. Kaffeebohnen 1 kg": "t.ex. kaffebönor 1 kg",
+    "Einzelflasche, Kasten …": "Enstaka flaska, back …", "Getränke Nord GmbH": "Leverantörens namn",
+    "Getränke, Küche, Verbrauchsmaterial — mit Komma trennen": "Dryck, kök, förbrukning — separera med komma",
+    "z. B. Keller · Regal B2": "t.ex. Källare · Hylla B2", "z. B. Bei Entnahme scannen": "t.ex. Skanna vid uttag" }
+};
+
+const STATUS = {
+  ok:       { de: "Bestand ok",           en: "In stock",        sv: "Lager ok",          tag: "tag tag-neutral" },
+  low:      { de: "Unter Mindestbestand", en: "Below minimum",   sv: "Under miniminivå",  tag: "tag tag-outline" },
+  ordered:  { de: "Ist bestellt",         en: "Ordered",         sv: "Beställd",          tag: "tag tag-accent" },
+  delivered:{ de: "Geliefert",            en: "Delivered",       sv: "Levererad",         tag: "tag tag-accent-2" }
+};
+
+const ROLES = {
+  owner:   { de: "Inhabende Person", en: "Owner", sv: "Ägare" },
+  manager: { de: "Lagerleitung", en: "Stock manager", sv: "Lageransvarig" },
+  worker:  { de: "Mitarbeitende Person", en: "Worker", sv: "Medarbetare" },
+  reader:  { de: "Lesezugriff", en: "Viewer", sv: "Läsbehörighet" },
+  super:   { de: "Betrieb", en: "Operator", sv: "Drift" }
+};
+
+const PERM_LIST = [
+  ["view", "Produkte ansehen", ["owner","manager","worker","reader"]],
+  ["withdraw", "Entnahme buchen", ["owner","manager","worker"]],
+  ["refill", "Nachfüllung buchen", ["owner","manager","worker"]],
+  ["create", "Produkte anlegen", ["owner","manager"]],
+  ["edit", "Produkte bearbeiten", ["owner","manager"]],
+  ["delete", "Produkte löschen", ["owner"]],
+  ["import", "Excel-Import", ["owner","manager"]],
+  ["qr", "QR-Codes generieren", ["owner","manager","worker"]],
+  ["places", "Lagerorte verwalten", ["owner","manager"]],
+  ["order", "Bestellstatus ändern", ["owner","manager"]],
+  ["invite", "Team einladen", ["owner"]],
+  ["rights", "Rechte ändern", ["owner"]],
+  ["history", "Bewegungen und Entnahmehistorie sehen", ["owner","manager","reader"]],
+  ["who", "Sehen, wer was entnommen hat", ["owner","manager"]],
+  ["profiles", "Profile des Teams ansehen", ["owner","manager"]],
+  ["profileEdit", "Profildaten ändern", ["owner"]],
+  ["export", "Excel-Datei erstellen", ["owner","manager","reader"]],
+  ["pdf", "PDF erstellen", ["owner","manager","reader"]],
+  ["upload", "Dateien hochladen", ["owner","manager"]],
+  ["mail", "Benachrichtigungen einstellen", ["owner","manager"]]
+];
+
+const SEED = [
+  { id:"SC-1001", name:"Mineralwasser still, Kasten 12 × 0,75 l", ean:"4001234567890", ist:6, min:10, bestellmenge:20,
+    ort:"Keller · Regal B2", mhd:"30.04.2027", preis:"8,49 €", quantitaet:"Kasten (12 Flaschen)", lieferant:"Getränke Nord GmbH",
+    status:"low", verantwortlich:"Marie Kohl", vertretung:"Timo Brand, Anke Reuß", kategorien:["Getränke","Küche"],
+    entnahme:"14.09.2026 08:12", auffuell:"29.08.2026 10:40", geaendert:"Timo Brand", hist:[22,20,17,14,12,9,6] },
+  { id:"SC-1002", name:"Kaffeebohnen Hausmischung 1 kg", ean:"4007654321098", ist:3, min:6, bestellmenge:12,
+    ort:"Küche · Oberschrank", mhd:"12.02.2027", preis:"18,90 €", quantitaet:"Beutel 1 kg", lieferant:"Röster Ost KG",
+    status:"ordered", verantwortlich:"Anke Reuß", vertretung:"Marie Kohl", kategorien:["Getränke","Küche"],
+    entnahme:"15.09.2026 07:55", auffuell:"01.09.2026 09:10", geaendert:"Anke Reuß", hist:[12,11,9,8,6,5,3] },
+  { id:"SC-1003", name:"Druckerpapier A4, 500 Blatt", ean:"4009876501234", ist:24, min:10, bestellmenge:30,
+    ort:"Lager Nord · Palette 7", mhd:"—", preis:"4,20 €", quantitaet:"Paket (500 Blatt)", lieferant:"Bürohaus Weiß",
+    status:"ok", verantwortlich:"Jonas Pelz", vertretung:"Lena Sikora", kategorien:["Büro"],
+    entnahme:"12.09.2026 16:02", auffuell:"05.09.2026 11:20", geaendert:"Jonas Pelz", hist:[30,29,28,27,26,25,24] },
+  { id:"SC-1004", name:"Toner schwarz, HL-L8360", ean:"4005550011223", ist:1, min:3, bestellmenge:4,
+    ort:"Serverraum · Schrank 3", mhd:"—", preis:"94,00 €", quantitaet:"Einzelkartusche", lieferant:"Bürohaus Weiß",
+    status:"low", verantwortlich:"Jonas Pelz", vertretung:"Timo Brand", kategorien:["Büro","IT"],
+    entnahme:"11.09.2026 13:31", auffuell:"20.08.2026 08:05", geaendert:"Jonas Pelz", hist:[4,4,3,3,2,2,1] },
+  { id:"SC-1005", name:"Netzwerkkabel Cat 6, 3 m", ean:"4001122334455", ist:38, min:15, bestellmenge:25,
+    ort:"Serverraum · Schrank 3", mhd:"—", preis:"3,80 €", quantitaet:"Einzelkabel", lieferant:"Kabelwerk Süd",
+    status:"ok", verantwortlich:"Timo Brand", vertretung:"Jonas Pelz", kategorien:["IT"],
+    entnahme:"09.09.2026 10:44", auffuell:"02.09.2026 15:00", geaendert:"Timo Brand", hist:[48,46,44,42,41,40,38], aktiv:false },
+  { id:"SC-1006", name:"Handseife Nachfüllbeutel 1 l", ean:"4003344556677", ist:4, min:5, bestellmenge:10,
+    ort:"Keller · Regal A1", mhd:"18.11.2027", preis:"5,60 €", quantitaet:"Beutel 1 l", lieferant:"Hygiene Plus",
+    status:"low", verantwortlich:"Lena Sikora", vertretung:"Anke Reuß, Marie Kohl", kategorien:["Hygiene"],
+    entnahme:"15.09.2026 06:30", auffuell:"28.08.2026 07:45", geaendert:"Lena Sikora", hist:[10,9,8,7,6,5,4] },
+  { id:"SC-1007", name:"Müllbeutel 120 l, Rolle", ean:"4004455667788", ist:12, min:8, bestellmenge:20,
+    ort:"Keller · Regal A1", mhd:"—", preis:"7,10 €", quantitaet:"Rolle (25 Stück)", lieferant:"Hygiene Plus",
+    status:"ok", verantwortlich:"Lena Sikora", vertretung:"Jonas Pelz", kategorien:["Hygiene"],
+    entnahme:"08.09.2026 17:20", auffuell:"03.09.2026 08:30", geaendert:"Lena Sikora", hist:[20,18,17,16,14,13,12] },
+  { id:"SC-1008", name:"HDMI-Kabel 2.1, 2 m", ean:"4005566778899", ist:9, min:6, bestellmenge:12,
+    ort:"Werkstatt · Schublade 12", mhd:"—", preis:"11,40 €", quantitaet:"Einzelkabel", lieferant:"Kabelwerk Süd",
+    status:"ok", verantwortlich:"Timo Brand", vertretung:"Marie Kohl", kategorien:["IT"],
+    entnahme:"10.09.2026 09:05", auffuell:"01.09.2026 14:10", geaendert:"Timo Brand", hist:[14,13,12,11,10,10,9] },
+  { id:"SC-1009", name:"Erste-Hilfe-Set DIN 13157", ean:"4006677889900", ist:2, min:2, bestellmenge:2,
+    ort:"Werkstatt · Wandhalter", mhd:"31.07.2028", preis:"27,50 €", quantitaet:"Koffer", lieferant:"Sicher & Fit GmbH",
+    status:"ok", verantwortlich:"Marie Kohl", vertretung:"Lena Sikora", kategorien:["Sicherheit"],
+    entnahme:"—", auffuell:"14.07.2026 12:00", geaendert:"Marie Kohl", hist:[2,2,2,2,2,2,2], aktiv:false },
+  { id:"SC-1010", name:"Schrauben 4 × 40, Box 200 Stück", ean:"4007788990011", ist:5, min:4, bestellmenge:8,
+    ort:"Werkstatt · Schublade 12", mhd:"—", preis:"6,95 €", quantitaet:"Box (200 Stück)", lieferant:"Eisen Meier",
+    status:"ok", verantwortlich:"Jonas Pelz", vertretung:"Timo Brand", kategorien:["Werkstatt"],
+    entnahme:"05.09.2026 11:11", auffuell:"22.08.2026 16:25", geaendert:"Jonas Pelz", hist:[9,8,8,7,6,6,5] }
+];
+
+const MEMBERS = [
+  { id:"u1", name:"Marie Kohl", email:"m.kohl@internet-gmbh.de", role:"owner", status:"active" },
+  { id:"u2", name:"Timo Brand", email:"t.brand@internet-gmbh.de", role:"manager", status:"active" },
+  { id:"u3", name:"Anke Reuß", email:"a.reuss@internet-gmbh.de", role:"worker", status:"active" },
+  { id:"u4", name:"Jonas Pelz", email:"j.pelz@internet-gmbh.de", role:"worker", status:"active" },
+  { id:"u5", name:"Lena Sikora", email:"l.sikora@internet-gmbh.de", role:"reader", status:"pending" },
+  { id:"u6", name:"Ravi Chandra", email:"r.chandra@internet-gmbh.de", role:"worker", status:"expired" }
+];
+
+const COMPANIES = [
+  { id:"c1", name:"Internet GmbH", admin:"m.kohl@internet-gmbh.de", plan:"Gratis", users:6, items:10, created:"02.03.2026", status:"active" },
+  { id:"c2", name:"Hafenlogistik Bremen", admin:"leitung@hafenlogistik.de", plan:"Gratis", users:14, items:412, created:"19.04.2026", status:"active" },
+  { id:"c3", name:"Klinik Nordlicht", admin:"einkauf@klinik-nordlicht.de", plan:"Gratis", users:31, items:1870, created:"07.05.2026", status:"active" },
+  { id:"c4", name:"Bäckerei Wendt", admin:"kontakt@baeckerei-wendt.de", plan:"Gratis", users:4, items:96, created:"21.06.2026", status:"blocked" },
+  { id:"c5", name:"Maler Lindqvist AB", admin:"info@lindqvist.se", plan:"Gratis", users:8, items:203, created:"30.07.2026", status:"active" },
+  { id:"c6", name:"Schreinerei Voß", admin:"buero@schreinerei-voss.de", plan:"Gratis", users:3, items:58, created:"11.08.2026", status:"active" }
+];
+
+const IMPORT_ROWS = [
+  { col:"Artikelname", field:"Name", check:"ok" },
+  { col:"EAN", field:"EAN", check:"ok" },
+  { col:"Menge", field:"Istbestand", check:"ok" },
+  { col:"Min", field:"Mindestbestand", check:"ok" },
+  { col:"Ort", field:"Lagerort", check:"neu" },
+  { col:"Haltbar bis", field:"MHD", check:"format" },
+  { col:"Zuständig", field:"Verantwortliche Person", check:"ok" }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const start = (props && props.startView) || "Übersicht";
+    this.state = {
+      authed: start !== "Anmeldung",
+      authView: "login",
+      screen: start === "Anmeldung" ? "dashboard" : this.screenKey(start),
+      role: (props && props.demoRole) ? this.roleKey(props.demoRole) : "owner",
+      theme: (props && props.theme) || "Hell",
+      lang: "de",
+      products: SEED.map(p => Object.assign({ aktiv: true }, p)),
+      ccDeputies: true,
+
+      events: [{ id: "E-1", name: "Betriebsfest Werkstatt", datum: "02.10.2026", ort: "Werkstatt & Hof",
+        items: [{ id: "SC-1001", qty: 24 }, { id: "SC-1002", qty: 4 }, { id: "SC-1007", qty: 6 }, { id: "SC-1009", qty: 3 }] }],
+      eventId: "E-1", eventSort: "fehlt",
+      evName: "", evDate: "", evPlace: "", evItems: [], evPick: "SC-1001", evQty: 1,
+      members: MEMBERS.map(m => Object.assign({}, m)),
+      companies: COMPANIES.map(c => Object.assign({}, c)),
+      movements: [
+        { name:"Handseife Nachfüllbeutel 1 l", delta:"−1", who:"Lena Sikora", when:"heute 06:30" },
+        { name:"Kaffeebohnen Hausmischung 1 kg", delta:"−2", who:"Anke Reuß", when:"heute 07:55" },
+        { name:"Mineralwasser still, Kasten", delta:"−3", who:"Timo Brand", when:"gestern 08:12" },
+        { name:"Toner schwarz, HL-L8360", delta:"−1", who:"Jonas Pelz", when:"11.09. 13:31" },
+        { name:"Druckerpapier A4", delta:"+30", who:"Jonas Pelz", when:"05.09. 11:20" },
+        { name:"Netzwerkkabel Cat 6, 3 m", delta:"−4", who:"Timo Brand", when:"02.09. 15:00" }
+      ],
+      currentId: "SC-1001",
+      qty: 1,
+      query: "", place: "", statusFilter: "",
+      mailMode: "now",
+      qrTop: "", qrBottom: "", qrSize: "m", qrQuery: "", showName: true, showId: true,
+      qrPicked: ["SC-1001", "SC-1002", "SC-1004", "SC-1006"],
+      pickedUser: "u3",
+      overrides: {},
+      pw: "", pw2: "",
+      regPw: "", regPw2: "", regBot: false,
+      loginFails: 0,
+      confirmLeft: 900,
+      inviteEmail: "", authEmail: "", authPw: "", regCompany: "",
+      importDone: false,
+      menu: null, burgerOpen: false,
+      live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
+      photoUrl: "", photoFor: null, platformAdmin: false,
+      toast: null
+    };
+  }
+
+  screenKey(label) {
+    return { "Übersicht":"dashboard", "Produkte":"products", "Scannen":"scan", "QR-Codes":"qr",
+      "Produkt anlegen":"new", "Team & Rechte":"team", "Einstellungen":"settings" }[label] || "dashboard";
+  }
+  roleKey(label) {
+    return { "Inhabende Person":"owner", "Lagerleitung":"manager", "Mitarbeitende Person":"worker",
+      "Lesezugriff":"reader", "Betrieb":"super" }[label] || "owner";
+  }
+
+  async connect() {
+    try {
+      const cfg = await import("./config.js");
+      if (cfg.SERVICE_NAME) this.setState({ brand: cfg.SERVICE_NAME });
+      const api = await import("./supabase-client.js");
+      if (!api.configured) return;
+      this.api = api;
+      const sess = await api.session();
+      if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase" }); return; }
+      await this.refresh();
+    } catch (e) { console.warn("StockControl läuft mit Demo-Daten:", e && e.message); }
+  }
+
+  async refresh() {
+    const api = this.api;
+    if (!api) return;
+    try {
+      const profile = await api.myProfile();
+      const d = await api.loadAll();
+      const isAdmin = await api.amPlatformAdmin().catch(() => false);
+      let companies = null;
+      if (isAdmin) {
+        companies = await api.loadCompanies().catch(() => null);
+      }
+      const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status }));
+      const nameOf = id => (members.find(m => m.id === id) || {}).name || "—";
+      const when = t => t ? new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "—";
+      const products = d.products.map(r => ({
+        id: r.id, name: r.name, ean: r.ean || "—", ist: r.ist, min: r.min, bestellmenge: r.bestellmenge,
+        ort: r.ort || "—", mhd: r.mhd || "—", preis: r.preis != null ? Number(r.preis).toFixed(2).replace(".", ",") + " €" : "—",
+        quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", status: r.status, bildKey: r.bild_url || "",
+        verantwortlich: nameOf(r.verantwortlich), vertretung: (r.vertreter || []).map(nameOf).join(", ") || "—",
+        kategorien: r.kategorien || [], entnahme: when(r.entnahme_am), auffuell: when(r.auffuell_am),
+        geaendert: nameOf(r.geaendert_von), aktiv: r.aktiv !== false, hist: [r.ist]
+      }));
+      const movements = d.movements.map(mv => {
+        const p = d.products.find(x => x.id === mv.product_id) || {};
+        return { name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
+      }).slice(0, 6);
+      const events = d.events.map(e => ({
+        id: e.id, name: e.name, datum: e.datum || "—", ort: e.ort || "—",
+        items: (e.event_items || []).map(i => ({ id: i.product_id, qty: i.qty }))
+      }));
+      this.setState(prev => ({
+        live: true, authed: true, source: "Supabase", products, members, events, movements,
+        platformAdmin: isAdmin,
+        companies: companies ? companies.map(c => ({
+          id: c.id, name: c.name, admin: c.admin_email || "—", plan: c.plan === "gratis" ? "Gratis" : c.plan,
+          users: c.users, items: c.items,
+          created: c.created_at ? new Date(c.created_at).toLocaleDateString("de-DE") : "—",
+          status: c.status
+        })) : prev.companies,
+        role: profile ? profile.role : prev.role,
+        meNameLive: profile ? (profile.name || profile.email) : "",
+        companyLive: profile && profile.companies ? profile.companies.name : "",
+        currentId: products.some(p => p.id === prev.currentId) ? prev.currentId : (products[0] ? products[0].id : null),
+        eventId: events.some(e => e.id === prev.eventId) ? prev.eventId : (events[0] ? events[0].id : null),
+        evPick: products.some(p => p.id === prev.evPick) ? prev.evPick : (products[0] ? products[0].id : ""),
+        pickedUser: members.some(m => m.id === prev.pickedUser) ? prev.pickedUser : (members[0] ? members[0].id : null),
+        ccDeputies: d.settings ? d.settings.cc_deputies : prev.ccDeputies,
+        mailMode: d.settings ? d.settings.mail_mode : prev.mailMode
+      }));
+    } catch (e) {
+      this.say("Supabase", this.tr("Laden fehlgeschlagen"), String((e && e.message) || e));
+    }
+  }
+
+  // Bilder liegen in einem privaten Bucket: pro Ansicht eine signierte
+  // Leseadresse holen, die nur für die eigene Firma ausgestellt wird.
+  loadPhoto(productId, force) {
+    if (!this.state.live || !this.api) return;
+    if (!force && this.state.photoFor === productId) return;
+    const p = this.state.products.find(x => x.id === productId);
+    const key = p && p.bildKey;
+    this.setState({ photoFor: productId, photoUrl: "" });
+    if (!key) return;
+    this.api.viewUrl(key)
+      .then(url => { if (this.state.photoFor === productId) this.setState({ photoUrl: url || "" }); })
+      .catch(() => {});
+  }
+
+  remote(call) {
+    if (!this.state.live || !this.api) return false;
+    Promise.resolve(call(this.api))
+      .then(() => this.refresh())
+      .catch(e => this.say("Supabase", this.tr("Nicht gespeichert"), String((e && e.message) || e)));
+    return true;
+  }
+
+  componentDidMount() {
+    this.applyTheme();
+    this.applyLang();
+    this.connect();
+    this.tick = setInterval(() => {
+      if (!this.state.authed && this.state.authView === "confirm" && this.state.confirmLeft > 0) {
+        this.setState(s => ({ confirmLeft: s.confirmLeft - 1 }));
+      }
+    }, 1000);
+    this.mq = window.matchMedia("(prefers-color-scheme: dark)");
+    this.mqL = () => { if (this.state.theme === "System") this.applyTheme(); };
+    this.mq.addEventListener("change", this.mqL);
+  }
+  componentWillUnmount() { clearInterval(this.tick); if (this.mq) this.mq.removeEventListener("change", this.mqL); }
+  componentDidUpdate() {
+    this.applyTheme();
+    this.applyLang();
+    if (this.state.screen === "detail" && this.state.photoFor !== this.state.currentId) {
+      this.loadPhoto(this.state.currentId);
+    }
+  }
+
+  applyTheme() {
+    const t = this.state.theme;
+    const dark = t === "Dunkel" || (t === "System" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.setAttribute("data-sc-theme", dark ? "dark" : "light");
+  }
+
+  applyLang() {
+    const lang = this.state.lang;
+    document.querySelectorAll("[data-i18n]").forEach(n => {
+      if (!n.dataset.i18nSrc) n.dataset.i18nSrc = n.textContent;
+      const src = n.dataset.i18nSrc.trim();
+      const out = lang === "de" ? src : ((DICT[lang] && DICT[lang][src]) || src);
+      if (n.textContent.trim() !== out) n.textContent = out;
+    });
+    document.querySelectorAll("[data-i18n-ph]").forEach(n => {
+      if (!n.dataset.i18nPhSrc) n.dataset.i18nPhSrc = n.getAttribute("placeholder") || "";
+      const src = n.dataset.i18nPhSrc;
+      n.setAttribute("placeholder", lang === "de" ? src : ((PH[lang] && PH[lang][src]) || src));
+    });
+  }
+
+  tr(de) { const l = this.state.lang; return l === "de" ? de : ((DICT[l] && DICT[l][de]) || de); }
+  statusOf(p) { const s = STATUS[p.status]; return { label: s[this.state.lang] || s.de, tag: s.tag }; }
+  say(kicker, title, body) {
+    this.setState({ toast: { kicker, title, body } });
+    clearTimeout(this.toastT);
+    this.toastT = setTimeout(() => this.setState({ toast: null }), 7000);
+  }
+  go(screen) { this.setState({ screen, menu: null, burgerOpen: false }); }
+  groupStyle(keys) {
+    const on = keys.includes(this.state.screen);
+    return "border-color: transparent; background: " + (on ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent") +
+      "; color: " + (on ? "var(--color-accent-700)" : "var(--color-text)") + "; font-size: 14px; gap: 6px";
+  }
+  navStyle(key) {
+    const on = this.state.screen === key;
+    return "justify-content: flex-start; border-color: " + (on ? "var(--color-accent)" : "transparent") +
+      "; background: " + (on ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent") +
+      "; color: " + (on ? "var(--color-accent-700)" : "var(--color-text)") + "; font-size: 14px; width: 100%";
+  }
+  segStyle(on) { return on ? "background: var(--color-accent); color: var(--color-bg)" : ""; }
+
+  qr(seed) {
+    let h = 2166136261;
+    for (const ch of String(seed)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+    const rnd = () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; };
+    const n = 25, g = [];
+    for (let y = 0; y < n; y++) { g.push([]); for (let x = 0; x < n; x++) g[y].push(rnd() > 0.52); }
+    const finder = (ox, oy) => {
+      for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
+        const edge = x === 0 || y === 0 || x === 6 || y === 6;
+        const core = x >= 2 && x <= 4 && y >= 2 && y <= 4;
+        g[oy + y][ox + x] = edge || core;
+      }
+      for (let i = 0; i < 8; i++) {
+        if (oy + 7 < n && ox + i < n) g[oy + 7][ox + i] = false;
+        if (ox + 7 < n && oy + i < n) g[oy + i][ox + 7] = false;
+        if (ox - 1 >= 0 && oy + i < n) g[oy + i][ox - 1] = false;
+        if (oy - 1 >= 0 && ox + i < n) g[oy - 1][ox + i] = false;
+      }
+    };
+    finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+    for (let i = 8; i < n - 8; i++) { g[6][i] = i % 2 === 0; g[i][6] = i % 2 === 0; }
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) {
+      const edge = x === 0 || y === 0 || x === 4 || y === 4;
+      g[n - 7 + y][n - 7 + x] = edge || (x === 2 && y === 2);
+    }
+    const rects = [];
+    for (let y = 0; y < n; y++) {
+      let run = 0;
+      for (let x = 0; x <= n; x++) {
+        const on = x < n && g[y][x];
+        if (on) run++;
+        else if (run) { rects.push(React.createElement("rect", { key: y + "-" + x, x: x - run + 2, y: y + 2, width: run, height: 1 })); run = 0; }
+      }
+    }
+    return rects;
+  }
+  qrEl(seed, px) {
+    return React.createElement("svg", {
+      viewBox: "0 0 29 29", width: px, height: px, shapeRendering: "crispEdges",
+      style: { display: "block", background: "#fff" }
+    }, React.createElement("g", { fill: "#1d1f20" }, this.qr(seed)));
+  }
+
+  chart(input) {
+    const hist = (input && input.length > 1) ? input : [(input && input[0]) || 0, (input && input[0]) || 0];
+    const max = Math.max.apply(null, hist) || 1;
+    const w = 100, h = 34, step = w / (hist.length - 1);
+    const pts = hist.map((v, i) => (i * step).toFixed(1) + "," + (h - (v / max) * (h - 4) - 2).toFixed(1)).join(" ");
+    return React.createElement("svg", { viewBox: "0 0 100 34", preserveAspectRatio: "none", style: { width: "100%", height: "70px", display: "block" } }, [
+      React.createElement("polyline", { key: "l", points: pts, fill: "none", stroke: "var(--color-accent)", strokeWidth: 1.2, vectorEffect: "non-scaling-stroke" }),
+      React.createElement("polyline", { key: "f", points: "0," + h + " " + pts + " " + w + "," + h, fill: "color-mix(in srgb, var(--color-accent) 16%, transparent)", stroke: "none" })
+    ]);
+  }
+
+  pwRules(v) {
+    return [
+      { ok: v.length >= 10, de: "mindestens 10 Zeichen", en: "at least 10 characters", sv: "minst 10 tecken" },
+      { ok: /[A-ZÄÖÜ]/.test(v), de: "ein Großbuchstabe", en: "one uppercase letter", sv: "en stor bokstav" },
+      { ok: /[a-zäöüß]/.test(v), de: "ein Kleinbuchstabe", en: "one lowercase letter", sv: "en liten bokstav" },
+      { ok: /[0-9]/.test(v), de: "eine Zahl", en: "one digit", sv: "en siffra" },
+      { ok: /[^A-Za-z0-9]/.test(v), de: "ein Sonderzeichen", en: "one special character", sv: "ett specialtecken" }
+    ];
+  }
+  rulesFor(v, v2) {
+    const lang = this.state.lang;
+    const dim = "color-mix(in srgb, var(--color-text) 55%, transparent)";
+    const rows = this.pwRules(v).map(r => ({ label: r[lang] || r.de, mark: r.ok ? "✓" : "", color: r.ok ? "var(--color-accent-700)" : dim }));
+    if (v2 !== undefined) {
+      const same = v.length > 0 && v === v2;
+      rows.push({ label: this.tr("Wiederholung stimmt überein"), mark: same ? "✓" : "", color: same ? "var(--color-accent-700)" : dim });
+    }
+    return rows;
+  }
+  meter(v, v2) {
+    const rules = this.pwRules(v);
+    const lang = this.state.lang;
+    const rows = rules.map((r, i) => React.createElement("div", {
+      key: i, style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "12px",
+        color: r.ok ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)" }
+    }, [
+      React.createElement("span", { key: "b", style: { width: "13px", height: "13px", flex: "none", border: "1px solid currentColor",
+        display: "grid", placeItems: "center", fontSize: "9px", lineHeight: 1 } }, r.ok ? "✓" : ""),
+      React.createElement("span", { key: "t" }, r[lang] || r.de)
+    ]));
+    if (v2 !== undefined) {
+      const same = v.length > 0 && v === v2;
+      rows.push(React.createElement("div", { key: "m", style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "12px",
+        color: same ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)" } }, [
+        React.createElement("span", { key: "b", style: { width: "13px", height: "13px", flex: "none", border: "1px solid currentColor",
+          display: "grid", placeItems: "center", fontSize: "9px", lineHeight: 1 } }, same ? "✓" : ""),
+        React.createElement("span", { key: "t" }, this.tr("Wiederholung stimmt überein"))
+      ]));
+    }
+    return React.createElement("div", { style: { display: "flex", flexDirection: "column", gap: "4px", margin: "6px 0" } }, rows);
+  }
+
+  h(tag, style, kids) { return React.createElement(tag, { style }, kids); }
+
+  authPanelEl() {
+    const R = React.createElement;
+    const v = this.state.authView;
+    const label = { fontSize: "12px", marginBottom: "5px", color: "color-mix(in srgb, var(--color-text) 70%, transparent)", display: "block" };
+    const field = (text, input) => R("div", { key: text, className: "field", style: { marginBottom: "10px" } }, [R("label", { key: "l", style: label }, text), input]);
+    const inp = (props) => R("input", Object.assign({ className: "input" }, props));
+
+    if (v === "register") {
+      const ok = this.pwRules(this.state.regPw).every(r => r.ok) && this.state.regPw === this.state.regPw2 && this.state.regBot;
+      return R("div", null, [
+        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Firma registrieren")),
+        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } }, this.tr("Eine Person aus dem Unternehmen legt den Zugang an und schließt das Abo ab. Alle Abos sind derzeit gratis.")),
+        field(this.tr("Firmenname"), inp({ placeholder: "Internet GmbH" })),
+        field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
+        field(this.tr("Passwort"), inp({ type: "password", onInput: e => this.setState({ regPw: e.target.value }) })),
+        field(this.tr("Passwort wiederholen"), inp({ type: "password", onInput: e => this.setState({ regPw2: e.target.value }) })),
+        this.meter(this.state.regPw, this.state.regPw2),
+        R("label", { key: "bot", className: "radio", style: { gap: "9px", margin: "10px 0 4px", fontSize: "13px" } }, [
+          R("input", { key: "i", type: "checkbox", onChange: e => this.setState({ regBot: e.target.checked }),
+            style: { position: "static", width: "16px", height: "16px", opacity: 1, accentColor: "var(--color-accent)" } }),
+          R("span", { key: "s" }, this.tr("Ich bin kein Bot — Prüfung bestanden"))
+        ]),
+        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" }, disabled: !ok,
+          onClick: () => this.setState({ authView: "confirm", confirmLeft: 900 }) }, this.tr("Registrieren und Mail erhalten")),
+        R("div", { key: "n", className: "text-muted", style: { fontSize: "11px", marginTop: "10px" } },
+          this.tr("Abo: Gratis-Tarif, jederzeit kündbar. Später kostenpflichtig — wir melden uns vorher."))
+      ]);
+    }
+
+    if (v === "confirm") {
+      const left = this.state.confirmLeft;
+      const mm = String(Math.floor(left / 60)).padStart(2, "0"), ss = String(left % 60).padStart(2, "0");
+      const dead = left <= 0;
+      return R("div", null, [
+        R("div", { key: "k", className: "card-kicker" }, this.tr("Schritt 2 von 2")),
+        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("E-Mail bestätigen")),
+        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
+          this.tr("Wir haben dir einen Bestätigungslink geschickt. Der Link gilt 15 Minuten — danach verfällt die Registrierung.")),
+        R("div", { key: "t", className: "blueprint", style: { padding: "14px", textAlign: "center", marginBottom: "12px" } }, [
+          R("i", { key: 1, className: "corner tl" }), R("i", { key: 2, className: "corner tr" }),
+          R("i", { key: 3, className: "corner bl" }), R("i", { key: 4, className: "corner br" }),
+          R("div", { key: "c", style: { fontFamily: "var(--font-heading)", fontSize: "34px", lineHeight: 1,
+            color: dead ? "color-mix(in srgb, var(--color-text) 45%, transparent)" : "var(--color-accent)" } }, mm + ":" + ss),
+          R("div", { key: "l", style: { fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase",
+            color: "color-mix(in srgb, var(--color-text) 55%, transparent)" } }, dead ? this.tr("Link verfallen") : this.tr("verbleibende Zeit"))
+        ]),
+        dead
+          ? R("button", { key: "b", className: "btn btn-secondary btn-block", style: { height: "44px" },
+              onClick: () => this.setState({ confirmLeft: 900 }) }, this.tr("Neue Bestätigungsmail anfordern"))
+          : R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
+              onClick: () => { this.setState({ authed: true, screen: "dashboard" }); this.say(this.tr("Registrierung"), this.tr("Firma angelegt"), this.tr("Du kannst jetzt weitere Personen einladen.")); } },
+              this.tr("Link jetzt bestätigen (Demo)"))
+      ]);
+    }
+
+    if (v === "forgot") {
+      return R("div", null, [
+        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Passwort zurücksetzen")),
+        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
+          this.tr("Gib deine E-Mail-Adresse ein. Wir schicken einen Link, der 15 Minuten gültig ist.")),
+        field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
+        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
+          onClick: () => { this.setState({ authView: "login" }); this.say("Brevo", this.tr("Mail ist unterwegs"), this.tr("Der Link gilt 15 Minuten.")); } },
+          this.tr("Link senden")),
+        R("button", { key: "b2", className: "btn btn-ghost btn-block", onClick: () => this.setState({ authView: "login" }) }, this.tr("Zurück zur Anmeldung"))
+      ]);
+    }
+
+    if (v === "invite") {
+      return R("div", null, [
+        R("div", { key: "k", className: "card-kicker" }, this.tr("Einladung von Marie Kohl")),
+        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Zugang einrichten")),
+        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
+          this.tr("Du wurdest zu Internet GmbH eingeladen. Die Einladung läuft in 2 Stunden 41 Minuten ab.")),
+        field(this.tr("Name"), inp({ placeholder: "Anke Reuß" })),
+        field(this.tr("E-Mail-Adresse"), inp({ type: "email", value: "a.reuss@internet-gmbh.de", readOnly: true })),
+        field(this.tr("Passwort"), inp({ type: "password", onInput: e => this.setState({ regPw: e.target.value }) })),
+        this.meter(this.state.regPw),
+        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
+          disabled: !this.pwRules(this.state.regPw).every(r => r.ok),
+          onClick: () => { this.setState({ authed: true, role: "worker", screen: "scan" }); this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die Lagerleitung.")); } },
+          this.tr("Zugang aktivieren"))
+      ]);
+    }
+
+    const locked = this.state.loginFails >= 5;
+    return R("div", null, [
+      R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Anmelden")),
+      R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } }, this.tr("Zugang zum Lager deiner Firma.")),
+      field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
+      field(this.tr("Passwort"), inp({ type: "password" })),
+      locked ? R("div", { key: "w", className: "blueprint", style: { padding: "10px 12px", marginBottom: "10px", fontSize: "12.5px",
+        background: "color-mix(in srgb, var(--color-accent) 12%, transparent)" } }, [
+          R("i", { key: 1, className: "corner tl" }), R("i", { key: 2, className: "corner tr" }),
+          R("i", { key: 3, className: "corner bl" }), R("i", { key: 4, className: "corner br" }),
+          this.tr("Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.")
+        ]) : null,
+      R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" }, disabled: locked,
+        onClick: () => { this.setState({ authed: true, screen: "dashboard" }); } }, this.tr("Anmelden")),
+      R("div", { key: "r", style: { display: "flex", justifyContent: "space-between", gap: "8px", marginTop: "10px", flexWrap: "wrap" } }, [
+        R("button", { key: "f", className: "btn btn-ghost", style: { padding: 0 }, onClick: () => this.setState({ authView: "forgot" }) }, this.tr("Passwort vergessen?")),
+        R("button", { key: "x", className: "btn btn-ghost", style: { padding: 0 },
+          onClick: () => this.setState(s => ({ loginFails: s.loginFails + 1 })) }, this.tr("Fehlversuch simulieren") + " (" + this.state.loginFails + "/5)")
+      ])
+    ]);
+  }
+
+  renderVals() {
+    const st = this.state, lang = st.lang;
+    const name = st.brand || this.props.serviceName || "StockControl";
+    const products = st.products;
+    const EMPTY_PRODUCT = { id: "—", name: "—", ean: "—", ist: 0, min: 0, bestellmenge: 0, ort: "—", mhd: "—",
+      preis: "—", quantitaet: "—", lieferant: "—", status: "ok", verantwortlich: "—", vertretung: "—",
+      kategorien: [], entnahme: "—", auffuell: "—", geaendert: "—", aktiv: true, hist: [0], bildUrl: "" };
+    const cur = products.find(p => p.id === st.currentId) || products[0] || EMPTY_PRODUCT;
+    const places = Array.from(new Set(products.filter(p => p.aktiv !== false).map(p => p.ort)));
+    const q = st.query.toLowerCase();
+
+    const meLabel = st.meNameLive || (st.role === "super" ? "Internet GmbH · Betrieb" : "Marie Kohl");
+    const mine = p => p.verantwortlich === meLabel || String(p.vertretung || "").includes(meLabel);
+    const visible = p => p.aktiv !== false || mine(p);
+    const activeProducts = products.filter(p => p.aktiv !== false);
+
+    const deco = p => {
+      const s = this.statusOf(p);
+      const off = p.aktiv === false;
+      return Object.assign({}, p, {
+        statusLabel: off ? this.tr("Deaktiviert") : s.label,
+        tagClass: off ? "tag tag-outline" : s.tag,
+        rowStyle: off ? "opacity: .45" : "",
+        kategorien: p.kategorien,
+        open: () => this.setState({ currentId: p.id, screen: "detail", qty: 1 })
+      });
+    };
+
+    const filtered = products.filter(p => visible(p) &&
+      (!q || (p.name + " " + p.ean + " " + p.lieferant).toLowerCase().includes(q)) &&
+      (!st.place || p.ort === st.place) &&
+      (!st.statusFilter || p.status === st.statusFilter)
+    ).sort((a, b) => (a.aktiv === false ? 1 : 0) - (b.aktiv === false ? 1 : 0)).map(deco);
+
+    const low = activeProducts.filter(p => p.status === "low" || p.status === "ordered");
+    const orderList = low.map(p => {
+      const s = this.statusOf(p);
+      return Object.assign({}, p, {
+        statusLabel: s.label, tagClass: s.tag,
+        action: p.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Als bestellt markieren"),
+        toggleOrdered: () => {
+          const next = p.status === "ordered" ? "low" : "ordered";
+          this.setState(prev => ({ products: prev.products.map(x => x.id === p.id ? Object.assign({}, x, { status: next, geaendert: meLabel }) : x) }));
+          this.remote(api => api.updateProduct(p.id, { status: next }));
+        }
+      });
+    });
+
+    const mailLabels = {
+      now: { de: "Sofort bei jeder Unterschreitung", en: "Immediately, every time", sv: "Direkt, varje gång" },
+      day: { de: "Täglich 07:30, gesammelt", en: "Daily 07:30, collected", sv: "Dagligen 07:30, samlat" },
+      week: { de: "Montags 07:30, gesammelt", en: "Mondays 07:30, collected", sv: "Måndagar 07:30, samlat" },
+      month: { de: "Am 1. um 07:30, gesammelt", en: "On the 1st at 07:30, collected", sv: "Den 1:a 07:30, samlat" }
+    };
+
+    const FALLBACK_USER = { id: null, name: "—", email: "", role: "reader", status: "active" };
+    const picked = st.members.find(m => m.id === st.pickedUser) || st.members[0] || FALLBACK_USER;
+    const permsFor = () => {
+      const u = picked;
+      const ov = st.overrides[u.id] || {};
+      return PERM_LIST.map(([key, label, roles]) => {
+        const base = roles.includes(u.role);
+        const on = ov[key] === undefined ? base : ov[key];
+        return {
+          label: this.tr(label), on,
+          toggle: () => this.setState(prev => {
+            const next = Object.assign({}, prev.overrides);
+            next[u.id] = Object.assign({}, next[u.id] || {});
+            next[u.id][key] = !on;
+            return { overrides: next };
+          })
+        };
+      });
+    };
+
+    const qrPx = { s: 96, m: 120, l: 150 }[st.qrSize];
+    const qrSheet = products.filter(p => st.qrPicked.includes(p.id)).map(p => ({
+      name: p.name, id: p.id, top: st.qrTop, bottom: st.qrBottom, svg: this.qrEl(p.id + p.ean, qrPx),
+      withName: st.showName, withId: st.showId
+    }));
+    const qq = st.qrQuery.toLowerCase();
+
+    const ev = st.events.find(e => e.id === st.eventId) || st.events[0];
+    const evRow = (it) => {
+      const p = products.find(x => x.id === it.id);
+      if (!p) return null;
+      const fehlt = Math.max(0, it.qty - p.ist);
+      return { id: p.id, name: p.name, lieferant: p.lieferant, ort: p.ort, preis: p.preis,
+        benoetigt: it.qty, bestand: p.ist, fehlt: fehlt,
+        tagClass: fehlt > 0 ? "tag tag-outline" : "tag tag-neutral",
+        statusLabel: fehlt > 0 ? this.tr("nachbestellen") : this.tr("vorhanden"),
+        rowStyle: p.aktiv === false ? "opacity: .55" : "",
+        offLabel: p.aktiv === false ? this.tr("deaktiviert") : "" };
+    };
+    const sortRows = rows => rows.slice().sort((a, b) => {
+      if (st.eventSort === "name") return a.name.localeCompare(b.name);
+      if (st.eventSort === "lieferant") return a.lieferant.localeCompare(b.lieferant) || a.name.localeCompare(b.name);
+      if (st.eventSort === "ort") return a.ort.localeCompare(b.ort) || a.name.localeCompare(b.name);
+      return b.fehlt - a.fehlt || a.name.localeCompare(b.name);
+    });
+    const evRows = ev ? sortRows(ev.items.map(evRow).filter(Boolean)) : [];
+    const sortMark = key => st.eventSort === key ? " ↓" : "";
+
+    const setSel = (key) => (e) => this.setState({ [key]: e.target.value });
+
+    return {
+      serviceName: name,
+      authed: st.authed, inAuth: !st.authed,
+      lang, role: st.role, isSuper: st.live ? st.platformAdmin : st.role === "super",
+      adminLive: st.live && st.platformAdmin,
+      adminDemo: !st.live,
+      roleLabel: (ROLES[st.role] || ROLES.owner)[lang] || ROLES.owner.de,
+      meName: meLabel,
+      companyName: st.companyLive || (st.role === "super" ? "Betriebszugang" : "Internet GmbH"),
+      sourceLabel: st.source,
+      sourceTagClass: st.live ? "tag tag-accent" : "tag tag-neutral",
+
+      screenTitle: {
+        dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
+        events: this.tr("Events"),
+        new: this.tr("Produkt anlegen"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
+        settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole")
+      }[st.screen],
+      onDashboard: st.screen === "dashboard", onProducts: st.screen === "products", onDetail: st.screen === "detail",
+      onScan: st.screen === "scan", onNew: st.screen === "new", onQr: st.screen === "qr",
+      onTeam: st.screen === "team", onSettings: st.screen === "settings", onAdmin: st.screen === "admin",
+
+      navDashboard: this.navStyle("dashboard"), navProducts: this.navStyle("products"), navScan: this.navStyle("scan"),
+      navNew: this.navStyle("new"), navQr: this.navStyle("qr"), navTeam: this.navStyle("team"),
+      navSettings: this.navStyle("settings"), navAdmin: this.navStyle("admin"),
+      navImport: this.navStyle("import"),
+      grpLager: this.groupStyle(["dashboard", "products", "scan", "detail"]),
+      grpStamm: this.groupStyle(["new", "qr"]),
+      grpVerw: this.groupStyle(["team", "settings", "admin"]),
+      menuLager: st.menu === "lager", menuStamm: st.menu === "stamm",
+      menuVerw: st.menu === "verw", menuUser: st.menu === "user",
+      hoverLager: () => this.setState({ menu: "lager" }), hoverStamm: () => this.setState({ menu: "stamm" }),
+      hoverVerw: () => this.setState({ menu: "verw" }), hoverUser: () => this.setState({ menu: "user" }),
+      closeMenu: () => this.setState({ menu: null }),
+      toggleLager: () => this.setState(s => ({ menu: s.menu === "lager" ? null : "lager" })),
+      toggleStamm: () => this.setState(s => ({ menu: s.menu === "stamm" ? null : "stamm" })),
+      toggleVerw: () => this.setState(s => ({ menu: s.menu === "verw" ? null : "verw" })),
+      toggleUser: () => this.setState(s => ({ menu: s.menu === "user" ? null : "user" })),
+      burgerOpen: st.burgerOpen,
+      toggleBurger: () => this.setState(s => ({ burgerOpen: !s.burgerOpen, menu: null })),
+      meInitials: st.role === "super" ? "IG" : "MK",
+      goDashboard: () => this.go("dashboard"), goProducts: () => this.go("products"), goScan: () => this.go("scan"),
+      goNew: () => this.go("new"), goQr: () => this.go("qr"), goTeam: () => this.go("team"),
+      goSettings: () => this.go("settings"), goAdmin: () => this.go("admin"),
+      logout: () => {
+        if (st.live && this.api) this.api.signOut().catch(() => {});
+        this.setState({ authed: false, authView: "login", menu: null });
+      },
+
+      segLight: this.segStyle(st.theme === "Hell"), segDark: this.segStyle(st.theme === "Dunkel"), segSystem: this.segStyle(st.theme === "System"),
+      setLight: () => this.setState({ theme: "Hell" }), setDark: () => this.setState({ theme: "Dunkel" }), setSystem: () => this.setState({ theme: "System" }),
+      setLang: setSel("lang"), setRole: setSel("role"),
+
+      kpiTotal: activeProducts.length, kpiLocations: places.length,
+      kpiLow: activeProducts.filter(p => p.status === "low").length,
+      kpiOrdered: activeProducts.filter(p => p.status === "ordered").length,
+      kpiToday: 3,
+      mailModeLabel: mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de,
+      orderList, movements: st.movements,
+
+      places, filtered, filteredCount: filtered.length,
+      visibleTotal: products.filter(visible).length,
+      inactiveVisible: products.filter(p => p.aktiv === false && visible(p)).length,
+      setQuery: e => this.setState({ query: e.target.value }),
+      setPlace: setSel("place"), setStatus: setSel("statusFilter"),
+
+      photoUrl: st.photoUrl,
+      current: Object.assign({}, cur, {
+        statusLabel: this.statusOf(cur).label, tagClass: this.statusOf(cur).tag,
+        linkLabel: this.tr("Beim Lieferanten öffnen"),
+        link: "https://example.com/" + cur.id.toLowerCase(),
+        qr: this.qrEl(cur.id + cur.ean, 110),
+        chart: this.chart(cur.hist)
+      }),
+      qty: st.qty,
+      inc: () => this.setState(s => ({ qty: s.qty + 1 })),
+      dec: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
+      setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n }); },
+      withdraw: () => {
+        const next = Math.max(0, cur.ist - st.qty);
+        const under = next < cur.min;
+        this.setState(prev => ({
+          qty: 1,
+          products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
+            ist: next, status: under ? (p.status === "ordered" ? "ordered" : "low") : "ok",
+            entnahme: "15.09.2026 · jetzt", geaendert: this.state.role === "super" ? "Betrieb" : "Marie Kohl"
+          }) : p),
+          movements: [{ name: cur.name, delta: "−" + st.qty, who: "Marie Kohl", when: this.tr("gerade eben") }].concat(prev.movements).slice(0, 6)
+        }));
+        this.remote(api => api.bookMovement({ productId: cur.id, delta: -st.qty, note: "Entnahme" }));
+        if (under && st.mailMode === "now") {
+          this.say("Brevo", this.tr("Mail an ") + cur.verantwortlich,
+            (st.ccDeputies ? this.tr("CC: ") + cur.vertretung : this.tr("ohne CC an Stellvertretung")) + " · " + this.tr("Bestand ") + next + " " + this.tr("unter Mindestbestand ") + cur.min);
+        } else if (under) {
+          this.say(this.tr("Bestellliste"), this.tr("Artikel vermerkt"), this.tr("Sammelmail: ") + (mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de));
+        } else {
+          this.say(this.tr("Entnahme"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next);
+        }
+      },
+      refill: () => {
+        const next = cur.ist + st.qty;
+        this.setState(prev => ({
+          qty: 1,
+          products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
+            ist: next, status: next < p.min ? "low" : "ok", auffuell: "15.09.2026 · jetzt", geaendert: "Marie Kohl"
+          }) : p),
+          movements: [{ name: cur.name, delta: "+" + st.qty, who: "Marie Kohl", when: this.tr("gerade eben") }].concat(prev.movements).slice(0, 6)
+        }));
+        this.remote(api => api.bookMovement({ productId: cur.id, delta: st.qty, note: "Nachfüllung" }));
+        this.say(this.tr("Nachfüllung"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next + " · " + this.tr("Status zurückgesetzt"));
+      },
+      hasPhoto: !!st.photoUrl, noPhoto: !st.photoUrl,
+      storageLabel: st.live ? this.tr("R2 · privat, signierter Zugriff") : this.tr("Demo: lokal ablegen"),
+      uploadPhoto: e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (!st.live || !this.api) { this.say(this.tr("Bild"), this.tr("Demo-Modus"), this.tr("Mit verbundenem R2 landet die Datei im Bucket der Firma.")); return; }
+        this.say("Cloudflare R2", this.tr("Wird hochgeladen"), file.name);
+        this.api.setProductImage(cur.id, file)
+          .then(() => { this.refresh(); this.loadPhoto(cur.id, true); this.say("Cloudflare R2", this.tr("Bild gespeichert"), file.name); })
+          .catch(err => this.say("Cloudflare R2", this.tr("Upload fehlgeschlagen"), String((err && err.message) || err)));
+      },
+      bookingOff: cur.aktiv === false,
+      isInactive: cur.aktiv === false,
+      activeBtnLabel: cur.aktiv === false ? this.tr("Produkt wieder aktivieren") : this.tr("Produkt deaktivieren"),
+      toggleActive: () => {
+        const off = cur.aktiv !== false;
+        this.setState(prev => ({ products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, { aktiv: !off }) : p) }));
+        this.remote(api => api.updateProduct(cur.id, { aktiv: !off }));
+        this.say(this.tr("Produkt"), off ? this.tr("Deaktiviert") : this.tr("Wieder aktiv"),
+          off ? this.tr("Keine Mails, kein Tracking. Sichtbar nur für Verantwortliche und Stellvertretung.") : this.tr("Benachrichtigungen und Bestandsverlauf laufen wieder."));
+      },
+      contacts: st.members.map(m => ({ name: m.name, email: m.email, label: m.name + " · " + m.email })),
+      ccDeputies: st.ccDeputies,
+      segCcOn: this.segStyle(st.ccDeputies), segCcOff: this.segStyle(!st.ccDeputies),
+      setCcOn: () => { this.setState({ ccDeputies: true }); this.remote(api => api.saveSettings({ cc_deputies: true })); },
+      setCcOff: () => { this.setState({ ccDeputies: false }); this.remote(api => api.saveSettings({ cc_deputies: false })); },
+
+      onEvents: st.screen === "events",
+      navEvents: this.navStyle("events"), goEvents: () => this.go("events"),
+      events: st.events.map(e => ({
+        id: e.id, name: e.name, meta: e.datum + " · " + e.ort, count: e.items.length + " " + this.tr("Positionen"),
+        style: e.id === st.eventId ? "border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent)" : "",
+        pick: () => this.setState({ eventId: e.id })
+      })),
+      hasEvent: !!ev,
+      eventName: ev ? ev.name : "—", eventMeta: ev ? (ev.datum + " · " + ev.ort) : "",
+      evRows: evRows,
+      evMissingTotal: evRows.filter(r => r.fehlt > 0).length,
+      evPosTotal: evRows.length,
+      sortByName: () => this.setState({ eventSort: "name" }),
+      sortBySupplier: () => this.setState({ eventSort: "lieferant" }),
+      sortByPlace: () => this.setState({ eventSort: "ort" }),
+      sortByMissing: () => this.setState({ eventSort: "fehlt" }),
+      thName: this.tr("Artikel") + sortMark("name"), thSupplier: this.tr("Lieferant") + sortMark("lieferant"),
+      thPlace: this.tr("Lagerort") + sortMark("ort"), thMissing: this.tr("Fehlt") + sortMark("fehlt"),
+      evProducts: products.map(p => ({ id: p.id, label: p.aktiv === false ? p.name + " (" + this.tr("deaktiviert") + ")" : p.name })),
+      evName: st.evName, evDate: st.evDate, evPlace: st.evPlace, evQty: st.evQty, evPick: st.evPick,
+      setEvName: e => this.setState({ evName: e.target.value }),
+      setEvDate: e => this.setState({ evDate: e.target.value }),
+      setEvPlace: e => this.setState({ evPlace: e.target.value }),
+      setEvPick: e => this.setState({ evPick: e.target.value }),
+      setEvQty: e => { const n = parseInt(e.target.value, 10); this.setState({ evQty: isNaN(n) || n < 1 ? 1 : n }); },
+      evDraft: st.evItems.map((it, i) => {
+        const p = products.find(x => x.id === it.id) || { name: it.id };
+        return { name: p.name, qty: it.qty, remove: () => this.setState(prev => ({ evItems: prev.evItems.filter((_, j) => j !== i) })) };
+      }),
+      hasDraft: st.evItems.length > 0,
+      addEvItem: () => this.setState(prev => {
+        const found = prev.evItems.find(i => i.id === prev.evPick);
+        return { evItems: found ? prev.evItems.map(i => i.id === prev.evPick ? { id: i.id, qty: i.qty + prev.evQty } : i) : prev.evItems.concat({ id: prev.evPick, qty: prev.evQty }), evQty: 1 };
+      }),
+      createEvent: () => {
+        if (!st.evItems.length) { this.say(this.tr("Event"), this.tr("Noch keine Artikel"), this.tr("Erst Artikel und Mengen hinzufügen.")); return; }
+        this.remote(api => api.createEvent({ name: st.evName, datum: st.evDate || null, ort: st.evPlace, items: st.evItems }));
+        const id = "E-" + (st.events.length + 1);
+        this.setState(prev => ({
+          events: prev.events.concat({ id: id, name: prev.evName || this.tr("Neues Event"), datum: prev.evDate || "—", ort: prev.evPlace || "—", items: prev.evItems }),
+          eventId: id, evName: "", evDate: "", evPlace: "", evItems: []
+        }));
+        this.say(this.tr("Event"), this.tr("Bedarfsliste erstellt"), st.evItems.length + " " + this.tr("Positionen") + " · " + this.tr("Fehlmengen berechnet"));
+      },
+      exportEventList: () => this.say("Export", this.tr("Bedarfsliste exportiert"), (ev ? ev.name : "") + " · Excel (.xlsx)"),
+
+      canOrder: cur.status === "low" || cur.status === "ordered",
+      orderBtnLabel: cur.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Status: ist bestellt"),
+      markOrdered: () => {
+        const next = cur.status === "ordered" ? "low" : "ordered";
+        this.setState(prev => ({ products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, { status: next }) : p) }));
+        this.remote(api => api.updateProduct(cur.id, { status: next }));
+      },
+      exportHistoryCsv: () => this.say("Export", this.tr("Bestandsverlauf exportiert"), cur.name + " · Excel (.xlsx)"),
+      exportOrderCsv: () => this.say("Export", this.tr("Bestellliste exportiert"), orderList.length + " " + this.tr("Positionen") + " · Excel (.xlsx)"),
+      printPage: () => window.print(),
+
+      scanTargets: products.slice(0, 3).map(p => ({
+        label: p.id + " · " + p.name.split(",")[0],
+        open: () => this.setState({ currentId: p.id, screen: "detail", qty: 1 })
+      })),
+
+      importDone: st.importDone,
+      importRows: IMPORT_ROWS.map(r => ({
+        col: r.col, field: this.tr(r.field),
+        check: { ok: this.tr("erkannt"), neu: this.tr("neuer Lagerort"), format: this.tr("Datum wird konvertiert") }[r.check],
+        tagClass: r.check === "ok" ? "tag tag-neutral" : "tag tag-outline"
+      })),
+      importBtnLabel: this.tr("48 Produkte importieren"),
+      simulateImport: () => this.setState({ importDone: true }),
+      runImport: () => { this.setState({ importDone: false }); this.go("products"); this.say("Import", this.tr("48 Produkte importiert"), this.tr("2 Zeilen übersprungen — EAN doppelt.")); },
+      downloadTemplate: () => this.say("Excel", this.tr("Vorlage erstellt"), this.tr("Eine Spalte pro Feld, inklusive eigener Kategorien.")),
+      createProduct: () => { this.go("products"); this.say(this.tr("Produkt"), this.tr("Gespeichert"), this.tr("QR-Code wurde automatisch erzeugt.")); },
+
+      qrPickList: products.filter(p => !qq || (p.name + " " + p.ean + " " + p.ort).toLowerCase().includes(qq)).map(p => {
+        const on = st.qrPicked.includes(p.id);
+        return {
+          name: p.name, meta: p.id + " · " + p.ort, checked: on,
+          rowBg: on ? "color-mix(in srgb, var(--color-accent) 12%, transparent)" : "transparent",
+          toggle: () => this.setState(prev => ({
+            qrPicked: prev.qrPicked.includes(p.id) ? prev.qrPicked.filter(x => x !== p.id) : prev.qrPicked.concat(p.id)
+          }))
+        };
+      }),
+      qrCountLabel: st.qrPicked.length + " " + this.tr("von") + " " + products.length + " " + this.tr("ausgewählt"),
+      setQrQuery: e => this.setState({ qrQuery: e.target.value }),
+      showName: st.showName, showId: st.showId,
+      toggleShowName: e => this.setState({ showName: e.target.checked }),
+      toggleShowId: e => this.setState({ showId: e.target.checked }),
+      qrSheet,
+      selectAllLabel: st.qrPicked.length === products.length ? this.tr("Auswahl leeren") : this.tr("Alle auswählen"),
+      selectAllQr: () => this.setState(prev => ({ qrPicked: prev.qrPicked.length === products.length ? [] : products.map(p => p.id) })),
+      setQrTop: e => this.setState({ qrTop: e.target.value }),
+      setQrBottom: e => this.setState({ qrBottom: e.target.value }),
+      qrSize: st.qrSize, setQrSize: setSel("qrSize"),
+
+      members: st.members.map(u => {
+        const s = { active: { de: "Aktiv", en: "Active", sv: "Aktiv", tag: "tag tag-neutral" },
+          pending: { de: "Einladung offen", en: "Invitation pending", sv: "Inbjudan väntar", tag: "tag tag-accent" },
+          blocked: { de: "Gesperrt", en: "Blocked", sv: "Blockerad", tag: "tag tag-outline" },
+          expired: { de: "Einladung abgelaufen", en: "Invitation expired", sv: "Inbjudan utgången", tag: "tag tag-outline" } }[u.status];
+        return Object.assign({}, u, {
+          statusLabel: s[lang] || s.de, tagClass: s.tag,
+          pick: () => this.setState({ pickedUser: u.id }),
+          setRole: e => { const val = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === u.id ? Object.assign({}, m, { role: val }) : m) })); }
+        });
+      }),
+      pickedName: picked.name, pickedNameVal: picked.name, pickedEmail: picked.email, pickedRole: picked.role,
+      cannotManage: st.role !== "owner",
+      blockMemberLabel: picked.status === "blocked" ? this.tr("Entsperren") : this.tr("Zugang sperren"),
+      setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remote(api => api.updateMember(picked.id, { name: v })); },
+      setPickedEmail: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { email: v }) : m) })); this.remote(api => api.updateMember(picked.id, { email: v })); },
+      setPickedRole: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { role: v }) : m) })); this.remote(api => api.updateMember(picked.id, { role: v })); },
+      toggleBlockMember: () => {
+        const next = picked.status === "blocked" ? "active" : "blocked";
+        this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { status: next }) : m) }));
+        this.remote(api => api.updateMember(picked.id, { status: next }));
+      },
+      removeMember: () => {
+        const u = picked;
+        this.setState(prev => {
+          const rest = prev.members.filter(m => m.id !== prev.pickedUser);
+          return { members: rest, pickedUser: rest.length ? rest[0].id : null };
+        });
+        this.say(this.tr("Team"), this.tr("Person entfernt"), u.name + " · " + this.tr("Zugang sofort gesperrt, Buchungen bleiben im Verlauf"));
+      },
+      perms: permsFor(),
+      allowAll: () => this.setState(prev => {
+        const next = Object.assign({}, prev.overrides); const o = {};
+        PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next };
+      }),
+      denyAll: () => this.setState(prev => {
+        const next = Object.assign({}, prev.overrides); const o = {};
+        PERM_LIST.forEach(([k]) => o[k] = false); next[prev.pickedUser] = o; return { overrides: next };
+      }),
+      setInvite: e => this.setState({ inviteEmail: e.target.value }),
+      sendInvite: () => {
+        this.remote(api => api.inviteMember({ email: st.inviteEmail, role: "worker" }));
+        this.say("Brevo", this.tr("Einladung gesendet"), (st.inviteEmail || "name@internet-gmbh.de") + " · " + this.tr("gültig 3 Stunden"));
+      },
+
+      setMailNow: () => { this.setState({ mailMode: "now" }); this.remote(api => api.saveSettings({ mail_mode: "now" })); },
+      setMailDay: () => { this.setState({ mailMode: "day" }); this.remote(api => api.saveSettings({ mail_mode: "day" })); },
+      setMailWeek: () => { this.setState({ mailMode: "week" }); this.remote(api => api.saveSettings({ mail_mode: "week" })); },
+      setMailMonth: () => { this.setState({ mailMode: "month" }); this.remote(api => api.saveSettings({ mail_mode: "month" })); },
+      setPw: e => this.setState({ pw: e.target.value }), setPw2: e => this.setState({ pw2: e.target.value }),
+      pwRulesList: this.rulesFor(st.pw, st.pw2),
+      savePassword: () => {
+        if (st.live && this.api) this.api.updatePassword(st.pw).catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
+        this.say(this.tr("Profil"), this.tr("Passwort geändert"), this.tr("Alle anderen Sitzungen wurden abgemeldet."));
+      },
+
+      companies: st.companies.map(c => {
+        const s = c.status === "blocked"
+          ? { de: "Gesperrt", en: "Blocked", sv: "Blockerad", tag: "tag tag-outline" }
+          : { de: "Aktiv", en: "Active", sv: "Aktiv", tag: "tag tag-neutral" };
+        return Object.assign({}, c, {
+          statusLabel: s[lang] || s.de, tagClass: s.tag,
+          blockLabel: c.status === "blocked" ? this.tr("Entsperren") : this.tr("Sperren"),
+          toggleBlock: () => {
+            const next = c.status === "blocked" ? "active" : "blocked";
+            this.setState(prev => ({ companies: prev.companies.map(x => x.id === c.id ? Object.assign({}, x, { status: next }) : x) }));
+            this.remote(api => api.setCompanyStatus(c.id, next));
+          },
+          resetPw: () => {
+            if (st.live && this.api) this.api.requestPasswordReset(c.admin).catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
+            this.say("Brevo", this.tr("Passwort-Mail gesendet"), c.admin);
+          },
+          remove: () => {
+            this.setState(prev => ({ companies: prev.companies.filter(x => x.id !== c.id) }));
+            this.remote(api => api.deleteCompany(c.id));
+            this.say(this.tr("Betrieb"), this.tr("Firma gelöscht"), c.name + " · " + this.tr("Firma, Personen, Produkte und Verlauf entfernt"));
+          }
+        });
+      }),
+
+      authIsLogin: st.authView === "login", authIsRegister: st.authView === "register",
+      authIsConfirm: st.authView === "confirm", authIsForgot: st.authView === "forgot",
+      authIsInvite: st.authView === "invite",
+      locked: st.loginFails >= 5,
+      failLabel: this.tr("Fehlversuch simulieren") + " (" + st.loginFails + "/5)",
+      addFail: () => this.setState(s => ({ loginFails: s.loginFails + 1 })),
+      authEmail: st.authEmail, authPw: st.authPw,
+      setAuthEmail: e => this.setState({ authEmail: e.target.value }),
+      setAuthPw: e => this.setState({ authPw: e.target.value }),
+      setRegCompany: e => this.setState({ regCompany: e.target.value }),
+      doLogin: () => {
+        if (st.live && this.api) {
+          this.api.signIn({ email: st.authEmail, password: st.authPw })
+            .then(() => this.refresh())
+            .catch(err => {
+              this.setState(s => ({ loginFails: s.loginFails + 1 }));
+              this.say("Supabase", this.tr("Anmeldung fehlgeschlagen"), String((err && err.message) || err));
+            });
+          return;
+        }
+        this.setState({ authed: true, screen: "dashboard" });
+      },
+      viewForgot: () => this.setState({ authView: "forgot" }),
+      sendReset: () => {
+        if (st.live && this.api) this.api.requestPasswordReset(st.authEmail).catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
+        this.setState({ authView: "login" });
+        this.say("Brevo", this.tr("Mail ist unterwegs"), this.tr("Der Link gilt 15 Minuten."));
+      },
+      setRegPw: e => this.setState({ regPw: e.target.value }),
+      setRegPw2: e => this.setState({ regPw2: e.target.value }),
+      setBot: e => this.setState({ regBot: e.target.checked }),
+      regRules: this.rulesFor(st.regPw, st.regPw2),
+      inviteRules: this.rulesFor(st.regPw),
+      regDisabled: !(this.pwRules(st.regPw).every(r => r.ok) && st.regPw === st.regPw2 && st.regBot),
+      inviteDisabled: !this.pwRules(st.regPw).every(r => r.ok),
+      doRegister: () => {
+        if (st.live && this.api) {
+          this.api.signUpCompany({ email: st.authEmail, password: st.regPw, companyName: st.regCompany })
+            .catch(err => this.say("Supabase", this.tr("Registrierung fehlgeschlagen"), String((err && err.message) || err)));
+        }
+        this.setState({ authView: "confirm", confirmLeft: 900 });
+      },
+      clock: String(Math.floor(st.confirmLeft / 60)).padStart(2, "0") + ":" + String(st.confirmLeft % 60).padStart(2, "0"),
+      clockColor: st.confirmLeft > 0 ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 45%, transparent)",
+      clockLabel: st.confirmLeft > 0 ? this.tr("verbleibende Zeit") : this.tr("Link verfallen"),
+      linkAlive: st.confirmLeft > 0, linkDead: st.confirmLeft <= 0,
+      resetClock: () => this.setState({ confirmLeft: 900 }),
+      doConfirm: () => { this.setState({ authed: true, screen: "dashboard" }); this.say(this.tr("Registrierung"), this.tr("Firma angelegt"), this.tr("Du kannst jetzt weitere Personen einladen.")); },
+      doInvite: () => { this.setState({ authed: true, role: "worker", screen: "scan" }); this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person.")); },
+      viewLogin: () => this.setState({ authView: "login" }),
+      viewRegister: () => this.setState({ authView: "register" }),
+      viewInvite: () => this.setState({ authView: "invite" }),
+      segLogin: this.segStyle(st.authView === "login" || st.authView === "forgot"),
+      segRegister: this.segStyle(st.authView === "register" || st.authView === "confirm"),
+      segInvite: this.segStyle(st.authView === "invite"),
+
+      hasToast: !!st.toast,
+      toastKicker: st.toast ? st.toast.kicker : "",
+      toastTitle: st.toast ? st.toast.title : "",
+      toastBody: st.toast ? st.toast.body : "",
+      closeToast: () => this.setState({ toast: null })
+    };
+  }
+}
+</script>
+</body>
+</html>
