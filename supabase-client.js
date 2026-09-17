@@ -25,18 +25,62 @@ function ok(res) {
 
 /* ── Konten ─────────────────────────────────────────────── */
 
-export async function signUpCompany({ email, password, companyName }) {
+export async function signUpCompany({ email, password, companyName, captchaToken }) {
   const sb = await client();
   // company_name landet in den Metadaten; der Trigger legt Firma + Profil an.
+  // captchaToken kommt von Cloudflare Turnstile — Supabase prüft ihn serverseitig,
+  // wenn unter Authentication → Attack Protection der Captcha-Schutz aktiv ist.
   return ok(await sb.auth.signUp({
     email, password,
-    options: { data: { company_name: companyName }, emailRedirectTo: location.origin + location.pathname }
+    options: { data: { company_name: companyName }, captchaToken, emailRedirectTo: location.origin + location.pathname }
   }));
 }
 
-export async function signIn({ email, password }) {
+export async function signIn({ email, password, captchaToken }) {
   const sb = await client();
-  return ok(await sb.auth.signInWithPassword({ email, password }));
+  const res = await sb.auth.signInWithPassword({ email, password, options: { captchaToken } });
+  if (res.error) throw res.error;
+  // Steht für dieses Konto ein zweiter Faktor an, meldet Supabase aal1 statt aal2.
+  const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+    const { data: fs } = await sb.auth.mfa.listFactors();
+    const totp = (fs && fs.totp && fs.totp[0]) || null;
+    return { mfaRequired: true, factorId: totp ? totp.id : null };
+  }
+  return { mfaRequired: false, data: res.data };
+}
+
+/* ── Zwei-Faktor-Anmeldung (TOTP) ───────────────────────── */
+// Ein zweiter Faktor schützt auch dann, wenn ein Passwort durch Phishing
+// oder ein Datenleck bekannt wird: ohne den Code aus der App kein Zugang.
+
+export async function mfaVerify({ factorId, code }) {
+  const sb = await client();
+  const chal = ok(await sb.auth.mfa.challenge({ factorId }));
+  return ok(await sb.auth.mfa.verify({ factorId, challengeId: chal.id, code }));
+}
+
+// Legt einen neuen Faktor an und liefert QR-Code und Geheimnis zum Einrichten.
+export async function mfaEnroll() {
+  const sb = await client();
+  const res = ok(await sb.auth.mfa.enroll({ factorType: "totp", friendlyName: "StockControl" }));
+  return { factorId: res.id, qr: res.totp.qr_code, secret: res.totp.secret, uri: res.totp.uri };
+}
+
+// Bestätigt die Einrichtung mit dem ersten Code aus der App.
+export async function mfaConfirm({ factorId, code }) {
+  return mfaVerify({ factorId, code });
+}
+
+export async function mfaFactors() {
+  const sb = await client();
+  const { data } = await sb.auth.mfa.listFactors();
+  return (data && data.totp) || [];
+}
+
+export async function mfaRemove(factorId) {
+  const sb = await client();
+  return ok(await sb.auth.mfa.unenroll({ factorId }));
 }
 
 export async function signOut() {
@@ -44,9 +88,10 @@ export async function signOut() {
   return ok(await sb.auth.signOut());
 }
 
-export async function requestPasswordReset(email) {
+export async function requestPasswordReset(email, captchaToken) {
   const sb = await client();
   return ok(await sb.auth.resetPasswordForEmail(email, {
+    captchaToken,
     redirectTo: location.origin + location.pathname + "#reset"
   }));
 }
