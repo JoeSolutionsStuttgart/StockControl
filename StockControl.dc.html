@@ -65,6 +65,9 @@
     [data-brandword] { display: none !important; }
     [data-langsel] { width: 62px !important; }
     [data-landing-hero] { padding: var(--space-6) var(--space-4) !important; }
+    [data-authgrid] { grid-template-columns: minmax(0, 1fr) !important; gap: var(--space-6) !important; padding: var(--space-5) var(--space-4) var(--space-6) !important; align-items: start !important; }
+    [data-authgrid] > div:last-child { justify-self: stretch !important; max-width: none !important; }
+    [data-authintro] { order: 2; }
     [data-landing-bar] { padding: var(--space-2) var(--space-4) !important; gap: 6px !important; }
     [data-two] { grid-template-columns: minmax(0, 1fr); }
     [data-wide-only] { display: none !important; }
@@ -153,16 +156,6 @@
               <div>
                 <div style="font-size: 13px; font-weight: 500">{{ meName }}</div>
                 <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ roleLabel }} · {{ companyName }}</div>
-              </div>
-              <div class="field">
-                <label data-i18n>Demo-Rolle wechseln</label>
-                <select class="input" value="{{ role }}" onChange="{{ setRole }}">
-                  <option value="owner">Inhabende Person (Person 1)</option>
-                  <option value="manager">Lagerleitung</option>
-                  <option value="worker">Mitarbeitende Person</option>
-                  <option value="reader">Lesezugriff</option>
-                  <option value="super">Internet GmbH · Betrieb</option>
-                </select>
               </div>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ logout }}"><span data-i18n>Abmelden</span></button>
@@ -499,10 +492,11 @@
               <div style="position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,.8)" data-i18n>QR-Code im Rahmen halten</div>
             </div>
             <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,.28)">
-              <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Demo: Code auswählen</div>
-              <sc-for list="{{ scanTargets }}" as="s" hint-placeholder-count="3">
-                <button class="btn" style="justify-content: flex-start; border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px" onClick="{{ s.open }}">{{ s.label }}</button>
-              </sc-for>
+              <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Code eingeben</div>
+              <div style="display: flex; gap: 6px">
+                <input class="input" data-i18n-ph placeholder="Artikel-ID oder EAN" onInput="{{ setScanCode }}" style="flex: 1; min-width: 0; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff">
+                <button class="btn" style="border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px; white-space: nowrap" onClick="{{ openScanCode }}"><span data-i18n>Öffnen</span></button>
+              </div>
             </div>
           </div>
         </div>
@@ -831,7 +825,10 @@
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
             <div class="text-muted" style="font-size: 12px" data-i18n>.xlsx oder .csv, bis 5 MB</div>
-            <button class="btn btn-secondary" style="margin-top: var(--space-3)" onClick="{{ simulateImport }}"><span data-i18n>Beispieldatei prüfen</span></button>
+            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer">
+              <span data-i18n>Datei auswählen</span>
+              <input type="file" accept=".xlsx,.csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+            </label>
           </div>
           <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
             <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
@@ -985,11 +982,17 @@
             </sc-if>
             <div class="hr"></div>
             <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Feinrechte</div>
+            <sc-if value="{{ isLastOwner }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-size: 12.5px; line-height: 1.45; color: var(--color-accent-800)" data-i18n>Diese Person verwaltet aktuell allein die Rechte. Rolle, Zugang und das Recht „Rechte ändern" sind deshalb gesperrt — vergib die Rolle zuerst an jemand anderen.</div>
+            </sc-if>
             <div style="display: flex; flex-direction: column; gap: 2px; max-height: 330px; overflow-y: auto">
               <sc-for list="{{ perms }}" as="pm" hint-placeholder-count="10">
                 <label class="radio" style="justify-content: space-between; width: 100%; padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
                   <span style="font-size: 13px">{{ pm.label }}</span>
-                  <input type="checkbox" checked="{{ pm.on }}" onChange="{{ pm.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+                  <span style="display: flex; align-items: center; gap: 7px">
+                    <span style="font-size: 11px; color: var(--color-accent-700)">{{ pm.pinNote }}</span>
+                    <input type="checkbox" checked="{{ pm.on }}" onChange="{{ pm.toggle }}" disabled="{{ pm.pinned }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+                  </span>
                 </label>
               </sc-for>
             </div>
@@ -1119,6 +1122,29 @@
             </div>
             <p class="card-body" style="margin: 0" data-i18n>Produkte, Bestände, Verläufe und Konten liegen in Supabase, die Mails verschickt Brevo, Bilder und große Dateien liegen in Cloudflare R2, und die Seite selbst läuft auf GitHub Pages. Keiner dieser Dienste wird hier bedient — sie werden einmalig eingerichtet: Zugangsdaten stehen in config.js, die geheimen Schlüssel als Secrets in Supabase. Die Schritte stehen in SETUP.md.</p>
           </section>
+
+          <section class="card">
+            <div class="card-kicker" data-i18n>Kosten</div>
+            <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+              <h4 style="margin: 0" data-i18n>Kostenbremse</h4>
+              <span class="{{ guardTagClass }}">{{ guardLabel }}</span>
+            </div>
+            <p class="card-body" style="margin: 0">{{ guardNote }}</p>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
+              <sc-for list="{{ quotaRows }}" as="qr" hint-placeholder-count="5">
+                <div>
+                  <div style="display: flex; justify-content: space-between; gap: var(--space-3); font-size: 12.5px; margin-bottom: 4px">
+                    <span>{{ qr.label }}</span>
+                    <span style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ qr.text }}</span>
+                  </div>
+                  <div style="height: 5px; border-radius: 999px; background: color-mix(in srgb, var(--color-text) 9%, transparent); overflow: hidden">
+                    <div style="height: 100%; width: {{ qr.pct }}; background: {{ qr.color }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <p class="card-body" style="margin: var(--space-2) 0 0; font-size: 12.5px" data-i18n>Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.</p>
+          </section>
         </div>
       </div>
       </sc-if>
@@ -1231,8 +1257,33 @@
     </select>
   </header>
 
-  <div style="display: grid; place-items: center; padding: var(--space-4) var(--space-4) var(--space-8)">
-  <div style="width: 100%; max-width: 400px">
+  <div data-authgrid style="flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-8); align-items: center; max-width: 1080px; width: 100%; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8)">
+
+  <div data-authintro style="min-width: 0">
+    <h1 style="font-family: var(--font-heading); font-size: clamp(30px, 4vw, 44px); line-height: 1.06; letter-spacing: -0.02em; margin: 0 0 var(--space-4)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
+    <p style="font-size: 16px; line-height: 1.6; max-width: 26em; margin: 0 0 var(--space-6); color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>StockControl ist die smarte und einfache Bestandsverwaltung</p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-4) var(--space-6); margin-bottom: var(--space-6)">
+      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Scannen statt suchen</div>
+      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Die optimale Lagermege für jede Situation</div>
+      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Schneller Überblick</div>
+      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Kein Stress mehr</div>
+    </div>
+
+    <div class="card elev-sm" style="padding: var(--space-4); max-width: 430px">
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-3)">
+        <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestandsverlauf</span>
+        <span style="font-size: 12px; color: var(--color-accent-700)" data-i18n>Mindestbestand erreicht</span>
+      </div>
+      {{ heroChart }}
+      <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">
+        <span data-i18n>vor 12 Wochen</span>
+        <span data-i18n>heute</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="width: 100%; max-width: 400px; justify-self: end">
 
     <sc-if value="{{ authIsChoice }}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: var(--space-3)">
@@ -1269,7 +1320,7 @@
           <div id="sc-turnstile-login" style="margin-bottom: var(--space-3); min-height: {{ captchaHeight }}"></div>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ locked }}" onClick="{{ doLogin }}"><span data-i18n>Anmelden</span></button>
           <div style="display: flex; justify-content: center; margin-top: var(--space-3)">
-            <button class="btn btn-ghost" style="padding: 0; font-size: 13px" onClick="{{ viewForgot }}"><span data-i18n>Passwort vergessen?</span></button>
+            <button class="btn btn-ghost" style="padding: 0; font-size: 13px; white-space: nowrap" onClick="{{ viewForgot }}"><span data-i18n>Passwort vergessen?</span></button>
           </div>
         </div>
       </sc-if>
@@ -1360,8 +1411,8 @@
     </section>
 
     <div style="display: flex; justify-content: center; gap: var(--space-4); margin-top: var(--space-4); flex-wrap: wrap">
-      <button class="btn btn-ghost" style="font-size: 13px; gap: 6px" onClick="{{ viewChoice }}"><span>←</span>{{ backLabel }}</button>
-      <button class="btn btn-ghost" style="font-size: 13px" onClick="{{ viewLanding }}"><span data-i18n>Mehr erfahren</span></button>
+      <button class="btn btn-ghost" style="font-size: 13px; gap: 6px; white-space: nowrap" onClick="{{ viewChoice }}"><span>←</span>{{ backLabel }}</button>
+      <button class="btn btn-ghost" style="font-size: 13px; white-space: nowrap" onClick="{{ viewLanding }}"><span data-i18n>Mehr erfahren</span></button>
     </div>
     </sc-if>
 
@@ -1386,9 +1437,10 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;serviceName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;StockControl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marke&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Anmeldung&quot;,&quot;Übersicht&quot;,&quot;Produkte&quot;,&quot;Scannen&quot;,&quot;Bestandsverlauf&quot;,&quot;Events&quot;,&quot;QR-Codes&quot;,&quot;Produkt anlegen&quot;,&quot;Team &amp; Rechte&quot;,&quot;Einstellungen&quot;],&quot;default&quot;:&quot;Anmeldung&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;demoRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Inhabende Person&quot;,&quot;Lagerleitung&quot;,&quot;Mitarbeitende Person&quot;,&quot;Lesezugriff&quot;,&quot;Betrieb&quot;],&quot;default&quot;:&quot;Inhabende Person&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hell&quot;,&quot;Dunkel&quot;,&quot;System&quot;],&quot;default&quot;:&quot;Hell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
-// Zugang für den Demo-Betrieb (solange config.js kein Supabase-Projekt nennt).
-const DEMO_USER = "m.kohl@internet-gmbh.de";
-const DEMO_PW = "Test123456!";
+// Kostenbremse — Voreinstellung, bis config.js gelesen ist.
+// (Es gibt bewusst keinen Demo-Zugang: angemeldet wird nur gegen Supabase.)
+const GUARD_DEFAULT = true;
+const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRows: 500, uploadMb: 10, storageMb: 8000 };
 
 const DICT = {
   en: {
@@ -1455,6 +1507,35 @@ const DICT = {
     "Wir schicken dir einen Link, der 15 Minuten gültig ist.": "We will send you a link, valid for 15 minutes.",
     "Zurück zur Anmeldung": "Back to sign in", "Zweiter Faktor": "Second factor",
     "Anmeldung": "Sign-in", "E-Mail oder Passwort falsch": "Wrong email or password",
+    "Kostenbremse": "Cost guard", "Kosten": "Cost", "Grenze erreicht": "Limit reached",
+    "Scannen statt suchen": "Scan, don't search", "Nie wieder leer": "Never run out",
+    "Jede Person ihr Maß": "Rights that fit", "Nur euer Lager": "Your stock only",
+    "Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.": "Each code belongs to exactly one item and opens its detail view. Print labels with your own text.",
+    "Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Verantwortliche Person direkt, Stellvertretung im CC.": "Alerts immediately or collected — daily, weekly, monthly. The responsible person directly, deputies in CC.",
+    "Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.": "Four roles as templates, every permission adjustable one by one — from booking to exporting.",
+    "Daten in der EU, streng pro Firma getrennt. Das steckt in der Datenbank, nicht in der Oberfläche.": "Data in the EU, strictly separated per company. That sits in the database, not in the interface.",
+    "Bot-Schutz und Sperre nach fünf Fehlversuchen": "Bot check and lockout after five failed attempts",
+    "Bestätigungslink gültig 15 Minuten": "Confirmation link valid for 15 minutes",
+    "Bilder nur über signierten Zugriff": "Images only via signed access",
+    "Nicht eingerichtet": "Not set up yet",
+    "Scannen, Menge eingeben, fertig. Den Rest macht das System.": "Scan, enter the quantity, done. The system does the rest.",
+    "Mindestbestand erreicht": "Minimum reached", "vor 12 Wochen": "12 weeks ago", "heute": "today",
+    "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL and SUPABASE_ANON_KEY are missing in config.js. Without them there is no database and no mail. The steps are in SETUP.md.",
+    "Code eingeben": "Enter code", "Artikel-ID oder EAN": "Item ID or EAN", "Öffnen": "Open",
+    "Nicht gefunden": "Not found", "Kein Artikel mit dieser ID oder EAN.": "No item with that ID or EAN.",
+    "Datei auswählen": "Choose file", "Spalten geprüft — unten bestätigen.": "Columns checked — confirm below.",
+    "Keine Datenbank verbunden": "No database connected",
+    "Mail-Tagesgrenze erreicht — Sammelversand morgen.": "Daily mail limit reached — collected send tomorrow.",
+    "In config.js FREE_TIER_GUARD auf false setzen oder die Grenze anheben.": "Set FREE_TIER_GUARD to false in config.js, or raise the limit.",
+    "aktiv": "on", "aus": "off", "Artikel": "Items", "Personen": "People", "Mails heute": "Mails today",
+    "Mails am Tag": "mails per day", "Zeilen je Import": "rows per import", "MB je Datei": "MB per file",
+    "MB Speicher": "MB of storage", "Speicher": "Storage", "gesetzt": "fixed",
+    "Rechte": "Rights", "Das geht nicht": "Not possible",
+    "Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen.": "At least one active person must be able to manage rights. Assign the role to someone else first.",
+    "Diese Person verwaltet aktuell allein die Rechte. Rolle, Zugang und das Recht „Rechte ändern\" sind deshalb gesperrt — vergib die Rolle zuerst an jemand anderen.": "This person is currently the only one managing rights. Role, access and the \"change rights\" permission are therefore locked — assign the role to someone else first.",
+    "Aktionen, die eine Grenze überschreiten würden, werden abgelehnt. So entstehen bei keinem der vier Dienste Kosten.": "Actions that would exceed a limit are refused, so none of the four services can incur cost.",
+    "Keine Sperre. Alles ist erlaubt — auch über die Gratis-Kontingente hinaus, wodurch Kosten entstehen können.": "No guard. Everything is allowed, including beyond the free tiers, which may incur cost.",
+    "Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.": "Toggle in config.js: setting FREE_TIER_GUARD to false lifts the guard; individual limits live in FREE_TIER_LIMITS.",
     "Bitte noch einmal versuchen.": "Please try again.", "Mehr erfahren": "Learn more",
     "Sechsstelligen Code aus deiner Authenticator-App eingeben.": "Enter the six-digit code from your authenticator app.",
     "Code": "Code", "Bestätigen": "Confirm", "Code falsch": "Wrong code",
@@ -1566,6 +1647,35 @@ const DICT = {
     "Wir schicken dir einen Link, der 15 Minuten gültig ist.": "Vi skickar en länk som gäller i 15 minuter.",
     "Zurück zur Anmeldung": "Tillbaka till inloggning", "Zweiter Faktor": "Andra faktorn",
     "Anmeldung": "Inloggning", "E-Mail oder Passwort falsch": "Fel e-post eller lösenord",
+    "Kostenbremse": "Kostnadsspärr", "Kosten": "Kostnad", "Grenze erreicht": "Gräns nådd",
+    "Scannen statt suchen": "Skanna i stället för att leta", "Nie wieder leer": "Aldrig tomt igen",
+    "Jede Person ihr Maß": "Rättigheter som passar", "Nur euer Lager": "Endast ert lager",
+    "Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.": "Varje kod hör till en enda artikel och öppnar dess detaljvy. Skriv ut etiketter med egen text.",
+    "Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Verantwortliche Person direkt, Stellvertretung im CC.": "Avisering direkt eller samlat — dagligen, varje vecka, varje månad. Ansvarig person direkt, ersättare som CC.",
+    "Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.": "Fyra roller som mall, varje rättighet justerbar var för sig — från bokning till export.",
+    "Daten in der EU, streng pro Firma getrennt. Das steckt in der Datenbank, nicht in der Oberfläche.": "Data i EU, strikt åtskilt per företag. Det ligger i databasen, inte i gränssnittet.",
+    "Bot-Schutz und Sperre nach fünf Fehlversuchen": "Botskydd och låsning efter fem misslyckade försök",
+    "Bestätigungslink gültig 15 Minuten": "Bekräftelselänk giltig i 15 minuter",
+    "Bilder nur über signierten Zugriff": "Bilder endast via signerad åtkomst",
+    "Nicht eingerichtet": "Inte konfigurerat",
+    "Scannen, Menge eingeben, fertig. Den Rest macht das System.": "Skanna, ange antal, klart. Resten sköter systemet.",
+    "Mindestbestand erreicht": "Miniminivå nådd", "vor 12 Wochen": "för 12 veckor sedan", "heute": "idag",
+    "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL och SUPABASE_ANON_KEY saknas i config.js. Utan dem finns ingen databas och inga mejl. Stegen står i SETUP.md.",
+    "Code eingeben": "Ange kod", "Artikel-ID oder EAN": "Artikel-ID eller EAN", "Öffnen": "Öppna",
+    "Nicht gefunden": "Hittades inte", "Kein Artikel mit dieser ID oder EAN.": "Ingen artikel med det ID:t eller EAN.",
+    "Datei auswählen": "Välj fil", "Spalten geprüft — unten bestätigen.": "Kolumner kontrollerade — bekräfta nedan.",
+    "Keine Datenbank verbunden": "Ingen databas ansluten",
+    "Mail-Tagesgrenze erreicht — Sammelversand morgen.": "Daglig mejlgräns nådd — samlat utskick i morgon.",
+    "In config.js FREE_TIER_GUARD auf false setzen oder die Grenze anheben.": "Sätt FREE_TIER_GUARD till false i config.js, eller höj gränsen.",
+    "aktiv": "på", "aus": "av", "Artikel": "Artiklar", "Personen": "Personer", "Mails heute": "Mejl idag",
+    "Mails am Tag": "mejl per dag", "Zeilen je Import": "rader per import", "MB je Datei": "MB per fil",
+    "MB Speicher": "MB lagring", "Speicher": "Lagring", "gesetzt": "låst",
+    "Rechte": "Rättigheter", "Das geht nicht": "Går inte",
+    "Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen.": "Minst en aktiv person måste kunna hantera rättigheter. Ge rollen till någon annan först.",
+    "Diese Person verwaltet aktuell allein die Rechte. Rolle, Zugang und das Recht „Rechte ändern\" sind deshalb gesperrt — vergib die Rolle zuerst an jemand anderen.": "Denna person hanterar för tillfället rättigheterna ensam. Roll, åtkomst och rättigheten att ändra rättigheter är därför låsta — ge rollen till någon annan först.",
+    "Aktionen, die eine Grenze überschreiten würden, werden abgelehnt. So entstehen bei keinem der vier Dienste Kosten.": "Åtgärder som skulle överskrida en gräns nekas, så ingen av de fyra tjänsterna kan ge kostnader.",
+    "Keine Sperre. Alles ist erlaubt — auch über die Gratis-Kontingente hinaus, wodurch Kosten entstehen können.": "Ingen spärr. Allt tillåts, även utöver gratisnivåerna, vilket kan ge kostnader.",
+    "Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.": "Ändra i config.js: FREE_TIER_GUARD till false tar bort spärren; gränserna står i FREE_TIER_LIMITS.",
     "Bitte noch einmal versuchen.": "Försök igen.", "Mehr erfahren": "Läs mer",
     "Sechsstelligen Code aus deiner Authenticator-App eingeben.": "Ange den sexsiffriga koden från din autentiseringsapp.",
     "Code": "Kod", "Bestätigen": "Bekräfta", "Code falsch": "Fel kod",
@@ -1779,7 +1889,7 @@ class Component extends DCLogic {
       loginFails: 0,
       confirmLeft: 900,
       inviteEmail: "", authEmail: "", authPw: "", regCompany: "",
-      importDone: false,
+      importDone: false, importFile: "",
       menu: null, burgerOpen: false,
       log: this.seedLog(),
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
@@ -1788,6 +1898,7 @@ class Component extends DCLogic {
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
       photoUrl: "", photoFor: null, platformAdmin: false,
+      guard: GUARD_DEFAULT, limits: LIMITS_DEFAULT, mailsToday: 0, storageMb: 340, scanCode: "",
       toast: null
     };
   }
@@ -1857,6 +1968,8 @@ class Component extends DCLogic {
     try {
       const cfg = await import("./config.js");
       if (cfg.SERVICE_NAME) this.setState({ brand: cfg.SERVICE_NAME });
+      if (cfg.FREE_TIER_GUARD !== undefined) this.setState({ guard: !!cfg.FREE_TIER_GUARD });
+      if (cfg.FREE_TIER_LIMITS) this.setState({ limits: Object.assign({}, LIMITS_DEFAULT, cfg.FREE_TIER_LIMITS) });
       if (cfg.TURNSTILE_SITE_KEY) {
         this.siteKey = cfg.TURNSTILE_SITE_KEY;
         this.setState({ captcha: true });
@@ -1939,6 +2052,36 @@ class Component extends DCLogic {
     this.api.viewUrl(key)
       .then(url => { if (this.state.photoFor === productId) this.setState({ photoUrl: url || "" }); })
       .catch(() => {});
+  }
+
+  // Kostenbremse: prüft eine Grenze, bevor etwas passiert, das bei einem
+  // Dienst zählt. Gibt false zurück und erklärt, wenn gesperrt ist.
+  // Grenze 0 oder guard=false heißt: durchlassen.
+  withinLimit(key, current, add) {
+    const cap = (this.state.limits || {})[key] || 0;
+    if (!this.state.guard || !cap) return true;
+    if (current + (add || 1) <= cap) return true;
+    const names = {
+      products: this.tr("Artikel"), members: this.tr("Personen"), mailsPerDay: this.tr("Mails am Tag"),
+      importRows: this.tr("Zeilen je Import"), uploadMb: this.tr("MB je Datei"), storageMb: this.tr("MB Speicher")
+    };
+    this.say(this.tr("Kostenbremse"), this.tr("Grenze erreicht") + ": " + cap + " " + names[key],
+      this.tr("In config.js FREE_TIER_GUARD auf false setzen oder die Grenze anheben."));
+    return false;
+  }
+
+  // Mindestens eine Person muss die Rechte verwalten können. Zählt, wie viele
+  // aktive inhabende Personen bleiben, wenn eine wegfällt oder wechselt.
+  ownersAfter(excludeId) {
+    return this.state.members.filter(m =>
+      m.id !== excludeId && m.role === "owner" && m.status === "active").length;
+  }
+  lastOwnerBlocked(u) {
+    if (!u || u.role !== "owner" || u.status !== "active") return false;
+    if (this.ownersAfter(u.id) > 0) return false;
+    this.say(this.tr("Rechte"), this.tr("Das geht nicht"),
+      this.tr("Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen."));
+    return true;
   }
 
   remote(call) {
@@ -2211,11 +2354,8 @@ class Component extends DCLogic {
         ]) : null,
       R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" }, disabled: locked,
         onClick: () => { this.setState({ authed: true, screen: "dashboard" }); } }, this.tr("Anmelden")),
-      R("div", { key: "r", style: { display: "flex", justifyContent: "space-between", gap: "8px", marginTop: "10px", flexWrap: "wrap" } }, [
-        R("button", { key: "f", className: "btn btn-ghost", style: { padding: 0 }, onClick: () => this.setState({ authView: "forgot" }) }, this.tr("Passwort vergessen?")),
-        R("button", { key: "x", className: "btn btn-ghost", style: { padding: 0 },
-          onClick: () => this.setState(s => ({ loginFails: s.loginFails + 1 })) }, this.tr("Fehlversuch simulieren") + " (" + this.state.loginFails + "/5)")
-      ])
+      R("div", { key: "r", style: { display: "flex", justifyContent: "center", marginTop: "10px" } },
+        R("button", { key: "f", className: "btn btn-ghost", style: { padding: 0 }, onClick: () => this.setState({ authView: "forgot" }) }, this.tr("Passwort vergessen?")))
     ]);
   }
 
@@ -2278,20 +2418,32 @@ class Component extends DCLogic {
 
     const FALLBACK_USER = { id: null, name: "—", email: "", role: "reader", status: "active" };
     const picked = st.members.find(m => m.id === st.pickedUser) || st.members[0] || FALLBACK_USER;
+    const lastOwner = picked.role === "owner" && picked.status === "active" && this.ownersAfter(picked.id) === 0;
     const permsFor = () => {
       const u = picked;
       const ov = st.overrides[u.id] || {};
       return PERM_LIST.map(([key, label, roles]) => {
         const base = roles.includes(u.role);
         const on = ov[key] === undefined ? base : ov[key];
+        // Der letzten rechteverwaltenden Person kann "Rechte ändern" nicht
+        // entzogen werden — sonst könnte niemand mehr Rechte vergeben.
+        const pinned = lastOwner && key === "rights" && on;
         return {
-          label: this.tr(label), on,
-          toggle: () => this.setState(prev => {
+          label: this.tr(label), on, pinned,
+          pinNote: pinned ? this.tr("gesetzt") : "",
+          toggle: () => {
+            if (pinned) {
+              this.say(this.tr("Rechte"), this.tr("Das geht nicht"),
+                this.tr("Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen."));
+              return;
+            }
+            this.setState(prev => {
             const next = Object.assign({}, prev.overrides);
             next[u.id] = Object.assign({}, next[u.id] || {});
             next[u.id][key] = !on;
             return { overrides: next };
-          })
+            });
+          }
         };
       });
     };
@@ -2454,7 +2606,12 @@ class Component extends DCLogic {
           movements: [{ name: cur.name, delta: "−" + st.qty, who: "Marie Kohl", when: this.tr("gerade eben") }].concat(prev.movements).slice(0, 6)
         }));
         this.remote(api => api.bookMovement({ productId: cur.id, delta: -st.qty, note: "Entnahme" }));
-        if (under && st.mailMode === "now") {
+        if (under && st.mailMode === "now" && !this.withinLimit("mailsPerDay", st.mailsToday)) {
+          // Tagesgrenze erreicht: Buchung bleibt, die Mail wandert in die
+          // Bestellliste statt sie zu verschicken.
+          this.say(this.tr("Bestellliste"), this.tr("Artikel vermerkt"), this.tr("Mail-Tagesgrenze erreicht — Sammelversand morgen."));
+        } else if (under && st.mailMode === "now") {
+          this.setState(s => ({ mailsToday: s.mailsToday + 1 }));
           this.say("Brevo", this.tr("Mail an ") + cur.verantwortlich,
             (st.ccDeputies ? this.tr("CC: ") + cur.vertretung : this.tr("ohne CC an Stellvertretung")) + " · " + this.tr("Bestand ") + next + " " + this.tr("unter Mindestbestand ") + cur.min);
         } else if (under) {
@@ -2486,6 +2643,9 @@ class Component extends DCLogic {
       uploadPhoto: e => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
+        const mb = file.size / (1024 * 1024);
+        if (!this.withinLimit("uploadMb", 0, Math.ceil(mb))) return;
+        if (!this.withinLimit("storageMb", st.storageMb, Math.ceil(mb))) return;
         if (!st.live || !this.api) { this.say(this.tr("Bild"), this.tr("Demo-Modus"), this.tr("Mit verbundenem R2 landet die Datei im Bucket der Firma.")); return; }
         this.say("Cloudflare R2", this.tr("Wird hochgeladen"), file.name);
         this.api.setProductImage(cur.id, file)
@@ -2594,6 +2754,13 @@ class Component extends DCLogic {
       exportOrderCsv: () => this.say("Export", this.tr("Bestellliste exportiert"), orderList.length + " " + this.tr("Positionen") + " · Excel (.xlsx)"),
       printPage: () => window.print(),
 
+      setScanCode: e => this.setState({ scanCode: e.target.value }),
+      openScanCode: () => {
+        const code = String(st.scanCode || "").trim().toLowerCase();
+        const hit = products.find(p => p.id.toLowerCase() === code || p.ean === code);
+        if (hit) this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "" });
+        else this.say(this.tr("Nicht gefunden"), code || "—", this.tr("Kein Artikel mit dieser ID oder EAN."));
+      },
       scanTargets: products.slice(0, 3).map(p => ({
         label: p.id + " · " + p.name.split(",")[0],
         open: () => this.setState({ currentId: p.id, screen: "detail", qty: 1 })
@@ -2606,10 +2773,27 @@ class Component extends DCLogic {
         tagClass: r.check === "ok" ? "tag tag-neutral" : "tag tag-outline"
       })),
       importBtnLabel: this.tr("48 Produkte importieren"),
-      simulateImport: () => this.setState({ importDone: true }),
-      runImport: () => { this.setState({ importDone: false }); this.go("products"); this.say("Import", this.tr("48 Produkte importiert"), this.tr("2 Zeilen übersprungen — EAN doppelt.")); },
+      pickImportFile: e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const mb = file.size / (1024 * 1024);
+        if (!this.withinLimit("uploadMb", 0, Math.ceil(mb))) return;
+        this.setState({ importDone: true, importFile: file.name });
+        this.say("Import", file.name, this.tr("Spalten geprüft — unten bestätigen."));
+      },
+      importFileName: st.importFile || "",
+      runImport: () => {
+        if (!this.withinLimit("importRows", 0, 48)) return;
+        if (!this.withinLimit("products", products.length, 48)) return;
+        this.setState({ importDone: false }); this.go("products");
+        this.say("Import", this.tr("48 Produkte importiert"), this.tr("2 Zeilen übersprungen — EAN doppelt."));
+      },
       downloadTemplate: () => this.say("Excel", this.tr("Vorlage erstellt"), this.tr("Eine Spalte pro Feld, inklusive eigener Kategorien.")),
-      createProduct: () => { this.go("products"); this.say(this.tr("Produkt"), this.tr("Gespeichert"), this.tr("QR-Code wurde automatisch erzeugt.")); },
+      createProduct: () => {
+        if (!this.withinLimit("products", products.length)) return;
+        this.go("products");
+        this.say(this.tr("Produkt"), this.tr("Gespeichert"), this.tr("QR-Code wurde automatisch erzeugt."));
+      },
 
       qrPickList: products.filter(p => !qq || (p.name + " " + p.ean + " " + p.ort).toLowerCase().includes(qq)).map(p => {
         const on = st.qrPicked.includes(p.id);
@@ -2641,7 +2825,12 @@ class Component extends DCLogic {
         return Object.assign({}, u, {
           statusLabel: s[lang] || s.de, tagClass: s.tag,
           pick: () => this.setState({ pickedUser: u.id }),
-          setRole: e => { const val = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === u.id ? Object.assign({}, m, { role: val }) : m) })); }
+          setRole: e => {
+            const val = e.target.value;
+            if (val !== "owner" && this.lastOwnerBlocked(u)) { e.target.value = u.role; return; }
+            this.setState(prev => ({ members: prev.members.map(m => m.id === u.id ? Object.assign({}, m, { role: val }) : m) }));
+            this.remote(api => api.updateMember(u.id, { role: val }));
+          }
         });
       }),
       pickedName: picked.name, pickedNameVal: picked.name, pickedEmail: picked.email, pickedRole: picked.role,
@@ -2649,31 +2838,67 @@ class Component extends DCLogic {
       blockMemberLabel: picked.status === "blocked" ? this.tr("Entsperren") : this.tr("Zugang sperren"),
       setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remote(api => api.updateMember(picked.id, { name: v })); },
       setPickedEmail: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { email: v }) : m) })); this.remote(api => api.updateMember(picked.id, { email: v })); },
-      setPickedRole: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { role: v }) : m) })); this.remote(api => api.updateMember(picked.id, { role: v })); },
+      setPickedRole: e => {
+        const v = e.target.value;
+        if (v !== "owner" && this.lastOwnerBlocked(picked)) { e.target.value = picked.role; return; }
+        this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { role: v }) : m) }));
+        this.remote(api => api.updateMember(picked.id, { role: v }));
+      },
+      isLastOwner: picked.role === "owner" && picked.status === "active" && this.ownersAfter(picked.id) === 0,
       toggleBlockMember: () => {
         const next = picked.status === "blocked" ? "active" : "blocked";
+        if (next === "blocked" && this.lastOwnerBlocked(picked)) return;
         this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { status: next }) : m) }));
         this.remote(api => api.updateMember(picked.id, { status: next }));
       },
       removeMember: () => {
         const u = picked;
+        if (this.lastOwnerBlocked(u)) return;
         this.setState(prev => {
           const rest = prev.members.filter(m => m.id !== prev.pickedUser);
           return { members: rest, pickedUser: rest.length ? rest[0].id : null };
         });
         this.say(this.tr("Team"), this.tr("Person entfernt"), u.name + " · " + this.tr("Zugang sofort gesperrt, Buchungen bleiben im Verlauf"));
       },
+      guardLabel: st.guard ? this.tr("aktiv") : this.tr("aus"),
+      guardTagClass: st.guard ? "tag tag-accent" : "tag tag-outline",
+      guardNote: st.guard
+        ? this.tr("Aktionen, die eine Grenze überschreiten würden, werden abgelehnt. So entstehen bei keinem der vier Dienste Kosten.")
+        : this.tr("Keine Sperre. Alles ist erlaubt — auch über die Gratis-Kontingente hinaus, wodurch Kosten entstehen können."),
+      quotaRows: (() => {
+        const L = st.limits || {};
+        const rows = [
+          ["products", this.tr("Artikel"), products.length, L.products, ""],
+          ["members", this.tr("Personen"), st.members.length, L.members, ""],
+          ["mailsPerDay", this.tr("Mails heute"), st.mailsToday, L.mailsPerDay, ""],
+          ["storageMb", this.tr("Speicher"), st.storageMb, L.storageMb, " MB"]
+        ];
+        return rows.filter(r => r[3]).map(([key, label, used, cap, unit]) => {
+          const share = Math.min(1, used / cap);
+          return {
+            label, text: used + unit + " / " + cap + unit,
+            pct: Math.max(2, Math.round(share * 100)) + "%",
+            color: share > 0.9 ? "var(--color-accent-800)" : "var(--color-accent)"
+          };
+        });
+      })(),
       perms: permsFor(),
       allowAll: () => this.setState(prev => {
         const next = Object.assign({}, prev.overrides); const o = {};
         PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next };
       }),
-      denyAll: () => this.setState(prev => {
-        const next = Object.assign({}, prev.overrides); const o = {};
-        PERM_LIST.forEach(([k]) => o[k] = false); next[prev.pickedUser] = o; return { overrides: next };
-      }),
+      denyAll: () => {
+        if (this.lastOwnerBlocked(picked)) return;
+        this.setState(prev => {
+          const next = Object.assign({}, prev.overrides); const o = {};
+          PERM_LIST.forEach(([k]) => o[k] = false); next[prev.pickedUser] = o; return { overrides: next };
+        });
+      },
       setInvite: e => this.setState({ inviteEmail: e.target.value }),
       sendInvite: () => {
+        if (!this.withinLimit("members", st.members.length)) return;
+        if (!this.withinLimit("mailsPerDay", st.mailsToday)) return;
+        this.setState(s => ({ mailsToday: s.mailsToday + 1 }));
         this.remote(api => api.inviteMember({ email: st.inviteEmail, role: "worker" }));
         this.say("Brevo", this.tr("Einladung gesendet"), (st.inviteEmail || "name@internet-gmbh.de") + " · " + this.tr("gültig 3 Stunden"));
       },
@@ -2722,9 +2947,32 @@ class Component extends DCLogic {
       authIsLogin: st.authView === "login", authIsRegister: st.authView === "register",
       authIsConfirm: st.authView === "confirm", authIsForgot: st.authView === "forgot",
       authIsInvite: st.authView === "invite",
+      // Angedeuteter Verlauf auf der Startseite: Treppenlinie mit
+      // Mindestbestand-Marke, ohne Achsen und Zahlen.
+      heroChart: (() => {
+        const vals = [46, 44, 39, 41, 34, 30, 31, 25, 21, 24, 17, 12, 9];
+        const w = 100, h = 42, max = 50, min = 12;
+        const x = i => (i * w) / (vals.length - 1);
+        const y = v => h - (v / max) * (h - 3) - 1.5;
+        let d = "M " + x(0).toFixed(1) + " " + y(vals[0]).toFixed(1);
+        vals.forEach((v, i) => { if (i) d += " L " + x(i).toFixed(1) + " " + y(vals[i - 1]).toFixed(1) + " L " + x(i).toFixed(1) + " " + y(v).toFixed(1); });
+        const area = d + " L " + w + " " + h + " L 0 " + h + " Z";
+        const yMin = y(min).toFixed(1);
+        return React.createElement("svg", {
+          viewBox: "0 0 100 42", preserveAspectRatio: "none",
+          style: { width: "100%", height: "96px", display: "block", overflow: "visible" }
+        }, [
+          React.createElement("path", { key: "a", d: area, fill: "color-mix(in srgb, var(--color-accent) 14%, transparent)", stroke: "none" }),
+          React.createElement("line", { key: "m", x1: 0, x2: w, y1: yMin, y2: yMin, stroke: "var(--color-accent-700)",
+            strokeWidth: 1, strokeDasharray: "3 3", vectorEffect: "non-scaling-stroke" }),
+          React.createElement("path", { key: "l", d, fill: "none", stroke: "var(--color-accent)", strokeWidth: 1.6,
+            strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" }),
+          React.createElement("line", { key: "p", x1: w, x2: w, y1: y(vals[vals.length - 1]), y2: h,
+            stroke: "var(--color-accent-800)", strokeWidth: 1.6, vectorEffect: "non-scaling-stroke" })
+        ]);
+      })(),
       locked: st.loginFails >= 5,
-      failLabel: this.tr("Fehlversuch simulieren") + " (" + st.loginFails + "/5)",
-      addFail: () => this.setState(s => ({ loginFails: s.loginFails + 1 })),
+
       authEmail: st.authEmail, authPw: st.authPw,
       setAuthEmail: e => this.setState({ authEmail: e.target.value }),
       setAuthPw: e => this.setState({ authPw: e.target.value }),
@@ -2781,14 +3029,9 @@ class Component extends DCLogic {
             });
           return;
         }
-        // Demo-Betrieb: nur das eine Testkonto kommt hinein. Im verbundenen
-        // Betrieb prüft Supabase, dieser Zweig läuft dann nicht.
-        if (st.authEmail.trim().toLowerCase() === DEMO_USER && st.authPw === DEMO_PW) {
-          this.setState({ authed: true, screen: "dashboard", loginFails: 0 });
-        } else {
-          this.setState(s => ({ loginFails: s.loginFails + 1 }));
-          this.say(this.tr("Anmeldung"), this.tr("E-Mail oder Passwort falsch"), this.tr("Bitte noch einmal versuchen."));
-        }
+        // Ohne Supabase gibt es kein Konto, gegen das geprüft werden könnte.
+        this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
+          this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
       },
       viewForgot: () => this.setState({ authView: "forgot" }),
       sendReset: () => {
