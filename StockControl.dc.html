@@ -384,7 +384,7 @@
             <div style="width: 226px; flex: none; display: flex; flex-direction: column; gap: 6px">
               <div class="blueprint" style="width: 226px; aspect-ratio: 3 / 2; overflow: hidden; display: grid; place-items: center">
                 <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}">
-                  <img src="{{ photoUrl }}" alt="{{ current.name }}" style="width: 100%; height: 100%; object-fit: cover; display: block">
+                  {{ photoImg }}
                 </sc-if>
                 <sc-if value="{{ noPhoto }}" hint-placeholder-val="{{ true }}">
                   <image-slot id="sc-product-photo" shape="rect" placeholder="Bild ablegen"></image-slot>
@@ -1359,8 +1359,9 @@
       </sc-if>
     </section>
 
-    <div style="display: flex; justify-content: center; margin-top: var(--space-4)">
+    <div style="display: flex; justify-content: center; gap: var(--space-4); margin-top: var(--space-4); flex-wrap: wrap">
       <button class="btn btn-ghost" style="font-size: 13px; gap: 6px" onClick="{{ viewChoice }}"><span>←</span>{{ backLabel }}</button>
+      <button class="btn btn-ghost" style="font-size: 13px" onClick="{{ viewLanding }}"><span data-i18n>Mehr erfahren</span></button>
     </div>
     </sc-if>
 
@@ -1384,7 +1385,11 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;serviceName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;StockControl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marke&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Übersicht&quot;,&quot;Produkte&quot;,&quot;Scannen&quot;,&quot;Events&quot;,&quot;QR-Codes&quot;,&quot;Produkt anlegen&quot;,&quot;Team &amp; Rechte&quot;,&quot;Einstellungen&quot;,&quot;Anmeldung&quot;],&quot;default&quot;:&quot;Übersicht&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;demoRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Inhabende Person&quot;,&quot;Lagerleitung&quot;,&quot;Mitarbeitende Person&quot;,&quot;Lesezugriff&quot;,&quot;Betrieb&quot;],&quot;default&quot;:&quot;Inhabende Person&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hell&quot;,&quot;Dunkel&quot;,&quot;System&quot;],&quot;default&quot;:&quot;Hell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;serviceName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;StockControl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marke&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Anmeldung&quot;,&quot;Übersicht&quot;,&quot;Produkte&quot;,&quot;Scannen&quot;,&quot;Bestandsverlauf&quot;,&quot;Events&quot;,&quot;QR-Codes&quot;,&quot;Produkt anlegen&quot;,&quot;Team &amp; Rechte&quot;,&quot;Einstellungen&quot;],&quot;default&quot;:&quot;Anmeldung&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;demoRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Inhabende Person&quot;,&quot;Lagerleitung&quot;,&quot;Mitarbeitende Person&quot;,&quot;Lesezugriff&quot;,&quot;Betrieb&quot;],&quot;default&quot;:&quot;Inhabende Person&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hell&quot;,&quot;Dunkel&quot;,&quot;System&quot;],&quot;default&quot;:&quot;Hell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
+// Zugang für den Demo-Betrieb (solange config.js kein Supabase-Projekt nennt).
+const DEMO_USER = "m.kohl@internet-gmbh.de";
+const DEMO_PW = "Test123456!";
+
 const DICT = {
   en: {
     "Übersicht": "Overview", "Produkte": "Products", "Scannen": "Scan", "Produkt anlegen": "Add product",
@@ -1449,6 +1454,8 @@ const DICT = {
     "Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab": "Invitation to Internet GmbH · expires in 2 h 41 min",
     "Wir schicken dir einen Link, der 15 Minuten gültig ist.": "We will send you a link, valid for 15 minutes.",
     "Zurück zur Anmeldung": "Back to sign in", "Zweiter Faktor": "Second factor",
+    "Anmeldung": "Sign-in", "E-Mail oder Passwort falsch": "Wrong email or password",
+    "Bitte noch einmal versuchen.": "Please try again.", "Mehr erfahren": "Learn more",
     "Sechsstelligen Code aus deiner Authenticator-App eingeben.": "Enter the six-digit code from your authenticator app.",
     "Code": "Code", "Bestätigen": "Confirm", "Code falsch": "Wrong code",
     "Zwei-Faktor-Anmeldung": "Two-factor sign-in",
@@ -1558,6 +1565,8 @@ const DICT = {
     "Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab": "Inbjudan till Internet GmbH · går ut om 2 tim 41 min",
     "Wir schicken dir einen Link, der 15 Minuten gültig ist.": "Vi skickar en länk som gäller i 15 minuter.",
     "Zurück zur Anmeldung": "Tillbaka till inloggning", "Zweiter Faktor": "Andra faktorn",
+    "Anmeldung": "Inloggning", "E-Mail oder Passwort falsch": "Fel e-post eller lösenord",
+    "Bitte noch einmal versuchen.": "Försök igen.", "Mehr erfahren": "Läs mer",
     "Sechsstelligen Code aus deiner Authenticator-App eingeben.": "Ange den sexsiffriga koden från din autentiseringsapp.",
     "Code": "Kod", "Bestätigen": "Bekräfta", "Code falsch": "Fel kod",
     "Zwei-Faktor-Anmeldung": "Tvåfaktorsinloggning",
@@ -1729,11 +1738,14 @@ const IMPORT_ROWS = [
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    const start = (props && props.startView) || "Übersicht";
+    const start = (props && props.startView) || "Anmeldung";
     this.state = {
+      // Ohne Anmeldung startet die Seite immer auf der Anmeldemaske.
+      // startView wählt nur, welcher Bereich nach dem Anmelden erscheint —
+      // oder überspringt sie zum Ansehen der Screens im Entwurf.
       authed: start !== "Anmeldung",
-      authView: "landing",
-      screen: start === "Anmeldung" ? "dashboard" : this.screenKey(start),
+      authView: "login",
+      screen: this.screenKey(start),
       role: (props && props.demoRole) ? this.roleKey(props.demoRole) : "owner",
       theme: (props && props.theme) || "Hell",
       lang: "de",
@@ -1803,7 +1815,8 @@ class Component extends DCLogic {
 
   screenKey(label) {
     return { "Übersicht":"dashboard", "Produkte":"products", "Scannen":"scan", "QR-Codes":"qr",
-      "Produkt anlegen":"new", "Team & Rechte":"team", "Einstellungen":"settings" }[label] || "dashboard";
+      "Produkt anlegen":"new", "Team & Rechte":"team", "Einstellungen":"settings",
+      "Bestandsverlauf":"history", "Events":"events" }[label] || "dashboard";
   }
   roleKey(label) {
     return { "Inhabende Person":"owner", "Lagerleitung":"manager", "Mitarbeitende Person":"worker",
@@ -1853,7 +1866,7 @@ class Component extends DCLogic {
       if (!api.configured) return;
       this.api = api;
       const sess = await api.session();
-      if (!sess) { this.setState({ live: true, authed: false, authView: "landing", source: "Supabase" }); return; }
+      if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase" }); return; }
       await this.refresh();
     } catch (e) { console.warn("StockControl läuft mit Demo-Daten:", e && e.message); }
   }
@@ -2397,7 +2410,7 @@ class Component extends DCLogic {
       goSettings: () => this.go("settings"), goAdmin: () => this.go("admin"),
       logout: () => {
         if (st.live && this.api) this.api.signOut().catch(() => {});
-        this.setState({ authed: false, authView: "landing", menu: null });
+        this.setState({ authed: false, authView: "login", menu: null, authEmail: "", authPw: "" });
       },
 
       segLight: this.segStyle(st.theme === "Hell"), segDark: this.segStyle(st.theme === "Dunkel"), segSystem: this.segStyle(st.theme === "System"),
@@ -2463,6 +2476,12 @@ class Component extends DCLogic {
         this.say(this.tr("Nachfüllung"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next + " · " + this.tr("Status zurückgesetzt"));
       },
       hasPhoto: !!st.photoUrl, noPhoto: !st.photoUrl,
+      // Als Element statt src-Hole: ein unaufgelöstes {{ }} in src würde der
+      // Browser beim Streaming als Adresse anfragen und scheitern.
+      photoImg: st.photoUrl
+        ? React.createElement("img", { src: st.photoUrl, alt: cur.name,
+            style: { width: "100%", height: "100%", objectFit: "cover", display: "block" } })
+        : null,
       storageLabel: st.live ? this.tr("R2 · privat, signierter Zugriff") : this.tr("Demo: lokal ablegen"),
       uploadPhoto: e => {
         const file = e.target.files && e.target.files[0];
@@ -2762,7 +2781,14 @@ class Component extends DCLogic {
             });
           return;
         }
-        this.setState({ authed: true, screen: "dashboard" });
+        // Demo-Betrieb: nur das eine Testkonto kommt hinein. Im verbundenen
+        // Betrieb prüft Supabase, dieser Zweig läuft dann nicht.
+        if (st.authEmail.trim().toLowerCase() === DEMO_USER && st.authPw === DEMO_PW) {
+          this.setState({ authed: true, screen: "dashboard", loginFails: 0 });
+        } else {
+          this.setState(s => ({ loginFails: s.loginFails + 1 }));
+          this.say(this.tr("Anmeldung"), this.tr("E-Mail oder Passwort falsch"), this.tr("Bitte noch einmal versuchen."));
+        }
       },
       viewForgot: () => this.setState({ authView: "forgot" }),
       sendReset: () => {
