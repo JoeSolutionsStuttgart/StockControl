@@ -64,6 +64,13 @@
     [data-brand] { margin-right: 0 !important; }
     [data-brandword] { display: none !important; }
     [data-langsel] { width: 62px !important; }
+    [data-auth-shell] { grid-template-columns: minmax(0, 1fr) !important; }
+    [data-auth-aside] { display: none !important; }
+    [data-auth-brand] { display: flex !important; }
+    [data-auth-note] { display: block !important; }
+    [data-landing-hero] { grid-template-columns: minmax(0, 1fr) !important; gap: var(--space-6) !important; padding: var(--space-6) var(--space-4) !important; }
+    [data-landing-bar] { padding: var(--space-2) var(--space-4) !important; gap: 6px !important; }
+    [data-landing-features] { padding: 0 var(--space-4) var(--space-6) !important; }
     [data-two] { grid-template-columns: minmax(0, 1fr); }
     [data-wide-only] { display: none !important; }
   }
@@ -98,6 +105,7 @@
               <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
               <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
               <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+              <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
             </div>
           </sc-if>
         </div>
@@ -182,6 +190,7 @@
             <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
             <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
             <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+            <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
           </div>
         </div>
         <div>
@@ -272,7 +281,14 @@
                     <td>{{ row.bestellmenge }}</td>
                     <td class="text-muted">{{ row.lieferant }}</td>
                     <td><span class="{{ row.tagClass }}">{{ row.statusLabel }}</span></td>
-                    <td style="text-align: right"><button class="btn btn-ghost" onClick="{{ row.toggleOrdered }}">{{ row.action }}</button></td>
+                    <td style="text-align: right">
+                      <sc-if value="{{ row.mayOrder }}" hint-placeholder-val="{{ true }}">
+                        <button class="btn btn-ghost" onClick="{{ row.toggleOrdered }}">{{ row.action }}</button>
+                      </sc-if>
+                      <sc-if value="{{ row.locked }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 45%, transparent)">{{ row.lockNote }}</span>
+                      </sc-if>
+                    </td>
                   </tr>
                 </sc-for>
               </tbody>
@@ -447,32 +463,26 @@
             <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
               <button class="btn btn-secondary btn-block" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
             </sc-if>
+            <sc-if value="{{ statusLocked }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)">{{ statusLockedNote }}</div>
+            </sc-if>
           </section>
 
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>QR-Code dieses Produkts</h4>
-            <div style="display: flex; gap: var(--space-4); align-items: center">
-              <div class="blueprint" style="padding: 8px; background: #fff; flex: none">
-                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-                {{ current.qr }}
+            <h4 style="margin: 0" data-i18n>Verantwortung</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Den Bestellstatus dürfen nur die verantwortliche Person und ihre Stellvertretungen setzen.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3)">
+              <div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Verantwortlich</div>
+                <div style="font-size: 14px">{{ current.verantwortlich }}</div>
               </div>
-              <div style="min-width: 0; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
-                <div style="font-family: var(--font-heading); font-size: 15px; color: var(--color-text)">{{ current.id }}</div>
-                <div data-i18n>Nur dieses Produkt. Scan öffnet direkt diese Detailansicht.</div>
-                <button class="btn btn-ghost" style="margin-top: 6px; padding: 0" onClick="{{ goQr }}"><span data-i18n>Etikett drucken</span></button>
+              <div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Stellvertretung</div>
+                <div style="font-size: 14px">{{ current.vertretung }}</div>
               </div>
             </div>
-          </section>
-
-          <section class="card blueprint">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>Bestandsverlauf</h4>
-            {{ current.chart }}
-            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-              <button class="btn btn-secondary" onClick="{{ exportHistoryCsv }}">Excel</button>
-              <button class="btn btn-secondary" onClick="{{ printPage }}">PDF</button>
-            </div>
+            <button class="btn btn-ghost" style="padding: 0; justify-content: flex-start" onClick="{{ goHistoryForCurrent }}"><span data-i18n>Bestandsverlauf dieses Produkts ansehen</span></button>
           </section>
         </div>
       </div>
@@ -499,6 +509,154 @@
                 <button class="btn" style="justify-content: flex-start; border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px" onClick="{{ s.open }}">{{ s.label }}</button>
               </sc-for>
             </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onHistory }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Bestandsverlauf" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <section class="card">
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0" data-i18n>Auswahl</h4>
+            <span class="text-muted" style="font-size: 12px" data-i18n>Beliebig kombinierbar. Leer heißt: alles.</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: var(--space-3)">
+            <div class="field"><label data-i18n>Einzelnes Produkt</label>
+              <select class="input" value="{{ hProduct }}" onChange="{{ setHProduct }}">
+                <option value="">Alle Produkte</option>
+                <sc-for list="{{ hProducts }}" as="p" hint-placeholder-count="6">
+                  <option value="{{ p.id }}">{{ p.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Produktart</label>
+              <select class="input" value="{{ hCategory }}" onChange="{{ setHCategory }}">
+                <option value="">Alle Arten</option>
+                <sc-for list="{{ hCategories }}" as="c" hint-placeholder-count="5">
+                  <option value="{{ c }}">{{ c }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Lagerort</label>
+              <select class="input" value="{{ hPlace }}" onChange="{{ setHPlace }}">
+                <option value="">Alle Lagerorte</option>
+                <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+                  <option value="{{ pl }}">{{ pl }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Verantwortliche Person</label>
+              <select class="input" value="{{ hResp }}" onChange="{{ setHResp }}">
+                <option value="">Alle Personen</option>
+                <sc-for list="{{ hPeople }}" as="n" hint-placeholder-count="5">
+                  <option value="{{ n }}">{{ n }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Lieferant</label>
+              <select class="input" value="{{ hSupplier }}" onChange="{{ setHSupplier }}">
+                <option value="">Alle Lieferanten</option>
+                <sc-for list="{{ hSuppliers }}" as="s" hint-placeholder-count="5">
+                  <option value="{{ s }}">{{ s }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Zeitraum</label>
+              <select class="input" value="{{ hRange }}" onChange="{{ setHRange }}">
+                <option value="30">Letzte 30 Tage</option>
+                <option value="90">Letzte 3 Monate</option>
+                <option value="365">Letzte 12 Monate</option>
+                <option value="0">Gesamter Zeitraum</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; margin-top: var(--space-2)">
+            <button class="btn btn-secondary" onClick="{{ resetHistory }}"><span data-i18n>Auswahl zurücksetzen</span></button>
+            <span style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ hSummary }}</span>
+          </div>
+        </section>
+
+        <div data-two>
+          <section class="card">
+            <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+              <h4 style="margin: 0" data-i18n>Bewegungen</h4>
+              <span class="text-muted" style="font-size: 12px">{{ hCountLabel }}</span>
+            </div>
+            <div style="overflow-x: auto; max-width: 100%">
+              <table class="table" data-zebra style="min-width: 540px">
+                <thead>
+                  <tr>
+                    <th data-i18n>Zeitpunkt</th>
+                    <th data-i18n>Artikel</th>
+                    <th style="text-align: right" data-i18n>Menge</th>
+                    <th style="text-align: right" data-i18n>Bestand danach</th>
+                    <th data-i18n>Person</th>
+                    <th data-i18n>Lagerort</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ hRows }}" as="r" hint-placeholder-count="8">
+                    <tr>
+                      <td style="white-space: nowrap">{{ r.when }}</td>
+                      <td style="font-weight: 500">{{ r.name }}</td>
+                      <td style="text-align: right; font-variant-numeric: tabular-nums; color: {{ r.color }}">{{ r.delta }}</td>
+                      <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.after }}</td>
+                      <td class="text-muted">{{ r.who }}</td>
+                      <td class="text-muted">{{ r.ort }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <sc-if value="{{ hEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: var(--space-6); text-align: center; font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Keine Bewegungen für diese Auswahl.</div>
+            </sc-if>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+              <button class="btn btn-secondary" onClick="{{ exportHistoryCsv }}"><span data-i18n>Als Excel exportieren</span></button>
+              <button class="btn btn-secondary" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
+            </div>
+          </section>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+            <section class="card">
+              <h4 style="margin: 0" data-i18n>Bestand im Zeitverlauf</h4>
+              <div class="card-meta">{{ hChartLabel }}</div>
+              {{ hChart }}
+            </section>
+            <section class="card">
+              <h4 style="margin: 0" data-i18n>Summe im Zeitraum</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--space-3)">
+                <div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Entnommen</div>
+                  <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1; color: var(--color-accent-700)">{{ hTaken }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Aufgefüllt</div>
+                  <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1">{{ hAdded }}</div>
+                </div>
+                <div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Buchungen</div>
+                  <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1">{{ hCount }}</div>
+                </div>
+              </div>
+            </section>
+            <section class="card">
+              <h4 style="margin: 0" data-i18n>Meistbewegte Artikel</h4>
+              <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+                <sc-for list="{{ hTop }}" as="t" hint-placeholder-count="5">
+                  <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: center">
+                    <div style="min-width: 0">
+                      <div style="font-size: 13px">{{ t.name }}</div>
+                      <div style="height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--color-text) 8%, transparent); margin-top: 4px">
+                        <div style="height: 5px; border-radius: 3px; background: var(--color-accent); width: {{ t.width }}"></div>
+                      </div>
+                    </div>
+                    <div style="font-family: var(--font-heading); font-size: 16px">{{ t.total }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
           </div>
         </div>
       </div>
@@ -975,12 +1133,189 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ onLanding }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="Startseite" style="min-height: 100vh; background: var(--sc-ground); display: flex; flex-direction: column">
+
+  <header style="position: sticky; top: 0; z-index: 20; background: var(--sc-card); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
+    <div data-landing-bar style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-3)">
+      <div style="display: flex; align-items: center; gap: 10px; margin-right: auto">
+        <div style="width: 30px; height: 30px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 16px; color: var(--sc-card)">S</div>
+        <div style="font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.01em">{{ serviceName }}</div>
+      </div>
+      <select class="input" style="width: 74px; flex: none; padding-inline: 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
+        <option value="de">DE</option>
+        <option value="en">EN</option>
+        <option value="sv">SV</option>
+      </select>
+      <button class="btn btn-secondary" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
+      <button class="btn btn-primary" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+    </div>
+  </header>
+
+  <section data-landing-hero style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-8); align-items: center">
+    <div>
+      <div style="display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--color-accent) 14%, transparent); color: var(--color-accent-700); font-size: 12px; letter-spacing: 0.04em">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span data-i18n>Alle Tarife derzeit kostenlos</span>
+      </div>
+      <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 54px); line-height: 1.03; letter-spacing: -0.02em; margin: var(--space-4) 0 var(--space-3)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
+      <p style="font-size: 17px; line-height: 1.6; max-width: 34em; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin: 0 0 var(--space-6)" data-i18n>QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.</p>
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap">
+        <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
+        <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
+      </div>
+      <div style="display: flex; gap: var(--space-6); flex-wrap: wrap; margin-top: var(--space-8)">
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">3</div>
+          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Sprachen</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">0 €</div>
+          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>im Einstieg</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">EU</div>
+          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Datenhaltung</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blueprint elev-lg" style="padding: var(--space-4); background: var(--sc-card)">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-3)">
+        <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Nach dem Scan</span>
+      </div>
+      <div style="font-family: var(--font-heading); font-size: 19px; line-height: 1.2">Mineralwasser still, Kasten 12 × 0,75 l</div>
+      <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: var(--space-4)">SC-1001 · Keller · Regal B2</div>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4)">
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Ist</div>
+          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1; color: var(--color-accent-700)">6</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Min</div>
+          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1">10</div>
+        </div>
+        <div>
+          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestellen</div>
+          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1">20</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-4)">
+        <span class="tag tag-outline" data-i18n>Unter Mindestbestand</span>
+        <span class="tag tag-neutral">Getränke</span>
+      </div>
+      <div class="blueprint" style="padding: var(--space-3); background: var(--sc-ground)">
+        <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-accent-700)">Brevo</div>
+        <div style="font-size: 13px; line-height: 1.45" data-i18n>Mail an Marie Kohl, Stellvertretung im CC: Bestand 6 unter Mindestbestand 10.</div>
+      </div>
+    </div>
+  </section>
+
+  <section data-landing-features style="max-width: 1120px; width: 100%; margin: 0 auto; padding: 0 var(--space-6) var(--space-8); display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--space-4)">
+    <div class="card">
+      <div class="card-kicker" data-i18n>Scannen</div>
+      <h4 style="margin: 0" data-i18n>QR-Code am Regal</h4>
+      <p class="card-body" style="margin: 0" data-i18n>Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.</p>
+    </div>
+    <div class="card">
+      <div class="card-kicker" data-i18n>Automatisch</div>
+      <h4 style="margin: 0" data-i18n>Nie wieder leer</h4>
+      <p class="card-body" style="margin: 0" data-i18n>Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Die Bestellliste entsteht von allein.</p>
+    </div>
+    <div class="card">
+      <div class="card-kicker" data-i18n>Rechte</div>
+      <h4 style="margin: 0" data-i18n>Jede Person ihr Maß</h4>
+      <p class="card-body" style="margin: 0" data-i18n>Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.</p>
+    </div>
+    <div class="card">
+      <div class="card-kicker" data-i18n>Getrennt</div>
+      <h4 style="margin: 0" data-i18n>Nur euer Lager</h4>
+      <p class="card-body" style="margin: 0" data-i18n>Jede Firma sieht ausschließlich eigene Artikel. Das steckt in der Datenbank, nicht in der Oberfläche.</p>
+    </div>
+  </section>
+
+  <section style="background: var(--color-accent-900); color: var(--color-neutral-100); padding: var(--space-8) var(--space-6)">
+    <div style="max-width: 1120px; margin: 0 auto">
+      <div style="font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: .75" data-i18n>So läuft es im Alltag</div>
+      <div data-landing-steps style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-6); margin-top: var(--space-4)">
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">01</div>
+          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Anlegen</div>
+          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Artikel einzeln eintragen oder eine Excel-Tabelle hochladen.</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">02</div>
+          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Etikettieren</div>
+          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>QR-Codes drucken und ans Regal kleben.</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">03</div>
+          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Buchen</div>
+          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Scannen, Menge eingeben, entnehmen. Wer und wann steht im Protokoll.</div>
+        </div>
+        <div>
+          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">04</div>
+          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Bestellen</div>
+          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Mail kommt, Liste steht, Status auf „ist bestellt" setzen.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); text-align: center">
+    <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 var(--space-3)" data-i18n>In zehn Minuten eingerichtet</h2>
+    <p style="font-size: 15.5px; line-height: 1.6; max-width: 30em; margin: 0 auto var(--space-6); color: color-mix(in srgb, var(--color-text) 70%, transparent)" data-i18n>Eine Person aus dem Unternehmen registriert sich, lädt das Team ein und legt die ersten Artikel an.</p>
+    <button class="btn btn-primary" style="height: 48px; padding-inline: 28px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Jetzt registrieren</span></button>
+  </section>
+
+  <footer style="margin-top: auto; border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
+    <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+      <span>{{ serviceName }} · Internet GmbH</span>
+      <span style="margin-left: auto" data-i18n>Daten in der EU · Jede Firma getrennt · Kein öffentlicher Zugriff</span>
+    </div>
+  </footer>
+</div>
+</sc-if>
+
 <sc-if value="{{ inAuth }}" hint-placeholder-val="{{ false }}">
-<div style="min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: var(--space-8) var(--space-4)">
-  <div style="width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: var(--space-4)">
+<div data-auth-shell style="min-height: 100vh; display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr); background: var(--sc-ground)">
+
+  <aside data-auth-aside style="background: var(--color-accent-900); color: var(--color-neutral-100); padding: var(--space-8) var(--space-6); display: flex; flex-direction: column; gap: var(--space-6)">
+    <button class="btn" style="align-self: flex-start; color: var(--color-neutral-100); border-color: color-mix(in srgb, #fff 30%, transparent); font-size: 13px" onClick="{{ viewLanding }}">
+      <span style="font-size: 14px">←</span><span data-i18n>Zur Startseite</span>
+    </button>
     <div style="display: flex; align-items: center; gap: 10px">
-      <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); color: var(--sc-card)">S</div>
+      <div style="width: 32px; height: 32px; border-radius: 10px; background: var(--color-neutral-100); display: grid; place-items: center; font-family: var(--font-heading); color: var(--color-accent-900)">S</div>
       <div style="font-family: var(--font-heading); font-size: 22px">{{ serviceName }}</div>
+    </div>
+    <div>
+      <div style="font-family: var(--font-heading); font-size: clamp(24px, 2.6vw, 33px); line-height: 1.1" data-i18n>Lagerverwaltung, die dem Regal folgt.</div>
+      <p style="font-size: 14.5px; line-height: 1.6; opacity: .88; margin: var(--space-3) 0 0; max-width: 26em" data-i18n>Scannen, buchen, nachbestellen — und jede Firma sieht ausschließlich ihr eigenes Lager.</p>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+      <div style="display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start">
+        <span style="font-family: var(--font-heading); opacity: .6">01</span>
+        <span style="font-size: 13.5px; line-height: 1.5" data-i18n>QR-Code scannen, Entnahme in Sekunden buchen</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start">
+        <span style="font-family: var(--font-heading); opacity: .6">02</span>
+        <span style="font-size: 13.5px; line-height: 1.5" data-i18n>Warnmail und Bestellliste entstehen von allein</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start">
+        <span style="font-family: var(--font-heading); opacity: .6">03</span>
+        <span style="font-size: 13.5px; line-height: 1.5" data-i18n>Rechte pro Person, bis auf das einzelne Recht</span>
+      </div>
+    </div>
+    <div style="margin-top: auto; font-size: 12px; line-height: 1.55; opacity: .72" data-i18n>Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.</div>
+  </aside>
+
+  <div style="display: grid; place-items: center; padding: var(--space-8) var(--space-4)">
+  <div style="width: 100%; max-width: 430px; display: flex; flex-direction: column; gap: var(--space-4)">
+    <div data-auth-brand style="display: none; align-items: center; gap: 10px">
+      <div style="width: 30px; height: 30px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); color: var(--sc-card)">S</div>
+      <div style="font-family: var(--font-heading); font-size: 20px; margin-right: auto">{{ serviceName }}</div>
+      <button class="btn btn-ghost" style="font-size: 13px" onClick="{{ viewLanding }}"><span data-i18n>Startseite</span></button>
     </div>
 
     <div class="seg" style="width: 100%">
@@ -1087,7 +1422,8 @@
       </sc-if>
     </section>
 
-    <div class="text-muted" style="font-size: 11px; text-align: center; line-height: 1.5" data-i18n>Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.</div>
+    <div data-auth-note style="display: none; font-size: 11px; text-align: center; line-height: 1.5; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.</div>
+  </div>
   </div>
 </div>
 </sc-if>
@@ -1163,6 +1499,35 @@ const DICT = {
     "Personen": "People", "Angelegt": "Created", "Passwort": "Password", "Löschen": "Delete",
     "Betriebszugang: Firmen und Personen sperren, löschen, Passwort-Neuanforderung schicken. Produktdaten der Firmen sind hier nicht sichtbar — jede Firma sieht nur ihr eigenes Lager.": "Operator access: block or delete companies and people, trigger password resets. Company product data is not visible here — each company only ever sees its own stock.",
     "Anmelden": "Sign in", "Registrieren": "Register", "Einladung": "Invitation", "Schließen": "Close",
+    "Kostenlos starten": "Start for free", "Alle Tarife derzeit kostenlos": "All plans free for now",
+    "Das Lager im Griff — mit einem Scan.": "Your stock, one scan away.",
+    "QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.": "Scan the shelf code, book the withdrawal, done. Drop below the minimum and the responsible person gets a mail automatically — and the order list writes itself.",
+    "Firma registrieren": "Register your company", "Ich habe ein Konto": "I have an account",
+    "Sprachen": "languages", "im Einstieg": "to start", "Datenhaltung": "data residency",
+    "Nach dem Scan": "After the scan", "Bestellen": "Order", "QR-Code am Regal": "A code on every shelf",
+    "Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.": "Each code belongs to exactly one item and opens its detail view. Print labels with your own text.",
+    "Automatisch": "Automatic", "Nie wieder leer": "Never run out",
+    "Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Die Bestellliste entsteht von allein.": "Alerts instantly or collected — daily, weekly, monthly. The order list builds itself.",
+    "Jede Person ihr Maß": "Rights that fit",
+    "Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.": "Four roles as templates, every right adjustable one by one — from booking to exporting.",
+    "Getrennt": "Separated", "Nur euer Lager": "Only your stock",
+    "Jede Firma sieht ausschließlich eigene Artikel. Das steckt in der Datenbank, nicht in der Oberfläche.": "Every company sees only its own items. That lives in the database, not the interface.",
+    "So läuft es im Alltag": "How it works day to day", "Anlegen": "Set up", "Etikettieren": "Label", "Buchen": "Book",
+    "Artikel einzeln eintragen oder eine Excel-Tabelle hochladen.": "Enter items one by one or upload a spreadsheet.",
+    "QR-Codes drucken und ans Regal kleben.": "Print QR codes and stick them on the shelf.",
+    "Scannen, Menge eingeben, entnehmen. Wer und wann steht im Protokoll.": "Scan, enter a quantity, take it. Who and when is logged.",
+    "Mail kommt, Liste steht, Status auf „ist bestellt\" setzen.": "The mail arrives, the list is ready, set the status to ordered.",
+    "In zehn Minuten eingerichtet": "Set up in ten minutes",
+    "Eine Person aus dem Unternehmen registriert sich, lädt das Team ein und legt die ersten Artikel an.": "One person from the company registers, invites the team and adds the first items.",
+    "Jetzt registrieren": "Register now",
+    "Daten in der EU · Jede Firma getrennt · Kein öffentlicher Zugriff": "Data in the EU · Every company separated · No public access",
+    "Zur Startseite": "Back to start", "Startseite": "Start",
+    "Lagerverwaltung, die dem Regal folgt.": "Stock management that follows the shelf.",
+    "Scannen, buchen, nachbestellen — und jede Firma sieht ausschließlich ihr eigenes Lager.": "Scan, book, reorder — and every company sees only its own stock.",
+    "QR-Code scannen, Entnahme in Sekunden buchen": "Scan a code, book a withdrawal in seconds",
+    "Warnmail und Bestellliste entstehen von allein": "Alert mails and order lists build themselves",
+    "Rechte pro Person, bis auf das einzelne Recht": "Rights per person, down to the single permission",
+    "Mail an Marie Kohl, Stellvertretung im CC: Bestand 6 unter Mindestbestand 10.": "Mail to Marie Kohl, deputies in CC: stock 6 below minimum 10.",
     "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registration and sign-in are protected by rate limiting, a bot check and a lockout after five failed attempts."
   },
   sv: {
@@ -1219,6 +1584,35 @@ const DICT = {
     "Personen": "Personer", "Angelegt": "Skapad", "Passwort": "Lösenord", "Löschen": "Ta bort",
     "Betriebszugang: Firmen und Personen sperren, löschen, Passwort-Neuanforderung schicken. Produktdaten der Firmen sind hier nicht sichtbar — jede Firma sieht nur ihr eigenes Lager.": "Operatörsåtkomst: blockera eller ta bort företag och personer, begär nytt lösenord. Företagens artikeldata syns inte här — varje företag ser bara sitt eget lager.",
     "Anmelden": "Logga in", "Registrieren": "Registrera", "Einladung": "Inbjudan", "Schließen": "Stäng",
+    "Kostenlos starten": "Börja gratis", "Alle Tarife derzeit kostenlos": "Alla planer gratis just nu",
+    "Das Lager im Griff — mit einem Scan.": "Lagret i handen — med en skanning.",
+    "QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.": "Skanna koden på hyllan, bokför uttaget, klart. Understiger lagret miniminivån går ett mejl automatiskt till ansvarig person — och beställningslistan skriver sig själv.",
+    "Firma registrieren": "Registrera företag", "Ich habe ein Konto": "Jag har ett konto",
+    "Sprachen": "språk", "im Einstieg": "till start", "Datenhaltung": "datalagring",
+    "Nach dem Scan": "Efter skanningen", "Bestellen": "Beställ", "QR-Code am Regal": "En kod på varje hylla",
+    "Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.": "Varje kod hör till en enda artikel och öppnar dess detaljvy. Skriv ut etiketter med egen text.",
+    "Automatisch": "Automatiskt", "Nie wieder leer": "Aldrig tomt igen",
+    "Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Die Bestellliste entsteht von allein.": "Avisering direkt eller samlat — dagligen, veckovis, månadsvis. Beställningslistan skapas av sig själv.",
+    "Jede Person ihr Maß": "Rättigheter som passar",
+    "Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.": "Fyra roller som mall, varje rättighet justerbar för sig — från bokning till export.",
+    "Getrennt": "Åtskilt", "Nur euer Lager": "Bara ert lager",
+    "Jede Firma sieht ausschließlich eigene Artikel. Das steckt in der Datenbank, nicht in der Oberfläche.": "Varje företag ser enbart sina egna artiklar. Det ligger i databasen, inte i gränssnittet.",
+    "So läuft es im Alltag": "Så fungerar det i vardagen", "Anlegen": "Lägg upp", "Etikettieren": "Märk upp", "Buchen": "Bokför",
+    "Artikel einzeln eintragen oder eine Excel-Tabelle hochladen.": "Lägg in artiklar en och en eller ladda upp ett kalkylblad.",
+    "QR-Codes drucken und ans Regal kleben.": "Skriv ut QR-koder och sätt dem på hyllan.",
+    "Scannen, Menge eingeben, entnehmen. Wer und wann steht im Protokoll.": "Skanna, ange antal, ta ut. Vem och när står i loggen.",
+    "Mail kommt, Liste steht, Status auf „ist bestellt\" setzen.": "Mejlet kommer, listan finns, sätt status till beställd.",
+    "In zehn Minuten eingerichtet": "Klart på tio minuter",
+    "Eine Person aus dem Unternehmen registriert sich, lädt das Team ein und legt die ersten Artikel an.": "En person från företaget registrerar sig, bjuder in teamet och lägger upp de första artiklarna.",
+    "Jetzt registrieren": "Registrera nu",
+    "Daten in der EU · Jede Firma getrennt · Kein öffentlicher Zugriff": "Data i EU · Varje företag åtskilt · Ingen offentlig åtkomst",
+    "Zur Startseite": "Till startsidan", "Startseite": "Start",
+    "Lagerverwaltung, die dem Regal folgt.": "Lagerhantering som följer hyllan.",
+    "Scannen, buchen, nachbestellen — und jede Firma sieht ausschließlich ihr eigenes Lager.": "Skanna, bokför, beställ om — och varje företag ser bara sitt eget lager.",
+    "QR-Code scannen, Entnahme in Sekunden buchen": "Skanna en kod, bokför ett uttag på sekunder",
+    "Warnmail und Bestellliste entstehen von allein": "Aviseringar och beställningslistor skapas automatiskt",
+    "Rechte pro Person, bis auf das einzelne Recht": "Rättigheter per person, ner till enskild rättighet",
+    "Mail an Marie Kohl, Stellvertretung im CC: Bestand 6 unter Mindestbestand 10.": "Mejl till Marie Kohl, ersättare som CC: lager 6 under miniminivå 10.",
     "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registrering och inloggning skyddas av hastighetsgräns, botkontroll och låsning efter fem misslyckade försök."
   }
 };
@@ -1349,7 +1743,7 @@ class Component extends DCLogic {
     const start = (props && props.startView) || "Übersicht";
     this.state = {
       authed: start !== "Anmeldung",
-      authView: "login",
+      authView: "landing",
       screen: start === "Anmeldung" ? "dashboard" : this.screenKey(start),
       role: (props && props.demoRole) ? this.roleKey(props.demoRole) : "owner",
       theme: (props && props.theme) || "Hell",
@@ -1386,10 +1780,33 @@ class Component extends DCLogic {
       inviteEmail: "", authEmail: "", authPw: "", regCompany: "",
       importDone: false,
       menu: null, burgerOpen: false,
+      log: this.seedLog(),
+      hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
       photoUrl: "", photoFor: null, platformAdmin: false,
       toast: null
     };
+  }
+
+  // Aus den Verlaufsreihen der Stammdaten wird ein Buchungsprotokoll
+  // mit Datum, Person und Bestand danach abgeleitet.
+  seedLog() {
+    const people = ["Marie Kohl", "Timo Brand", "Anke Reuß", "Jonas Pelz", "Lena Sikora"];
+    const out = [];
+    const today = new Date(2026, 8, 16);
+    SEED.forEach((p, pi) => {
+      for (let i = 1; i < p.hist.length; i++) {
+        const delta = p.hist[i] - p.hist[i - 1];
+        if (delta === 0) continue;
+        const d = new Date(today);
+        d.setDate(d.getDate() - (p.hist.length - i) * 9 - (pi % 4));
+        out.push({
+          productId: p.id, delta, after: p.hist[i], date: d,
+          who: people[(pi + i) % people.length]
+        });
+      }
+    });
+    return out.sort((a, b) => b.date - a.date);
   }
 
   screenKey(label) {
@@ -1409,7 +1826,7 @@ class Component extends DCLogic {
       if (!api.configured) return;
       this.api = api;
       const sess = await api.session();
-      if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase" }); return; }
+      if (!sess) { this.setState({ live: true, authed: false, authView: "landing", source: "Supabase" }); return; }
       await this.refresh();
     } catch (e) { console.warn("StockControl läuft mit Demo-Daten:", e && e.message); }
   }
@@ -1798,6 +2215,8 @@ class Component extends DCLogic {
       const s = this.statusOf(p);
       return Object.assign({}, p, {
         statusLabel: s.label, tagClass: s.tag,
+        mayOrder: mine(p), locked: !mine(p),
+        lockNote: this.tr("nur ") + p.verantwortlich,
         action: p.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Als bestellt markieren"),
         toggleOrdered: () => {
           const next = p.status === "ordered" ? "low" : "ordered";
@@ -1841,6 +2260,37 @@ class Component extends DCLogic {
     }));
     const qq = st.qrQuery.toLowerCase();
 
+    /* ── Bestandsverlauf: eigene Seite mit Filtern ───────────── */
+    const byId = id => products.find(p => p.id === id);
+    const matchProduct = p => !!p &&
+      (!st.hProduct || p.id === st.hProduct) &&
+      (!st.hCategory || (p.kategorien || []).includes(st.hCategory)) &&
+      (!st.hPlace || p.ort === st.hPlace) &&
+      (!st.hResp || p.verantwortlich === st.hResp) &&
+      (!st.hSupplier || p.lieferant === st.hSupplier);
+    const days = parseInt(st.hRange, 10) || 0;
+    const cutoff = days ? new Date(2026, 8, 16 - 0).getTime() - days * 86400000 : 0;
+    const fmt = d => d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
+
+    const hEntries = st.log.filter(e => matchProduct(byId(e.productId)) && (!cutoff || e.date.getTime() >= cutoff));
+    const hMatched = products.filter(matchProduct);
+    const taken = hEntries.filter(e => e.delta < 0).reduce((s, e) => s + Math.abs(e.delta), 0);
+    const added = hEntries.filter(e => e.delta > 0).reduce((s, e) => s + e.delta, 0);
+
+    const totals = {};
+    hEntries.forEach(e => { totals[e.productId] = (totals[e.productId] || 0) + Math.abs(e.delta); });
+    const topMax = Math.max(1, ...Object.values(totals));
+    const hTop = Object.keys(totals).sort((a, b) => totals[b] - totals[a]).slice(0, 5).map(id => ({
+      name: (byId(id) || {}).name || id, total: totals[id],
+      width: Math.round((totals[id] / topMax) * 100) + "%"
+    }));
+
+    const steps = 7;
+    const agg = [];
+    for (let i = 0; i < steps; i++) {
+      agg.push(hMatched.reduce((s, p) => s + ((p.hist && p.hist[i] !== undefined) ? p.hist[i] : p.ist), 0));
+    }
+
     const ev = st.events.find(e => e.id === st.eventId) || st.events[0];
     const evRow = (it) => {
       const p = products.find(x => x.id === it.id);
@@ -1866,7 +2316,10 @@ class Component extends DCLogic {
 
     return {
       serviceName: name,
-      authed: st.authed, inAuth: !st.authed,
+      authed: st.authed,
+      onLanding: !st.authed && st.authView === "landing",
+      inAuth: !st.authed && st.authView !== "landing",
+      viewLanding: () => this.setState({ authView: "landing" }),
       lang, role: st.role, isSuper: st.live ? st.platformAdmin : st.role === "super",
       adminLive: st.live && st.platformAdmin,
       adminDemo: !st.live,
@@ -1878,12 +2331,15 @@ class Component extends DCLogic {
 
       screenTitle: {
         dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
-        events: this.tr("Events"),
+        events: this.tr("Events"), history: this.tr("Bestandsverlauf"),
         new: this.tr("Produkt anlegen"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
         settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole")
       }[st.screen],
       onDashboard: st.screen === "dashboard", onProducts: st.screen === "products", onDetail: st.screen === "detail",
       onScan: st.screen === "scan", onNew: st.screen === "new", onQr: st.screen === "qr",
+      onHistory: st.screen === "history", navHistory: this.navStyle("history"),
+      goHistory: () => this.go("history"),
+      goHistoryForCurrent: () => this.setState({ screen: "history", hProduct: cur.id, menu: null, burgerOpen: false }),
       onTeam: st.screen === "team", onSettings: st.screen === "settings", onAdmin: st.screen === "admin",
 
       navDashboard: this.navStyle("dashboard"), navProducts: this.navStyle("products"), navScan: this.navStyle("scan"),
@@ -1910,7 +2366,7 @@ class Component extends DCLogic {
       goSettings: () => this.go("settings"), goAdmin: () => this.go("admin"),
       logout: () => {
         if (st.live && this.api) this.api.signOut().catch(() => {});
-        this.setState({ authed: false, authView: "login", menu: null });
+        this.setState({ authed: false, authView: "landing", menu: null });
       },
 
       segLight: this.segStyle(st.theme === "Hell"), segDark: this.segStyle(st.theme === "Dunkel"), segSystem: this.segStyle(st.theme === "System"),
@@ -2048,14 +2504,40 @@ class Component extends DCLogic {
       },
       exportEventList: () => this.say("Export", this.tr("Bedarfsliste exportiert"), (ev ? ev.name : "") + " · Excel (.xlsx)"),
 
-      canOrder: cur.status === "low" || cur.status === "ordered",
+      canOrder: (cur.status === "low" || cur.status === "ordered") && mine(cur),
+      statusLocked: (cur.status === "low" || cur.status === "ordered") && !mine(cur),
+      statusLockedNote: this.tr("Status setzen darf nur ") + cur.verantwortlich + this.tr(" oder die Stellvertretung."),
       orderBtnLabel: cur.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Status: ist bestellt"),
       markOrdered: () => {
         const next = cur.status === "ordered" ? "low" : "ordered";
         this.setState(prev => ({ products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, { status: next }) : p) }));
         this.remote(api => api.updateProduct(cur.id, { status: next }));
       },
-      exportHistoryCsv: () => this.say("Export", this.tr("Bestandsverlauf exportiert"), cur.name + " · Excel (.xlsx)"),
+      hProducts: products.map(p => ({ id: p.id, name: p.name })),
+      hCategories: Array.from(new Set(products.flatMap(p => p.kategorien || []))).sort(),
+      hPeople: Array.from(new Set(products.map(p => p.verantwortlich).filter(Boolean))).sort(),
+      hSuppliers: Array.from(new Set(products.map(p => p.lieferant).filter(Boolean))).sort(),
+      hProduct: st.hProduct, hCategory: st.hCategory, hPlace: st.hPlace,
+      hResp: st.hResp, hSupplier: st.hSupplier, hRange: st.hRange,
+      setHProduct: setSel("hProduct"), setHCategory: setSel("hCategory"), setHPlace: setSel("hPlace"),
+      setHResp: setSel("hResp"), setHSupplier: setSel("hSupplier"), setHRange: setSel("hRange"),
+      resetHistory: () => this.setState({ hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90" }),
+      hSummary: hMatched.length + " " + this.tr("Artikel in der Auswahl"),
+      hCountLabel: hEntries.length + " " + this.tr("Buchungen"),
+      hEmpty: hEntries.length === 0,
+      hRows: hEntries.slice(0, 40).map(e => {
+        const p = byId(e.productId) || {};
+        return {
+          when: fmt(e.date), name: p.name || e.productId,
+          delta: (e.delta > 0 ? "+" : "−") + Math.abs(e.delta),
+          color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
+          after: e.after, who: e.who, ort: p.ort || "—"
+        };
+      }),
+      hTaken: taken, hAdded: added, hCount: hEntries.length, hTop,
+      hChart: this.chart(agg),
+      hChartLabel: hMatched.length === 1 ? hMatched[0].name : hMatched.length + " " + this.tr("Artikel zusammengefasst"),
+      exportHistoryCsv: () => this.say("Export", this.tr("Bestandsverlauf exportiert"), hEntries.length + " " + this.tr("Buchungen") + " · Excel (.xlsx)"),
       exportOrderCsv: () => this.say("Export", this.tr("Bestellliste exportiert"), orderList.length + " " + this.tr("Positionen") + " · Excel (.xlsx)"),
       printPage: () => window.print(),
 
