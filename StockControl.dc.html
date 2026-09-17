@@ -64,9 +64,8 @@
     [data-brand] { margin-right: 0 !important; }
     [data-brandword] { display: none !important; }
     [data-langsel] { width: 62px !important; }
-    [data-landing-hero] { grid-template-columns: minmax(0, 1fr) !important; gap: var(--space-6) !important; padding: var(--space-6) var(--space-4) !important; }
+    [data-landing-hero] { padding: var(--space-6) var(--space-4) !important; }
     [data-landing-bar] { padding: var(--space-2) var(--space-4) !important; gap: 6px !important; }
-    [data-landing-features] { padding: 0 var(--space-4) var(--space-6) !important; }
     [data-two] { grid-template-columns: minmax(0, 1fr); }
     [data-wide-only] { display: none !important; }
   }
@@ -1187,127 +1186,31 @@
     </div>
   </header>
 
-  <section data-landing-hero style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: var(--space-8); align-items: center">
-    <div>
-      <div style="display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px; background: color-mix(in srgb, var(--color-accent) 14%, transparent); color: var(--color-accent-700); font-size: 12px; letter-spacing: 0.04em">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span data-i18n>Alle Tarife derzeit kostenlos</span>
-      </div>
-      <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 54px); line-height: 1.03; letter-spacing: -0.02em; margin: var(--space-4) 0 var(--space-3)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
-      <p style="font-size: 17px; line-height: 1.6; max-width: 34em; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin: 0 0 var(--space-6)" data-i18n>QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.</p>
-      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap">
-        <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
-        <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
-      </div>
-      <div style="display: flex; gap: var(--space-6); flex-wrap: wrap; margin-top: var(--space-8)">
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">3</div>
-          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Sprachen</div>
-        </div>
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">0 €</div>
-          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>im Einstieg</div>
-        </div>
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 26px; line-height: 1">EU</div>
-          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Datenhaltung</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="blueprint elev-lg" style="padding: var(--space-4); background: var(--sc-card)">
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-3)">
-        <span style="width: 9px; height: 9px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Nach dem Scan</span>
-      </div>
-      <div style="font-family: var(--font-heading); font-size: 19px; line-height: 1.2">Mineralwasser still, Kasten 12 × 0,75 l</div>
-      <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent); margin-bottom: var(--space-4)">SC-1001 · Keller · Regal B2</div>
-      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4)">
-        <div>
-          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Ist</div>
-          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1; color: var(--color-accent-700)">6</div>
-        </div>
-        <div>
-          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Min</div>
-          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1">10</div>
-        </div>
-        <div>
-          <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestellen</div>
-          <div style="font-family: var(--font-heading); font-size: 25px; line-height: 1.1">20</div>
-        </div>
-      </div>
-      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--space-4)">
-        <span class="tag tag-outline" data-i18n>Unter Mindestbestand</span>
-        <span class="tag tag-neutral">Getränke</span>
-      </div>
-      <div class="blueprint" style="padding: var(--space-3); background: var(--sc-ground)">
-        <div style="font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-accent-700)">Brevo</div>
-        <div style="font-size: 13px; line-height: 1.45" data-i18n>Mail an Marie Kohl, Stellvertretung im CC: Bestand 6 unter Mindestbestand 10.</div>
-      </div>
+  <section data-landing-hero style="max-width: 640px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); flex: 1; display: flex; flex-direction: column; justify-content: center">
+    <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 50px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 var(--space-6)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
+    <ul style="list-style: none; margin: 0 0 var(--space-8); padding: 0; display: flex; flex-direction: column; gap: var(--space-3)">
+      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+        <span data-i18n>QR-Code am Regal scannen</span>
+      </li>
+      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+        <span data-i18n>Warenüberblick mit Warnung und Bestellliste</span>
+      </li>
+      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
+        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+        <span data-i18n>Daten in der EU, pro Firma getrennt</span>
+      </li>
+    </ul>
+    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap">
+      <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
+      <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
     </div>
   </section>
 
-  <section data-landing-features style="max-width: 1120px; width: 100%; margin: 0 auto; padding: 0 var(--space-6) var(--space-8); display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--space-4)">
-    <div class="card">
-      <div class="card-kicker" data-i18n>Scannen</div>
-      <h4 style="margin: 0" data-i18n>QR-Code am Regal</h4>
-      <p class="card-body" style="margin: 0" data-i18n>Jeder Code gehört zu genau einem Artikel und öffnet dessen Detailansicht. Etiketten mit eigenem Text drucken.</p>
-    </div>
-    <div class="card">
-      <div class="card-kicker" data-i18n>Automatisch</div>
-      <h4 style="margin: 0" data-i18n>Nie wieder leer</h4>
-      <p class="card-body" style="margin: 0" data-i18n>Warnung sofort oder gesammelt — täglich, wöchentlich, monatlich. Die Bestellliste entsteht von allein.</p>
-    </div>
-    <div class="card">
-      <div class="card-kicker" data-i18n>Rechte</div>
-      <h4 style="margin: 0" data-i18n>Jede Person ihr Maß</h4>
-      <p class="card-body" style="margin: 0" data-i18n>Vier Rollen als Vorlage, jedes Recht einzeln anpassbar — von Buchen bis Exportieren.</p>
-    </div>
-    <div class="card">
-      <div class="card-kicker" data-i18n>Getrennt</div>
-      <h4 style="margin: 0" data-i18n>Nur euer Lager</h4>
-      <p class="card-body" style="margin: 0" data-i18n>Jede Firma sieht ausschließlich eigene Artikel. Das steckt in der Datenbank, nicht in der Oberfläche.</p>
-    </div>
-  </section>
-
-  <section style="background: var(--color-accent-900); color: var(--color-neutral-100); padding: var(--space-8) var(--space-6)">
-    <div style="max-width: 1120px; margin: 0 auto">
-      <div style="font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: .75" data-i18n>So läuft es im Alltag</div>
-      <div data-landing-steps style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-6); margin-top: var(--space-4)">
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">01</div>
-          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Anlegen</div>
-          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Artikel einzeln eintragen oder eine Excel-Tabelle hochladen.</div>
-        </div>
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">02</div>
-          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Etikettieren</div>
-          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>QR-Codes drucken und ans Regal kleben.</div>
-        </div>
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">03</div>
-          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Buchen</div>
-          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Scannen, Menge eingeben, entnehmen. Wer und wann steht im Protokoll.</div>
-        </div>
-        <div>
-          <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1; opacity: .5">04</div>
-          <div style="font-family: var(--font-heading); font-size: 17px; margin: 5px 0 3px" data-i18n>Bestellen</div>
-          <div style="font-size: 13.5px; line-height: 1.5; opacity: .88" data-i18n>Mail kommt, Liste steht, Status auf „ist bestellt" setzen.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); text-align: center">
-    <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); margin: 0 0 var(--space-3)" data-i18n>In zehn Minuten eingerichtet</h2>
-    <p style="font-size: 15.5px; line-height: 1.6; max-width: 30em; margin: 0 auto var(--space-6); color: color-mix(in srgb, var(--color-text) 70%, transparent)" data-i18n>Eine Person aus dem Unternehmen registriert sich, lädt das Team ein und legt die ersten Artikel an.</p>
-    <button class="btn btn-primary" style="height: 48px; padding-inline: 28px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Jetzt registrieren</span></button>
-  </section>
-
-  <footer style="margin-top: auto; border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
-    <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
-      <span>{{ serviceName }} · Internet GmbH</span>
-      <span style="margin-left: auto" data-i18n>Daten in der EU · Jede Firma getrennt · Kein öffentlicher Zugriff</span>
+  <footer style="border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
+    <div style="max-width: 640px; margin: 0 auto; padding: var(--space-4) var(--space-6); font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+      {{ serviceName }} · Internet GmbH
     </div>
   </footer>
 </div>
@@ -1558,7 +1461,10 @@ const DICT = {
     "Nur im verbundenen Betrieb": "Only when connected", "Zwei-Faktor braucht Supabase.": "Two-factor needs Supabase.",
     "Buchungen anzeigen": "Show entries", "Buchungen ausblenden": "Hide entries",
     "Einzelne Buchungen": "Individual entries",
-    "Kostenlos starten": "Start for free", "Alle Tarife derzeit kostenlos": "All plans free for now",
+    "Kostenlos starten": "Start for free",
+    "QR-Code am Regal scannen": "Scan the code on the shelf",
+    "Warenüberblick mit Warnung und Bestellliste": "Stock overview with alerts and order list",
+    "Daten in der EU, pro Firma getrennt": "Data in the EU, separated per company",
     "Das Lager im Griff — mit einem Scan.": "Your stock, one scan away.",
     "QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.": "Scan the shelf code, book the withdrawal, done. Drop below the minimum and the responsible person gets a mail automatically — and the order list writes itself.",
     "Firma registrieren": "Register your company", "Ich habe ein Konto": "I have an account",
@@ -1664,7 +1570,10 @@ const DICT = {
     "Nur im verbundenen Betrieb": "Endast i ansluten drift", "Zwei-Faktor braucht Supabase.": "Tvåfaktor kräver Supabase.",
     "Buchungen anzeigen": "Visa poster", "Buchungen ausblenden": "Dölj poster",
     "Einzelne Buchungen": "Enskilda poster",
-    "Kostenlos starten": "Börja gratis", "Alle Tarife derzeit kostenlos": "Alla planer gratis just nu",
+    "Kostenlos starten": "Börja gratis",
+    "QR-Code am Regal scannen": "Skanna koden på hyllan",
+    "Warenüberblick mit Warnung und Bestellliste": "Lageröversikt med avisering och beställningslista",
+    "Daten in der EU, pro Firma getrennt": "Data i EU, åtskilt per företag",
     "Das Lager im Griff — mit einem Scan.": "Lagret i handen — med en skanning.",
     "QR-Code am Regal scannen, Entnahme buchen, fertig. Fällt der Bestand unter das Minimum, geht automatisch eine Mail an die verantwortliche Person — und die Bestellliste schreibt sich selbst.": "Skanna koden på hyllan, bokför uttaget, klart. Understiger lagret miniminivån går ett mejl automatiskt till ansvarig person — och beställningslistan skriver sig själv.",
     "Firma registrieren": "Registrera företag", "Ich habe ein Konto": "Jag har ett konto",
