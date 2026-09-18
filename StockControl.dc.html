@@ -766,11 +766,13 @@
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Einzelnes Produkt anlegen</h4>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3)">
-            <div class="field"><label data-i18n>Name</label><input class="input" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg"></div>
-            <div class="field"><label data-i18n>EAN</label><input class="input" placeholder="4001234567890"></div>
+            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Name</label><input class="input" value="{{ npName }}" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg" onInput="{{ setNpName }}">
+              <div style="font-size: 11.5px; margin-top: 3px; color: {{ npNameColor }}">{{ npNameNote }}</div>
+            </div>
+            <div class="field"><label data-i18n>EAN</label><input class="input" value="{{ npEan }}" placeholder="4001234567890" onInput="{{ setNpEan }}"></div>
             <div class="field">
               <label data-i18n>Verantwortliche Person</label>
-              <select class="input">
+              <select class="input" value="{{ npResp }}" onChange="{{ setNpResp }}">
                 <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
                   <option value="{{ c.name }}">{{ c.name }}</option>
                 </sc-for>
@@ -778,7 +780,7 @@
             </div>
             <div class="field">
               <label data-i18n>Stellvertretung 1</label>
-              <select class="input">
+              <select class="input" value="{{ npD1 }}" onChange="{{ setNpD1 }}">
                 <option value="">— keine —</option>
                 <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
                   <option value="{{ c.name }}">{{ c.name }}</option>
@@ -787,7 +789,7 @@
             </div>
             <div class="field">
               <label data-i18n>Stellvertretung 2</label>
-              <select class="input">
+              <select class="input" value="{{ npD2 }}" onChange="{{ setNpD2 }}">
                 <option value="">— keine —</option>
                 <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
                   <option value="{{ c.name }}">{{ c.name }}</option>
@@ -796,7 +798,7 @@
             </div>
             <div class="field">
               <label data-i18n>Stellvertretung 3</label>
-              <select class="input">
+              <select class="input" value="{{ npD3 }}" onChange="{{ setNpD3 }}">
                 <option value="">— keine —</option>
                 <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
                   <option value="{{ c.name }}">{{ c.name }}</option>
@@ -804,16 +806,23 @@
               </select>
             </div>
             <div style="grid-column: 1 / -1; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
-            <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" value="10"></div>
-            <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" value="0"></div>
-            <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" value="20"></div>
-            <div class="field"><label data-i18n>Quantität</label><input class="input" data-i18n-ph placeholder="Einzelflasche, Kasten …"></div>
-            <div class="field"><label data-i18n>Lagerort</label><select class="input"><option>Keller · Regal B2</option><option>Serverraum · Schrank 3</option><option>Küche · Oberschrank</option><option>Lager Nord · Palette 7</option><option>Werkstatt · Schublade 12</option></select></div>
-            <div class="field"><label data-i18n>MHD</label><input class="input" type="date"></div>
-            <div class="field"><label data-i18n>Preis</label><input class="input" placeholder="8,49 €"></div>
-            <div class="field"><label data-i18n>Lieferant</label><input class="input" data-i18n-ph placeholder="Getränke Nord GmbH"></div>
-            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Link zum Produkt</label><input class="input" type="url" placeholder="https://"></div>
-            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Kategorien</label><input class="input" data-i18n-ph placeholder="Getränke, Küche, Verbrauchsmaterial — mit Komma trennen"></div>
+            <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
+            <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" min="0" step="1" value="{{ npIst }}" onInput="{{ setNpIst }}"></div>
+            <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" min="0" step="1" value="{{ npOrder }}" onInput="{{ setNpOrder }}"></div>
+            <div class="field"><label data-i18n>Quantität</label><input class="input" value="{{ npQty }}" data-i18n-ph placeholder="Einzelflasche, Kasten …" onInput="{{ setNpQty }}"></div>
+            <div class="field"><label data-i18n>Lagerort</label>
+              <select class="input" value="{{ npPlace }}" onChange="{{ setNpPlace }}">
+                <option value="">— bitte wählen —</option>
+                <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+                  <option value="{{ pl }}">{{ pl }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>MHD</label><input class="input" type="date" value="{{ npMhd }}" onInput="{{ setNpMhd }}"></div>
+            <div class="field"><label data-i18n>Preis</label><input class="input" value="{{ npPrice }}" placeholder="8,49 €" onInput="{{ setNpPrice }}"></div>
+            <div class="field"><label data-i18n>Lieferant</label><input class="input" value="{{ npSupplier }}" data-i18n-ph placeholder="Getränke Nord GmbH" onInput="{{ setNpSupplier }}"></div>
+            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Link zum Produkt</label><input class="input" type="url" value="{{ npLink }}" placeholder="https://" onInput="{{ setNpLink }}"></div>
+            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Kategorien</label><input class="input" value="{{ npCats }}" data-i18n-ph placeholder="Getränke, Küche, Verbrauchsmaterial — mit Komma trennen" onInput="{{ setNpCats }}"></div>
             <sc-for list="{{ attrFields }}" as="f" hint-placeholder-count="2">
               <div class="field">
                 <label>{{ f.name }}</label>
@@ -830,23 +839,47 @@
             </sc-for>
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
-            <button class="btn btn-primary" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ npDisabled }}" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
             <button class="btn btn-secondary" onClick="{{ goProducts }}"><span data-i18n>Abbrechen</span></button>
           </div>
         </section>
 
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <h4 style="margin: 0" data-i18n>Viele Produkte per Excel importieren</h4>
+          <h4 style="margin: 0" data-i18n>Viele Produkte aus einer Tabelle importieren</h4>
           <ol style="margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 6px">
             <li data-i18n>Vorlage mit allen Feldern herunterladen</li>
             <li data-i18n>Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt</li>
-            <li data-i18n>Datei hier hochladen, Spalten prüfen, importieren</li>
+            <li data-i18n>In Excel über „Speichern unter" als CSV ablegen (Trennzeichen Semikolon)</li>
+            <li data-i18n>CSV hier hochladen, Spalten prüfen, importieren</li>
           </ol>
-          <button class="btn btn-secondary" onClick="{{ downloadTemplate }}"><span data-i18n>Excel-Vorlage herunterladen</span></button>
+          <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>CSV-Vorlage herunterladen</span></button>
 
-          <div class="hr"></div>
-          <h4 style="margin: 0" data-i18n>Eigene Attribute</h4>
+        </section>
+
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Lagerorte</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Die Auswahl, die beim Anlegen eines Produkts und in allen Filtern erscheint. Ein Lagerort lässt sich nur löschen, wenn kein Produkt mehr darin liegt.</p>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-for list="{{ placeList }}" as="pl" hint-placeholder-count="4">
+              <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <span style="font-size: 13px; margin-right: auto">{{ pl.name }}</span>
+                <span class="tag tag-neutral">{{ pl.countLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ pl.locked }}" onClick="{{ pl.remove }}"><span data-i18n>Löschen</span></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neuer Lagerort</label><input class="input" value="{{ newPlace }}" data-i18n-ph placeholder="z. B. Halle 2 · Regal 4" onInput="{{ setNewPlace }}"></div>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addPlaceDisabled }}" onClick="{{ addPlace }}"><span data-i18n>Lagerort anlegen</span></button>
+          </div>
+
+        </section>
+
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Eigene Merkmale</h4>
           <p class="card-body" style="margin: 0" data-i18n>Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.</p>
           <div style="display: flex; flex-direction: column; gap: 2px">
             <sc-for list="{{ attrList }}" as="a" hint-placeholder-count="2">
@@ -861,7 +894,7 @@
             </sc-for>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-2); align-items: end; margin-top: var(--space-2)">
-            <div class="field"><label data-i18n>Name des Attributs</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
+            <div class="field"><label data-i18n>Name des Merkmals</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
             <div class="field"><label data-i18n>Art</label>
               <select class="input" value="{{ attrType }}" onChange="{{ setAttrType }}">
                 <option value="text">Text</option>
@@ -881,15 +914,15 @@
                 <option value="label">Auf Etikett drucken</option>
               </select>
             </div>
-            <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Attribut anlegen</span></button>
+            <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Merkmal anlegen</span></button>
           </div>
           <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>.xlsx oder .csv, bis 5 MB</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
             <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer">
               <span data-i18n>Datei auswählen</span>
-              <input type="file" accept=".xlsx,.csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
             </label>
           </div>
           <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
@@ -1024,8 +1057,8 @@
             <h4 style="margin: 0">{{ pickedName }}</h4>
             <p class="card-body" style="margin: 0" data-i18n>Scheidet jemand aus dem Unternehmen aus, können Profildaten hier geändert, der Zugang gesperrt oder die Person entfernt werden.</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: var(--space-3)">
-              <div class="field"><label data-i18n>Name</label><input class="input" value="{{ pickedNameVal }}" onChange="{{ setPickedName }}" disabled="{{ cannotManage }}"></div>
-              <div class="field"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="{{ pickedEmail }}" onChange="{{ setPickedEmail }}" disabled="{{ cannotManage }}"></div>
+              <div class="field"><label data-i18n>Name</label><input class="input" value="{{ draftName }}" onInput="{{ setDraftName }}" disabled="{{ cannotManage }}"></div>
+              <div class="field"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="{{ draftEmail }}" onInput="{{ setDraftEmail }}" disabled="{{ cannotManage }}"></div>
               <div class="field"><label data-i18n>Rolle</label>
                 <select class="input" value="{{ pickedRole }}" onChange="{{ setPickedRole }}" disabled="{{ cannotManage }}">
                   <option value="owner">Inhabende Person</option>
@@ -1040,6 +1073,10 @@
                   <button class="btn btn-secondary" onClick="{{ removeMember }}" disabled="{{ cannotManage }}"><span data-i18n>Entfernen</span></button>
                 </div>
               </div>
+            </div>
+            <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ profileSaveDisabled }}" onClick="{{ saveProfile }}"><span data-i18n>Änderungen übernehmen</span></button>
+              <span style="font-size: 12px; color: {{ profileNoteColor }}">{{ profileNote }}</span>
             </div>
             <sc-if value="{{ cannotManage }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700)" data-i18n>Profildaten und Rechte darf nur die inhabende Person ändern.</div>
@@ -1082,9 +1119,9 @@
             <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-2)">
-            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="07:30"></div>
+            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="{{ mailTime }}" onInput="{{ setMailTime }}"></div>
             <div class="field"><label data-i18n>Wochentag</label><select class="input"><option>Montag</option><option>Dienstag</option><option>Mittwoch</option><option>Donnerstag</option><option>Freitag</option></select></div>
-            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" value="1" min="1" max="28"></div>
+            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" value="{{ mailDay }}" onInput="{{ setMailDay }}"></div>
           </div>
           <div class="field" style="margin-top: var(--space-2)">
             <label data-i18n>Wer bekommt die Mail?</label>
@@ -1569,7 +1606,7 @@
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
             <li data-i18n>Personen unbegrenzt</li>
             <li data-i18n>Artikel unbegrenzt</li>
-            <li data-i18n>Eigene Attribute mit Regeln</li>
+            <li data-i18n>Eigene Merkmale mit Regeln</li>
             <li data-i18n>Feinrechte pro Person</li>
             <li data-i18n>Antwort am nächsten Werktag</li>
           </ul>
@@ -2142,12 +2179,13 @@ const DICT = {
     "Einzelnes Produkt anlegen": "Add a single product", "EAN": "EAN",
     "Verantwortliche Person": "Responsible person", "Kategorien": "Categories",
     "Link zum Produkt": "Product link", "Produkt speichern": "Save product", "Abbrechen": "Cancel",
-    "Viele Produkte per Excel importieren": "Import many products from Excel",
+    "Viele Produkte aus einer Tabelle importieren": "Import many products from a spreadsheet",
     "Vorlage mit allen Feldern herunterladen": "Download the template with every field",
     "Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt": "Fill it in row by row — one row is one product",
-    "Datei hier hochladen, Spalten prüfen, importieren": "Upload the file, check the columns, import",
-    "Excel-Vorlage herunterladen": "Download Excel template", "Datei hierher ziehen": "Drag a file here",
-    ".xlsx oder .csv, bis 5 MB": ".xlsx or .csv, up to 5 MB", "Beispieldatei prüfen": "Check sample file",
+    "CSV hier hochladen, Spalten prüfen, importieren": "Upload the CSV, check the columns, import",
+    "In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon)": "In Excel, use Save As to write a CSV (semicolon separated)",
+    "CSV-Vorlage herunterladen": "Download CSV template", "Datei hierher ziehen": "Drag a file here",
+    ".csv, bis 5 MB — Excel-Dateien vorher als CSV speichern": ".csv, up to 5 MB — save Excel files as CSV first", "Beispieldatei prüfen": "Check sample file",
     "Spalte in Datei": "Column in file", "Feld im System": "Field in system", "Prüfung": "Check",
     "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
     "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
@@ -2286,12 +2324,13 @@ const DICT = {
     "Einzelnes Produkt anlegen": "Lägg till en artikel", "EAN": "EAN",
     "Verantwortliche Person": "Ansvarig person", "Kategorien": "Kategorier",
     "Link zum Produkt": "Länk till produkten", "Produkt speichern": "Spara artikel", "Abbrechen": "Avbryt",
-    "Viele Produkte per Excel importieren": "Importera många artiklar via Excel",
+    "Viele Produkte aus einer Tabelle importieren": "Importera många artiklar från ett kalkylblad",
     "Vorlage mit allen Feldern herunterladen": "Ladda ner mallen med alla fält",
     "Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt": "Fyll i rad för rad — en rad är en artikel",
-    "Datei hier hochladen, Spalten prüfen, importieren": "Ladda upp filen, kontrollera kolumnerna, importera",
-    "Excel-Vorlage herunterladen": "Ladda ner Excel-mall", "Datei hierher ziehen": "Dra en fil hit",
-    ".xlsx oder .csv, bis 5 MB": ".xlsx eller .csv, upp till 5 MB", "Beispieldatei prüfen": "Kontrollera exempelfil",
+    "CSV hier hochladen, Spalten prüfen, importieren": "Ladda upp CSV-filen, kontrollera kolumnerna, importera",
+    "In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon)": "Spara som CSV i Excel (semikolon som avgränsare)",
+    "CSV-Vorlage herunterladen": "Ladda ner CSV-mall", "Datei hierher ziehen": "Dra en fil hit",
+    ".csv, bis 5 MB — Excel-Dateien vorher als CSV speichern": ".csv, upp till 5 MB — spara Excel-filer som CSV först", "Beispieldatei prüfen": "Kontrollera exempelfil",
     "Spalte in Datei": "Kolumn i filen", "Feld im System": "Fält i systemet", "Prüfung": "Kontroll",
     "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
     "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
@@ -2423,7 +2462,7 @@ const STATUS = {
   delivered:{ de: "Geliefert",            en: "Delivered",       sv: "Levererad",         tag: "tag tag-accent-2" }
 };
 
-// Datentypen für eigene Produktattribute.
+// Datentypen für eigene Produktmerkmale.
 const ATTR_TYPES = {
   text:   { de: "Text", en: "Text", sv: "Text" },
   number: { de: "Zahl", en: "Number", sv: "Tal" },
@@ -2432,7 +2471,7 @@ const ATTR_TYPES = {
   email:  { de: "E-Mail", en: "Email", sv: "E-post" }
 };
 
-// Was ein Attribut in der Bestandsverwaltung auslösen kann.
+// Was ein Merkmal in der Bestandsverwaltung auslösen kann.
 const ATTR_TRIGGERS = {
   warn:     { de: "Warnmail bei Entnahme", en: "Alert mail on withdrawal", sv: "Varningsmejl vid uttag" },
   order:    { de: "In Bestellliste aufnehmen", en: "Add to order list", sv: "Lägg i beställningslistan" },
@@ -2603,12 +2642,19 @@ class Component extends DCLogic {
       rowsOpen: false,
       testMailTo: "", mailChecks: [], legalTab: "impressum",
       testMode: false, pwVisible: false, connectError: "",
+      placesOwn: ["Keller · Regal B2", "Serverraum · Schrank 3", "Küche · Oberschrank",
+        "Lager Nord · Palette 7", "Werkstatt · Schublade 12"],
+      newPlace: "", draftFor: null, draftName: "", draftEmail: "",
+      npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
+      npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "",
+      npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: "",
+      mailTime: "07:30", mailDay: "1", importParsed: [],
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
       photoUrl: "", photoFor: null, platformAdmin: false,
       guard: GUARD_DEFAULT, limits: LIMITS_DEFAULT, mailsToday: 0, storageMb: 340, scanCode: "",
-      // Eigene Attribute je Firma. trigger: was eine Regel auslösen kann.
+      // Eigene Merkmale je Firma. trigger: was eine Regel auslösen kann.
       attrs: [
         { id: "a1", name: "Charge", type: "text", trigger: "" },
         { id: "a2", name: "Gefahrstoff", type: "bool", trigger: "warn" }
@@ -2894,6 +2940,96 @@ class Component extends DCLogic {
     return String(answer || "").slice(0, 180);
   }
 
+  // Menüs schließen mit Verzögerung: der Weg von der Schaltfläche in die
+  // Liste führt über eine Lücke, und dabei soll nichts wegklappen.
+  openMenu(key) {
+    clearTimeout(this.menuT);
+    this.setState({ menu: key });
+  }
+
+  deferCloseMenu() {
+    clearTimeout(this.menuT);
+    this.menuT = setTimeout(() => this.setState({ menu: null }), 450);
+  }
+
+  // CSV einlesen: Kopfzeile auf Felder abbilden, alles ohne Namen verwerfen.
+  // Dadurch landen Kategorie- oder Zwischenzeilen nicht als Produkt im Lager.
+  parseImport(text) {
+    const MAP = {
+      name: ["name", "artikelname", "artikel", "bezeichnung", "produkt", "produktname", "titel"],
+      ean: ["ean", "artikelnummer", "artikel-nr", "artikelnr", "nummer", "sku", "barcode", "gtin"],
+      ist: ["istbestand", "ist", "bestand", "menge", "anzahl", "stück", "stueck"],
+      min: ["mindestbestand", "min", "minimum", "meldebestand", "mindest"],
+      bestellmenge: ["bestellmenge", "bestellen", "nachbestellmenge", "nachbestellung"],
+      ort: ["lagerort", "ort", "lagerplatz", "platz", "regal", "standort", "lager"],
+      mhd: ["mhd", "haltbarkeit", "haltbar bis", "ablaufdatum", "verfallsdatum"],
+      preis: ["preis", "ek", "einzelpreis", "kosten", "netto", "brutto", "stückpreis"],
+      quantitaet: ["quantität", "quantitaet", "einheit", "verpackung", "verpackungseinheit", "gebinde"],
+      lieferant: ["lieferant", "händler", "haendler", "hersteller", "bezugsquelle"],
+      verantwortlich: ["verantwortlich", "verantwortliche person", "zuständig", "zustaendig"],
+      vertretung: ["stellvertretung", "vertretung", "vertreter", "stellvertreter"],
+      kategorien: ["kategorien", "kategorie", "gruppe", "warengruppe", "bereich"],
+      link: ["link", "url", "bestellseite", "webseite", "shop"]
+    };
+    const lines = String(text || "").replace(/^\uFEFF/, "").split(/\r?\n/).filter(l => l.trim() !== "");
+    if (!lines.length) return { rows: [], hint: this.tr("Die Datei ist leer.") };
+    const head = lines[0];
+    const sep = (head.split(";").length > head.split(",").length) ? ";"
+      : (head.split("\t").length > head.split(",").length ? "\t" : ",");
+    const cols = this.splitCsvLine(head, sep).map(c => c.toLowerCase().replace(/[*:]/g, "").trim());
+    const idx = {};
+    Object.keys(MAP).forEach(field => {
+      const i = cols.findIndex(c => MAP[field].includes(c));
+      if (i >= 0) idx[field] = i;
+    });
+    if (idx.name === undefined) {
+      return { rows: [], hint: this.tr("In der Kopfzeile fehlt eine Spalte „Name\" (oder „Artikelname\"). Ohne sie ist nicht erkennbar, was ein Produkt ist.") };
+    }
+    const rows = [];
+    let dropped = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const f = this.splitCsvLine(lines[i], sep);
+      const row = {};
+      Object.keys(idx).forEach(k => { row[k] = (f[idx[k]] || "").trim(); });
+      // Eine Zeile ohne Namen oder mit nur einem gefüllten Feld ist eine
+      // Zwischenüberschrift (z. B. eine Kategorie) und kein Produkt.
+      const filled = f.filter(v => v !== "").length;
+      if (!row.name || filled < 2) { dropped++; continue; }
+      rows.push(row);
+    }
+    const known = Object.keys(idx).length;
+    return {
+      rows,
+      hint: known + " " + this.tr("Spalten erkannt") +
+        (dropped ? " · " + dropped + " " + this.tr("Zeilen ohne Namen verworfen") : "") +
+        " · " + this.tr("unten bestätigen")
+    };
+  }
+
+  // Zahl aus einem Eingabefeld, leere Eingabe zählt als 0.
+  toNum(v) {
+    const n = parseInt(String(v == null ? "" : v).replace(/[^0-9-]/g, ""), 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  // Trennzeichen erkennen und eine CSV-Zeile in Felder zerlegen.
+  splitCsvLine(line, sep) {
+    const out = [];
+    let cur = "", quoted = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (quoted) {
+        if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+        else if (ch === '"') quoted = false;
+        else cur += ch;
+      } else if (ch === '"') quoted = true;
+      else if (ch === sep) { out.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out.map(v => v.trim());
+  }
+
   remote(call) {
     if (!this.state.live || !this.api) return false;
     Promise.resolve(call(this.api))
@@ -2953,7 +3089,10 @@ class Component extends DCLogic {
     clearTimeout(this.toastT);
     this.toastT = setTimeout(() => this.setState({ toast: null }), 7000);
   }
-  go(screen) { this.setState({ screen, menu: null, burgerOpen: false }); }
+  go(screen) {
+    clearTimeout(this.menuT);
+    this.setState({ screen, menu: null, burgerOpen: false });
+  }
   groupStyle(keys) {
     const on = keys.includes(this.state.screen);
     return "border-color: transparent; background: " + (on ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent") +
@@ -3073,7 +3212,8 @@ class Component extends DCLogic {
       preis: "—", quantitaet: "—", lieferant: "—", status: "ok", verantwortlich: "—", vertretung: "—",
       kategorien: [], entnahme: "—", auffuell: "—", geaendert: "—", aktiv: true, hist: [0], bildUrl: "" };
     const cur = products.find(p => p.id === st.currentId) || products[0] || EMPTY_PRODUCT;
-    const places = Array.from(new Set(products.filter(p => p.aktiv !== false).map(p => p.ort)));
+    const places = Array.from(new Set(
+      (st.placesOwn || []).concat(products.filter(p => p.aktiv !== false).map(p => p.ort)).filter(Boolean)));
     const q = st.query.toLowerCase();
 
     const meLabel = st.meNameLive || (st.role === "super" ? "Internet GmbH · Betrieb" : "Marie Kohl");
@@ -3263,13 +3403,13 @@ class Component extends DCLogic {
       grpVerw: this.groupStyle(["team", "settings", "admin"]),
       menuLager: st.menu === "lager", menuStamm: st.menu === "stamm",
       menuVerw: st.menu === "verw", menuUser: st.menu === "user",
-      hoverLager: () => this.setState({ menu: "lager" }), hoverStamm: () => this.setState({ menu: "stamm" }),
-      hoverVerw: () => this.setState({ menu: "verw" }), hoverUser: () => this.setState({ menu: "user" }),
-      closeMenu: () => this.setState({ menu: null }),
-      toggleLager: () => this.setState(s => ({ menu: s.menu === "lager" ? null : "lager" })),
-      toggleStamm: () => this.setState(s => ({ menu: s.menu === "stamm" ? null : "stamm" })),
-      toggleVerw: () => this.setState(s => ({ menu: s.menu === "verw" ? null : "verw" })),
-      toggleUser: () => this.setState(s => ({ menu: s.menu === "user" ? null : "user" })),
+      hoverLager: () => this.openMenu("lager"), hoverStamm: () => this.openMenu("stamm"),
+      hoverVerw: () => this.openMenu("verw"), hoverUser: () => this.openMenu("user"),
+      closeMenu: () => this.deferCloseMenu(),
+      toggleLager: () => { clearTimeout(this.menuT); this.setState(s => ({ menu: s.menu === "lager" ? null : "lager" })); },
+      toggleStamm: () => { clearTimeout(this.menuT); this.setState(s => ({ menu: s.menu === "stamm" ? null : "stamm" })); },
+      toggleVerw: () => { clearTimeout(this.menuT); this.setState(s => ({ menu: s.menu === "verw" ? null : "verw" })); },
+      toggleUser: () => { clearTimeout(this.menuT); this.setState(s => ({ menu: s.menu === "user" ? null : "user" })); },
       burgerOpen: st.burgerOpen,
       toggleBurger: () => this.setState(s => ({ burgerOpen: !s.burgerOpen, menu: null })),
       meInitials: st.role === "super" ? "IG" : "MK",
@@ -3293,6 +3433,32 @@ class Component extends DCLogic {
       orderList, movements: st.movements,
 
       places, filtered, filteredCount: filtered.length,
+      placeList: places.map(pl => {
+        const used = products.filter(p => p.ort === pl).length;
+        return {
+          name: pl,
+          countLabel: used + " " + (used === 1 ? this.tr("Produkt") : this.tr("Produkte")),
+          locked: used > 0,
+          remove: () => {
+            if (used > 0) return;
+            this.setState(prev => ({ placesOwn: (prev.placesOwn || []).filter(x => x !== pl) }));
+            this.say(this.tr("Lagerort"), this.tr("Gelöscht"), pl);
+          }
+        };
+      }),
+      newPlace: st.newPlace,
+      setNewPlace: e => this.setState({ newPlace: e.target.value }),
+      addPlaceDisabled: !String(st.newPlace || "").trim()
+        || places.some(p => p.toLowerCase() === String(st.newPlace).trim().toLowerCase()),
+      addPlace: () => {
+        const v = String(st.newPlace || "").trim();
+        if (!v || places.some(p => p.toLowerCase() === v.toLowerCase())) return;
+        this.setState(prev => ({ placesOwn: (prev.placesOwn || []).concat(v), newPlace: "" }));
+        this.say(this.tr("Lagerort"), this.tr("Angelegt"), v);
+      },
+      mailTime: st.mailTime, mailDay: st.mailDay,
+      setMailTime: e => { const v = e.target.value; this.setState({ mailTime: v }); this.remote(api => api.saveSettings({ mail_time: v })); },
+      setMailDay: e => { const v = e.target.value; this.setState({ mailDay: v }); this.remote(api => api.saveSettings({ mail_day: this.toNum(v) })); },
       visibleTotal: products.filter(visible).length,
       inactiveVisible: products.filter(p => p.aktiv === false && visible(p)).length,
       setQuery: e => this.setState({ query: e.target.value }),
@@ -3520,15 +3686,61 @@ class Component extends DCLogic {
         if (!file) return;
         const mb = file.size / (1024 * 1024);
         if (!this.withinLimit("uploadMb", 0, Math.ceil(mb))) return;
-        this.setState({ importDone: true, importFile: file.name });
-        this.say("Import", file.name, this.tr("Spalten geprüft — unten bestätigen."));
+        if (/\.(xlsx|xls)$/i.test(file.name)) {
+          this.setState({ importDone: false, importFile: file.name, importParsed: [] });
+          this.say("Import", this.tr("Diese Datei kann der Browser nicht lesen"),
+            this.tr("In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und die CSV-Datei wählen."));
+          return;
+        }
+        file.text().then(text => {
+          const out = this.parseImport(text);
+          if (!out.rows.length) {
+            this.setState({ importDone: false, importFile: file.name, importParsed: [] });
+            this.say("Import", this.tr("Keine Zeile erkannt"), out.hint);
+            return;
+          }
+          this.setState({ importDone: true, importFile: file.name + " · " + out.rows.length + " " + this.tr("Zeilen"), importParsed: out.rows });
+          this.say("Import", out.rows.length + " " + this.tr("Zeilen gelesen"), out.hint);
+        }).catch(err => this.say("Import", this.tr("Datei nicht lesbar"), String((err && err.message) || err)));
       },
       importFileName: st.importFile || "",
       runImport: () => {
-        if (!this.withinLimit("importRows", 0, 48)) return;
-        if (!this.withinLimit("products", products.length, 48)) return;
-        this.setState({ importDone: false }); this.go("products");
-        this.say("Import", this.tr("48 Produkte importiert"), this.tr("2 Zeilen übersprungen — EAN doppelt."));
+        const parsed = st.importParsed || [];
+        if (!parsed.length) {
+          this.say("Import", this.tr("Nichts zu importieren"), this.tr("Erst eine CSV-Datei wählen."));
+          return;
+        }
+        if (!this.withinLimit("importRows", 0, parsed.length)) return;
+        if (!this.withinLimit("products", products.length, parsed.length)) return;
+        const taken = new Set(products.map(p => String(p.name).trim().toLowerCase()));
+        const fresh = [];
+        let skipped = 0;
+        parsed.forEach(r => {
+          const key = r.name.trim().toLowerCase();
+          if (!key || taken.has(key)) { skipped++; return; }
+          taken.add(key);
+          const ist = this.toNum(r.ist), min = this.toNum(r.min);
+          fresh.push({
+            id: "P-" + String(products.length + fresh.length + 1).padStart(3, "0"),
+            name: r.name.trim(), ean: r.ean || "—", ist, min, bestellmenge: this.toNum(r.bestellmenge),
+            ort: r.ort || (places[0] || "—"), mhd: r.mhd || "—", preis: r.preis || "—",
+            quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "",
+            kategorien: String(r.kategorien || "").split(/[,;]/).map(x => x.trim()).filter(Boolean),
+            status: ist < min ? "low" : "ok", aktiv: true,
+            verantwortlich: r.verantwortlich || meLabel, vertretung: r.vertretung || "—",
+            entnahme: "—", auffuell: "—", geaendert: meLabel, hist: [ist], bildUrl: ""
+          });
+        });
+        const newPlaces = Array.from(new Set(fresh.map(p => p.ort).filter(o => o && o !== "—" && !places.includes(o))));
+        this.setState(prev => ({
+          products: fresh.concat(prev.products),
+          placesOwn: (prev.placesOwn || []).concat(newPlaces),
+          importDone: false, importParsed: [], importFile: ""
+        }));
+        this.go("products");
+        this.say("Import", fresh.length + " " + this.tr("Produkte importiert"),
+          (skipped ? skipped + " " + this.tr("Zeilen übersprungen (Name fehlt oder doppelt)") : this.tr("Alle Zeilen übernommen"))
+          + (newPlaces.length ? " · " + newPlaces.length + " " + this.tr("neue Lagerorte") : ""));
       },
       downloadTemplate: () => {
         const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
@@ -3540,12 +3752,80 @@ class Component extends DCLogic {
           "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
           .concat(st.attrs.map(() => ""));
         this.download("stockcontrol-vorlage.csv", [head, example]);
-        this.say("Excel", this.tr("Vorlage heruntergeladen"), this.tr("Eine Spalte pro Feld, inklusive eigener Attribute."));
+        this.say("Excel", this.tr("Vorlage heruntergeladen"), this.tr("Eine Spalte pro Feld, inklusive eigener Merkmale."));
       },
+      npName: st.npName, npEan: st.npEan, npResp: st.npResp,
+      npD1: st.npD1, npD2: st.npD2, npD3: st.npD3,
+      npMin: st.npMin, npIst: st.npIst, npOrder: st.npOrder, npQty: st.npQty,
+      npPlace: st.npPlace, npMhd: st.npMhd, npPrice: st.npPrice,
+      npSupplier: st.npSupplier, npLink: st.npLink, npCats: st.npCats,
+      setNpName: e => this.setState({ npName: e.target.value }),
+      setNpEan: e => this.setState({ npEan: e.target.value }),
+      setNpResp: e => this.setState({ npResp: e.target.value }),
+      setNpD1: e => this.setState({ npD1: e.target.value }),
+      setNpD2: e => this.setState({ npD2: e.target.value }),
+      setNpD3: e => this.setState({ npD3: e.target.value }),
+      setNpMin: e => this.setState({ npMin: e.target.value }),
+      setNpIst: e => this.setState({ npIst: e.target.value }),
+      setNpOrder: e => this.setState({ npOrder: e.target.value }),
+      setNpQty: e => this.setState({ npQty: e.target.value }),
+      setNpPlace: e => this.setState({ npPlace: e.target.value }),
+      setNpMhd: e => this.setState({ npMhd: e.target.value }),
+      setNpPrice: e => this.setState({ npPrice: e.target.value }),
+      setNpSupplier: e => this.setState({ npSupplier: e.target.value }),
+      setNpLink: e => this.setState({ npLink: e.target.value }),
+      setNpCats: e => this.setState({ npCats: e.target.value }),
+      npNameNote: (() => {
+        const n = (st.npName || "").trim().toLowerCase();
+        if (!n) return this.tr("Pflichtfeld — ohne Namen wird nicht gespeichert.");
+        if (products.some(p => String(p.name).trim().toLowerCase() === n)) return this.tr("Diesen Namen gibt es schon.");
+        return this.tr("Name ist frei.");
+      })(),
+      npNameColor: (() => {
+        const n = (st.npName || "").trim().toLowerCase();
+        if (!n) return "color-mix(in srgb, var(--color-text) 55%, transparent)";
+        return products.some(p => String(p.name).trim().toLowerCase() === n)
+          ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)";
+      })(),
+      npDisabled: (() => {
+        const n = (st.npName || "").trim().toLowerCase();
+        return !n || products.some(p => String(p.name).trim().toLowerCase() === n);
+      })(),
       createProduct: () => {
+        const name = (st.npName || "").trim();
+        if (!name) {
+          this.say(this.tr("Produkt"), this.tr("Name fehlt"), this.tr("Ohne Namen kann nicht gespeichert werden."));
+          return;
+        }
+        if (products.some(p => String(p.name).trim().toLowerCase() === name.toLowerCase())) {
+          this.say(this.tr("Produkt"), this.tr("Name schon vergeben"), this.tr("Jeder Name darf nur einmal vorkommen."));
+          return;
+        }
         if (!this.withinLimit("products", products.length)) return;
-        this.go("products");
-        this.say(this.tr("Produkt"), this.tr("Gespeichert"), this.tr("QR-Code wurde automatisch erzeugt."));
+        const ist = this.toNum(st.npIst), min = this.toNum(st.npMin);
+        const id = "P-" + String(products.length + 1).padStart(3, "0");
+        const row = {
+          id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
+          ort: st.npPlace || places[0] || "—", mhd: st.npMhd || "—", preis: st.npPrice || "—",
+          quantitaet: st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
+          kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
+          status: ist < min ? "low" : "ok", aktiv: true,
+          verantwortlich: st.npResp || meLabel,
+          vertretung: [st.npD1, st.npD2, st.npD3].filter(Boolean).join(", ") || "—",
+          entnahme: "—", auffuell: "—", geaendert: meLabel, hist: [ist], bildUrl: ""
+        };
+        this.setState(prev => ({
+          products: [row].concat(prev.products), currentId: id, screen: "detail", qty: 1,
+          npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
+          npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "",
+          npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: ""
+        }));
+        this.remote(api => api.createProduct({
+          name, ean: st.npEan || null, ist, min, bestellmenge: this.toNum(st.npOrder),
+          ort: row.ort, preis: null, quantitaet: st.npQty || null, lieferant: st.npSupplier || null,
+          link: st.npLink || null, kategorien: row.kategorien, status: row.status
+        }));
+        this.say(this.tr("Produkt"), this.tr("Gespeichert"), name + " · " + row.ort);
       },
 
       qrPickList: products.filter(p => !qq || (p.name + " " + p.ean + " " + p.ort).toLowerCase().includes(qq)).map(p => {
@@ -3587,6 +3867,44 @@ class Component extends DCLogic {
         });
       }),
       pickedName: picked.name, pickedNameVal: picked.name, pickedEmail: picked.email, pickedRole: picked.role,
+      draftName: st.draftFor === picked.id ? st.draftName : (picked.name || ""),
+      draftEmail: st.draftFor === picked.id ? st.draftEmail : (picked.email || ""),
+      setDraftName: e => this.setState({
+        draftFor: picked.id, draftName: e.target.value,
+        draftEmail: st.draftFor === picked.id ? st.draftEmail : (picked.email || "")
+      }),
+      setDraftEmail: e => this.setState({
+        draftFor: picked.id, draftEmail: e.target.value,
+        draftName: st.draftFor === picked.id ? st.draftName : (picked.name || "")
+      }),
+      profileSaveDisabled: st.role !== "owner" || st.draftFor !== picked.id
+        || ((st.draftName || "").trim() === (picked.name || "") && (st.draftEmail || "").trim() === (picked.email || "")),
+      profileNote: st.draftFor === picked.id
+        && ((st.draftName || "").trim() !== (picked.name || "") || (st.draftEmail || "").trim() !== (picked.email || ""))
+        ? this.tr("Noch nicht übernommen.") : this.tr("Stand gespeichert."),
+      profileNoteColor: st.draftFor === picked.id
+        && ((st.draftName || "").trim() !== (picked.name || "") || (st.draftEmail || "").trim() !== (picked.email || ""))
+        ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)",
+      saveProfile: () => {
+        const name = (st.draftName || "").trim(), email = (st.draftEmail || "").trim();
+        if (!name) { this.say(this.tr("Profil"), this.tr("Name fehlt"), this.tr("Ohne Namen wird nicht übernommen.")); return; }
+        if (!/.+@.+\..+/.test(email)) { this.say(this.tr("Profil"), this.tr("Adresse prüfen"), this.tr("Bitte eine vollständige E-Mail-Adresse eintragen.")); return; }
+        const wasMe = picked.name === meLabel;
+        this.setState(prev => {
+          const next = {
+            members: prev.members.map(m => m.id === picked.id ? Object.assign({}, m, { name, email }) : m),
+            products: prev.products.map(p => Object.assign({}, p, {
+              verantwortlich: p.verantwortlich === picked.name ? name : p.verantwortlich,
+              vertretung: String(p.vertretung || "").split(", ").map(v => v === picked.name ? name : v).join(", ")
+            })),
+            draftFor: null
+          };
+          if (wasMe) next.meNameLive = name;
+          return next;
+        });
+        this.remoteMember(picked.id, { name, email });
+        this.say(this.tr("Profil"), this.tr("Übernommen"), name + " · " + email);
+      },
       cannotManage: st.role !== "owner",
       blockMemberLabel: picked.status === "blocked" ? this.tr("Entsperren") : this.tr("Zugang sperren"),
       setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remoteMember(picked.id, { name: v }); },
@@ -3639,7 +3957,7 @@ class Component extends DCLogic {
           };
         });
       })(),
-      // ── Eigene Attribute ────────────────────────────────────
+      // ── Eigene Merkmale ─────────────────────────────────────
       attrTypeLabels: null,
       attrList: st.attrs.map(a => ({
         name: a.name,
@@ -3660,7 +3978,7 @@ class Component extends DCLogic {
           attrs: prev.attrs.concat({ id: "a" + Date.now(), name, type: prev.attrType, trigger: prev.attrTrigger }),
           attrName: "", attrTrigger: ""
         }));
-        this.say(this.tr("Attribut"), name, st.attrTrigger
+        this.say(this.tr("Merkmal"), name, st.attrTrigger
           ? this.tr("Regel aktiv: ") + (ATTR_TRIGGERS[st.attrTrigger][lang] || ATTR_TRIGGERS[st.attrTrigger].de)
           : this.tr("Feld steht ab jetzt in jedem Produkt."));
       },
