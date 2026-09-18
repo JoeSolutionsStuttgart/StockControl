@@ -1131,15 +1131,45 @@
             <h4 style="margin: 0" data-i18n>Passwort ändern</h4>
             <div class="field"><label data-i18n>Aktuelles Passwort</label><input class="input" type="password"></div>
             <div class="field"><label data-i18n>Neues Passwort</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setPw }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
             </div>
             <div class="field"><label data-i18n>Neues Passwort wiederholen</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setPw2 }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw2 }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
@@ -1172,6 +1202,11 @@
               <span class="tag tag-neutral">Cloudflare R2</span>
               <span class="tag tag-neutral">GitHub Pages</span>
             </div>
+            <sc-if value="{{ hasConnectError }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: 10px 12px; border-radius: var(--radius-md); font-size: 12.5px; line-height: 1.5; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">
+                <b data-i18n>Keine Verbindung zu Supabase.</b> {{ connectError }}
+              </div>
+            </sc-if>
             <p class="card-body" style="margin: 0" data-i18n>Produkte, Bestände, Verläufe und Konten liegen in Supabase, die Mails verschickt Brevo, Bilder und große Dateien liegen in Cloudflare R2, und die Seite selbst läuft auf GitHub Pages. Keiner dieser Dienste wird hier bedient — sie werden einmalig im Browser eingerichtet: die öffentlichen Angaben in config.js, der Brevo-Schlüssel in der Datenbank, der Bucket im Cloudflare-Worker. Es gibt keinen eigenen Server und keine Kommandozeile. Die Schritte stehen in SETUP.md.</p>
           </section>
 
@@ -1864,9 +1899,24 @@
           <h3 style="margin: 0 0 var(--space-6); font-size: 25px" data-i18n>Anmelden</h3>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>Passwort</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="current-password" style="flex: 1; min-width: 0" onInput="{{ setAuthPw }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="current-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setAuthPw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
           </div>
           <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
@@ -1888,15 +1938,45 @@
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Firmenname</label><input class="input" autocomplete="organization" onInput="{{ setRegCompany }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
           </div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort wiederholen</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw2 }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw2 }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: var(--space-4)">
@@ -1966,9 +2046,24 @@
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
-            <div style="display: flex; gap: 6px">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw }}">
-              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
             </div>
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: var(--space-4)">
@@ -2507,7 +2602,7 @@ class Component extends DCLogic {
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       rowsOpen: false,
       testMailTo: "", mailChecks: [], legalTab: "impressum",
-      testMode: false, pwVisible: false,
+      testMode: false, pwVisible: false, connectError: "",
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -2597,12 +2692,24 @@ class Component extends DCLogic {
         this.loadTurnstile();
       }
       const api = await import("./supabase-client.js");
-      if (!api.configured) return;
+      if (!api.configured) {
+        // config.js wurde geladen, aber die beiden Pflichtwerte fehlen.
+        this.setState({ connectError: !cfg.SUPABASE_URL
+          ? this.tr("In config.js ist SUPABASE_URL leer.")
+          : this.tr("In config.js ist SUPABASE_ANON_KEY leer.") });
+        return;
+      }
       this.api = api;
       const sess = await api.session();
-      if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase" }); return; }
+      if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase", connectError: "" }); return; }
       await this.refresh();
-    } catch (e) { console.warn("StockControl läuft mit Demo-Daten:", e && e.message); }
+    } catch (e) {
+      // Häufigster Fall: config.js fehlt neben der Seite, hat einen Tippfehler,
+      // oder der Nachladeort für die Supabase-Bibliothek ist gesperrt.
+      const msg = String((e && e.message) || e);
+      console.warn("StockControl läuft mit Demo-Daten:", msg);
+      this.setState({ connectError: msg });
+    }
   }
 
   async refresh() {
@@ -2740,6 +2847,17 @@ class Component extends DCLogic {
     });
     this.say(this.tr("Testzugang"), this.tr("Angemeldet als Marie Kohl"),
       this.tr("Beispieldaten, nichts wird gespeichert. Systemdienste und Kostenbremse sind sichtbar."));
+  }
+
+  // Warum läuft die Seite auf Demo-Daten? Der genaue Grund hilft mehr
+  // als der Hinweis, dass etwas fehlt.
+  notConnectedBody() {
+    const e = this.state.connectError;
+    if (e) {
+      return this.tr("Grund: ") + e + " — " +
+        this.tr("Liegt config.js neben der Seite, und stehen dort SUPABASE_URL und SUPABASE_ANON_KEY? Nach dem Hochladen die Seite mit Strg+Umschalt+R (Mac: Cmd+Umschalt+R) neu laden.");
+    }
+    return this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.");
   }
 
   // Aus der Fehlermeldung von Supabase die wahrscheinliche Ursache ableiten.
@@ -3707,6 +3825,9 @@ class Component extends DCLogic {
       setAuthEmail: e => this.setState({ authEmail: e.target.value }),
       setAuthPw: e => this.setState({ authPw: e.target.value }),
       pwType: st.pwVisible ? "text" : "password",
+      pwVisible: st.pwVisible, pwHidden: !st.pwVisible,
+      hasConnectError: !!st.connectError && !st.live,
+      connectError: st.connectError || "",
       pwToggleLabel: st.pwVisible ? this.tr("verbergen") : this.tr("zeigen"),
       togglePw: () => this.setState(s => ({ pwVisible: !s.pwVisible })),
       setRegCompany: e => this.setState({ regCompany: e.target.value }),
@@ -3770,7 +3891,7 @@ class Component extends DCLogic {
         if (isTest) { this.enterTestAccount(); return; }
         this.setState(s => ({ loginFails: s.loginFails + 1 }));
         this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
-          this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
+          this.notConnectedBody());
       },
       viewForgot: () => this.setState({ authView: "forgot" }),
       sendReset: () => {
@@ -3781,7 +3902,7 @@ class Component extends DCLogic {
         }
         if (!st.live || !this.api) {
           this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
-            this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
+            this.notConnectedBody());
           return;
         }
         // Nur vorhandene Adressen bekommen einen Link — sonst eine klare Absage.
@@ -3811,7 +3932,7 @@ class Component extends DCLogic {
       doRegister: () => {
         if (!st.live || !this.api) {
           this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
-            this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
+            this.notConnectedBody());
           return;
         }
         const mail = (st.authEmail || "").trim();
