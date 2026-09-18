@@ -39,7 +39,11 @@
   .blueprint > .corner { display: none; }
   .card, .dialog, .blueprint, .input, .btn, .seg, select, textarea { border-radius: var(--sc-radius); }
   .btn-icon { border-radius: var(--sc-radius); }
-  .tag { border-radius: 999px; padding: 4px 11px; }
+  .tag { border-radius: 999px; padding: 4px 11px; white-space: nowrap; }
+  summary { list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "+"; font-family: var(--font-heading); font-size: 20px; line-height: 1; color: var(--color-accent); }
+  details[open] > summary::before { content: "−"; }
   .card, .blueprint {
     background: var(--sc-card);
     border: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent);
@@ -65,7 +69,7 @@
     [data-brandword] { display: none !important; }
     [data-langsel] { width: 62px !important; }
     [data-landing-hero] { padding: var(--space-6) var(--space-4) !important; }
-    [data-authgrid] { grid-template-columns: minmax(0, 1fr) !important; gap: var(--space-6) !important; padding: var(--space-5) var(--space-4) var(--space-6) !important; align-items: start !important; }
+    [data-authgrid] { grid-template-columns: minmax(0, 1fr) !important; gap: var(--space-6) !important; padding: var(--space-6) var(--space-4) var(--space-6) !important; align-items: start !important; }
     [data-authgrid] > div:last-child { justify-self: stretch !important; max-width: none !important; }
     [data-authintro] { order: 2; }
     [data-landing-bar] { padding: var(--space-2) var(--space-4) !important; gap: 6px !important; }
@@ -1140,32 +1144,9 @@
           <section class="card">
             <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
               <h4 style="margin: 0; margin-right: auto" data-i18n>Zwei-Faktor-Anmeldung</h4>
-              <span class="{{ mfaTagClass }}">{{ mfaStatus }}</span>
+              <span class="tag tag-outline" data-i18n>Vorbereitet</span>
             </div>
-            <p class="card-body" style="margin: 0" data-i18n>Zusätzlich zum Passwort ein Code aus einer App. Schützt auch dann, wenn das Passwort bekannt wird.</p>
-
-            <sc-if value="{{ mfaSetup }}" hint-placeholder-val="{{ false }}">
-              <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: flex-start">
-                <div style="padding: 8px; background: #fff; border-radius: var(--radius-md); flex: none">{{ mfaQr }}</div>
-                <div style="flex: 1; min-width: 160px">
-                  <div style="font-size: 12.5px; line-height: 1.5; margin-bottom: var(--space-3)" data-i18n>QR-Code in der App scannen, dann den ersten Code eingeben.</div>
-                  <div class="field">
-                    <label data-i18n>Code</label>
-                    <input class="input" inputmode="numeric" maxlength="6" style="font-family: var(--font-heading); font-size: 20px; letter-spacing: 0.25em; text-align: center" onInput="{{ setMfaCode }}">
-                  </div>
-                  <button class="btn btn-primary btn-block" style="margin-top: var(--space-2)" disabled="{{ mfaDisabled }}" onClick="{{ confirmMfa }}"><span data-i18n>Bestätigen</span></button>
-                </div>
-              </div>
-            </sc-if>
-
-            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-              <sc-if value="{{ mfaOff }}" hint-placeholder-val="{{ true }}">
-                <button class="btn btn-primary" onClick="{{ startMfa }}"><span data-i18n>Einrichten</span></button>
-              </sc-if>
-              <sc-if value="{{ mfaOn }}" hint-placeholder-val="{{ false }}">
-                <button class="btn btn-secondary" onClick="{{ removeMfa }}"><span data-i18n>Entfernen</span></button>
-              </sc-if>
-            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.</p>
           </section>
 
           <sc-if value="{{ showSystemCards }}" hint-placeholder-val="{{ false }}">
@@ -1179,7 +1160,47 @@
               <span class="tag tag-neutral">Cloudflare R2</span>
               <span class="tag tag-neutral">GitHub Pages</span>
             </div>
-            <p class="card-body" style="margin: 0" data-i18n>Produkte, Bestände, Verläufe und Konten liegen in Supabase, die Mails verschickt Brevo, Bilder und große Dateien liegen in Cloudflare R2, und die Seite selbst läuft auf GitHub Pages. Keiner dieser Dienste wird hier bedient — sie werden einmalig eingerichtet: Zugangsdaten stehen in config.js, die geheimen Schlüssel als Secrets in Supabase. Die Schritte stehen in SETUP.md.</p>
+            <p class="card-body" style="margin: 0" data-i18n>Produkte, Bestände, Verläufe und Konten liegen in Supabase, die Mails verschickt Brevo, Bilder und große Dateien liegen in Cloudflare R2, und die Seite selbst läuft auf GitHub Pages. Keiner dieser Dienste wird hier bedient — sie werden einmalig im Browser eingerichtet: die öffentlichen Angaben in config.js, der Brevo-Schlüssel in der Datenbank, der Bucket im Cloudflare-Worker. Es gibt keinen eigenen Server und keine Kommandozeile. Die Schritte stehen in SETUP.md.</p>
+          </section>
+
+          <section class="card">
+            <div class="card-kicker" data-i18n>Systemdienste</div>
+            <h4 style="margin: 0" data-i18n>Mailversand prüfen</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Zwei Wege, die getrennt geprüft werden müssen. Konto-Mails — Registrierung und Passwort — verschickt Supabase selbst; dafür muss im Supabase-Dashboard der SMTP-Zugang von Brevo eingetragen sein, sonst erscheint in Brevo kein einziger Eintrag. Fach-Mails — Bestandswarnung, Bestellliste, Einladung — verschickt die Datenbank über die Brevo-API. Die Testmail unten nimmt genau diesen zweiten Weg.</p>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+              <div class="field" style="flex: 1; min-width: 200px; margin: 0">
+                <label data-i18n>Testmail an</label>
+                <input class="input" type="email" placeholder="name@deine-domain.de" value="{{ testMailTo }}" onInput="{{ setTestMailTo }}">
+              </div>
+              <button class="btn btn-primary" onClick="{{ doTestMail }}"><span data-i18n>Testmail senden</span></button>
+              <button class="btn btn-secondary" onClick="{{ refreshMailStatus }}"><span data-i18n>Antworten abrufen</span></button>
+            </div>
+            <sc-if value="{{ hasMailChecks }}" hint-placeholder-val="{{ false }}">
+              <table class="table" style="margin-top: var(--space-2)">
+                <thead>
+                  <tr>
+                    <th data-i18n>Zeit</th>
+                    <th data-i18n>Betreff</th>
+                    <th data-i18n>Antwort von Brevo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ mailChecks }}" as="m" hint-placeholder-count="3">
+                    <tr>
+                      <td style="white-space: nowrap; vertical-align: top">{{ m.when }}</td>
+                      <td style="vertical-align: top">
+                        <div>{{ m.subject }}</div>
+                        <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.to }}</div>
+                      </td>
+                      <td style="vertical-align: top">
+                        <span class="{{ m.tagClass }}">{{ m.statusLabel }}</span>
+                        <div style="font-size: 11.5px; margin-top: 3px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.hint }}</div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </sc-if>
           </section>
 
           <section class="card">
@@ -1257,46 +1278,495 @@
 <div data-screen-label="Startseite" style="min-height: 100vh; background: var(--sc-ground); display: flex; flex-direction: column">
 
   <header style="position: sticky; top: 0; z-index: 20; background: var(--sc-card); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
-    <div data-landing-bar style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-3)">
+    <div data-landing-bar style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
       <div style="display: flex; align-items: center; gap: 10px; margin-right: auto">
         <div style="width: 30px; height: 30px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 16px; color: var(--sc-card)">S</div>
         <div style="font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.01em">{{ serviceName }}</div>
       </div>
+      <a href="#funktionen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Funktionen</a>
+      <a href="#preise" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Preise</a>
+      <a href="#fragen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Fragen</a>
       <select class="input" style="width: 74px; flex: none; padding-inline: 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
         <option value="de">DE</option>
         <option value="en">EN</option>
         <option value="sv">SV</option>
       </select>
-      <button class="btn btn-secondary" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
-      <button class="btn btn-primary" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+      <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
+      <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
     </div>
   </header>
 
-  <section data-landing-hero style="max-width: 640px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); flex: 1; display: flex; flex-direction: column; justify-content: center">
-    <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 50px); line-height: 1.05; letter-spacing: -0.02em; margin: 0 0 var(--space-6)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
-    <ul style="list-style: none; margin: 0 0 var(--space-8); padding: 0; display: flex; flex-direction: column; gap: var(--space-3)">
-      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
-        <span data-i18n>QR-Code am Regal scannen</span>
-      </li>
-      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
-        <span data-i18n>Warenüberblick mit Warnung und Bestellliste</span>
-      </li>
-      <li style="display: grid; grid-template-columns: 8px minmax(0, 1fr); gap: 14px; align-items: baseline; font-size: 16.5px; line-height: 1.4">
-        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
-        <span data-i18n>Daten in der EU, pro Firma getrennt</span>
-      </li>
-    </ul>
-    <div style="display: flex; gap: var(--space-3); flex-wrap: wrap">
-      <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
-      <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
+  <section data-landing-hero style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-8); padding-bottom: var(--space-8)">
+    <div data-two style="align-items: center">
+      <div style="min-width: 0">
+        <span class="tag tag-accent" style="margin-bottom: var(--space-4); display: inline-block" data-i18n>Derzeit kostenlos</span>
+        <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 52px); line-height: 1.03; letter-spacing: -0.02em; margin: 0 0 var(--space-4)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
+        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Entnahme am Regal scannen, Bestand ist sofort aktuell. Unterschreitet ein Artikel den Mindestbestand, geht die Mail an die verantwortliche Person — nicht an alle.</p>
+        <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4)">
+          <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px; white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
+          <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px; white-space: nowrap" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
+        </div>
+        <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Keine Karte nötig · Einrichtung in einer Stunde · jederzeit kündbar</div>
+      </div>
+
+      <div class="card" style="padding: var(--space-3); gap: var(--space-2)">
+        <div style="display: flex; align-items: center; gap: var(--space-2); padding: 0 4px">
+          <div style="font-family: var(--font-heading); font-size: 17px; margin-right: auto" data-i18n>Produkte</div>
+          <span class="tag tag-outline" data-i18n>4 von 128</span>
+        </div>
+        <table class="table" data-zebra style="margin: 0">
+          <thead>
+            <tr>
+              <th data-i18n>Artikel</th>
+              <th align="right" data-i18n>Ist</th>
+              <th align="right" data-i18n>Min.</th>
+              <th align="right" data-i18n>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nitrilhandschuhe M<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal A-2</div></td>
+              <td align="right" style="font-variant-numeric: tabular-nums">18</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">40</td>
+              <td align="right"><span class="tag tag-accent">niedrig</span></td>
+            </tr>
+            <tr>
+              <td>Kabelbinder 200 mm<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal C-1</div></td>
+              <td align="right" style="font-variant-numeric: tabular-nums">640</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">200</td>
+              <td align="right"><span class="tag tag-neutral">ok</span></td>
+            </tr>
+            <tr>
+              <td>Etiketten 62 mm<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Lager 1</div></td>
+              <td align="right" style="font-variant-numeric: tabular-nums">3</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">10</td>
+              <td align="right"><span class="tag tag-outline">bestellt</span></td>
+            </tr>
+            <tr>
+              <td>Reinigungstücher<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal B-4</div></td>
+              <td align="right" style="font-variant-numeric: tabular-nums">96</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">50</td>
+              <td align="right"><span class="tag tag-neutral">ok</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section style="background: var(--sc-card); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
+    <div style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-4); padding-bottom: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); font-size: 13px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+      <span data-i18n>QR-Etiketten in fünf Formaten</span>
+      <span data-i18n>Excel- und CSV-Import</span>
+      <span data-i18n>Rollen und Rechte pro Person</span>
+      <span data-i18n>Bestandsverlauf mit Grafik</span>
+      <span data-i18n>Bedarfslisten für Events</span>
+    </div>
+  </section>
+
+  <section style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6)">
+    <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>So läuft es</div>
+    <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Drei Handgriffe, kein Papier.</h2>
+    <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Wer etwas herausnimmt, scannt. Alles andere passiert von selbst.</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-6)">
+        <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">1</div>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Scannen</h3>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>QR-Code am Regal mit dem Handy scannen. Kein Gerät kaufen, keine App installieren — die Kamera genügt.</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">2</div>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Menge buchen</h3>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Entnahme oder Nachfüllung eintragen. Der Bestand schreibt sich fort, die Buchung bleibt mit Person und Zeit im Verlauf.</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">3</div>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Nachbestellen</h3>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Unter dem Mindestbestand geht die Warnung raus — sofort oder gesammelt als Bestellliste, je nach Einstellung.</p>
+          </div>
+        </div>
+    </div>
+  </section>
+
+  <section id="funktionen" style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); background: var(--sc-card); max-width: none">
+    <div style="max-width: 1120px; margin: 0 auto">
+      <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Funktionen</div>
+      <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Für das Lager gedacht, nicht für die Buchhaltung.</h2>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Alles, was ein Betriebslager braucht — und nichts, was danach noch erklärt werden muss.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4)">
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Scan-Entnahme</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Ein QR-Code je Artikel oder Regalplatz. Scannen, Menge tippen, fertig — auch mit Handschuhen bedienbar.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Verantwortung je Artikel</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Eine verantwortliche Person und bis zu drei Stellvertretungen. Die Warnmail geht an sie, in CC an die Stellvertretung.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Mindestbestand und Mail</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Sofort, täglich, wöchentlich oder monatlich. Sammelmails fassen alles zu einer Bestellliste zusammen.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Etiketten drucken</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>QR-Etiketten in fünf Formaten, von 2×4 bis 5×13 je Blatt, dazu die Endlosrolle mit 62 mm.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Excel-Import</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Bestehende Listen mit Vorlage übernehmen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
+        </div>
+        <div class="card">
+          <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Rollen und Rechte</h3>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Inhabende Person, Lagerleitung, Mitarbeitende, Leser — und einzelne Rechte pro Person, wenn eine Rolle nicht passt.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6)">
+    <div data-two>
+      <div style="min-width: 0">
+        <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Sicherheit</div>
+        <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Eine Firma sieht nur ihre eigenen Zeilen.</h2>
+        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-bottom: var(--space-4)" data-i18n>Die Trennung steckt nicht in der Oberfläche, sondern in der Datenbank: jede Zeile trägt eine Firmenkennung, und die Regel dazu lässt nur die eigene durch. Auch ein Zugriff an der Oberfläche vorbei bringt nichts.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Produktbilder liegen in einer geschlossenen Ablage und werden über Adressen geladen, die nach einer Stunde verfallen. Der Mailschlüssel liegt in der Datenbank, nicht im Browser.</p>
+      </div>
+      <div class="card">
+        <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Kurz gesagt</h3>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2)">
+          <li style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; line-height: 1.5">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+            <span data-i18n>Datenbank in einer EU-Region</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; line-height: 1.5">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+            <span data-i18n>Bot-Prüfung bei Anmeldung und Registrierung</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; line-height: 1.5">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+            <span data-i18n>Kein Tracking, keine Werbe-Cookies</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; line-height: 1.5">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+            <span data-i18n>Jede Buchung bleibt mit Person und Zeit nachvollziehbar</span>
+          </li>
+          <li style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 12px; align-items: baseline; font-size: 13.5px; line-height: 1.5">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--color-accent); transform: translateY(-3px)"></span>
+            <span data-i18n>Eigene Daten jederzeit als CSV heraus</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="preise" style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); background: var(--sc-card); max-width: none">
+    <div style="max-width: 1120px; margin: 0 auto">
+      <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Preise</div>
+      <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Erst arbeiten, dann zahlen.</h2>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Alle Tarife sind derzeit kostenlos. Bevor sich daran etwas ändert, melden wir uns — ohne Zustimmung wird nichts abgebucht.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4); align-items: start">
+
+        <div class="card" style="gap: var(--space-3)">
+          <div>
+            <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Start</div>
+            <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für ein Lager und ein kleines Team</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 6px">
+            <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">0 €</span>
+            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>für immer</span>
+          </div>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
+            <li data-i18n>3 Personen</li>
+            <li data-i18n>300 Artikel</li>
+            <li data-i18n>Scan, Mindestbestand, Bestellliste</li>
+            <li data-i18n>Etiketten in allen Formaten</li>
+          </ul>
+          <button class="btn btn-secondary btn-block" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+        </div>
+
+        <div class="card" style="gap: var(--space-3); border-color: var(--color-accent); box-shadow: var(--shadow-md)">
+          <div style="display: flex; align-items: flex-start; gap: var(--space-2)">
+            <div style="margin-right: auto">
+              <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Team</div>
+              <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Mehrere Lager, mehrere Schichten</div>
+            </div>
+            <span class="tag tag-accent" data-i18n>derzeit gratis</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 6px">
+            <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">19 €</span>
+            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>je Monat, geplant</span>
+          </div>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
+            <li data-i18n>15 Personen</li>
+            <li data-i18n>2 000 Artikel</li>
+            <li data-i18n>Verantwortliche und Stellvertretung</li>
+            <li data-i18n>Excel-Import, Events, Bestandsverlauf</li>
+            <li data-i18n>Bilder und Datenblätter je Artikel</li>
+          </ul>
+          <button class="btn btn-primary btn-block" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+        </div>
+
+        <div class="card" style="gap: var(--space-3)">
+          <div>
+            <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Betrieb</div>
+            <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für gewachsene Lagerstrukturen</div>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 6px">
+            <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">49 €</span>
+            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>je Monat, geplant</span>
+          </div>
+          <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
+            <li data-i18n>Personen unbegrenzt</li>
+            <li data-i18n>Artikel unbegrenzt</li>
+            <li data-i18n>Eigene Attribute mit Regeln</li>
+            <li data-i18n>Feinrechte pro Person</li>
+            <li data-i18n>Antwort am nächsten Werktag</li>
+          </ul>
+          <button class="btn btn-secondary btn-block" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+        </div>
+      </div>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-4)" data-i18n>Preise ohne Umsatzsteuer. Ein Wechsel ist jederzeit möglich, eine Kündigung ebenso — die eigenen Daten lassen sich vorher als CSV herausziehen.</p>
+    </div>
+  </section>
+
+  <section id="fragen" style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6)">
+    <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Fragen</div>
+    <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Was meistens gefragt wird.</h2>
+    <div style="margin-top: var(--space-4)">
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Was kostet es wirklich?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Derzeit nichts. Die Tarife stehen oben, damit klar ist, was später wofür gilt. Wird abgerechnet, fragen wir vorher — ohne Zustimmung passiert nichts.</p>
+      </details>
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Brauchen wir besondere Geräte?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Nein. Jedes Handy mit Kamera genügt, der QR-Code klebt am Regal. Etiketten druckst du selbst, auf normalem Papier oder mit einem Rollendrucker.</p>
+      </details>
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Können wir unsere bestehende Liste übernehmen?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Ja. Die Importvorlage herunterladen, eigene Daten hineinkopieren, hochladen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
+      </details>
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Wer bekommt die Warnmails?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Die verantwortliche Person des Artikels, in CC die Stellvertretung. Auf Wunsch statt Einzelmails eine gesammelte Bestellliste zu einer festen Uhrzeit.</p>
+      </details>
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Sehen andere Firmen unsere Daten?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Nein. Jede Zeile trägt eine Firmenkennung, und die Datenbank gibt nur Zeilen der eigenen Firma heraus. Das gilt auch für Zugriffe an der Oberfläche vorbei.</p>
+      </details>
+      <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
+        <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Wie kommen wir wieder heraus?</summary>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Kündigung jederzeit. Produktliste, Bestandsverlauf und Bestellliste lassen sich als CSV herunterladen, danach wird die Firma samt Daten gelöscht.</p>
+      </details>
+    </div>
+  </section>
+
+  <section style="background: var(--color-accent-900); color: var(--sc-card)">
+    <div style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-8); padding-bottom: var(--space-8); text-align: center">
+      <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 38px); line-height: 1.08; margin: 0 0 var(--space-3); color: var(--sc-card)" data-i18n>Ein Lager, eine Stunde Einrichtung.</h2>
+      <p style="font-size: 15.5px; line-height: 1.5; margin: 0 auto var(--space-6); max-width: 46ch; color: color-mix(in srgb, #fff 82%, transparent)" data-i18n>Firma anlegen, Artikel importieren, Etiketten drucken. Danach scannt das Team.</p>
+      <button class="btn btn-primary" style="height: 48px; padding-inline: 28px; font-size: 15px; white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
     </div>
   </section>
 
   <footer style="border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
-    <div style="max-width: 640px; margin: 0 auto; padding: var(--space-4) var(--space-6); font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
-      {{ serviceName }} · Internet GmbH
+    <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-6) var(--space-6); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-6)">
+      <div>
+        <div style="display: flex; align-items: center; gap: 9px; margin-bottom: var(--space-2)">
+          <div style="width: 24px; height: 24px; border-radius: 8px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 13px; color: var(--sc-card)">S</div>
+          <div style="font-family: var(--font-heading); font-size: 17px">{{ serviceName }}</div>
+        </div>
+        <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Lagerverwaltung für Betriebe. Betrieben von der Internet GmbH.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px">
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Produkt</div>
+        <a href="#funktionen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Funktionen</a>
+        <a href="#preise" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Preise</a>
+        <a href="#fragen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Fragen</a>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px">
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Rechtliches</div>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewImpressum }}"><span data-i18n>Impressum</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewDatenschutz }}"><span data-i18n>Datenschutz</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewAgb }}"><span data-i18n>AGB</span></button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px">
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Zugang</div>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
+      </div>
+    </div>
+    <div style="border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+      <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ serviceName }} · Internet GmbH</div>
+    </div>
+  </footer>
+</div>
+</sc-if>
+
+<sc-if value="{{ onLegal }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Rechtliches" style="min-height: 100vh; background: var(--sc-ground); display: flex; flex-direction: column">
+
+  <header style="position: sticky; top: 0; z-index: 20; background: var(--sc-card); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
+    <div data-landing-bar style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
+      <button class="btn btn-ghost" style="gap: 10px; padding: 4px 8px; margin-right: auto" onClick="{{ viewLanding }}">
+        <span style="width: 30px; height: 30px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 16px; color: var(--sc-card)">S</span>
+        <span style="font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.01em; color: var(--color-text)">{{ serviceName }}</span>
+      </button>
+      <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ viewLanding }}"><span data-i18n>Zur Startseite</span></button>
+      <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
+    </div>
+  </header>
+
+  <main style="max-width: 820px; width: 100%; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8); flex: 1">
+    <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-6)">
+      <button class="{{ legalTabImp }}" onClick="{{ viewImpressum }}"><span data-i18n>Impressum</span></button>
+      <button class="{{ legalTabDs }}" onClick="{{ viewDatenschutz }}"><span data-i18n>Datenschutz</span></button>
+      <button class="{{ legalTabAgb }}" onClick="{{ viewAgb }}"><span data-i18n>AGB</span></button>
+    </div>
+
+    <div class="card" style="margin-bottom: var(--space-6); border-color: var(--color-accent)">
+      <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
+        <span class="tag tag-accent" data-i18n>Vorlage</span>
+        <span style="font-size: 13px; line-height: 1.5; flex: 1; min-width: 200px" data-i18n>Die Angaben in eckigen Klammern gehören ersetzt. Vor der Veröffentlichung sollte ein Fachkundiger die Texte prüfen — sie sind ein Gerüst, keine Rechtsberatung.</span>
+      </div>
+    </div>
+
+    <sc-if value="{{ legalIsImpressum }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Impressum</h1>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Angaben gemäß § 5 Digitale-Dienste-Gesetz.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Anbieter</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Firmenname]<br>[Straße und Hausnummer]<br>[PLZ und Ort]<br>[Land]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Vertreten durch</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Vor- und Nachname der vertretungsberechtigten Person]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Kontakt</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)"><span data-i18n>Telefon</span>: [Nummer]<br><span data-i18n>E-Mail</span>: [adresse@domain.de]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Registereintrag</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)"><span data-i18n>Registergericht</span>: [Amtsgericht]<br><span data-i18n>Registernummer</span>: [HRB 00000]<br><span data-i18n>Umsatzsteuer-Identifikationsnummer</span>: [DE000000000]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Verantwortlich für den Inhalt</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Name]<br>[Adresse, falls abweichend]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Haftung für Inhalte</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Inhalte dieser Seiten werden mit Sorgfalt erstellt. Für die Richtigkeit und Vollständigkeit wird keine Gewähr übernommen. Eine Verpflichtung zur Überwachung fremder Informationen besteht nicht; ab Kenntnis einer Rechtsverletzung werden entsprechende Inhalte unverzüglich entfernt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Haftung für Verweise</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Für Inhalte verlinkter Seiten ist der jeweilige Anbieter verantwortlich. Zum Zeitpunkt der Verlinkung waren keine Rechtsverstöße erkennbar. Eine dauerhafte Prüfung ohne konkreten Anlass findet nicht statt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Urheberrecht</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die auf diesen Seiten erstellten Inhalte unterliegen dem Urheberrecht. Vervielfältigung und Verbreitung außerhalb der gesetzlich erlaubten Fälle bedürfen der schriftlichen Zustimmung.</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ legalIsDatenschutz }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Datenschutzerklärung</h1>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Diese Erklärung beschreibt, welche Daten bei der Nutzung der Lagerverwaltung verarbeitet werden, zu welchem Zweck und auf welcher Grundlage.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>1 · Verantwortlicher</h2>
+        <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Firmenname]<br>[Straße und Hausnummer]<br>[PLZ und Ort]<br><span data-i18n>E-Mail</span>: [datenschutz@domain.de]</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>2 · Welche Daten verarbeitet werden</h2>
+        <h3 style="font-family: var(--font-heading); font-size: 19px; margin: var(--space-4) 0 4px" data-i18n>Konto</h3>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Name, E-Mail-Adresse, Firmenzugehörigkeit, Rolle und Rechte. Das Passwort wird nur als nicht rückrechenbarer Prüfwert gespeichert, nie im Klartext.</p>
+        <h3 style="font-family: var(--font-heading); font-size: 19px; margin: var(--space-4) 0 4px" data-i18n>Nutzung</h3>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Jede Buchung wird mit Artikel, Menge, Zeitpunkt und buchender Person festgehalten. Das ist der Kern der Lagerverwaltung: ohne diese Zuordnung ließe sich ein Bestand nicht nachvollziehen.</p>
+        <h3 style="font-family: var(--font-heading); font-size: 19px; margin: var(--space-4) 0 4px" data-i18n>Inhalte</h3>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Artikeldaten, Bilder und Dateien, die von der Firma selbst eingestellt werden.</p>
+        <h3 style="font-family: var(--font-heading); font-size: 19px; margin: var(--space-4) 0 4px" data-i18n>Technische Daten</h3>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Beim Aufruf fallen bei den beteiligten Dienstleistern Verbindungsdaten an, darunter die IP-Adresse. Sie dienen dem Betrieb und der Abwehr von Angriffen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>3 · Zwecke und Rechtsgrundlagen</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Verarbeitung erfolgt zur Erfüllung des Nutzungsvertrags (Art. 6 Abs. 1 lit. b DSGVO) sowie zur Sicherheit des Betriebs und zur Abwehr von Missbrauch (Art. 6 Abs. 1 lit. f DSGVO). Eine Nutzung für Werbung findet nicht statt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>4 · Eingesetzte Dienstleister</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Verarbeitung erfolgt auf Grundlage von Verträgen zur Auftragsverarbeitung. Eingesetzt werden:</p>
+        <table class="table" style="margin: 0 0 var(--space-3)">
+          <thead>
+            <tr>
+              <th data-i18n>Dienst</th>
+              <th data-i18n>Wofür</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Supabase</td><td data-i18n>Datenbank, Konten, Anmeldung</td></tr>
+            <tr><td>Brevo</td><td data-i18n>Versand der Benachrichtigungen und Konto-Mails</td></tr>
+            <tr><td>Cloudflare</td><td data-i18n>Ablage der Bilder und Dateien, Bot-Prüfung</td></tr>
+            <tr><td>GitHub</td><td data-i18n>Ausliefern der Programmoberfläche</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Soweit ein Dienst außerhalb der EU verarbeitet, geschieht das auf Grundlage der Standardvertragsklauseln der EU-Kommission.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>5 · Speicherung im Browser</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Gespeichert werden die Anmeldesitzung und Einstellungen wie Sprache und Darstellung. Es werden keine Cookies zu Werbezwecken gesetzt, und es findet keine Analyse des Nutzungsverhaltens statt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>6 · Speicherdauer</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Kontodaten werden für die Dauer der Nutzung gespeichert. Nach Kündigung werden Firma, Konten, Artikel und Verlauf gelöscht, soweit keine gesetzliche Aufbewahrungspflicht entgegensteht.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>7 · Rechte der betroffenen Personen</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Es besteht das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Außerdem kann bei der zuständigen Aufsichtsbehörde Beschwerde eingelegt werden. Zuständig ist [Aufsichtsbehörde des Bundeslandes].</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>8 · Datensicherheit</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Übertragung erfolgt verschlüsselt. In der Datenbank trennt eine Regel auf Zeilenebene die Firmen voneinander: Anfragen geben nur Zeilen der eigenen Firma heraus. Dateien liegen in einer geschlossenen Ablage und werden über Adressen ausgeliefert, die nach einer Stunde verfallen.</p>
+
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ legalIsAgb }}" hint-placeholder-val="{{ false }}">
+      <div>
+        <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Allgemeine Geschäftsbedingungen</h1>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für die Nutzung der Lagerverwaltung durch Unternehmen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 1 Geltungsbereich</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Diese Bedingungen gelten für die Nutzung der Lagerverwaltung zwischen [Firmenname] als Anbieter und dem Kunden. Der Dienst richtet sich an Unternehmen; eine Nutzung durch Verbraucher ist nicht vorgesehen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 2 Leistung</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Anbieter stellt eine im Internet erreichbare Anwendung zur Verwaltung von Lagerbeständen bereit, einschließlich Buchungen, Benachrichtigungen, Etiketten und Auswertungen. Der Umfang ergibt sich aus dem gewählten Tarif und der jeweils bereitgestellten Fassung.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 3 Konto und Zugangsdaten</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Kunde legt ein Konto für seine Firma an und verwaltet weitere Personen selbst. Zugangsdaten sind geheim zu halten. Wer Personen einlädt oder Rechte vergibt, handelt für den Kunden.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 4 Preise und Gratisphase</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Nutzung ist derzeit unentgeltlich. Der Anbieter kann eine Entgeltpflicht einführen; er kündigt dies mit angemessener Frist an. Ohne Zustimmung des Kunden entsteht keine Zahlungspflicht. Angegebene Preise verstehen sich ohne Umsatzsteuer.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 5 Pflichten des Kunden</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Kunde stellt sicher, dass eingestellte Inhalte keine Rechte Dritter verletzen. Er nutzt den Dienst nicht in einer Weise, die den Betrieb beeinträchtigt, insbesondere nicht durch automatisierte Massenzugriffe.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 6 Verfügbarkeit</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Anbieter bemüht sich um eine hohe Verfügbarkeit, schuldet aber keine bestimmte Quote. Wartungsfenster und Störungen bei den eingesetzten Dienstleistern können zu Unterbrechungen führen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 7 Daten des Kunden</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die eingestellten Daten bleiben Daten des Kunden. Er kann Produktliste, Bestandsverlauf und Bestellliste jederzeit als Datei herunterladen. Eine eigene Sicherung dieser Auszüge wird empfohlen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 8 Haftung</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Anbieter haftet unbeschränkt bei Vorsatz und grober Fahrlässigkeit sowie bei Verletzung von Leben, Körper und Gesundheit. Bei leichter Fahrlässigkeit haftet er nur für die Verletzung wesentlicher Vertragspflichten und begrenzt auf den vorhersehbaren, typischen Schaden. Während der unentgeltlichen Nutzung ist die Haftung auf Vorsatz und grobe Fahrlässigkeit beschränkt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 9 Laufzeit und Kündigung</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Vertrag läuft auf unbestimmte Zeit und kann von beiden Seiten jederzeit ohne Frist gekündigt werden. Nach Kündigung werden die Daten der Firma gelöscht; der Kunde sollte vorher seine Auszüge herunterladen.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 10 Änderungen</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Der Anbieter kann diese Bedingungen mit Wirkung für die Zukunft ändern und kündigt Änderungen mit angemessener Frist an. Widerspricht der Kunde nicht, gelten sie als angenommen; im Fall des Widerspruchs endet der Vertrag zum Änderungszeitpunkt.</p>
+
+        <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 11 Recht und Gerichtsstand</h2>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Es gilt deutsches Recht. Gerichtsstand ist, soweit zulässig, [Ort].</p>
+
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
+      </div>
+    </sc-if>
+  </main>
+
+  <footer style="border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
+    <div style="max-width: 820px; margin: 0 auto; padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+      <span style="margin-right: auto">{{ serviceName }} · Internet GmbH</span>
+      <button style="background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer" onClick="{{ viewLanding }}"><span data-i18n>Startseite</span></button>
     </div>
   </footer>
 </div>
@@ -1357,14 +1827,14 @@
 
     <sc-if value="{{ authIsChoice }}" hint-placeholder-val="{{ true }}">
       <div style="display: flex; flex-direction: column; gap: var(--space-3)">
-        <button class="card elev-sm" style="text-align: left; cursor: pointer; border: 0; width: 100%; padding: var(--space-5); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); background: var(--color-accent); color: var(--sc-card)" onClick="{{ viewLogin }}">
+        <button class="card elev-sm" style="text-align: left; cursor: pointer; border: 0; width: 100%; padding: var(--space-6); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); background: var(--color-accent); color: var(--sc-card)" onClick="{{ viewLogin }}">
           <span>
             <span style="display: block; font-family: var(--font-heading); font-size: 23px; line-height: 1.15" data-i18n>Anmelden</span>
             <span style="display: block; font-size: 13.5px; opacity: .9; margin-top: 2px" data-i18n>Ich habe schon ein Konto</span>
           </span>
           <span style="font-size: 22px; opacity: .8">→</span>
         </button>
-        <button class="card elev-sm" style="text-align: left; cursor: pointer; width: 100%; padding: var(--space-5); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3)" onClick="{{ viewRegister }}">
+        <button class="card elev-sm" style="text-align: left; cursor: pointer; width: 100%; padding: var(--space-6); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3)" onClick="{{ viewRegister }}">
           <span>
             <span style="display: block; font-family: var(--font-heading); font-size: 23px; line-height: 1.15" data-i18n>Registrieren</span>
             <span style="display: block; font-size: 13.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); margin-top: 2px" data-i18n>Neue Firma anlegen</span>
@@ -1379,7 +1849,7 @@
 
       <sc-if value="{{ authIsLogin }}" hint-placeholder-val="{{ true }}">
         <div>
-          <h3 style="margin: 0 0 var(--space-5); font-size: 25px" data-i18n>Anmelden</h3>
+          <h3 style="margin: 0 0 var(--space-6); font-size: 25px" data-i18n>Anmelden</h3>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="current-password" onInput="{{ setAuthPw }}"></div>
           <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
@@ -1397,7 +1867,7 @@
 
       <sc-if value="{{ authIsRegister }}" hint-placeholder-val="{{ false }}">
         <div>
-          <h3 style="margin: 0 0 var(--space-5); font-size: 25px" data-i18n>Registrieren</h3>
+          <h3 style="margin: 0 0 var(--space-6); font-size: 25px" data-i18n>Registrieren</h3>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Firmenname</label><input class="input" autocomplete="organization" onInput="{{ setRegCompany }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="new-password" onInput="{{ setRegPw }}"></div>
@@ -1427,9 +1897,9 @@
       <sc-if value="{{ authIsConfirm }}" hint-placeholder-val="{{ false }}">
         <div style="text-align: center">
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>E-Mail bestätigen</h3>
-          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ confirmNote }}</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ confirmNote }}</p>
           <div style="font-family: var(--font-heading); font-size: 40px; line-height: 1; color: {{ clockColor }}">{{ clock }}</div>
-          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-5); color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-6); color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
           <sc-if value="{{ regFailed }}" hint-placeholder-val="{{ false }}">
             <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ regError }}</div>
           </sc-if>
@@ -1443,7 +1913,7 @@
       <sc-if value="{{ authIsMfa }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Zweiter Faktor</h3>
-          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Sechsstelligen Code aus deiner Authenticator-App eingeben.</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Sechsstelligen Code aus deiner Authenticator-App eingeben.</p>
           <div class="field" style="margin-bottom: var(--space-4)">
             <label data-i18n>Code</label>
             <input class="input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="font-family: var(--font-heading); font-size: 24px; letter-spacing: 0.3em; text-align: center" onInput="{{ setMfaCode }}">
@@ -1455,7 +1925,7 @@
       <sc-if value="{{ authIsForgot }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Passwort zurücksetzen</h3>
-          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Wir schicken dir einen Link, der 15 Minuten gültig ist.</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Wir schicken dir einen Link, der 15 Minuten gültig ist.</p>
           <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" onClick="{{ sendReset }}"><span data-i18n>Link senden</span></button>
         </div>
@@ -1464,7 +1934,7 @@
       <sc-if value="{{ authIsInvite }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Zugang einrichten</h3>
-          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="new-password" onInput="{{ setRegPw }}"></div>
@@ -2003,6 +2473,7 @@ class Component extends DCLogic {
       log: this.seedLog(),
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       rowsOpen: false,
+      testMailTo: "", mailChecks: [], legalTab: "impressum",
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -2225,6 +2696,27 @@ class Component extends DCLogic {
     setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
+  // Antworten von Brevo nachladen. Steht dort 201, hat Brevo die Mail
+  // angenommen; 401 heißt falscher Schlüssel, 400 meist ein Absender,
+  // der in Brevo nicht verifiziert ist.
+  loadMailStatus() {
+    if (!this.state.live || !this.api || !this.api.mailStatus) {
+      this.say(this.tr("Mailversand"), this.tr("Keine Datenbank verbunden"), this.tr("Im Demo-Modus wird nichts verschickt."));
+      return;
+    }
+    this.api.mailStatus(8)
+      .then(rows => this.setState({ mailChecks: rows || [] }))
+      .catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
+  }
+
+  mailHint(status, answer) {
+    if (status == null) return this.tr("Anfrage läuft noch — in ein paar Sekunden erneut abrufen.");
+    if (status === 200 || status === 201 || status === 202) return this.tr("Brevo hat die Mail angenommen.");
+    if (status === 401) return this.tr("Schlüssel abgelehnt — brevo_api_key in sc_config prüfen.");
+    if (status === 400) return this.tr("Absender nicht verifiziert — in Brevo unter Senders freischalten.");
+    return String(answer || "").slice(0, 180);
+  }
+
   remote(call) {
     if (!this.state.live || !this.api) return false;
     Promise.resolve(call(this.api))
@@ -2396,110 +2888,6 @@ class Component extends DCLogic {
 
   h(tag, style, kids) { return React.createElement(tag, { style }, kids); }
 
-  authPanelEl() {
-    const R = React.createElement;
-    const v = this.state.authView;
-    const label = { fontSize: "12px", marginBottom: "5px", color: "color-mix(in srgb, var(--color-text) 70%, transparent)", display: "block" };
-    const field = (text, input) => R("div", { key: text, className: "field", style: { marginBottom: "10px" } }, [R("label", { key: "l", style: label }, text), input]);
-    const inp = (props) => R("input", Object.assign({ className: "input" }, props));
-
-    if (v === "register") {
-      const ok = this.pwRules(this.state.regPw).every(r => r.ok) && this.state.regPw === this.state.regPw2 && this.state.regBot;
-      return R("div", null, [
-        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Firma registrieren")),
-        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } }, this.tr("Eine Person aus dem Unternehmen legt den Zugang an und schließt das Abo ab. Alle Abos sind derzeit gratis.")),
-        field(this.tr("Firmenname"), inp({ placeholder: "Internet GmbH" })),
-        field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
-        field(this.tr("Passwort"), inp({ type: "password", onInput: e => this.setState({ regPw: e.target.value }) })),
-        field(this.tr("Passwort wiederholen"), inp({ type: "password", onInput: e => this.setState({ regPw2: e.target.value }) })),
-        this.meter(this.state.regPw, this.state.regPw2),
-        R("label", { key: "bot", className: "radio", style: { gap: "9px", margin: "10px 0 4px", fontSize: "13px" } }, [
-          R("input", { key: "i", type: "checkbox", onChange: e => this.setState({ regBot: e.target.checked }),
-            style: { position: "static", width: "16px", height: "16px", opacity: 1, accentColor: "var(--color-accent)" } }),
-          R("span", { key: "s" }, this.tr("Ich bin kein Bot — Prüfung bestanden"))
-        ]),
-        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" }, disabled: !ok,
-          onClick: () => this.setState({ authView: "confirm", confirmLeft: 900 }) }, this.tr("Registrieren und Mail erhalten")),
-        R("div", { key: "n", className: "text-muted", style: { fontSize: "11px", marginTop: "10px" } },
-          this.tr("Abo: Gratis-Tarif, jederzeit kündbar. Später kostenpflichtig — wir melden uns vorher."))
-      ]);
-    }
-
-    if (v === "confirm") {
-      const left = this.state.confirmLeft;
-      const mm = String(Math.floor(left / 60)).padStart(2, "0"), ss = String(left % 60).padStart(2, "0");
-      const dead = left <= 0;
-      return R("div", null, [
-        R("div", { key: "k", className: "card-kicker" }, this.tr("Schritt 2 von 2")),
-        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("E-Mail bestätigen")),
-        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
-          this.tr("Wir haben dir einen Bestätigungslink geschickt. Der Link gilt 15 Minuten — danach verfällt die Registrierung.")),
-        R("div", { key: "t", className: "blueprint", style: { padding: "14px", textAlign: "center", marginBottom: "12px" } }, [
-          R("i", { key: 1, className: "corner tl" }), R("i", { key: 2, className: "corner tr" }),
-          R("i", { key: 3, className: "corner bl" }), R("i", { key: 4, className: "corner br" }),
-          R("div", { key: "c", style: { fontFamily: "var(--font-heading)", fontSize: "34px", lineHeight: 1,
-            color: dead ? "color-mix(in srgb, var(--color-text) 45%, transparent)" : "var(--color-accent)" } }, mm + ":" + ss),
-          R("div", { key: "l", style: { fontSize: "11px", letterSpacing: "0.08em", textTransform: "uppercase",
-            color: "color-mix(in srgb, var(--color-text) 55%, transparent)" } }, dead ? this.tr("Link verfallen") : this.tr("verbleibende Zeit"))
-        ]),
-        dead
-          ? R("button", { key: "b", className: "btn btn-secondary btn-block", style: { height: "44px" },
-              onClick: () => this.setState({ confirmLeft: 900 }) }, this.tr("Neue Bestätigungsmail anfordern"))
-          : R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
-              onClick: () => { this.setState({ authed: true, screen: "dashboard" }); this.say(this.tr("Registrierung"), this.tr("Firma angelegt"), this.tr("Du kannst jetzt weitere Personen einladen.")); } },
-              this.tr("Link jetzt bestätigen (Demo)"))
-      ]);
-    }
-
-    if (v === "forgot") {
-      return R("div", null, [
-        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Passwort zurücksetzen")),
-        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
-          this.tr("Gib deine E-Mail-Adresse ein. Wir schicken einen Link, der 15 Minuten gültig ist.")),
-        field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
-        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
-          onClick: () => { this.setState({ authView: "login" }); this.say("Brevo", this.tr("Mail ist unterwegs"), this.tr("Der Link gilt 15 Minuten.")); } },
-          this.tr("Link senden")),
-        R("button", { key: "b2", className: "btn btn-ghost btn-block", onClick: () => this.setState({ authView: "login" }) }, this.tr("Zurück zur Anmeldung"))
-      ]);
-    }
-
-    if (v === "invite") {
-      return R("div", null, [
-        R("div", { key: "k", className: "card-kicker" }, this.tr("Einladung von Marie Kohl")),
-        R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Zugang einrichten")),
-        R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } },
-          this.tr("Du wurdest zu Internet GmbH eingeladen. Die Einladung läuft in 2 Stunden 41 Minuten ab.")),
-        field(this.tr("Name"), inp({ placeholder: "Anke Reuß" })),
-        field(this.tr("E-Mail-Adresse"), inp({ type: "email", value: "a.reuss@internet-gmbh.de", readOnly: true })),
-        field(this.tr("Passwort"), inp({ type: "password", onInput: e => this.setState({ regPw: e.target.value }) })),
-        this.meter(this.state.regPw),
-        R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" },
-          disabled: !this.pwRules(this.state.regPw).every(r => r.ok),
-          onClick: () => { this.setState({ authed: true, role: "worker", screen: "scan" }); this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die Lagerleitung.")); } },
-          this.tr("Zugang aktivieren"))
-      ]);
-    }
-
-    const locked = this.state.loginFails >= 5;
-    return R("div", null, [
-      R("h4", { key: "h", style: { margin: "0 0 4px" } }, this.tr("Anmelden")),
-      R("p", { key: "p", className: "card-body", style: { margin: "0 0 14px" } }, this.tr("Zugang zum Lager deiner Firma.")),
-      field(this.tr("E-Mail-Adresse"), inp({ type: "email", placeholder: "name@internet-gmbh.de" })),
-      field(this.tr("Passwort"), inp({ type: "password" })),
-      locked ? R("div", { key: "w", className: "blueprint", style: { padding: "10px 12px", marginBottom: "10px", fontSize: "12.5px",
-        background: "color-mix(in srgb, var(--color-accent) 12%, transparent)" } }, [
-          R("i", { key: 1, className: "corner tl" }), R("i", { key: 2, className: "corner tr" }),
-          R("i", { key: 3, className: "corner bl" }), R("i", { key: 4, className: "corner br" }),
-          this.tr("Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.")
-        ]) : null,
-      R("button", { key: "b", className: "btn btn-primary btn-block", style: { height: "44px" }, disabled: locked,
-        onClick: () => { this.setState({ authed: true, screen: "dashboard" }); } }, this.tr("Anmelden")),
-      R("div", { key: "r", style: { display: "flex", justifyContent: "center", marginTop: "10px" } },
-        R("button", { key: "f", className: "btn btn-ghost", style: { padding: 0 }, onClick: () => this.setState({ authView: "forgot" }) }, this.tr("Passwort vergessen?")))
-    ]);
-  }
-
   renderVals() {
     const st = this.state, lang = st.lang;
     const name = st.brand || this.props.serviceName || "StockControl";
@@ -2654,7 +3042,17 @@ class Component extends DCLogic {
       serviceName: name,
       authed: st.authed,
       onLanding: !st.authed && st.authView === "landing",
-      inAuth: !st.authed && st.authView !== "landing",
+      inAuth: !st.authed && st.authView !== "landing" && st.authView !== "legal",
+      onLegal: !st.authed && st.authView === "legal",
+      legalIsImpressum: st.legalTab === "impressum",
+      legalIsDatenschutz: st.legalTab === "datenschutz",
+      legalIsAgb: st.legalTab === "agb",
+      legalTabImp: st.legalTab === "impressum" ? "btn btn-secondary" : "btn btn-ghost",
+      legalTabDs: st.legalTab === "datenschutz" ? "btn btn-secondary" : "btn btn-ghost",
+      legalTabAgb: st.legalTab === "agb" ? "btn btn-secondary" : "btn btn-ghost",
+      viewImpressum: () => this.setState({ authView: "legal", legalTab: "impressum" }),
+      viewDatenschutz: () => this.setState({ authView: "legal", legalTab: "datenschutz" }),
+      viewAgb: () => this.setState({ authView: "legal", legalTab: "agb" }),
       viewLanding: () => this.setState({ authView: "landing" }),
       viewAuthChoice: () => this.setState({ authView: "choice" }),
       lang, role: st.role, isSuper: st.live ? st.platformAdmin : st.role === "super",
@@ -3127,6 +3525,41 @@ class Component extends DCLogic {
       setMailDay: () => { this.setState({ mailMode: "day" }); this.remote(api => api.saveSettings({ mail_mode: "day" })); },
       setMailWeek: () => { this.setState({ mailMode: "week" }); this.remote(api => api.saveSettings({ mail_mode: "week" })); },
       setMailMonth: () => { this.setState({ mailMode: "month" }); this.remote(api => api.saveSettings({ mail_mode: "month" })); },
+
+      testMailTo: st.testMailTo,
+      setTestMailTo: e => this.setState({ testMailTo: e.target.value }),
+      doTestMail: () => {
+        const to = (st.testMailTo || "").trim();
+        if (!/.+@.+\..+/.test(to)) {
+          this.say(this.tr("Mailversand"), this.tr("Adresse fehlt"), this.tr("Bitte eine vollständige E-Mail-Adresse eintragen."));
+          return;
+        }
+        if (!st.live || !this.api || !this.api.sendTestMail) {
+          this.say(this.tr("Mailversand"), this.tr("Keine Datenbank verbunden"), this.tr("Im Demo-Modus wird nichts verschickt."));
+          return;
+        }
+        this.api.sendTestMail(to)
+          .then(() => {
+            this.say(this.tr("Mailversand"), this.tr("Testmail abgeschickt"), this.tr("Die Antwort von Brevo steht in ein paar Sekunden in der Tabelle."));
+            setTimeout(() => this.loadMailStatus(), 4000);
+          })
+          .catch(err => this.say(this.tr("Mailversand"), this.tr("Abgelehnt"), String((err && err.message) || err)));
+      },
+      refreshMailStatus: () => this.loadMailStatus(),
+      hasMailChecks: (st.mailChecks || []).length > 0,
+      mailChecks: (st.mailChecks || []).map(m => {
+        const s = m.status == null ? null : Number(m.status);
+        const good = s === 200 || s === 201 || s === 202;
+        return {
+          when: m.gesendet ? new Date(m.gesendet).toLocaleString("de-DE",
+            { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—",
+          subject: m.betreff || "—",
+          to: m.empfaenger || "",
+          statusLabel: s == null ? this.tr("unterwegs") : String(s),
+          tagClass: good ? "tag tag-accent" : s == null ? "tag tag-outline" : "tag tag-neutral",
+          hint: this.mailHint(s, m.antwort)
+        };
+      }),
       setPw: e => this.setState({ pw: e.target.value }), setPw2: e => this.setState({ pw2: e.target.value }),
       pwRulesList: this.rulesFor(st.pw, st.pw2),
       savePassword: () => {
