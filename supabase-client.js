@@ -25,6 +25,16 @@ function ok(res) {
 
 /* ── Konten ─────────────────────────────────────────────── */
 
+// Bestätigungsmail erneut anfordern. Hilft, wenn die erste im Spam landete
+// oder der Link abgelaufen ist.
+export async function resendConfirmation(email) {
+  const sb = await client();
+  return ok(await sb.auth.resend({
+    type: "signup", email,
+    options: { emailRedirectTo: location.origin + location.pathname }
+  }));
+}
+
 export async function signUpCompany({ email, password, companyName, captchaToken }) {
   const sb = await client();
   // company_name landet in den Metadaten; der Trigger legt Firma + Profil an.

@@ -364,7 +364,10 @@
               </sc-for>
             </tbody>
           </table>
-          <div class="card-meta" style="margin-top: var(--space-2)">{{ filteredCount }} <span data-i18n>von</span> {{ visibleTotal }} <span data-i18n>sichtbaren Artikeln</span> · {{ inactiveVisible }} <span data-i18n>deaktiviert</span></div>
+          <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-2)">
+            <div class="card-meta" style="margin: 0; flex: 1; min-width: 180px">{{ filteredCount }} <span data-i18n>von</span> {{ visibleTotal }} <span data-i18n>sichtbaren Artikeln</span> · {{ inactiveVisible }} <span data-i18n>deaktiviert</span></div>
+            <button class="btn btn-secondary" onClick="{{ exportProductsCsv }}"><span data-i18n>Als Excel exportieren</span></button>
+          </div>
         </section>
       </div>
       </sc-if>
@@ -805,6 +808,20 @@
             <div class="field"><label data-i18n>Lieferant</label><input class="input" data-i18n-ph placeholder="Getränke Nord GmbH"></div>
             <div class="field" style="grid-column: 1 / -1"><label data-i18n>Link zum Produkt</label><input class="input" type="url" placeholder="https://"></div>
             <div class="field" style="grid-column: 1 / -1"><label data-i18n>Kategorien</label><input class="input" data-i18n-ph placeholder="Getränke, Küche, Verbrauchsmaterial — mit Komma trennen"></div>
+            <sc-for list="{{ attrFields }}" as="f" hint-placeholder-count="2">
+              <div class="field">
+                <label>{{ f.name }}</label>
+                <sc-if value="{{ f.isPlain }}" hint-placeholder-val="{{ true }}">
+                  <input class="input" type="{{ f.inputType }}">
+                </sc-if>
+                <sc-if value="{{ f.isBool }}" hint-placeholder-val="{{ false }}">
+                  <label class="radio" style="gap: 8px; height: 38px">
+                    <input type="checkbox" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
+                    <span style="font-size: 13px" data-i18n>ja</span>
+                  </label>
+                </sc-if>
+              </div>
+            </sc-for>
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
             <button class="btn btn-primary" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
@@ -821,6 +838,45 @@
             <li data-i18n>Datei hier hochladen, Spalten prüfen, importieren</li>
           </ol>
           <button class="btn btn-secondary" onClick="{{ downloadTemplate }}"><span data-i18n>Excel-Vorlage herunterladen</span></button>
+
+          <div class="hr"></div>
+          <h4 style="margin: 0" data-i18n>Eigene Attribute</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.</p>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-for list="{{ attrList }}" as="a" hint-placeholder-count="2">
+              <div style="display: flex; flex-wrap: wrap; gap: 6px var(--space-2); align-items: center; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <div style="flex: 1; min-width: 120px">
+                  <div style="font-size: 13.5px; font-weight: 500">{{ a.name }}</div>
+                  <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ a.typeLabel }}</div>
+                </div>
+                <span class="{{ a.triggerClass }}" style="white-space: nowrap">{{ a.triggerLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 0 6px; white-space: nowrap" onClick="{{ a.remove }}"><span data-i18n>Entfernen</span></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-2); align-items: end; margin-top: var(--space-2)">
+            <div class="field"><label data-i18n>Name des Attributs</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
+            <div class="field"><label data-i18n>Art</label>
+              <select class="input" value="{{ attrType }}" onChange="{{ setAttrType }}">
+                <option value="text">Text</option>
+                <option value="number">Zahl</option>
+                <option value="bool">Ja / Nein</option>
+                <option value="date">Datum</option>
+                <option value="email">E-Mail</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Löst aus</label>
+              <select class="input" value="{{ attrTrigger }}" onChange="{{ setAttrTrigger }}">
+                <option value="">keine Regel</option>
+                <option value="warn">Warnmail bei Entnahme</option>
+                <option value="order">In Bestellliste aufnehmen</option>
+                <option value="block">Buchung sperren, wenn gesetzt</option>
+                <option value="expiry">Wie MHD überwachen</option>
+                <option value="label">Auf Etikett drucken</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Attribut anlegen</span></button>
+          </div>
           <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
@@ -854,12 +910,15 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-3); align-items: end">
             <div class="field"><label data-i18n>Text über dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Keller · Regal B2" onInput="{{ setQrTop }}"></div>
             <div class="field"><label data-i18n>Text unter dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Bei Entnahme scannen" onInput="{{ setQrBottom }}"></div>
-            <div class="field"><label data-i18n>Etikettgröße</label>
-              <select class="input" value="{{ qrSize }}" onChange="{{ setQrSize }}">
-                <option value="s">Klein · 35 mm</option>
-                <option value="m">Mittel · 50 mm</option>
-                <option value="l">Groß · 70 mm</option>
+            <div class="field"><label data-i18n>Etikettformat</label>
+              <select class="input" value="{{ labelFormat }}" onChange="{{ setLabelFormat }}">
+                <option value="2x4">2 × 4 · 99 × 67 mm · 8 je Blatt</option>
+                <option value="3x8">3 × 8 · 70 × 36 mm · 24 je Blatt</option>
+                <option value="4x10">4 × 10 · 48 × 27 mm · 40 je Blatt</option>
+                <option value="5x13">5 × 13 · 38 × 21 mm · 65 je Blatt</option>
+                <option value="roll">Endlosrolle · 62 mm breit</option>
               </select>
+              <div style="font-size: 11.5px; margin-top: 4px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ labelNote }}</div>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
               <button class="btn btn-secondary" onClick="{{ selectAllQr }}">{{ selectAllLabel }}</button>
@@ -897,10 +956,9 @@
           </div>
         </section>
 
-        <section data-print-sheet style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: var(--space-4)">
+        <section data-print-sheet style="{{ labelSheetStyle }}">
           <sc-for list="{{ qrSheet }}" as="q" hint-placeholder-count="4">
-            <div class="blueprint" style="padding: var(--space-3); display: flex; flex-direction: column; align-items: center; gap: 6px; background: #fff; color: #1d1f20; break-inside: avoid">
-              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="{{ labelCellStyle }}">
               <div style="font-size: 11px; text-align: center; min-height: 14px">{{ q.top }}</div>
               {{ q.svg }}
               <sc-if value="{{ q.withName }}" hint-placeholder-val="{{ true }}">
@@ -1110,6 +1168,7 @@
             </div>
           </section>
 
+          <sc-if value="{{ showSystemCards }}" hint-placeholder-val="{{ false }}">
           <section class="card">
             <div class="card-kicker" data-i18n>Systemdienste</div>
             <h4 style="margin: 0" data-i18n>Datenquelle</h4>
@@ -1145,6 +1204,7 @@
             </div>
             <p class="card-body" style="margin: var(--space-2) 0 0; font-size: 12.5px" data-i18n>Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.</p>
           </section>
+          </sc-if>
         </div>
       </div>
       </sc-if>
@@ -1243,7 +1303,7 @@
 </sc-if>
 
 <sc-if value="{{ inAuth }}" hint-placeholder-val="{{ false }}">
-<div style="min-height: 100vh; background: var(--sc-ground); display: grid; grid-template-rows: auto 1fr">
+<div style="position: relative; min-height: 100vh; background: var(--sc-ground); display: grid; grid-template-rows: auto 1fr; overflow: hidden">
 
   <header style="padding: var(--space-4) var(--space-6); display: flex; align-items: center; gap: var(--space-3)">
     <button class="btn btn-ghost" style="gap: 8px; padding: 4px 8px; margin-right: auto" onClick="{{ viewLanding }}">
@@ -1257,29 +1317,39 @@
     </select>
   </header>
 
-  <div data-authgrid style="flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-8); align-items: center; max-width: 1080px; width: 100%; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8)">
+  <div style="position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0">
+    <div style="position: absolute; left: -2%; right: -2%; bottom: -1%; height: 62%; opacity: .1">{{ bgChart }}</div>
+    <div style="position: absolute; top: -26%; right: -14%; width: 58%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 68%)"></div>
+  </div>
+
+  <div data-authgrid style="position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-8); align-items: center; max-width: 1080px; width: 100%; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8)">
 
   <div data-authintro style="min-width: 0">
     <h1 style="font-family: var(--font-heading); font-size: clamp(30px, 4vw, 44px); line-height: 1.06; letter-spacing: -0.02em; margin: 0 0 var(--space-4)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
-    <p style="font-size: 16px; line-height: 1.6; max-width: 26em; margin: 0 0 var(--space-6); color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>StockControl ist die smarte und einfache Bestandsverwaltung</p>
+    <p style="font-size: 16px; line-height: 1.6; max-width: 26em; margin: 0 0 var(--space-6); color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Scannen, Menge eingeben, fertig. Den Rest macht das System.</p>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-4) var(--space-6); margin-bottom: var(--space-6)">
-      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Scannen statt suchen</div>
-      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Die optimale Lagermege für jede Situation</div>
-      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Schneller Überblick</div>
-      <div style="font-family: var(--font-heading); font-size: 16px" data-i18n>Kein Stress mehr</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4) var(--space-6); margin-bottom: var(--space-6)">
+      <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Scannen statt suchen</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nie wieder leer</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Jede Person ihr Maß</span>
+      </div>
+      <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
+        <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nur euer Lager</span>
+      </div>
     </div>
 
-    <div class="card elev-sm" style="padding: var(--space-4); max-width: 430px">
-      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-3)">
-        <span style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestandsverlauf</span>
-        <span style="font-size: 12px; color: var(--color-accent-700)" data-i18n>Mindestbestand erreicht</span>
-      </div>
-      {{ heroChart }}
-      <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">
-        <span data-i18n>vor 12 Wochen</span>
-        <span data-i18n>heute</span>
-      </div>
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">
+      <span style="width: 26px; height: 1px; background: var(--color-accent)"></span>
+      <span data-i18n>Derzeit kostenlos, jederzeit kündbar.</span>
     </div>
   </div>
 
@@ -1357,15 +1427,16 @@
       <sc-if value="{{ authIsConfirm }}" hint-placeholder-val="{{ false }}">
         <div style="text-align: center">
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>E-Mail bestätigen</h3>
-          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Wir haben dir einen Link geschickt. Er gilt 15 Minuten.</p>
+          <p style="margin: 0 0 var(--space-5); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ confirmNote }}</p>
           <div style="font-family: var(--font-heading); font-size: 40px; line-height: 1; color: {{ clockColor }}">{{ clock }}</div>
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-5); color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
-          <sc-if value="{{ linkAlive }}" hint-placeholder-val="{{ true }}">
-            <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" onClick="{{ doConfirm }}"><span data-i18n>Link jetzt bestätigen (Demo)</span></button>
+          <sc-if value="{{ regFailed }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ regError }}</div>
           </sc-if>
-          <sc-if value="{{ linkDead }}" hint-placeholder-val="{{ false }}">
-            <button class="btn btn-secondary btn-block" style="height: 46px; font-size: 15px" onClick="{{ resetClock }}"><span data-i18n>Neue Mail anfordern</span></button>
-          </sc-if>
+          <button class="btn btn-secondary btn-block" style="height: 46px; font-size: 15px" onClick="{{ resendMail }}"><span data-i18n>Neue Mail anfordern</span></button>
+          <div style="display: flex; justify-content: center; margin-top: var(--space-3)">
+            <button class="btn btn-ghost" style="padding: 0; font-size: 13px; white-space: nowrap" onClick="{{ viewLogin }}"><span data-i18n>Zurück zur Anmeldung</span></button>
+          </div>
         </div>
       </sc-if>
 
@@ -1438,7 +1509,10 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;serviceName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;StockControl&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marke&quot;},&quot;startView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Anmeldung&quot;,&quot;Übersicht&quot;,&quot;Produkte&quot;,&quot;Scannen&quot;,&quot;Bestandsverlauf&quot;,&quot;Events&quot;,&quot;QR-Codes&quot;,&quot;Produkt anlegen&quot;,&quot;Team &amp; Rechte&quot;,&quot;Einstellungen&quot;],&quot;default&quot;:&quot;Anmeldung&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;demoRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Inhabende Person&quot;,&quot;Lagerleitung&quot;,&quot;Mitarbeitende Person&quot;,&quot;Lesezugriff&quot;,&quot;Betrieb&quot;],&quot;default&quot;:&quot;Inhabende Person&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Hell&quot;,&quot;Dunkel&quot;,&quot;System&quot;],&quot;default&quot;:&quot;Hell&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;}}">
 // Kostenbremse — Voreinstellung, bis config.js gelesen ist.
-// (Es gibt bewusst keinen Demo-Zugang: angemeldet wird nur gegen Supabase.)
+// Zugang der inhabenden Person, solange config.js kein Supabase-Projekt nennt.
+// Sobald Supabase verbunden ist, prüft Supabase und dieser Zweig läuft nicht.
+const OWNER_USER = "m.kohl@internet-gmbh.de";
+const OWNER_PW = "Testen1234!";
 const GUARD_DEFAULT = true;
 const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRows: 500, uploadMb: 10, storageMb: 8000 };
 
@@ -1518,6 +1592,10 @@ const DICT = {
     "Bestätigungslink gültig 15 Minuten": "Confirmation link valid for 15 minutes",
     "Bilder nur über signierten Zugriff": "Images only via signed access",
     "Nicht eingerichtet": "Not set up yet",
+    "Konto sofort aktiv — keine Mail": "Account active immediately — no mail",
+    "In Supabase ist „Confirm email\" ausgeschaltet. Einschalten unter Authentication → Providers → Email.": "\"Confirm email\" is switched off in Supabase. Turn it on under Authentication → Providers → Email.",
+    "Die Registrierung wurde abgelehnt:": "The registration was rejected:",
+    "Mail erneut angefordert": "Mail requested again", "Neue Mail anfordern": "Request a new mail",
     "Scannen, Menge eingeben, fertig. Den Rest macht das System.": "Scan, enter the quantity, done. The system does the rest.",
     "Mindestbestand erreicht": "Minimum reached", "vor 12 Wochen": "12 weeks ago", "heute": "today",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL and SUPABASE_ANON_KEY are missing in config.js. Without them there is no database and no mail. The steps are in SETUP.md.",
@@ -1658,6 +1736,10 @@ const DICT = {
     "Bestätigungslink gültig 15 Minuten": "Bekräftelselänk giltig i 15 minuter",
     "Bilder nur über signierten Zugriff": "Bilder endast via signerad åtkomst",
     "Nicht eingerichtet": "Inte konfigurerat",
+    "Konto sofort aktiv — keine Mail": "Kontot aktivt direkt — inget mejl",
+    "In Supabase ist „Confirm email\" ausgeschaltet. Einschalten unter Authentication → Providers → Email.": "\"Confirm email\" är avstängt i Supabase. Slå på det under Authentication → Providers → Email.",
+    "Die Registrierung wurde abgelehnt:": "Registreringen avvisades:",
+    "Mail erneut angefordert": "Mejl begärt igen", "Neue Mail anfordern": "Begär nytt mejl",
     "Scannen, Menge eingeben, fertig. Den Rest macht das System.": "Skanna, ange antal, klart. Resten sköter systemet.",
     "Mindestbestand erreicht": "Miniminivå nådd", "vor 12 Wochen": "för 12 veckor sedan", "heute": "idag",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL och SUPABASE_ANON_KEY saknas i config.js. Utan dem finns ingen databas och inga mejl. Stegen står i SETUP.md.",
@@ -1741,6 +1823,33 @@ const STATUS = {
   low:      { de: "Unter Mindestbestand", en: "Below minimum",   sv: "Under miniminivå",  tag: "tag tag-outline" },
   ordered:  { de: "Ist bestellt",         en: "Ordered",         sv: "Beställd",          tag: "tag tag-accent" },
   delivered:{ de: "Geliefert",            en: "Delivered",       sv: "Levererad",         tag: "tag tag-accent-2" }
+};
+
+// Datentypen für eigene Produktattribute.
+const ATTR_TYPES = {
+  text:   { de: "Text", en: "Text", sv: "Text" },
+  number: { de: "Zahl", en: "Number", sv: "Tal" },
+  bool:   { de: "Ja / Nein", en: "Yes / No", sv: "Ja / Nej" },
+  date:   { de: "Datum", en: "Date", sv: "Datum" },
+  email:  { de: "E-Mail", en: "Email", sv: "E-post" }
+};
+
+// Was ein Attribut in der Bestandsverwaltung auslösen kann.
+const ATTR_TRIGGERS = {
+  warn:     { de: "Warnmail bei Entnahme", en: "Alert mail on withdrawal", sv: "Varningsmejl vid uttag" },
+  order:    { de: "In Bestellliste aufnehmen", en: "Add to order list", sv: "Lägg i beställningslistan" },
+  block:    { de: "Buchung sperren, wenn gesetzt", en: "Block booking when set", sv: "Blockera bokning när satt" },
+  expiry:   { de: "Wie MHD überwachen", en: "Monitor like best-before", sv: "Bevaka som bäst-före" },
+  label:    { de: "Auf Etikett drucken", en: "Print on label", sv: "Skriv ut på etikett" }
+};
+
+// Etikettformate für den Druckbogen.
+const LABEL_FORMATS = {
+  "2x4":  { cols: 2, gap: "8mm",   pad: "8mm",   qr: 150, note: "2 × 4 · 99 × 67 mm · 8 je Blatt" },
+  "3x8":  { cols: 3, gap: "4mm",   pad: "5mm",   qr: 120, note: "3 × 8 · 70 × 36 mm · 24 je Blatt" },
+  "4x10": { cols: 4, gap: "2.5mm", pad: "3.5mm", qr: 92,  note: "4 × 10 · 48 × 27 mm · 40 je Blatt" },
+  "5x13": { cols: 5, gap: "1.5mm", pad: "2.5mm", qr: 70,  note: "5 × 13 · 38 × 21 mm · 65 je Blatt" },
+  roll:   { cols: 1, gap: "3mm",   pad: "6mm",   qr: 132, note: "Endlosrolle · 62 mm breit · einspaltig" }
 };
 
 const ROLES = {
@@ -1889,7 +1998,7 @@ class Component extends DCLogic {
       loginFails: 0,
       confirmLeft: 900,
       inviteEmail: "", authEmail: "", authPw: "", regCompany: "",
-      importDone: false, importFile: "",
+      importDone: false, importFile: "", regState: "", regError: "",
       menu: null, burgerOpen: false,
       log: this.seedLog(),
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
@@ -1899,6 +2008,13 @@ class Component extends DCLogic {
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
       photoUrl: "", photoFor: null, platformAdmin: false,
       guard: GUARD_DEFAULT, limits: LIMITS_DEFAULT, mailsToday: 0, storageMb: 340, scanCode: "",
+      // Eigene Attribute je Firma. trigger: was eine Regel auslösen kann.
+      attrs: [
+        { id: "a1", name: "Charge", type: "text", trigger: "" },
+        { id: "a2", name: "Gefahrstoff", type: "bool", trigger: "warn" }
+      ],
+      attrName: "", attrType: "text", attrTrigger: "",
+      labelFormat: "3x8",
       toast: null
     };
   }
@@ -2082,6 +2198,31 @@ class Component extends DCLogic {
     this.say(this.tr("Rechte"), this.tr("Das geht nicht"),
       this.tr("Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen."));
     return true;
+  }
+
+  // Nur echte Supabase-Zeilen haben eine UUID. Seed-Kennungen wie "u3"
+  // dürfen nicht an die Datenbank gehen — sonst kommt ein uuid-Syntaxfehler.
+  isDbId(id) {
+    return typeof id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  }
+  remoteMember(id, patch) {
+    if (!this.isDbId(id)) return;
+    this.remote(api => api.updateMember(id, patch));
+  }
+
+  // Datei zum Herunterladen anbieten. CSV mit BOM und Semikolon, damit Excel
+  // es auf deutschen Systemen direkt richtig in Spalten öffnet.
+  download(name, rows) {
+    const esc = v => {
+      const s = String(v === undefined || v === null ? "" : v);
+      return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    };
+    const csv = "\uFEFF" + rows.map(r => r.map(esc).join(";")).join("\r\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
   }
 
   remote(call) {
@@ -2448,7 +2589,7 @@ class Component extends DCLogic {
       });
     };
 
-    const qrPx = { s: 96, m: 120, l: 150 }[st.qrSize];
+    const qrPx = LABEL_FORMATS[st.labelFormat].qr;
     const qrSheet = products.filter(p => st.qrPicked.includes(p.id)).map(p => ({
       name: p.name, id: p.id, top: st.qrTop, bottom: st.qrBottom, svg: this.qrEl(p.id + p.ean, qrPx),
       withName: st.showName, withId: st.showId
@@ -2750,8 +2891,34 @@ class Component extends DCLogic {
       hTaken: taken, hAdded: added, hCount: hEntries.length, hTop,
       hChart: this.chart(agg),
       hChartLabel: hMatched.length === 1 ? hMatched[0].name : hMatched.length + " " + this.tr("Artikel zusammengefasst"),
-      exportHistoryCsv: () => this.say("Export", this.tr("Bestandsverlauf exportiert"), hEntries.length + " " + this.tr("Buchungen") + " · Excel (.xlsx)"),
-      exportOrderCsv: () => this.say("Export", this.tr("Bestellliste exportiert"), orderList.length + " " + this.tr("Positionen") + " · Excel (.xlsx)"),
+      exportHistoryCsv: () => {
+        const rows = [[this.tr("Datum"), this.tr("Artikel"), this.tr("Lagerort"), this.tr("Vorgang"), this.tr("Menge"), this.tr("Bestand danach"), this.tr("Person")]];
+        hEntries.slice().sort((a, b) => b.date - a.date).forEach(e => {
+          const p = byId(e.productId) || {};
+          rows.push([fmt(e.date), p.name || e.productId, p.ort || "", e.delta < 0 ? this.tr("Entnahme") : this.tr("Nachfüllung"),
+            e.delta, e.after, e.who]);
+        });
+        this.download("bestandsverlauf.csv", rows);
+        this.say("Export", this.tr("Bestandsverlauf exportiert"), hEntries.length + " " + this.tr("Buchungen") + " · bestandsverlauf.csv");
+      },
+      exportOrderCsv: () => {
+        const rows = [[this.tr("Artikel"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"), this.tr("Lieferant"), this.tr("Preis"), this.tr("Lagerort"), this.tr("Status"), this.tr("Verantwortlich")]];
+        orderList.forEach(p => rows.push([p.name, p.ean, p.ist, p.min, p.bestellmenge, p.lieferant, p.preis, p.ort, p.statusLabel, p.verantwortlich]));
+        this.download("bestellliste.csv", rows);
+        this.say("Export", this.tr("Bestellliste exportiert"), orderList.length + " " + this.tr("Positionen") + " · bestellliste.csv");
+      },
+      exportProductsCsv: () => {
+        const head = ["ID", this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
+          this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"), this.tr("Lieferant"), this.tr("Status"),
+          this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien")]
+          .concat(st.attrs.map(a => a.name));
+        const rows = [head];
+        products.forEach(p => rows.push([p.id, p.name, p.ean, p.ist, p.min, p.bestellmenge, p.ort, p.mhd, p.preis,
+          p.quantitaet, p.lieferant, p.status, p.verantwortlich, p.vertretung, (p.kategorien || []).join(", ")]
+          .concat(st.attrs.map(a => (p.extra || {})[a.id] || ""))));
+        this.download("produkte.csv", rows);
+        this.say("Export", this.tr("Produkte exportiert"), products.length + " " + this.tr("Artikel") + " · produkte.csv");
+      },
       printPage: () => window.print(),
 
       setScanCode: e => this.setState({ scanCode: e.target.value }),
@@ -2788,7 +2955,18 @@ class Component extends DCLogic {
         this.setState({ importDone: false }); this.go("products");
         this.say("Import", this.tr("48 Produkte importiert"), this.tr("2 Zeilen übersprungen — EAN doppelt."));
       },
-      downloadTemplate: () => this.say("Excel", this.tr("Vorlage erstellt"), this.tr("Eine Spalte pro Feld, inklusive eigener Kategorien.")),
+      downloadTemplate: () => {
+        const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
+          this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"), this.tr("Lieferant"),
+          this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
+          .concat(st.attrs.map(a => a.name));
+        const example = ["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
+          "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)", "Getränke Nord GmbH",
+          "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
+          .concat(st.attrs.map(() => ""));
+        this.download("stockcontrol-vorlage.csv", [head, example]);
+        this.say("Excel", this.tr("Vorlage heruntergeladen"), this.tr("Eine Spalte pro Feld, inklusive eigener Attribute."));
+      },
       createProduct: () => {
         if (!this.withinLimit("products", products.length)) return;
         this.go("products");
@@ -2829,27 +3007,27 @@ class Component extends DCLogic {
             const val = e.target.value;
             if (val !== "owner" && this.lastOwnerBlocked(u)) { e.target.value = u.role; return; }
             this.setState(prev => ({ members: prev.members.map(m => m.id === u.id ? Object.assign({}, m, { role: val }) : m) }));
-            this.remote(api => api.updateMember(u.id, { role: val }));
+            this.remoteMember(u.id, { role: val });
           }
         });
       }),
       pickedName: picked.name, pickedNameVal: picked.name, pickedEmail: picked.email, pickedRole: picked.role,
       cannotManage: st.role !== "owner",
       blockMemberLabel: picked.status === "blocked" ? this.tr("Entsperren") : this.tr("Zugang sperren"),
-      setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remote(api => api.updateMember(picked.id, { name: v })); },
-      setPickedEmail: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { email: v }) : m) })); this.remote(api => api.updateMember(picked.id, { email: v })); },
+      setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remoteMember(picked.id, { name: v }); },
+      setPickedEmail: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { email: v }) : m) })); this.remoteMember(picked.id, { email: v }); },
       setPickedRole: e => {
         const v = e.target.value;
         if (v !== "owner" && this.lastOwnerBlocked(picked)) { e.target.value = picked.role; return; }
         this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { role: v }) : m) }));
-        this.remote(api => api.updateMember(picked.id, { role: v }));
+        this.remoteMember(picked.id, { role: v });
       },
       isLastOwner: picked.role === "owner" && picked.status === "active" && this.ownersAfter(picked.id) === 0,
       toggleBlockMember: () => {
         const next = picked.status === "blocked" ? "active" : "blocked";
         if (next === "blocked" && this.lastOwnerBlocked(picked)) return;
         this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { status: next }) : m) }));
-        this.remote(api => api.updateMember(picked.id, { status: next }));
+        this.remoteMember(picked.id, { status: next });
       },
       removeMember: () => {
         const u = picked;
@@ -2860,6 +3038,8 @@ class Component extends DCLogic {
         });
         this.say(this.tr("Team"), this.tr("Person entfernt"), u.name + " · " + this.tr("Zugang sofort gesperrt, Buchungen bleiben im Verlauf"));
       },
+      // Systemdienste und Kosten sieht nur die inhabende Person.
+      showSystemCards: st.role === "owner",
       guardLabel: st.guard ? this.tr("aktiv") : this.tr("aus"),
       guardTagClass: st.guard ? "tag tag-accent" : "tag tag-outline",
       guardNote: st.guard
@@ -2882,6 +3062,46 @@ class Component extends DCLogic {
           };
         });
       })(),
+      // ── Eigene Attribute ────────────────────────────────────
+      attrTypeLabels: null,
+      attrList: st.attrs.map(a => ({
+        name: a.name,
+        typeLabel: ATTR_TYPES[a.type] ? (ATTR_TYPES[a.type][lang] || ATTR_TYPES[a.type].de) : a.type,
+        triggerLabel: a.trigger ? (ATTR_TRIGGERS[a.trigger][lang] || ATTR_TRIGGERS[a.trigger].de) : this.tr("keine Regel"),
+        triggerClass: a.trigger ? "tag tag-accent" : "tag tag-outline",
+        remove: () => this.setState(prev => ({ attrs: prev.attrs.filter(x => x.id !== a.id) }))
+      })),
+      attrName: st.attrName, attrType: st.attrType, attrTrigger: st.attrTrigger,
+      setAttrName: e => this.setState({ attrName: e.target.value }),
+      setAttrType: e => this.setState({ attrType: e.target.value }),
+      setAttrTrigger: e => this.setState({ attrTrigger: e.target.value }),
+      attrDisabled: !st.attrName.trim(),
+      addAttr: () => {
+        const name = st.attrName.trim();
+        if (!name) return;
+        this.setState(prev => ({
+          attrs: prev.attrs.concat({ id: "a" + Date.now(), name, type: prev.attrType, trigger: prev.attrTrigger }),
+          attrName: "", attrTrigger: ""
+        }));
+        this.say(this.tr("Attribut"), name, st.attrTrigger
+          ? this.tr("Regel aktiv: ") + (ATTR_TRIGGERS[st.attrTrigger][lang] || ATTR_TRIGGERS[st.attrTrigger].de)
+          : this.tr("Feld steht ab jetzt in jedem Produkt."));
+      },
+      attrFields: st.attrs.map(a => ({
+        name: a.name,
+        inputType: a.type === "number" ? "number" : a.type === "email" ? "email" : a.type === "date" ? "date" : "text",
+        isBool: a.type === "bool", isPlain: a.type !== "bool"
+      })),
+
+      // ── Etikettformate ──────────────────────────────────────
+      labelFormat: st.labelFormat,
+      setLabelFormat: e => this.setState({ labelFormat: e.target.value }),
+      labelSheetStyle: "display: grid; gap: " + LABEL_FORMATS[st.labelFormat].gap +
+        "; grid-template-columns: repeat(" + LABEL_FORMATS[st.labelFormat].cols + ", minmax(0, 1fr))",
+      labelCellStyle: "padding: " + LABEL_FORMATS[st.labelFormat].pad +
+        "; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fff; color: #1d1f20; break-inside: avoid; border: 1px solid #c9c9cb; border-radius: 6px",
+      labelNote: LABEL_FORMATS[st.labelFormat].note,
+
       perms: permsFor(),
       allowAll: () => this.setState(prev => {
         const next = Object.assign({}, prev.overrides); const o = {};
@@ -2971,6 +3191,22 @@ class Component extends DCLogic {
             stroke: "var(--color-accent-800)", strokeWidth: 1.6, vectorEffect: "non-scaling-stroke" })
         ]);
       })(),
+      // Blasse Treppengrafik als Hintergrund der Anmeldeseite.
+      bgChart: (() => {
+        const vals = [62, 58, 60, 51, 47, 49, 40, 43, 34, 29, 32, 24, 19, 22, 14, 9];
+        const w = 100, h = 40, max = 66;
+        const x = i => (i * w) / (vals.length - 1);
+        const y = v => h - (v / max) * (h - 2) - 1;
+        let d = "M " + x(0).toFixed(1) + " " + y(vals[0]).toFixed(1);
+        vals.forEach((v, i) => { if (i) d += " L " + x(i).toFixed(1) + " " + y(vals[i - 1]).toFixed(1) + " L " + x(i).toFixed(1) + " " + y(v).toFixed(1); });
+        return React.createElement("svg", {
+          viewBox: "0 0 100 40", preserveAspectRatio: "none",
+          style: { width: "100%", height: "100%", display: "block" }
+        }, [
+          React.createElement("path", { key: "a", d: d + " L " + w + " " + h + " L 0 " + h + " Z", fill: "var(--color-accent)", stroke: "none" }),
+          React.createElement("path", { key: "l", d, fill: "none", stroke: "var(--color-accent-800)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" })
+        ]);
+      })(),
       locked: st.loginFails >= 5,
 
       authEmail: st.authEmail, authPw: st.authPw,
@@ -3029,7 +3265,12 @@ class Component extends DCLogic {
             });
           return;
         }
-        // Ohne Supabase gibt es kein Konto, gegen das geprüft werden könnte.
+        // Ohne Supabase gibt es nur den Zugang der inhabenden Person zum Ansehen.
+        if (st.authEmail.trim().toLowerCase() === OWNER_USER && st.authPw === OWNER_PW) {
+          this.setState({ authed: true, role: "owner", screen: "dashboard", loginFails: 0 });
+          return;
+        }
+        this.setState(s => ({ loginFails: s.loginFails + 1 }));
         this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
           this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
       },
@@ -3048,18 +3289,52 @@ class Component extends DCLogic {
         && (st.captcha ? !!st.captchaToken : st.regBot)),
       inviteDisabled: !this.pwRules(st.regPw).every(r => r.ok),
       doRegister: () => {
-        if (st.live && this.api) {
-          this.api.signUpCompany({ email: st.authEmail, password: st.regPw, companyName: st.regCompany, captchaToken: st.captchaToken })
-            .catch(err => this.say("Supabase", this.tr("Registrierung fehlgeschlagen"), String((err && err.message) || err)));
+        if (!st.live || !this.api) {
+          this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
+            this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
+          return;
         }
-        this.setState({ authView: "confirm", confirmLeft: 900 });
+        this.setState({ authView: "confirm", confirmLeft: 900, regState: "wait" });
+        this.api.signUpCompany({ email: st.authEmail, password: st.regPw, companyName: st.regCompany, captchaToken: st.captchaToken })
+          .then(r => {
+            // Kommt eine Sitzung zurück, ist in Supabase "Confirm email" aus —
+            // dann verschickt Supabase gar keine Bestätigungsmail.
+            if (r && r.session) {
+              this.setState({ regState: "nomail" });
+              this.say("Supabase", this.tr("Konto sofort aktiv — keine Mail"),
+                this.tr("In Supabase ist „Confirm email\" ausgeschaltet. Einschalten unter Authentication → Providers → Email."));
+            } else if (r && r.user) {
+              this.setState({ regState: "sent" });
+            } else {
+              this.setState({ regState: "sent" });
+            }
+          })
+          .catch(err => {
+            this.setState({ regState: "error", regError: String((err && err.message) || err) });
+            this.say("Supabase", this.tr("Registrierung fehlgeschlagen"), String((err && err.message) || err));
+          });
       },
+      regWaiting: st.regState === "wait", regSent: st.regState === "sent",
+      regNoMail: st.regState === "nomail", regFailed: st.regState === "error",
+      regError: st.regError || "",
+      confirmNote: st.regState === "nomail"
+        ? this.tr("In Supabase ist „Confirm email\" ausgeschaltet. Einschalten unter Authentication → Providers → Email.")
+        : st.regState === "error"
+          ? this.tr("Die Registrierung wurde abgelehnt:")
+          : this.tr("Wir haben dir einen Link geschickt. Er gilt 15 Minuten."),
       clock: String(Math.floor(st.confirmLeft / 60)).padStart(2, "0") + ":" + String(st.confirmLeft % 60).padStart(2, "0"),
       clockColor: st.confirmLeft > 0 ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 45%, transparent)",
       clockLabel: st.confirmLeft > 0 ? this.tr("verbleibende Zeit") : this.tr("Link verfallen"),
       linkAlive: st.confirmLeft > 0, linkDead: st.confirmLeft <= 0,
       resetClock: () => this.setState({ confirmLeft: 900 }),
-      doConfirm: () => { this.setState({ authed: true, screen: "dashboard" }); this.say(this.tr("Registrierung"), this.tr("Firma angelegt"), this.tr("Du kannst jetzt weitere Personen einladen.")); },
+      resendMail: () => {
+        this.setState({ confirmLeft: 900 });
+        if (st.live && this.api && this.api.resendConfirmation) {
+          this.api.resendConfirmation(st.authEmail)
+            .then(() => this.say("Supabase", this.tr("Mail erneut angefordert"), st.authEmail))
+            .catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
+        }
+      },
       doInvite: () => { this.setState({ authed: true, role: "worker", screen: "scan" }); this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person.")); },
       viewLogin: () => this.setState({ authView: "login" }),
       viewRegister: () => this.setState({ authView: "register" }),
