@@ -133,6 +133,7 @@
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
               <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
               <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+              <button class="btn" style="{{ navHelp }}" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
               <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ false }}">
                 <button class="btn" style="{{ navAdmin }}" onClick="{{ goAdmin }}"><span data-i18n>Betriebs-Konsole</span></button>
               </sc-if>
@@ -164,6 +165,7 @@
                 <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ roleLabel }} · {{ companyName }}</div>
               </div>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+              <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ logout }}"><span data-i18n>Abmelden</span></button>
             </div>
           </sc-if>
@@ -200,6 +202,7 @@
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
             <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
             <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+            <button class="btn" style="{{ navHelp }}" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
             <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ false }}">
               <button class="btn" style="{{ navAdmin }}" onClick="{{ goAdmin }}"><span data-i18n>Betriebs-Konsole</span></button>
             </sc-if>
@@ -219,6 +222,32 @@
 
       <sc-if value="{{ onDashboard }}" hint-placeholder-val="{{ true }}">
       <div data-screen-label="Übersicht" style="display: flex; flex-direction: column; gap: var(--space-6)">
+        <sc-if value="{{ showOnboard }}" hint-placeholder-val="{{ false }}">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+              <div style="margin-right: auto">
+                <div class="card-kicker" data-i18n>Einrichtung</div>
+                <h3 style="margin: 0; font-family: var(--font-heading); font-size: 22px" data-i18n>Die ersten fünf Schritte</h3>
+              </div>
+              <span class="tag tag-accent">{{ onboardProgress }}</span>
+              <button class="btn btn-ghost" style="white-space: nowrap; font-size: 12.5px" onClick="{{ hideOnboard }}"><span data-i18n>Ausblenden</span></button>
+            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Danach läuft das Lager von selbst. Jeder Schritt hakt sich ab, sobald er erledigt ist.</p>
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{ onboardSteps }}" as="ob" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: 9px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <span style="width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: {{ ob.dotBg }}; color: {{ ob.dotFg }}">{{ ob.mark }}</span>
+                  <div style="min-width: 0">
+                    <div style="font-size: 13.5px; font-family: var(--font-heading)">{{ ob.title }}</div>
+                    <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ ob.note }}</div>
+                  </div>
+                  <button class="{{ ob.cls }}" style="white-space: nowrap; font-size: 12.5px; padding-inline: 12px" onClick="{{ ob.go }}">{{ ob.action }}</button>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
         <div data-cols>
           <div class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -451,6 +480,43 @@
               <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
               <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
             </div>
+            <sc-if value="{{ hasUnitLadder }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: var(--space-2)">
+                <sc-for list="{{ unitRows }}" as="u" hint-placeholder-count="2">
+                  <div class="field" style="margin: 0">
+                    <label>{{ u.label }}</label>
+                    <input class="input" type="number" min="0" step="1" value="{{ u.qty }}" onInput="{{ u.set }}">
+                  </div>
+                </sc-for>
+              </div>
+              <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 58%, transparent)">{{ unitSumNote }}</div>
+            </sc-if>
+            <details style="border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding-top: var(--space-2)">
+              <summary style="font-family: var(--font-heading); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: var(--space-2)" data-i18n>Einheiten dieses Produkts</summary>
+              <p style="font-size: 12.5px; line-height: 1.5; margin: var(--space-2) 0; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.</p>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <sc-for list="{{ unitList }}" as="ul" hint-placeholder-count="2">
+                  <div style="display: flex; align-items: center; gap: var(--space-2); padding: 6px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                    <span style="font-size: 13px; margin-right: auto">{{ ul.name }}</span>
+                    <span class="tag tag-neutral">{{ ul.factorLabel }}</span>
+                    <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ ul.locked }}" onClick="{{ ul.remove }}"><span data-i18n>Löschen</span></button>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end; margin-top: var(--space-2)">
+                <div class="field" style="flex: 2; min-width: 130px; margin: 0"><label data-i18n>Einheit</label><input class="input" value="{{ newUnitName }}" data-i18n-ph placeholder="z. B. Kiste" onInput="{{ setNewUnitName }}"></div>
+                <div class="field" style="flex: 2; min-width: 165px; margin: 0">
+                  <label data-i18n>Verhältnis</label>
+                  <select class="input" value="{{ newUnitDir }}" onChange="{{ setNewUnitDir }}">
+                    <option value="up">{{ dirUpLabel }}</option>
+                    <option value="down">{{ dirDownLabel }}</option>
+                  </select>
+                </div>
+                <div class="field" style="flex: 1; min-width: 90px; margin: 0"><label data-i18n>Anzahl</label><input class="input" inputmode="numeric" value="{{ newUnitFactor }}" onInput="{{ setNewUnitFactor }}"></div>
+                <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addUnitDisabled }}" onClick="{{ addUnit }}"><span data-i18n>Einheit anlegen</span></button>
+              </div>
+              <div style="font-size: 12.5px; margin-top: 5px; color: {{ unitNoteColor }}">{{ unitFactorNote }}</div>
+            </details>
             <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
             <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
             <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
@@ -661,8 +727,102 @@
           </sc-if>
 
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-            <button class="btn btn-secondary" onClick="{{ exportHistoryCsv }}"><span data-i18n>Als Excel exportieren</span></button>
-            <button class="btn btn-secondary" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
+            <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ exportHistoryCsv }}"><span data-i18n>Als Excel exportieren</span></button>
+            <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-kicker" data-i18n>Preise</div>
+          <h4 style="margin: 0" data-i18n>Preisverlauf und Umsatz</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Jede Preisänderung gilt ab ihrem Datum. Der Umsatz nimmt für jede Entnahme den Preis, der an diesem Tag gültig war — über ein Produkt oder über mehrere zusammen.</p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{ priceProducts }}" as="pp" hint-placeholder-count="5">
+              <button class="{{ pp.cls }}" style="white-space: nowrap" onClick="{{ pp.toggle }}">{{ pp.name }}</button>
+            </sc-for>
+          </div>
+          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 58%, transparent)">{{ priceSelNote }}</div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3)">
+            <div class="blueprint" style="padding: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Umsatz</div>
+              <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--color-accent-700)">{{ revenueTotal }}</div>
+            </div>
+            <div class="blueprint" style="padding: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Entnommen</div>
+              <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ revenueQty }}</div>
+            </div>
+            <div class="blueprint" style="padding: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Preisänderungen</div>
+              <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ priceChangeCount }}</div>
+            </div>
+          </div>
+
+          <table class="table" data-zebra style="margin: 0">
+            <thead>
+              <tr>
+                <th data-i18n>Produkt</th>
+                <th align="right" data-i18n>Entnommen</th>
+                <th align="right" data-i18n>Preis heute</th>
+                <th align="right" data-i18n>Umsatz</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ revenueRows }}" as="rv" hint-placeholder-count="3">
+                <tr>
+                  <td>{{ rv.name }}</td>
+                  <td align="right" style="font-variant-numeric: tabular-nums">{{ rv.qty }}</td>
+                  <td align="right" style="font-variant-numeric: tabular-nums">{{ rv.price }}</td>
+                  <td align="right" style="font-variant-numeric: tabular-nums">{{ rv.sum }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Preisänderungen</div>
+          <table class="table" style="margin: 0">
+            <thead>
+              <tr>
+                <th data-i18n>Datum</th>
+                <th data-i18n>Produkt</th>
+                <th align="right" data-i18n>Preis</th>
+                <th align="right" data-i18n>Änderung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ priceRows }}" as="pr" hint-placeholder-count="4">
+                <tr>
+                  <td style="white-space: nowrap">{{ pr.datum }}</td>
+                  <td>{{ pr.name }}</td>
+                  <td align="right" style="font-variant-numeric: tabular-nums">{{ pr.preis }}</td>
+                  <td align="right" style="font-variant-numeric: tabular-nums; color: {{ pr.color }}">{{ pr.delta }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 2; min-width: 180px; margin: 0">
+              <label data-i18n>Produkt</label>
+              <select class="input" value="{{ pcProduct }}" onChange="{{ setPcProduct }}">
+                <sc-for list="{{ hProducts }}" as="hp" hint-placeholder-count="4">
+                  <option value="{{ hp.id }}">{{ hp.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field" style="flex: 1; min-width: 140px; margin: 0">
+              <label data-i18n>Gültig ab</label>
+              <input class="input" type="date" value="{{ pcDate }}" onInput="{{ setPcDate }}">
+            </div>
+            <div class="field" style="flex: 1; min-width: 110px; margin: 0">
+              <label data-i18n>Neuer Preis</label>
+              <input class="input" inputmode="decimal" placeholder="8,49" value="{{ pcPrice }}" onInput="{{ setPcPrice }}">
+            </div>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ pcDisabled }}" onClick="{{ addPriceChange }}"><span data-i18n>Preis eintragen</span></button>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+            <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ exportPriceCsv }}"><span data-i18n>Umsatz als CSV</span></button>
           </div>
         </section>
       </div>
@@ -856,89 +1016,6 @@
           <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>CSV-Vorlage herunterladen</span></button>
 
         </section>
-
-        <section class="card blueprint">
-          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <h4 style="margin: 0" data-i18n>Lagerorte</h4>
-          <p class="card-body" style="margin: 0" data-i18n>Die Auswahl, die beim Anlegen eines Produkts und in allen Filtern erscheint. Ein Lagerort lässt sich nur löschen, wenn kein Produkt mehr darin liegt.</p>
-          <div style="display: flex; flex-direction: column; gap: 2px">
-            <sc-for list="{{ placeList }}" as="pl" hint-placeholder-count="4">
-              <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                <span style="font-size: 13px; margin-right: auto">{{ pl.name }}</span>
-                <span class="tag tag-neutral">{{ pl.countLabel }}</span>
-                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ pl.locked }}" onClick="{{ pl.remove }}"><span data-i18n>Löschen</span></button>
-              </div>
-            </sc-for>
-          </div>
-          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
-            <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neuer Lagerort</label><input class="input" value="{{ newPlace }}" data-i18n-ph placeholder="z. B. Halle 2 · Regal 4" onInput="{{ setNewPlace }}"></div>
-            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addPlaceDisabled }}" onClick="{{ addPlace }}"><span data-i18n>Lagerort anlegen</span></button>
-          </div>
-
-        </section>
-
-        <section class="card blueprint">
-          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <h4 style="margin: 0" data-i18n>Eigene Merkmale</h4>
-          <p class="card-body" style="margin: 0" data-i18n>Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.</p>
-          <div style="display: flex; flex-direction: column; gap: 2px">
-            <sc-for list="{{ attrList }}" as="a" hint-placeholder-count="2">
-              <div style="display: flex; flex-wrap: wrap; gap: 6px var(--space-2); align-items: center; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                <div style="flex: 1; min-width: 120px">
-                  <div style="font-size: 13.5px; font-weight: 500">{{ a.name }}</div>
-                  <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ a.typeLabel }}</div>
-                </div>
-                <span class="{{ a.triggerClass }}" style="white-space: nowrap">{{ a.triggerLabel }}</span>
-                <button class="btn btn-ghost" style="padding: 0 6px; white-space: nowrap" onClick="{{ a.remove }}"><span data-i18n>Entfernen</span></button>
-              </div>
-            </sc-for>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-2); align-items: end; margin-top: var(--space-2)">
-            <div class="field"><label data-i18n>Name des Merkmals</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
-            <div class="field"><label data-i18n>Art</label>
-              <select class="input" value="{{ attrType }}" onChange="{{ setAttrType }}">
-                <option value="text">Text</option>
-                <option value="number">Zahl</option>
-                <option value="bool">Ja / Nein</option>
-                <option value="date">Datum</option>
-                <option value="email">E-Mail</option>
-              </select>
-            </div>
-            <div class="field"><label data-i18n>Löst aus</label>
-              <select class="input" value="{{ attrTrigger }}" onChange="{{ setAttrTrigger }}">
-                <option value="">keine Regel</option>
-                <option value="warn">Warnmail bei Entnahme</option>
-                <option value="order">In Bestellliste aufnehmen</option>
-                <option value="block">Buchung sperren, wenn gesetzt</option>
-                <option value="expiry">Wie MHD überwachen</option>
-                <option value="label">Auf Etikett drucken</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Merkmal anlegen</span></button>
-          </div>
-          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
-            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer">
-              <span data-i18n>Datei auswählen</span>
-              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
-            </label>
-          </div>
-          <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
-            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
-              <table class="table">
-                <thead><tr><th data-i18n>Spalte in Datei</th><th data-i18n>Feld im System</th><th data-i18n>Prüfung</th></tr></thead>
-                <tbody>
-                  <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="4">
-                    <tr><td>{{ r.col }}</td><td class="text-muted">{{ r.field }}</td><td><span class="{{ r.tagClass }}">{{ r.check }}</span></td></tr>
-                  </sc-for>
-                </tbody>
-              </table>
-              <button class="btn btn-primary" onClick="{{ runImport }}">{{ importBtnLabel }}</button>
-            </div>
-          </sc-if>
-        </section>
       </div>
       </sc-if>
 
@@ -1106,8 +1183,138 @@
       </div>
       </sc-if>
 
+      <sc-if value="{{ onHelp }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Hilfe" style="display: flex; flex-direction: column; gap: var(--space-6)">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="card-kicker" data-i18n>Hilfe</div>
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 26px" data-i18n>Wie mache ich …?</h3>
+          <p class="card-body" style="margin: 0" data-i18n>Kurze Antworten zu allem, was im Lager täglich vorkommt. Tippe ein Stichwort ein, um zu filtern.</p>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 1; min-width: 200px; margin: 0">
+              <label data-i18n>Suchen</label>
+              <input class="input" value="{{ helpQuery }}" data-i18n-ph placeholder="z. B. Etikett, Mail, Einheit" onInput="{{ setHelpQuery }}">
+            </div>
+            <span style="font-size: 12.5px; padding-bottom: 9px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ helpCountNote }}</span>
+          </div>
+        </section>
+
+        <sc-for list="{{ helpGroups }}" as="hg" hint-placeholder-count="3">
+          <section class="card">
+            <div class="card-kicker">{{ hg.kicker }}</div>
+            <h4 style="margin: 0">{{ hg.title }}</h4>
+            <div>
+              <sc-for list="{{ hg.items }}" as="hi" hint-placeholder-count="3">
+                <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding: var(--space-3) 0">
+                  <summary style="font-family: var(--font-heading); font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)">{{ hi.q }}</summary>
+                  <div style="margin-top: var(--space-2); display: flex; flex-direction: column; gap: 6px">
+                    <sc-for list="{{ hi.a }}" as="par" hint-placeholder-count="2">
+                      <p style="margin: 0; font-size: 13.5px; line-height: 1.6; max-width: 76ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ par }}</p>
+                    </sc-for>
+                  </div>
+                  <sc-if value="{{ hi.hasLink }}" hint-placeholder-val="{{ false }}">
+                    <button class="btn btn-secondary" style="margin-top: var(--space-3); white-space: nowrap; font-size: 12.5px" onClick="{{ hi.go }}">{{ hi.linkLabel }}</button>
+                  </sc-if>
+                </details>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+
+        <sc-if value="{{ helpEmpty }}" hint-placeholder-val="{{ false }}">
+          <section class="card">
+            <h4 style="margin: 0" data-i18n>Nichts gefunden</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Kein Eintrag passt zu diesem Stichwort. Versuche ein einzelnes Wort — etwa „Mail", „Etikett" oder „Import".</p>
+          </section>
+        </sc-if>
+      </div>
+      </sc-if>
+
       <sc-if value="{{ onSettings }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Einstellungen" data-two>
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Lagerorte</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Die Auswahl, die beim Anlegen eines Produkts und in allen Filtern erscheint. Ein Lagerort lässt sich nur löschen, wenn kein Produkt mehr darin liegt.</p>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-for list="{{ placeList }}" as="pl" hint-placeholder-count="4">
+              <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <span style="font-size: 13px; margin-right: auto">{{ pl.name }}</span>
+                <span class="tag tag-neutral">{{ pl.countLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ pl.locked }}" onClick="{{ pl.remove }}"><span data-i18n>Löschen</span></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neuer Lagerort</label><input class="input" value="{{ newPlace }}" data-i18n-ph placeholder="z. B. Halle 2 · Regal 4" onInput="{{ setNewPlace }}"></div>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addPlaceDisabled }}" onClick="{{ addPlace }}"><span data-i18n>Lagerort anlegen</span></button>
+          </div>
+
+        </section>
+
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Eigene Merkmale</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.</p>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-for list="{{ attrList }}" as="a" hint-placeholder-count="2">
+              <div style="display: flex; flex-wrap: wrap; gap: 6px var(--space-2); align-items: center; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <div style="flex: 1; min-width: 120px">
+                  <div style="font-size: 13.5px; font-weight: 500">{{ a.name }}</div>
+                  <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ a.typeLabel }}</div>
+                </div>
+                <span class="{{ a.triggerClass }}" style="white-space: nowrap">{{ a.triggerLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 0 6px; white-space: nowrap" onClick="{{ a.remove }}"><span data-i18n>Entfernen</span></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-2); align-items: end; margin-top: var(--space-2)">
+            <div class="field"><label data-i18n>Name des Merkmals</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
+            <div class="field"><label data-i18n>Art</label>
+              <select class="input" value="{{ attrType }}" onChange="{{ setAttrType }}">
+                <option value="text">Text</option>
+                <option value="number">Zahl</option>
+                <option value="bool">Ja / Nein</option>
+                <option value="date">Datum</option>
+                <option value="email">E-Mail</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Löst aus</label>
+              <select class="input" value="{{ attrTrigger }}" onChange="{{ setAttrTrigger }}">
+                <option value="">keine Regel</option>
+                <option value="warn">Warnmail bei Entnahme</option>
+                <option value="order">In Bestellliste aufnehmen</option>
+                <option value="block">Buchung sperren, wenn gesetzt</option>
+                <option value="expiry">Wie MHD überwachen</option>
+                <option value="label">Auf Etikett drucken</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Merkmal anlegen</span></button>
+          </div>
+          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
+            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer">
+              <span data-i18n>Datei auswählen</span>
+              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+            </label>
+          </div>
+          <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
+              <table class="table">
+                <thead><tr><th data-i18n>Spalte in Datei</th><th data-i18n>Feld im System</th><th data-i18n>Prüfung</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="4">
+                    <tr><td>{{ r.col }}</td><td class="text-muted">{{ r.field }}</td><td><span class="{{ r.tagClass }}">{{ r.check }}</span></td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <button class="btn btn-primary" onClick="{{ runImport }}">{{ importBtnLabel }}</button>
+            </div>
+          </sc-if>
+        </section>
+
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
@@ -2581,6 +2788,85 @@ const COMPANIES = [
   { id:"c6", name:"Schreinerei Voß", admin:"buero@schreinerei-voss.de", plan:"Gratis", users:3, items:58, created:"11.08.2026", status:"active" }
 ];
 
+// Hilfetexte. Als Daten, damit die Suche filtern kann.
+const HELP_TOPICS = [
+  { kicker: "Erste Schritte", title: "Lager einrichten", items: [
+    { q: "Wie lege ich Lagerorte an?",
+      a: ["Einstellungen → Lagerorte. Namen eintragen, „Lagerort anlegen\" drücken. Die Liste speist die Auswahl beim Anlegen eines Produkts und alle Filter.",
+          "Löschen geht nur, solange kein Produkt darin liegt — sonst wäre der Ort eines Produkts plötzlich leer. Der Zähler rechts zeigt, wie viele Produkte betroffen sind."],
+      go: "settings", linkLabel: "Zu den Lagerorten" },
+    { q: "Wie lege ich ein Produkt an?",
+      a: ["Stammdaten → Produkt anlegen. Pflicht ist nur der Name; alles andere lässt sich später ergänzen.",
+          "Gleiche Namen sind erlaubt, solange sich Lagerort oder Quantität unterscheiden — „Wasser 0,5 l\" kann im Keller und in der Küche liegen. Stimmen Name, Lagerort und Quantität überein, bleibt der Knopf gesperrt."],
+      go: "new", linkLabel: "Produkt anlegen" },
+    { q: "Wie übernehme ich eine bestehende Liste?",
+      a: ["Stammdaten → Excel-Import. Erst die CSV-Vorlage herunterladen, eigene Daten hineinkopieren, dann hochladen.",
+          "Excel-Dateien kann der Browser nicht lesen. In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und diese Datei wählen.",
+          "Erkannt werden Spalten wie Name, Artikelnummer, Istbestand, Mindestbestand, Lagerort, Preis, Lieferant. Zeilen ohne Namen gelten als Zwischenüberschrift und werden übersprungen — Kategoriezeilen landen also nicht als Produkt im Lager."],
+      go: "new", linkLabel: "Zum Import" },
+    { q: "Wie bekomme ich QR-Etiketten an das Regal?",
+      a: ["Stammdaten → QR-Codes. Format wählen (2×4 bis 5×13 je Blatt oder Endlosrolle 62 mm), Produkte auswählen, drucken.",
+          "Der Code enthält nur die Produktkennung, keine Bestände. Ein Etikett bleibt also gültig, auch wenn sich alles andere ändert."],
+      go: "qr", linkLabel: "Zu den Etiketten" }
+  ]},
+  { kicker: "Täglicher Betrieb", title: "Buchen und scannen", items: [
+    { q: "Wie buche ich eine Entnahme?",
+      a: ["Lager → Scannen, Code mit der Handykamera erfassen oder die Nummer eintippen. Menge eingeben, Entnahme oder Nachfüllung wählen, buchen.",
+          "Der Bestand ändert sich sofort. Jede Buchung bleibt mit Person und Zeitpunkt im Bestandsverlauf nachvollziehbar."],
+      go: "scan", linkLabel: "Zum Scannen" },
+    { q: "Wie buche ich Kisten und Einzelflaschen zusammen?",
+      a: ["Auf dem Buchungsschirm steht unter dem Mengenfeld je Einheit ein eigenes Feld. Zwei Kisten und drei Flaschen einzutragen ergibt automatisch die Gesamtmenge in der kleinsten Einheit.",
+          "Angelegt werden Einheiten im Buchungsschirm unter „Einheiten dieses Produkts\": Name und Verhältnis zur bisherigen Einheit. Eine Kiste mit zwölf Flaschen ist „größer als Flasche, 12\"; eine Palette mit 32 Kisten dann „größer als Flasche, 384\".",
+          "Wird eine kleinere Einheit nachgetragen, rechnet das Programm Bestand, Mindestbestand und Verlauf mit um — aus 8 Kisten werden 96 Flaschen. Die Zahlen bedeuten also weiter dasselbe."],
+      go: "scan", linkLabel: "Zum Buchen" },
+    { q: "Ein Produkt wird nicht mehr geführt — löschen?",
+      a: ["Besser deaktivieren: im Produktdetail den Schalter „Aktiv\" ausschalten. Das Produkt verschwindet aus Listen, Filtern und Bestellvorschlägen, bleibt aber für die verantwortliche Person grau sichtbar.",
+          "So bleibt der Verlauf erhalten. Gelöschte Produkte würden auch ihre Buchungen mitnehmen."] }
+  ]},
+  { kicker: "Benachrichtigungen", title: "Mindestbestand und Mails", items: [
+    { q: "Wer bekommt die Warnmail?",
+      a: ["Die verantwortliche Person des Produkts, in CC die Stellvertretungen. Beides steht im Produktdetail unter „Verantwortung\".",
+          "Ist niemand eingetragen, geht die Mail an die inhabende Person."] },
+    { q: "Sofort oder gesammelt?",
+      a: ["Einstellungen → Benachrichtigungen. „Sofort\" verschickt bei jeder Unterschreitung eine Mail. Täglich, wöchentlich oder monatlich fasst alles zu einer Bestellliste zu einer festen Uhrzeit zusammen.",
+          "Bei vielen kleinen Entnahmen ist die Sammelmail ruhiger — eine Liste statt zwanzig Einzelmails."],
+      go: "settings", linkLabel: "Zu den Benachrichtigungen" },
+    { q: "Es kommt keine Mail an.",
+      a: ["Einstellungen → Systemdienste → Mailversand prüfen: Testmail an die eigene Adresse schicken, dann „Antworten abrufen\". Dort steht die Antwort des Maildienstes im Klartext.",
+          "201 heißt angenommen. 401 heißt falscher Schlüssel, 400 heißt Absenderadresse nicht freigeschaltet. Bleibt die Tabelle leer, ist die Anwendung nicht mit der Datenbank verbunden.",
+          "Bestätigungs- und Passwortmails laufen über einen anderen Weg als die Warnmails. Die vollständige Anleitung dazu liegt im Dokument „Registrierung und Mail\"."],
+      go: "settings", linkLabel: "Zu den Systemdiensten" }
+  ]},
+  { kicker: "Auswertung", title: "Verlauf, Preise, Umsatz", items: [
+    { q: "Wie sehe ich, was sich verbraucht?",
+      a: ["Lager → Bestandsverlauf. Produkt und Zeitraum wählen; die Grafik zeigt den Bestand, die Tabelle darunter jede einzelne Buchung.",
+          "Über „Als Excel exportieren\" wandert derselbe Stand als CSV auf die Festplatte."],
+      go: "history", linkLabel: "Zum Bestandsverlauf" },
+    { q: "Wie trage ich eine Preisänderung ein?",
+      a: ["Lager → Bestandsverlauf, Karte „Preisverlauf und Umsatz\". Produkt wählen, Datum unter „Gültig ab\" setzen, neuen Preis eintragen.",
+          "Alte Preise bleiben erhalten. Jede Entnahme wird mit dem Preis gerechnet, der an ihrem Tag gültig war — eine Erhöhung verfälscht also nicht rückwirkend den Umsatz."],
+      go: "history", linkLabel: "Zum Preisverlauf" },
+    { q: "Wie bekomme ich den Umsatz mehrerer Produkte?",
+      a: ["In derselben Karte die Produkte anklicken, die zusammengerechnet werden sollen. Ohne Auswahl rechnet das Programm über alle aktiven Produkte.",
+          "Oben stehen Umsatz, entnommene Menge und Anzahl der Preisänderungen; die Tabelle schlüsselt nach Produkt auf. „Umsatz als CSV\" gibt alles heraus."],
+      go: "history", linkLabel: "Zum Umsatz" }
+  ]},
+  { kicker: "Organisation", title: "Team, Rechte, Merkmale", items: [
+    { q: "Wie hole ich Kollegen dazu?",
+      a: ["Verwaltung → Team & Rechte → einladen. Die Person bekommt eine Mail mit einem Link, der drei Stunden gilt, und richtet ihr Passwort selbst ein.",
+          "Rollen sind Vorlagen: Lagerleitung darf verwalten, Mitarbeitende dürfen buchen, Leser dürfen nur sehen. Einzelne Rechte lassen sich pro Person davon abweichend setzen."],
+      go: "team", linkLabel: "Zu Team & Rechte" },
+    { q: "Wie ändere ich einen Namen?",
+      a: ["Verwaltung → Team & Rechte, Person auswählen, Name eintragen und „Änderungen übernehmen\" drücken. Erst dann gilt der neue Name überall — auch bei Verantwortlichkeiten und Stellvertretungen.",
+          "Solange etwas nicht übernommen ist, steht das ausdrücklich daneben."],
+      go: "team", linkLabel: "Zu Team & Rechte" },
+    { q: "Wozu sind eigene Merkmale gut?",
+      a: ["Einstellungen → Eigene Merkmale. Damit lässt sich erfassen, was dieses Lager braucht und kein anderes: Gefahrstoffklasse, Prüfdatum, Regalhöhe.",
+          "Jedes Merkmal kann eine Regel tragen — eine Warnmail auslösen, auf die Bestellliste wandern, eine Entnahme sperren oder auf das Etikett gedruckt werden."],
+      go: "settings", linkLabel: "Zu den Merkmalen" }
+  ]}
+];
+
 const IMPORT_ROWS = [
   { col:"Artikelname", field:"Name", check:"ok" },
   { col:"EAN", field:"EAN", check:"ok" },
@@ -2649,6 +2935,9 @@ class Component extends DCLogic {
       npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "",
       npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: "",
       mailTime: "07:30", mailDay: "1", importParsed: [],
+      units: {}, unitQty: {}, newUnitName: "", newUnitFactor: "12", newUnitDir: "up",
+      priceHist: {}, pricePicked: [], pcProduct: "", pcDate: "", pcPrice: "",
+      helpQuery: "", onboardHidden: false, qrPrinted: false, mailChecked: false,
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -3006,6 +3295,62 @@ class Component extends DCLogic {
     };
   }
 
+  // Einheitenleiter eines Produkts. Die kleinste Einheit hat Faktor 1;
+  // größere Einheiten rechnen über ihren Faktor in sie um.
+  unitsFor(p) {
+    if (!p) return [];
+    const own = (this.state.units || {})[p.id];
+    const base = { name: (p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück"), faktor: 1 };
+    const list = (own && own.length) ? own.slice() : [base];
+    if (!list.some(u => Number(u.faktor) === 1)) list.unshift(base);
+    return list.sort((a, b) => Number(a.faktor) - Number(b.faktor));
+  }
+
+  parsePrice(v) {
+    const n = parseFloat(String(v == null ? "" : v).replace(/[^0-9,.-]/g, "").replace(",", "."));
+    return isNaN(n) ? null : n;
+  }
+
+  money(n) {
+    return (Number(n) || 0).toLocaleString("de-DE", { style: "currency", currency: "EUR" });
+  }
+
+  dayStr(d) { return new Date(d).toISOString().slice(0, 10); }
+
+  // Preisverlauf: was der Nutzer eingetragen hat, sonst der aktuelle Preis
+  // als einziger Stützpunkt.
+  priceHistFor(p) {
+    const own = ((this.state.priceHist || {})[p.id] || []).slice();
+    if (!own.length) {
+      const v = this.parsePrice(p.preis);
+      if (v == null) return [];
+      own.push({ datum: this.dayStr(Date.now() - 365 * 864e5), preis: v });
+    }
+    return own.sort((a, b) => String(a.datum).localeCompare(String(b.datum)));
+  }
+
+  // Der Preis, der an einem bestimmten Tag galt.
+  priceAt(p, day) {
+    const h = this.priceHistFor(p);
+    if (!h.length) return null;
+    let v = h[0].preis;
+    h.forEach(r => { if (String(r.datum) <= String(day)) v = r.preis; });
+    return v;
+  }
+
+  // Entnahmen aus dem Bestandsverlauf, mit Datum über den Zeitraum verteilt.
+  salesFor(p, days) {
+    const h = (p.hist || []).map(Number);
+    const out = [];
+    if (h.length < 2) return out;
+    const step = days / (h.length - 1);
+    for (let i = 1; i < h.length; i++) {
+      const diff = h[i - 1] - h[i];
+      if (diff > 0) out.push({ datum: this.dayStr(Date.now() - (h.length - 1 - i) * step * 864e5), menge: diff });
+    }
+    return out;
+  }
+
   // Zahl aus einem Eingabefeld, leere Eingabe zählt als 0.
   toNum(v) {
     const n = parseInt(String(v == null ? "" : v).replace(/[^0-9-]/g, ""), 10);
@@ -3041,6 +3386,13 @@ class Component extends DCLogic {
   componentDidMount() {
     this.applyTheme();
     this.applyLang();
+    try {
+      this.setState({
+        onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
+        qrPrinted: localStorage.getItem("sc-qr-printed") === "1",
+        mailChecked: localStorage.getItem("sc-mail-checked") === "1"
+      });
+    } catch (e) {}
     this.connect();
     this.tick = setInterval(() => {
       if (!this.state.authed && this.state.authView === "confirm" && this.state.confirmLeft > 0) {
@@ -3217,6 +3569,50 @@ class Component extends DCLogic {
     const q = st.query.toLowerCase();
 
     const meLabel = st.meNameLive || (st.role === "super" ? "Internet GmbH · Betrieb" : "Marie Kohl");
+    // Gleiche Namen sind erlaubt — nur die Kombination aus Name, Lagerort und
+    // Quantität muss eindeutig bleiben.
+    const key = (n, o, q) => [n, o, q].map(v => String(v || "").trim().toLowerCase()).join("|");
+    // Auswahl für Preisverlauf und Umsatz: ausgewählte Produkte, sonst alle aktiven.
+    // Hilfe filtern: ein Eintrag zählt, wenn Frage oder Antwort das Stichwort trägt.
+    const hq = String(st.helpQuery || "").trim().toLowerCase();
+    const helpGroups = HELP_TOPICS.map(g => ({
+      kicker: g.kicker, title: g.title,
+      items: hq ? g.items.filter(it =>
+        (this.tr(it.q) + " " + it.a.map(p => this.tr(p)).join(" ") + " " + g.title).toLowerCase().includes(hq)) : g.items
+    })).filter(g => g.items.length);
+
+    // Einrichtungsschritte. Erledigt wird aus den echten Daten abgeleitet,
+    // nicht abgespeichert — wer etwas rückgängig macht, sieht den Schritt wieder.
+    const onboardSteps = [
+      { n: 1, title: "Lagerorte anlegen", note: "Einstellungen → Lagerorte: Regal, Schrank, Halle.",
+        done: (st.placesOwn || []).length > 0, go: "settings" },
+      { n: 2, title: "Produkte anlegen oder Tabelle importieren", note: "Einzeln eintragen oder eine CSV hochladen.",
+        done: st.products.length > 0, go: "new" },
+      { n: 3, title: "QR-Etiketten drucken", note: "Ein Code je Produkt, ans Regal geklebt.",
+        done: !!st.qrPrinted, go: "qr" },
+      { n: 4, title: "Team einladen", note: "Wer bucht, braucht einen Zugang.",
+        done: (st.members || []).length > 1, go: "team" },
+      { n: 5, title: "Mailversand prüfen", note: "Einmal testen, damit Warnungen ankommen.",
+        done: !!st.mailChecked, go: "settings" }
+    ];
+    const baseUnit = (this.unitsFor(cur)[0] || {}).name || this.tr("Stück");
+    const revDays = this.toNum(st.hRange) || 90;
+    const revBase = st.pricePicked.length
+      ? st.products.filter(p => st.pricePicked.includes(p.id))
+      : st.products.filter(p => p.aktiv !== false);
+    const revSel = revBase.map(p => {
+      const sales = this.salesFor(p, revDays);
+      return {
+        p, qty: sales.reduce((a, x) => a + x.menge, 0),
+        sum: sales.reduce((a, x) => a + x.menge * (this.priceAt(p, x.datum) || 0), 0)
+      };
+    });
+    const dupKey = () => {
+      const n = (st.npName || "").trim();
+      if (!n) return null;
+      const k = key(n, st.npPlace, st.npQty);
+      return st.products.some(p => key(p.name, p.ort, p.quantitaet) === k) ? k : null;
+    };
     const mine = p => p.verantwortlich === meLabel || String(p.vertretung || "").includes(meLabel);
     const visible = p => p.aktiv !== false || mine(p);
     const activeProducts = products.filter(p => p.aktiv !== false);
@@ -3385,14 +3781,51 @@ class Component extends DCLogic {
         dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
         events: this.tr("Events"), history: this.tr("Bestandsverlauf"),
         new: this.tr("Produkt anlegen"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
-        settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole")
-      }[st.screen],
+        settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole"),
+        help: this.tr("Hilfe")
+      }[st.screen] || "",
       onDashboard: st.screen === "dashboard", onProducts: st.screen === "products", onDetail: st.screen === "detail",
       onScan: st.screen === "scan", onNew: st.screen === "new", onQr: st.screen === "qr",
       onHistory: st.screen === "history", navHistory: this.navStyle("history"),
       goHistory: () => this.go("history"),
       goHistoryForCurrent: () => this.setState({ screen: "history", hProduct: cur.id, menu: null, burgerOpen: false }),
       onTeam: st.screen === "team", onSettings: st.screen === "settings", onAdmin: st.screen === "admin",
+      onHelp: st.screen === "help", navHelp: this.navStyle("help"), goHelp: () => this.go("help"),
+
+      // ── Hilfe ───────────────────────────────────────────────
+      helpQuery: st.helpQuery,
+      setHelpQuery: e => this.setState({ helpQuery: e.target.value }),
+      helpGroups: helpGroups.map(g => ({
+        kicker: this.tr(g.kicker), title: this.tr(g.title),
+        items: g.items.map(it => ({
+          q: this.tr(it.q), a: it.a.map(p => this.tr(p)),
+          hasLink: !!it.go, linkLabel: it.linkLabel ? this.tr(it.linkLabel) : "",
+          go: () => this.go(it.go)
+        }))
+      })),
+      helpEmpty: helpGroups.length === 0,
+      helpCountNote: (() => {
+        const n = helpGroups.reduce((a, g) => a + g.items.length, 0);
+        if (!String(st.helpQuery || "").trim()) return n + " " + this.tr("Einträge");
+        return n + " " + (n === 1 ? this.tr("Treffer") : this.tr("Treffer"));
+      })(),
+
+      // ── Einrichtungsliste auf der Übersicht ─────────────────
+      showOnboard: !st.onboardHidden && onboardSteps.some(x => !x.done),
+      onboardProgress: onboardSteps.filter(x => x.done).length + " / " + onboardSteps.length,
+      hideOnboard: () => {
+        this.setState({ onboardHidden: true });
+        try { localStorage.setItem("sc-onboard-hidden", "1"); } catch (e) {}
+      },
+      onboardSteps: onboardSteps.map(x => ({
+        title: this.tr(x.title), note: this.tr(x.note),
+        mark: x.done ? "✓" : String(x.n),
+        dotBg: x.done ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 10%, transparent)",
+        dotFg: x.done ? "var(--sc-card)" : "color-mix(in srgb, var(--color-text) 70%, transparent)",
+        cls: x.done ? "btn btn-ghost" : "btn btn-secondary",
+        action: x.done ? this.tr("Ansehen") : this.tr("Erledigen"),
+        go: () => this.go(x.go)
+      })),
 
       navDashboard: this.navStyle("dashboard"), navProducts: this.navStyle("products"), navScan: this.navStyle("scan"),
       navNew: this.navStyle("new"), navQr: this.navStyle("qr"), navTeam: this.navStyle("team"),
@@ -3431,6 +3864,158 @@ class Component extends DCLogic {
       kpiToday: 3,
       mailModeLabel: mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de,
       orderList, movements: st.movements,
+
+      // ── Einheiten (Quantitäten) ─────────────────────────────
+      hasUnitLadder: this.unitsFor(cur).length > 1,
+      unitRows: this.unitsFor(cur).map(u => ({
+        label: u.faktor === 1 ? u.name : u.name + " (× " + u.faktor + ")",
+        qty: String((st.unitQty || {})[u.name] || ""),
+        set: e => {
+          const v = Math.max(0, this.toNum(e.target.value));
+          this.setState(prev => {
+            const next = Object.assign({}, prev.unitQty, { [u.name]: v });
+            const total = this.unitsFor(cur).reduce((sum, x) => sum + Number(x.faktor) * (next[x.name] || 0), 0);
+            return { unitQty: next, qty: Math.max(1, total) };
+          });
+        }
+      })),
+      unitSumNote: (() => {
+        const list = this.unitsFor(cur);
+        const parts = list.filter(u => (st.unitQty || {})[u.name])
+          .map(u => (st.unitQty[u.name]) + " × " + u.name);
+        const base = list[0] ? list[0].name : this.tr("Stück");
+        if (!parts.length) return this.tr("Menge oben eintragen oder hier nach Einheiten aufteilen.");
+        return parts.join(" + ") + " = " + st.qty + " " + base;
+      })(),
+      unitList: this.unitsFor(cur).map(u => ({
+        name: u.name,
+        factorLabel: u.faktor === 1 ? this.tr("kleinste Einheit") : "× " + u.faktor,
+        locked: Number(u.faktor) === 1,
+        remove: () => this.setState(prev => ({
+          units: Object.assign({}, prev.units, {
+            [cur.id]: this.unitsFor(cur).filter(x => x.name !== u.name)
+          })
+        }))
+      })),
+      newUnitName: st.newUnitName, newUnitFactor: st.newUnitFactor, newUnitDir: st.newUnitDir,
+      setNewUnitName: e => this.setState({ newUnitName: e.target.value }),
+      setNewUnitFactor: e => this.setState({ newUnitFactor: e.target.value }),
+      setNewUnitDir: e => this.setState({ newUnitDir: e.target.value }),
+      dirUpLabel: this.tr("größer als ") + baseUnit,
+      dirDownLabel: this.tr("kleiner als ") + baseUnit,
+      unitFactorNote: (() => {
+        const raw = String(st.newUnitFactor || "").trim();
+        const name = String(st.newUnitName || "").trim() || this.tr("neue Einheit");
+        if (!/^[0-9]+$/.test(raw) || Number(raw) < 2) return this.tr("Die Anzahl muss eine ganze Zahl ab 2 sein.");
+        if (this.unitsFor(cur).some(u => u.name.toLowerCase() === name.toLowerCase())) return this.tr("Diese Einheit gibt es schon.");
+        return st.newUnitDir === "down"
+          ? "1 " + baseUnit + " = " + raw + " " + name + " · " + this.tr("wird die neue kleinste Einheit")
+          : "1 " + name + " = " + raw + " " + baseUnit;
+      })(),
+      unitNoteColor: (() => {
+        const raw = String(st.newUnitFactor || "").trim();
+        return (/^[0-9]+$/.test(raw) && Number(raw) >= 2) ? "color-mix(in srgb, var(--color-text) 58%, transparent)" : "var(--color-accent-700)";
+      })(),
+      addUnitDisabled: !String(st.newUnitName || "").trim()
+        || !/^[0-9]+$/.test(String(st.newUnitFactor || "").trim())
+        || Number(String(st.newUnitFactor).trim()) < 2
+        || this.unitsFor(cur).some(u => u.name.toLowerCase() === String(st.newUnitName).trim().toLowerCase()),
+      addUnit: () => {
+        const name = String(st.newUnitName || "").trim();
+        const raw = String(st.newUnitFactor || "").trim();
+        if (!name || !/^[0-9]+$/.test(raw) || Number(raw) < 2) return;
+        const n = Number(raw);
+        const list = this.unitsFor(cur);
+        // "kleiner": die Leiter wird umbasiert — alle bisherigen Faktoren mal n,
+        // die neue Einheit wird die kleinste (Faktor 1). Der Bestand rechnet mit.
+        const next = st.newUnitDir === "down"
+          ? list.map(u => ({ name: u.name, faktor: Number(u.faktor) * n })).concat({ name, faktor: 1 })
+          : list.concat({ name, faktor: n });
+        this.setState(prev => ({
+          units: Object.assign({}, prev.units, { [cur.id]: next }),
+          products: st.newUnitDir === "down"
+            ? prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
+                ist: p.ist * n, min: p.min * n, bestellmenge: p.bestellmenge * n,
+                hist: (p.hist || []).map(h => h * n)
+              }) : p)
+            : prev.products,
+          unitQty: {}, newUnitName: "", newUnitFactor: "12"
+        }));
+        this.say(this.tr("Einheit"), name, st.newUnitDir === "down"
+          ? "1 " + baseUnit + " = " + n + " " + name + " · " + this.tr("Bestand umgerechnet")
+          : "1 " + name + " = " + n + " " + baseUnit);
+      },
+
+      // ── Preisverlauf und Umsatz ─────────────────────────────
+      priceProducts: activeProducts.map(p => ({
+        name: p.name,
+        cls: st.pricePicked.includes(p.id) ? "btn btn-primary" : "btn btn-secondary",
+        toggle: () => this.setState(prev => ({
+          pricePicked: prev.pricePicked.includes(p.id)
+            ? prev.pricePicked.filter(x => x !== p.id) : prev.pricePicked.concat(p.id)
+        }))
+      })),
+      priceSelNote: st.pricePicked.length
+        ? st.pricePicked.length + " " + (st.pricePicked.length === 1 ? this.tr("Produkt ausgewählt") : this.tr("Produkte ausgewählt"))
+        : this.tr("Nichts ausgewählt — gerechnet wird über alle aktiven Produkte."),
+      revenueTotal: this.money(revSel.reduce((a, r) => a + r.sum, 0)),
+      revenueQty: revSel.reduce((a, r) => a + r.qty, 0),
+      priceChangeCount: revSel.reduce((a, r) => a + this.priceHistFor(r.p).length, 0),
+      revenueRows: revSel.map(r => ({
+        name: r.p.name, qty: r.qty,
+        price: this.money(this.priceAt(r.p, this.dayStr(Date.now())) || 0),
+        sum: this.money(r.sum)
+      })),
+      priceRows: (() => {
+        const out = [];
+        revSel.forEach(r => {
+          const h = this.priceHistFor(r.p);
+          h.forEach((e, i) => {
+            const prev = i > 0 ? h[i - 1].preis : null;
+            const d = prev == null ? null : e.preis - prev;
+            out.push({
+              datum: e.datum.split("-").reverse().join("."), name: r.p.name,
+              preis: this.money(e.preis),
+              delta: d == null ? this.tr("erster Preis") : (d > 0 ? "+" : "") + this.money(d),
+              color: d == null ? "color-mix(in srgb, var(--color-text) 50%, transparent)"
+                : (d > 0 ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 70%, transparent)")
+            });
+          });
+        });
+        return out.reverse();
+      })(),
+      pcProduct: st.pcProduct || (products[0] ? products[0].id : ""),
+      pcDate: st.pcDate || this.dayStr(Date.now()),
+      pcPrice: st.pcPrice,
+      setPcProduct: e => this.setState({ pcProduct: e.target.value }),
+      setPcDate: e => this.setState({ pcDate: e.target.value }),
+      setPcPrice: e => this.setState({ pcPrice: e.target.value }),
+      pcDisabled: this.parsePrice(st.pcPrice) == null,
+      addPriceChange: () => {
+        const id = st.pcProduct || (products[0] ? products[0].id : "");
+        const val = this.parsePrice(st.pcPrice);
+        const day = st.pcDate || this.dayStr(Date.now());
+        const p = products.find(x => x.id === id);
+        if (!p || val == null) return;
+        this.setState(prev => {
+          const list = (this.priceHistFor(p) || []).filter(e => e.datum !== day).concat({ datum: day, preis: val });
+          return {
+            priceHist: Object.assign({}, prev.priceHist, { [id]: list }),
+            products: prev.products.map(x => x.id === id ? Object.assign({}, x, { preis: this.money(val) }) : x),
+            pcPrice: "",
+            pricePicked: prev.pricePicked.includes(id) ? prev.pricePicked : prev.pricePicked.concat(id)
+          };
+        });
+        this.say(this.tr("Preis"), p.name, this.money(val) + " · " + this.tr("gültig ab ") + day.split("-").reverse().join("."));
+      },
+      exportPriceCsv: () => {
+        const rows = [[this.tr("Produkt"), this.tr("Entnommen"), this.tr("Preis heute"), this.tr("Umsatz")]]
+          .concat(revSel.map(r => [r.p.name, r.qty,
+            String(this.priceAt(r.p, this.dayStr(Date.now())) || 0).replace(".", ","),
+            String(r.sum.toFixed(2)).replace(".", ",")]));
+        this.download("stockcontrol-umsatz.csv", rows);
+        this.say("Export", this.tr("Umsatz als CSV"), revSel.length + " " + this.tr("Produkte"));
+      },
 
       places, filtered, filteredCount: filtered.length,
       placeList: places.map(pl => {
@@ -3660,7 +4245,13 @@ class Component extends DCLogic {
         this.download("produkte.csv", rows);
         this.say("Export", this.tr("Produkte exportiert"), products.length + " " + this.tr("Artikel") + " · produkte.csv");
       },
-      printPage: () => window.print(),
+      printPage: () => {
+        if (st.screen === "qr") {
+          this.setState({ qrPrinted: true });
+          try { localStorage.setItem("sc-qr-printed", "1"); } catch (e) {}
+        }
+        window.print();
+      },
 
       setScanCode: e => this.setState({ scanCode: e.target.value }),
       openScanCode: () => {
@@ -3712,13 +4303,13 @@ class Component extends DCLogic {
         }
         if (!this.withinLimit("importRows", 0, parsed.length)) return;
         if (!this.withinLimit("products", products.length, parsed.length)) return;
-        const taken = new Set(products.map(p => String(p.name).trim().toLowerCase()));
+        const taken = new Set(products.map(p => key(p.name, p.ort, p.quantitaet)));
         const fresh = [];
         let skipped = 0;
         parsed.forEach(r => {
-          const key = r.name.trim().toLowerCase();
-          if (!key || taken.has(key)) { skipped++; return; }
-          taken.add(key);
+          const k = key(r.name, r.ort || (places[0] || "—"), r.quantitaet);
+          if (!r.name.trim() || taken.has(k)) { skipped++; return; }
+          taken.add(k);
           const ist = this.toNum(r.ist), min = this.toNum(r.min);
           fresh.push({
             id: "P-" + String(products.length + fresh.length + 1).padStart(3, "0"),
@@ -3778,27 +4369,21 @@ class Component extends DCLogic {
       npNameNote: (() => {
         const n = (st.npName || "").trim().toLowerCase();
         if (!n) return this.tr("Pflichtfeld — ohne Namen wird nicht gespeichert.");
-        if (products.some(p => String(p.name).trim().toLowerCase() === n)) return this.tr("Diesen Namen gibt es schon.");
+        if (dupKey()) return this.tr("Dieses Produkt gibt es schon: gleicher Name, gleicher Lagerort, gleiche Quantität. Ändere eines davon.");
+        if (products.some(p => String(p.name).trim().toLowerCase() === n)) return this.tr("Den Namen gibt es schon — mit anderem Lagerort oder anderer Quantität ist das in Ordnung.");
         return this.tr("Name ist frei.");
       })(),
-      npNameColor: (() => {
-        const n = (st.npName || "").trim().toLowerCase();
-        if (!n) return "color-mix(in srgb, var(--color-text) 55%, transparent)";
-        return products.some(p => String(p.name).trim().toLowerCase() === n)
-          ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)";
-      })(),
-      npDisabled: (() => {
-        const n = (st.npName || "").trim().toLowerCase();
-        return !n || products.some(p => String(p.name).trim().toLowerCase() === n);
-      })(),
+      npNameColor: dupKey() ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)",
+      npDisabled: !(st.npName || "").trim() || !!dupKey(),
       createProduct: () => {
         const name = (st.npName || "").trim();
-        if (!name) {
-          this.say(this.tr("Produkt"), this.tr("Name fehlt"), this.tr("Ohne Namen kann nicht gespeichert werden."));
+        if (dupKey()) {
+          this.say(this.tr("Produkt"), this.tr("Schon vorhanden"),
+            this.tr("Name, Lagerort und Quantität stimmen mit einem bestehenden Produkt überein."));
           return;
         }
-        if (products.some(p => String(p.name).trim().toLowerCase() === name.toLowerCase())) {
-          this.say(this.tr("Produkt"), this.tr("Name schon vergeben"), this.tr("Jeder Name darf nur einmal vorkommen."));
+        if (!name) {
+          this.say(this.tr("Produkt"), this.tr("Name fehlt"), this.tr("Ohne Namen kann nicht gespeichert werden."));
           return;
         }
         if (!this.withinLimit("products", products.length)) return;
@@ -4035,6 +4620,8 @@ class Component extends DCLogic {
           this.say(this.tr("Mailversand"), this.tr("Keine Datenbank verbunden"), this.tr("Im Demo-Modus wird nichts verschickt."));
           return;
         }
+        this.setState({ mailChecked: true });
+        try { localStorage.setItem("sc-mail-checked", "1"); } catch (e) {}
         this.api.sendTestMail(to)
           .then(() => {
             this.say(this.tr("Mailversand"), this.tr("Testmail abgeschickt"), this.tr("Die Antwort von Brevo steht in ein paar Sekunden in der Tabelle."));
