@@ -51,7 +51,9 @@
   }
   .card { padding: var(--space-4); gap: var(--space-3); }
   .input { background: var(--sc-ground); border-color: color-mix(in srgb, var(--color-text) 14%, transparent); }
-  .seg { overflow: hidden; background: var(--sc-ground); }
+  .seg { overflow: hidden; background: var(--sc-ground); height: auto; align-items: stretch; }
+  .seg-opt { height: auto; min-height: 34px; display: flex; align-items: center; justify-content: center;
+    text-align: center; line-height: 1.25; padding-block: 6px; }
   .table th { border-bottom-color: color-mix(in srgb, var(--color-text) 14%, transparent); }
   .table tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 7%, transparent); }
   [data-zebra] tbody tr:nth-child(even) { background: color-mix(in srgb, var(--color-text) 4.5%, transparent); }
@@ -1128,8 +1130,18 @@
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n>Passwort ändern</h4>
             <div class="field"><label data-i18n>Aktuelles Passwort</label><input class="input" type="password"></div>
-            <div class="field"><label data-i18n>Neues Passwort</label><input class="input" type="password" onInput="{{ setPw }}"></div>
-            <div class="field"><label data-i18n>Neues Passwort wiederholen</label><input class="input" type="password" onInput="{{ setPw2 }}"></div>
+            <div class="field"><label data-i18n>Neues Passwort</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setPw }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+            </div>
+            <div class="field"><label data-i18n>Neues Passwort wiederholen</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setPw2 }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+            </div>
             <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
               <sc-for list="{{ pwRulesList }}" as="r" hint-placeholder-count="6">
                 <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
@@ -1172,8 +1184,8 @@
                 <label data-i18n>Testmail an</label>
                 <input class="input" type="email" placeholder="name@deine-domain.de" value="{{ testMailTo }}" onInput="{{ setTestMailTo }}">
               </div>
-              <button class="btn btn-primary" onClick="{{ doTestMail }}"><span data-i18n>Testmail senden</span></button>
-              <button class="btn btn-secondary" onClick="{{ refreshMailStatus }}"><span data-i18n>Antworten abrufen</span></button>
+              <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ doTestMail }}"><span data-i18n>Testmail senden</span></button>
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ refreshMailStatus }}"><span data-i18n>Antworten abrufen</span></button>
             </div>
             <sc-if value="{{ hasMailChecks }}" hint-placeholder-val="{{ false }}">
               <table class="table" style="margin-top: var(--space-2)">
@@ -1851,7 +1863,12 @@
         <div>
           <h3 style="margin: 0 0 var(--space-6); font-size: 25px" data-i18n>Anmelden</h3>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
-          <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="current-password" onInput="{{ setAuthPw }}"></div>
+          <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>Passwort</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="current-password" style="flex: 1; min-width: 0" onInput="{{ setAuthPw }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+          </div>
           <sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}">
             <div style="padding: 10px 12px; margin-bottom: var(--space-3); border-radius: var(--radius-md); font-size: 12.5px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">
               <span data-i18n>Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.</span>
@@ -1870,8 +1887,18 @@
           <h3 style="margin: 0 0 var(--space-6); font-size: 25px" data-i18n>Registrieren</h3>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Firmenname</label><input class="input" autocomplete="organization" onInput="{{ setRegCompany }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
-          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="new-password" onInput="{{ setRegPw }}"></div>
-          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort wiederholen</label><input class="input" type="password" autocomplete="new-password" onInput="{{ setRegPw2 }}"></div>
+          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort wiederholen</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw2 }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+          </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: var(--space-4)">
             <sc-for list="{{ regRules }}" as="r" hint-placeholder-count="6">
               <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: {{ r.color }}">
@@ -1901,7 +1928,8 @@
           <div style="font-family: var(--font-heading); font-size: 40px; line-height: 1; color: {{ clockColor }}">{{ clock }}</div>
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-6); color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
           <sc-if value="{{ regFailed }}" hint-placeholder-val="{{ false }}">
-            <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ regError }}</div>
+            <div style="padding: 10px 12px; margin-bottom: var(--space-3); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ regError }}</div>
+            <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); color: color-mix(in srgb, var(--color-text) 72%, transparent)">{{ regHint }}</div>
           </sc-if>
           <button class="btn btn-secondary btn-block" style="height: 46px; font-size: 15px" onClick="{{ resendMail }}"><span data-i18n>Neue Mail anfordern</span></button>
           <div style="display: flex; justify-content: center; margin-top: var(--space-3)">
@@ -1937,7 +1965,12 @@
           <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
-          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label><input class="input" type="password" autocomplete="new-password" onInput="{{ setRegPw }}"></div>
+          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
+            <div style="display: flex; gap: 6px">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0" onInput="{{ setRegPw }}">
+              <button class="btn btn-secondary" style="flex: none; padding-inline: 12px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePw }}">{{ pwToggleLabel }}</button>
+            </div>
+          </div>
           <div style="display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: var(--space-4)">
             <sc-for list="{{ inviteRules }}" as="r" hint-placeholder-count="5">
               <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: {{ r.color }}">
@@ -2474,6 +2507,7 @@ class Component extends DCLogic {
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       rowsOpen: false,
       testMailTo: "", mailChecks: [], legalTab: "impressum",
+      testMode: false, pwVisible: false,
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -2694,6 +2728,31 @@ class Component extends DCLogic {
     a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  // Testzugang der inhabenden Person. Läuft absichtlich auf den mitgelieferten
+  // Beispieldaten: keine Buchung landet in der echten Datenbank, aber alle
+  // Bildschirme — auch die Systemdienste — sind vorführbar.
+  enterTestAccount() {
+    this.setState({
+      authed: true, role: "owner", screen: "dashboard", loginFails: 0,
+      live: false, testMode: true, source: this.tr("Testzugang"), authPw: ""
+    });
+    this.say(this.tr("Testzugang"), this.tr("Angemeldet als Marie Kohl"),
+      this.tr("Beispieldaten, nichts wird gespeichert. Systemdienste und Kostenbremse sind sichtbar."));
+  }
+
+  // Aus der Fehlermeldung von Supabase die wahrscheinliche Ursache ableiten.
+  regHintFor(msg) {
+    const m = String(msg || "").toLowerCase();
+    if (/captcha/.test(m)) return this.tr("In Supabase ist der Captcha-Schutz aktiv. Dann braucht config.js den TURNSTILE_SITE_KEY, und in Supabase muss der passende Secret Key stehen.");
+    if (/database error|saving new user/.test(m)) return this.tr("Das Anlegen in der Datenbank schlägt fehl. schema.sql im SQL-Editor erneut ausführen.");
+    if (/already registered|already exists|email_taken|bereits registriert/.test(m)) return this.tr("Zu dieser Adresse gibt es schon ein Konto. Anmelden oder Passwort zurücksetzen.");
+    if (/signups? not allowed|signup is disabled/.test(m)) return this.tr("Registrierung ist abgeschaltet: Authentication → Providers → Email → Enable Sign-ups einschalten.");
+    if (/rate limit|too many|email rate/.test(m)) return this.tr("Mailgrenze erreicht. Ohne eigenen SMTP-Zugang erlaubt Supabase nur wenige Mails pro Stunde — SMTP-Daten von Brevo eintragen.");
+    if (/smtp|sending confirmation|error sending/.test(m)) return this.tr("Supabase konnte die Mail nicht übergeben. SMTP-Zugang prüfen: Project Settings → Authentication → SMTP Settings.");
+    if (/password/.test(m)) return this.tr("Das Passwort erfüllt die Vorgaben von Supabase nicht.");
+    return this.tr("Die genaue Meldung steht oben. Die Schritte zum Mailversand stehen in „Registrierung und Mail\".");
   }
 
   // Antworten von Brevo nachladen. Steht dort 201, hat Brevo die Mail
@@ -3437,7 +3496,9 @@ class Component extends DCLogic {
         this.say(this.tr("Team"), this.tr("Person entfernt"), u.name + " · " + this.tr("Zugang sofort gesperrt, Buchungen bleiben im Verlauf"));
       },
       // Systemdienste und Kosten sieht nur die inhabende Person.
-      showSystemCards: st.role === "owner",
+      // Systemdienste, Kostenbremse und die Zugangsdaten der Dienste sieht nur
+      // der Testzugang der inhabenden Person (oder der Betreiberzugang).
+      showSystemCards: st.testMode || st.platformAdmin,
       guardLabel: st.guard ? this.tr("aktiv") : this.tr("aus"),
       guardTagClass: st.guard ? "tag tag-accent" : "tag tag-outline",
       guardNote: st.guard
@@ -3645,6 +3706,9 @@ class Component extends DCLogic {
       authEmail: st.authEmail, authPw: st.authPw,
       setAuthEmail: e => this.setState({ authEmail: e.target.value }),
       setAuthPw: e => this.setState({ authPw: e.target.value }),
+      pwType: st.pwVisible ? "text" : "password",
+      pwToggleLabel: st.pwVisible ? this.tr("verbergen") : this.tr("zeigen"),
+      togglePw: () => this.setState(s => ({ pwVisible: !s.pwVisible })),
       setRegCompany: e => this.setState({ regCompany: e.target.value }),
       mfaOn: st.mfaActive, mfaOff: !st.mfaActive,
       mfaStatus: st.mfaActive ? this.tr("Aktiv") : this.tr("Nicht eingerichtet"),
@@ -3683,9 +3747,11 @@ class Component extends DCLogic {
           .catch(err => this.say("Supabase", this.tr("Code falsch"), String((err && err.message) || err)));
       },
       doLogin: () => {
+        const isTest = (st.authEmail || "").trim().toLowerCase() === OWNER_USER && st.authPw === OWNER_PW;
         if (st.live && this.api) {
           this.api.signIn({ email: st.authEmail, password: st.authPw, captchaToken: st.captchaToken })
             .then(res => {
+              if (isTest) this.setState({ testMode: true });
               if (res && res.mfaRequired) {
                 this.setState({ authView: "mfa", mfaFactor: res.factorId, mfaCode: "" });
               } else {
@@ -3693,25 +3759,46 @@ class Component extends DCLogic {
               }
             })
             .catch(err => {
+              // Der Testzugang funktioniert auch dann, wenn es das Konto in
+              // Supabase (noch) nicht gibt — damit alles vorführbar bleibt.
+              if (isTest) { this.enterTestAccount(); return; }
               this.setState(s => ({ loginFails: s.loginFails + 1, captchaToken: "" }));
               this.say("Supabase", this.tr("Anmeldung fehlgeschlagen"), String((err && err.message) || err));
             });
           return;
         }
-        // Ohne Supabase gibt es nur den Zugang der inhabenden Person zum Ansehen.
-        if (st.authEmail.trim().toLowerCase() === OWNER_USER && st.authPw === OWNER_PW) {
-          this.setState({ authed: true, role: "owner", screen: "dashboard", loginFails: 0 });
-          return;
-        }
+        if (isTest) { this.enterTestAccount(); return; }
         this.setState(s => ({ loginFails: s.loginFails + 1 }));
         this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
           this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
       },
       viewForgot: () => this.setState({ authView: "forgot" }),
       sendReset: () => {
-        if (st.live && this.api) this.api.requestPasswordReset(st.authEmail).catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
-        this.setState({ authView: "login" });
-        this.say("Brevo", this.tr("Mail ist unterwegs"), this.tr("Der Link gilt 15 Minuten."));
+        const mail = (st.authEmail || "").trim();
+        if (!/.+@.+\..+/.test(mail)) {
+          this.say(this.tr("Passwort"), this.tr("Adresse fehlt"), this.tr("Bitte eine vollständige E-Mail-Adresse eintragen."));
+          return;
+        }
+        if (!st.live || !this.api) {
+          this.say(this.tr("Nicht eingerichtet"), this.tr("Keine Datenbank verbunden"),
+            this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
+          return;
+        }
+        // Nur vorhandene Adressen bekommen einen Link — sonst eine klare Absage.
+        Promise.resolve(this.api.emailTaken ? this.api.emailTaken(mail) : null)
+          .then(taken => {
+            if (taken === false) {
+              this.say(this.tr("Passwort"), this.tr("Kein Konto zu dieser Adresse"),
+                this.tr("Zu ") + mail + this.tr(" gibt es keinen Zugang. Bitte Adresse prüfen oder Firma neu registrieren."));
+              return;
+            }
+            return this.api.requestPasswordReset(mail, st.captchaToken)
+              .then(() => {
+                this.setState({ authView: "login" });
+                this.say("Brevo", this.tr("Mail ist unterwegs"), this.tr("Der Link gilt 15 Minuten."));
+              });
+          })
+          .catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
       },
       setRegPw: e => this.setState({ regPw: e.target.value }),
       setRegPw2: e => this.setState({ regPw2: e.target.value }),
@@ -3727,8 +3814,23 @@ class Component extends DCLogic {
             this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md."));
           return;
         }
+        const mail = (st.authEmail || "").trim();
+        if (!/.+@.+\..+/.test(mail)) {
+          this.say(this.tr("Registrierung"), this.tr("Adresse fehlt"), this.tr("Bitte eine vollständige E-Mail-Adresse eintragen."));
+          return;
+        }
         this.setState({ authView: "confirm", confirmLeft: 900, regState: "wait" });
-        this.api.signUpCompany({ email: st.authEmail, password: st.regPw, companyName: st.regCompany, captchaToken: st.captchaToken })
+        // Erst nachsehen, ob die Adresse schon vergeben ist — zweimal dieselbe
+        // Firma anzulegen führt sonst zu zwei Konten mit demselben Postfach.
+        Promise.resolve(this.api.emailTaken ? this.api.emailTaken(mail) : null)
+          .then(taken => {
+            if (taken === true) {
+              const e = new Error(this.tr("Diese E-Mail-Adresse ist bereits registriert. Bitte anmelden oder das Passwort zurücksetzen."));
+              e.code = "email_taken";
+              throw e;
+            }
+            return this.api.signUpCompany({ email: mail, password: st.regPw, companyName: st.regCompany, captchaToken: st.captchaToken });
+          })
           .then(r => {
             // Kommt eine Sitzung zurück, ist in Supabase "Confirm email" aus —
             // dann verschickt Supabase gar keine Bestätigungsmail.
@@ -3750,6 +3852,7 @@ class Component extends DCLogic {
       regWaiting: st.regState === "wait", regSent: st.regState === "sent",
       regNoMail: st.regState === "nomail", regFailed: st.regState === "error",
       regError: st.regError || "",
+      regHint: st.regError ? this.regHintFor(st.regError) : "",
       confirmNote: st.regState === "nomail"
         ? this.tr("In Supabase ist „Confirm email\" ausgeschaltet. Einschalten unter Authentication → Providers → Email.")
         : st.regState === "error"

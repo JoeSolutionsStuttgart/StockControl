@@ -2,7 +2,7 @@
 // Die Oberfläche ruft ausschließlich diese Funktionen auf; ist nichts
 // konfiguriert, meldet configured=false und die Seite bleibt im Demo-Modus.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, MAIL_FUNCTION, UPLOAD_FUNCTION } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, UPLOAD_WORKER_URL } from "./config.js";
 
 export const configured = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
@@ -35,34 +35,48 @@ export async function resendConfirmation(email) {
   }));
 }
 
+// Gibt es zu dieser Adresse schon ein Konto? Antwortet die Datenbank
+// (sc_email_taken aus mail.sql). Ist die Funktion nicht eingespielt,
+// wird null gemeldet und die Oberfläche fragt nicht weiter nach.
+export async function emailTaken(email) {
+  const sb = await client();
+  const { data, error } = await sb.rpc("sc_email_taken", { p_email: email });
+  if (error) return null;
+  return data === true;
+}
+
 export async function signUpCompany({ email, password, companyName, captchaToken }) {
   const sb = await client();
   // company_name landet in den Metadaten; der Trigger legt Firma + Profil an.
   // captchaToken kommt von Cloudflare Turnstile — Supabase prüft ihn serverseitig,
   // wenn unter Authentication → Attack Protection der Captcha-Schutz aktiv ist.
-  return ok(await sb.auth.signUp({
+  const res = ok(await sb.auth.signUp({
     email, password,
     options: { data: { company_name: companyName }, captchaToken, emailRedirectTo: location.origin + location.pathname }
   }));
+  // Supabase meldet eine bereits vergebene Adresse nicht als Fehler, sondern
+  // liefert ein Konto ohne "identities" zurück. Das gilt hier als vergeben.
+  if (res && res.user && Array.isArray(res.user.identities) && res.user.identities.length === 0) {
+    const err = new Error("Diese E-Mail-Adresse ist bereits registriert.");
+    err.code = "email_taken";
+    throw err;
+  }
+  return res;
 }
 
 export async function signIn({ email, password, captchaToken }) {
   const sb = await client();
   const res = await sb.auth.signInWithPassword({ email, password, options: { captchaToken } });
   if (res.error) throw res.error;
-  // Steht für dieses Konto ein zweiter Faktor an, meldet Supabase aal1 statt aal2.
-  const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (aal && aal.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
-    const { data: fs } = await sb.auth.mfa.listFactors();
-    const totp = (fs && fs.totp && fs.totp[0]) || null;
-    return { mfaRequired: true, factorId: totp ? totp.id : null };
-  }
   return { mfaRequired: false, data: res.data };
 }
 
-/* ── Zwei-Faktor-Anmeldung (TOTP) ───────────────────────── */
-// Ein zweiter Faktor schützt auch dann, wenn ein Passwort durch Phishing
-// oder ein Datenleck bekannt wird: ohne den Code aus der App kein Zugang.
+/* ── Zwei-Faktor-Anmeldung (vorbereitet, nicht aktiv) ──── */
+// Der zweite Faktor ist absichtlich noch abgeschaltet: die Anmeldung
+// verlangt Passwort und Captcha. Die Funktionen unten bleiben stehen,
+// damit TOTP später ohne Umbau dazukommen kann — dann prüft signIn
+// wieder das Assurance Level (aal1 → aal2).
+export const MFA_ENABLED = false;
 
 export async function mfaVerify({ factorId, code }) {
   const sb = await client();
@@ -185,6 +199,15 @@ export async function inviteMember({ email, role }) {
   return row;
 }
 
+export async function acceptInvitation({ token, email, password, name, captchaToken }) {
+  const sb = await client();
+  return ok(await sb.auth.signUp({
+    email, password,
+    options: { data: { name, invite_token: token }, captchaToken,
+               emailRedirectTo: location.origin + location.pathname }
+  }));
+}
+
 export async function updateMember(id, patch) {
   const sb = await client();
   return ok(await sb.from("profiles").update(patch).eq("id", id).select().single());
@@ -244,39 +267,43 @@ export async function saveSettings(patch) {
   return ok(await sb.from("settings").upsert(patch).select().single());
 }
 
-/* ── Große Dateien: Cloudflare R2 (privater Bucket) ─────── */
-// Der Bucket ist NICHT öffentlich. Hochladen und Ansehen laufen beide über
-// die Edge Function: sie prüft Anmeldung und Firmenzugehörigkeit und stellt
-// eine kurzlebige signierte Adresse aus — PUT für 10 Minuten, GET für eine
-// Stunde. In products.bild_url steht nur der Schlüssel, keine offene URL.
-// Ohne Anmeldung ist eine Datei in R2 nicht erreichbar.
+/* ── Große Dateien: Cloudflare R2 über einen Worker ─────── */
+// Der Bucket ist NICHT öffentlich und hat keine ausgelagerten Schlüssel:
+// der Worker hat ihn direkt gebunden. Er prüft am mitgeschickten Token,
+// wer fragt und zu welcher Firma die Person gehört, legt die Datei unter
+// <firma>/… ab und stellt zum Ansehen eine unterschriebene Adresse aus,
+// die eine Stunde gilt. In products.bild_url steht nur der Schlüssel.
 
-export async function uploadFile(file, kind = "product") {
-  const sb = await client();
-  const { data: slot, error } = await sb.functions.invoke(UPLOAD_FUNCTION, {
-    body: { action: "upload", filename: file.name, contentType: file.type, size: file.size, kind }
+export const filesConfigured = !!UPLOAD_WORKER_URL;
+
+async function workerCall(path, init = {}) {
+  if (!UPLOAD_WORKER_URL) throw new Error("Kein Datei-Worker eingerichtet (config.js: UPLOAD_WORKER_URL)");
+  const sess = await session();
+  if (!sess) throw new Error("Nicht angemeldet");
+  const res = await fetch(UPLOAD_WORKER_URL.replace(/\/$/, "") + path, {
+    ...init,
+    headers: { ...(init.headers || {}), authorization: `Bearer ${sess.access_token}` }
   });
-  if (error) throw error;
-  if (slot.error) throw new Error(slot.error);
-
-  const put = await fetch(slot.uploadUrl, {
-    method: "PUT", headers: { "content-type": file.type }, body: file
-  });
-  if (!put.ok) throw new Error(`Upload fehlgeschlagen (${put.status})`);
-
-  return { key: slot.key };
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok || out.error) throw new Error(out.error || `Worker ${res.status}`);
+  return out;
 }
 
-// Kurzlebige Leseadresse für eine Datei. Nur für Dateien der eigenen Firma —
-// das prüft die Function am Schlüssel-Präfix.
+export async function uploadFile(file, kind = "product") {
+  const q = `?filename=${encodeURIComponent(file.name)}&kind=${encodeURIComponent(kind)}`;
+  const out = await workerCall("/upload" + q, {
+    method: "POST", headers: { "content-type": file.type || "application/octet-stream" }, body: file
+  });
+  return { key: out.key };
+}
+
 export async function viewUrl(key) {
   if (!key) return null;
   if (/^https?:\/\//.test(key)) return key;   // Altbestand: bereits volle URL
-  const sb = await client();
-  const { data, error } = await sb.functions.invoke(UPLOAD_FUNCTION, { body: { action: "view", key } });
-  if (error) throw error;
-  if (data.error) throw new Error(data.error);
-  return data.url;
+  const out = await workerCall("/view", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ key })
+  });
+  return out.url;
 }
 
 export async function setProductImage(productId, file) {
@@ -285,14 +312,30 @@ export async function setProductImage(productId, file) {
   return key;
 }
 
-/* ── Mailversand über Brevo (Edge Function) ─────────────── */
-// Der Brevo-API-Key liegt als Secret in Supabase, nie im Browser.
+/* ── Mailversand über Brevo, direkt aus der Datenbank ───── */
+// Kein Server, keine Edge Function: die Datenbank ruft Brevo selbst auf
+// (supabase/mail.sql). Der Brevo-Schlüssel liegt in der Tabelle sc_config,
+// die für angemeldete Konten technisch unlesbar ist.
 
 export async function sendMail({ template, to, cc, data }) {
   const sb = await client();
-  const { data: res, error } = await sb.functions.invoke(MAIL_FUNCTION, {
-    body: { action: "send", template, to, cc, data }
+  const { data: res, error } = await sb.rpc("sc_send_mail", {
+    template, to_email: to, cc_emails: cc ? [].concat(cc) : [], data: data || {}
   });
   if (error) throw error;
   return res;
+}
+
+// Testmail an die eigene Adresse — für die Prüfseite in den Systemdiensten.
+export async function sendTestMail(to) {
+  return sendMail({ template: "test", to });
+}
+
+// Was ist aus den letzten Mails geworden? Liefert die Antwort von Brevo mit:
+// 201 angenommen · 401 Schlüssel falsch · 400 Absender nicht verifiziert.
+export async function mailStatus(n = 8) {
+  const sb = await client();
+  const { data, error } = await sb.rpc("sc_mail_status", { n });
+  if (error) throw error;
+  return data || [];
 }
