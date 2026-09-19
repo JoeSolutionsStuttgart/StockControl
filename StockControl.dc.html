@@ -489,9 +489,60 @@
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
           </div>
+
+          <sc-if value="{{ canEditProduct }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ startEdit }}"><span data-i18n>Bearbeiten</span></button>
+              <button class="btn btn-ghost" style="white-space: nowrap; color: var(--color-accent-700)" onClick="{{ askDelete }}"><span data-i18n>Produkt löschen</span></button>
+            </div>
+          </sc-if>
         </section>
 
         <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+            <section class="card blueprint" style="border-color: var(--color-accent)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div class="card-kicker" data-i18n>Bearbeiten</div>
+              <h4 style="margin: 0">{{ current.name }}</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3)">
+                <sc-for list="{{ editFields }}" as="f" hint-placeholder-count="8">
+                  <div class="field" style="margin: 0; grid-column: {{ f.span }}">
+                    <label>{{ f.label }}</label>
+                    <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                      <select class="input" value="{{ f.value }}" onChange="{{ f.set }}">
+                        <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3">
+                          <option value="{{ o.value }}">{{ o.label }}</option>
+                        </sc-for>
+                      </select>
+                    </sc-if>
+                    <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}">
+                      <input class="input" type="{{ f.type }}" inputmode="{{ f.mode }}" value="{{ f.value }}" placeholder="{{ f.hint }}" onInput="{{ f.set }}">
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+                <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ editSaveDisabled }}" onClick="{{ saveEdit }}"><span data-i18n>Änderungen übernehmen</span></button>
+                <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ cancelEdit }}"><span data-i18n>Abbrechen</span></button>
+                <span style="font-size: 12px; color: {{ editNoteColor }}">{{ editNote }}</span>
+              </div>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ confirmDelete }}" hint-placeholder-val="{{ false }}">
+            <section class="card blueprint" style="border-color: var(--color-accent)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div class="card-kicker" data-i18n>Löschen</div>
+              <h4 style="margin: 0" data-i18n>Wirklich vollständig löschen?</h4>
+              <p class="card-body" style="margin: 0">{{ deleteWarning }}</p>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+                <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ doDelete }}"><span data-i18n>Endgültig löschen</span></button>
+                <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ cancelDelete }}"><span data-i18n>Abbrechen</span></button>
+              </div>
+              <p style="margin: 0; font-size: 12px; color: var(--sc-ink-2)" data-i18n>Wer den Verlauf behalten will, schaltet das Produkt stattdessen auf „nicht aktiv" — es verschwindet dann aus allen Listen, bleibt aber auffindbar.</p>
+            </section>
+          </sc-if>
+
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
@@ -606,6 +657,11 @@
                   </sc-if>
                 </div>
               </sc-if>
+              <div style="border: 1px solid rgba(255,255,255,.28); border-radius: 8px; padding: 7px 9px; background: rgba(0,0,0,.35)">
+                <div style="font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.62)">{{ readoutLabel }}</div>
+                <div style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; line-height: 1.35; color: #fff; word-break: break-all; min-height: 16px">{{ readoutText }}</div>
+                <div style="font-size: 10.5px; margin-top: 2px; color: {{ readoutColor }}">{{ readoutNote }}</div>
+              </div>
               <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Oder Code eingeben</div>
               <div style="display: flex; gap: 6px">
                 <input class="input" data-i18n-ph placeholder="Artikel-ID oder EAN" value="{{ scanCode }}" onInput="{{ setScanCode }}" style="flex: 1; min-width: 0; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff">
@@ -1177,6 +1233,48 @@
 
       <sc-if value="{{ onTeam }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Team und Rechte" style="display: flex; flex-direction: column; gap: var(--space-6)">
+        <sc-if value="{{ canManageRoles }}" hint-placeholder-val="{{ false }}">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Rollen</div>
+            <h4 style="margin: 0" data-i18n>Rollen und ihre Standardrechte</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Eine Rolle ist eine Vorlage: Wer sie bekommt, startet mit genau diesen Rechten. Einzelne Personen lassen sich danach weiter oben abweichend einstellen. Die inhabende Person darf immer alles und ist deshalb nicht änderbar.</p>
+
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <sc-for list="{{ roleCards }}" as="rl" hint-placeholder-count="4">
+                <div class="blueprint" style="padding: var(--space-3); background: var(--sc-ground)">
+                  <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+                    <input class="input" style="flex: 1; min-width: 160px" value="{{ rl.label }}" disabled="{{ rl.locked }}" onInput="{{ rl.rename }}">
+                    <span class="tag tag-neutral">{{ rl.usage }}</span>
+                    <span class="tag tag-outline">{{ rl.permCount }}</span>
+                    <button class="btn btn-ghost" style="font-size: 12px; white-space: nowrap; color: var(--color-accent-700)" disabled="{{ rl.cannotDelete }}" onClick="{{ rl.remove }}"><span data-i18n>Löschen</span></button>
+                  </div>
+                  <details style="margin-top: var(--space-2)">
+                    <summary style="font-family: var(--font-heading); font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px">{{ rl.summaryLabel }}</summary>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 4px var(--space-3); margin-top: var(--space-2)">
+                      <sc-for list="{{ rl.perms }}" as="pm" hint-placeholder-count="6">
+                        <label class="radio" style="display: flex; gap: 9px; align-items: flex-start; padding: 3px 0; font-size: 12.5px">
+                          <input type="checkbox" checked="{{ pm.on }}" disabled="{{ pm.locked }}" onChange="{{ pm.toggle }}" style="position: static; width: 15px; height: 15px; opacity: 1; accent-color: var(--color-accent); flex: none; margin-top: 1px">
+                          <span>{{ pm.label }}</span>
+                        </label>
+                      </sc-for>
+                    </div>
+                  </details>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+              <div class="field" style="flex: 1; min-width: 190px; margin: 0">
+                <label data-i18n>Neue Rolle</label>
+                <input class="input" value="{{ newRoleName }}" data-i18n-ph placeholder="z. B. Schichtleitung" onInput="{{ setNewRoleName }}">
+              </div>
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addRoleDisabled }}" onClick="{{ addRole }}"><span data-i18n>Rolle anlegen</span></button>
+            </div>
+            <div style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Eine neue Rolle startet mit den Rechten für Ansehen und Buchen. Alles Weitere hier ankreuzen.</div>
+          </section>
+        </sc-if>
+
         <div data-two>
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -2424,7 +2522,447 @@ const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRo
 
 const DICT = {
   en: {
-    "Übersicht": "Overview", "Produkte": "Products", "Produktverwaltung": "Product management", "Vorlage herunterladen": "Download template", "Ausgefüllte Liste hier hochladen": "Upload your filled-in list here", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Drag a file here or click · .csv up to 5 MB", "Leere Liste — nur Kopfzeile": "Empty list — header only", "Mit allen vorhandenen Produkten": "With every existing product", "Vorlage mit Bestand": "Template with stock", "Leere Vorlage": "Empty template", "Vorlage": "Template", "Datei unten hochladen, Spalten prüfen, importieren": "Upload the file below, check the columns, import", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Pick a template: empty, or with today\u2019s stock", "Scannen": "Scan", "Produkt anlegen": "Add product",
+    " oder die Stellvertretung.": " or the deputies.",
+    "15 Personen": "15 people",
+    "2 000 Artikel": "2,000 items",
+    "3 Personen": "3 people",
+    "300 Artikel": "300 items",
+    "4 von 128": "4 of 128",
+    "Abgelehnt": "Rejected",
+    "Adresse fehlt": "Address missing",
+    "Adresse prüfen": "Check the address",
+    "Alle": "All",
+    "Alle Arten": "All types",
+    "Alle Felder sind änderbar.": "Every field can be changed.",
+    "Alle Lagerorte": "All locations",
+    "Alle Lieferanten": "All suppliers",
+    "Alle Personen": "All people",
+    "Alle Produkte": "All products",
+    "Alle Zeilen übernommen": "All rows taken over",
+    "Alle anderen Sitzungen wurden abgemeldet.": "All other sessions were signed out.",
+    "Alle auswählen": "Select all",
+    "Als bestellt markieren": "Mark as ordered",
+    "Anfrage läuft noch — in ein paar Sekunden erneut abrufen.": "Still in flight — fetch again in a few seconds.",
+    "Angelegt, aber nicht verschickt": "Created, but not sent",
+    "Angemeldet als Marie Kohl": "Signed in as Marie Kohl",
+    "Anhalten": "Stop",
+    "Anmeldung fehlgeschlagen": "Sign-in failed",
+    "Ansehen": "View",
+    "Antwort am nächsten Werktag": "Reply the next working day",
+    "Antwort von Brevo": "Reply from Brevo",
+    "Antworten abrufen": "Fetch replies",
+    "Anzahl": "Count",
+    "Artikel auswählen": "Select items",
+    "Artikel in der Auswahl": "items in the selection",
+    "Artikel unbegrenzt": "Unlimited items",
+    "Artikel vermerkt": "items noted",
+    "Artikel zusammengefasst": "items combined",
+    "Artikel-ID auf dem Etikett": "Item ID on the label",
+    "Auf Etikett drucken": "Print on label",
+    "Aufgefüllt": "Refilled",
+    "Ausblenden": "Hide",
+    "Auswahl": "Selection",
+    "Auswahl leeren": "Clear selection",
+    "Auswahl zurücksetzen": "Reset selection",
+    "Bedarfsliste erstellt": "Requirement list created",
+    "Bedarfsliste exportiert": "Requirement list exported",
+    "Bedarfslisten für Events": "Requirement lists for events",
+    "Beim Lieferanten öffnen": "Open at the supplier",
+    "Beliebig kombinierbar. Leer heißt: alles.": "Combine freely. Empty means everything.",
+    "Benachrichtigungen und Bestandsverlauf laufen wieder.": "Notifications and stock history are running again.",
+    "Benötigt": "Needed",
+    "Bestand danach": "Stock afterwards",
+    "Bestand im Zeitverlauf": "Stock over time",
+    "Bestand ok": "Stock ok",
+    "Bestand umgerechnet": "Stock converted",
+    "Bestandsverlauf dieses Produkts ansehen": "View this product's stock history",
+    "Bestandsverlauf exportiert": "Stock history exported",
+    "Bestandsverlauf mit Grafik": "Stock history with chart",
+    "Bestellliste exportiert": "Order list exported",
+    "Bestellung zurücknehmen": "Undo order",
+    "Betreff": "Subject",
+    "Bild gespeichert": "Image saved",
+    "Bild hochladen": "Upload image",
+    "Bild wird noch geladen …": "Image still loading …",
+    "Bilder und Datenblätter je Artikel": "Images and data sheets per item",
+    "Bitte eine vollständige E-Mail-Adresse eintragen.": "Please enter a complete email address.",
+    "Bot-Prüfung bei Anmeldung und Registrierung": "Bot check on sign-in and registration",
+    "Brauchen wir besondere Geräte?": "Do we need special devices?",
+    "Brevo hat die Mail angenommen.": "Brevo accepted the message.",
+    "Buchung sperren, wenn gesetzt": "Block booking when set",
+    "CC: ": "CC: ",
+    "Das Passwort erfüllt die Vorgaben von Supabase nicht.": "The password does not meet Supabase's requirements.",
+    "Datei nicht lesbar": "File not readable",
+    "Datenbank in einer EU-Region": "Database in an EU region",
+    "Datenquelle": "Data source",
+    "Datum": "Date",
+    "Deaktiviert": "Deactivated",
+    "Demo": "Demo",
+    "Demo-Modus": "Demo mode",
+    "Demo: lokal ablegen": "Demo: store locally",
+    "Der Link gilt 15 Minuten.": "The link is valid for 15 minutes.",
+    "Derzeit kostenlos": "Free for now",
+    "Deutsch": "German",
+    "Die Anzahl muss eine ganze Zahl ab 2 sein.": "The count must be a whole number of 2 or more.",
+    "Die Datei ist leer.": "The file is empty.",
+    "Die ersten fünf Schritte": "The first five steps",
+    "Dienstag": "Tuesday",
+    "Diese Datei kann der Browser nicht lesen": "The browser cannot read this file",
+    "Diese Einheit gibt es schon.": "That unit already exists.",
+    "Dieses Gerät erlaubt das Licht nicht über den Browser.": "This device does not allow the light from the browser.",
+    "Donnerstag": "Thursday",
+    "Drei Handgriffe, kein Papier.": "Three moves, no paper.",
+    "Eigene Daten jederzeit als CSV heraus": "Your own data out as CSV at any time",
+    "Eigene Merkmale": "Custom attributes",
+    "Eigene Merkmale mit Regeln": "Custom attributes with rules",
+    "Ein Lager, eine Stunde Einrichtung.": "One stockroom, one hour of setup.",
+    "Eine Firma sieht nur ihre eigenen Zeilen.": "A company sees only its own rows.",
+    "Eine Spalte pro Feld, inklusive eigener Merkmale.": "One column per field, custom attributes included.",
+    "Eingefügte Liste": "Pasted list",
+    "Einheit": "Unit",
+    "Einheit anlegen": "Create unit",
+    "Einheiten dieses Produkts": "Units of this product",
+    "Einladung gesendet": "Invitation sent",
+    "Einrichtung": "Setup",
+    "Einträge": "entries",
+    "Einzelnes Produkt": "Single product",
+    "Endlosrolle · 62 mm breit": "Continuous roll · 62 mm wide",
+    "English": "English",
+    "Entnahme": "Withdrawal",
+    "Entnommen": "Withdrawn",
+    "Entsperren": "Unblock",
+    "Erkannt und zugeordnet.": "Recognised and matched.",
+    "Erledigen": "Do it",
+    "Erst Artikel und Mengen hinzufügen.": "Add items and quantities first.",
+    "Erst arbeiten, dann zahlen.": "Work first, pay later.",
+    "Erst eine CSV-Datei wählen.": "Choose a CSV file first.",
+    "Es wurde keine Kamera gefunden.": "No camera was found.",
+    "Etiketten 62 mm": "Labels 62 mm",
+    "Etiketten drucken": "Print labels",
+    "Etiketten in allen Formaten": "Labels in every format",
+    "Etikettformat": "Label format",
+    "Event": "Event",
+    "Event anlegen und Bedarfsliste erstellen": "Create an event and its requirement list",
+    "Events": "Events",
+    "Excel- und CSV-Import": "Excel and CSV import",
+    "Excel-Import": "Excel import",
+    "Excel-Import, Events, Bestandsverlauf": "Excel import, events, stock history",
+    "Fehler": "Error",
+    "Fehlmengen berechnet": "Shortfalls calculated",
+    "Fehlt": "Missing",
+    "Feinrechte pro Person": "Fine-grained rights per person",
+    "Feld steht ab jetzt in jedem Produkt.": "The field is now on every product.",
+    "Firma, Personen, Produkte und Verlauf entfernt": "Company, people, products and history removed",
+    "Fragen": "Questions",
+    "Freitag": "Friday",
+    "Funktionen": "Features",
+    "Für das Lager gedacht, nicht für die Buchhaltung.": "Made for the stockroom, not for accounting.",
+    "Für ein Lager und ein kleines Team": "For one stockroom and a small team",
+    "Für gewachsene Lagerstrukturen": "For grown stockroom structures",
+    "Gelesen, aber kein Produkt mit dieser Kennung.": "Read, but no product with that identifier.",
+    "Gelöscht": "Deleted",
+    "Geplante Events": "Planned events",
+    "Gesamter Zeitraum": "Whole period",
+    "Gescannt": "Scanned",
+    "Grund: ": "Reason: ",
+    "Gültig ab": "Valid from",
+    "Hilfe": "Help",
+    "Hinzufügen": "Add",
+    "Im Demo-Modus wird nichts verschickt.": "Nothing is sent in demo mode.",
+    "In Bestellliste aufnehmen": "Add to order list",
+    "In config.js ist SUPABASE_ANON_KEY leer.": "SUPABASE_ANON_KEY is empty in config.js.",
+    "In config.js ist SUPABASE_URL leer.": "SUPABASE_URL is empty in config.js.",
+    "Inhabende Person": "Owner",
+    "Ist bestellt": "Is ordered",
+    "Ja / Nein": "Yes / No",
+    "Jede Buchung bleibt mit Person und Zeit nachvollziehbar": "Every booking stays traceable with person and time",
+    "Kamera aus": "Camera off",
+    "Kamera läuft": "Camera running",
+    "Kamera nicht verfügbar": "Camera not available",
+    "Kamera starten": "Start camera",
+    "Kamera starten, dann den Code am Regal erfassen": "Start the camera, then capture the code on the shelf",
+    "Kamera starten, dann einen Code vor die Linse halten.": "Start the camera, then hold a code in front of the lens.",
+    "Kein Konto zu dieser Adresse": "No account for this address",
+    "Kein Tracking, keine Werbe-Cookies": "No tracking, no advertising cookies",
+    "Keine Bewegungen für diese Auswahl.": "No movements for this selection.",
+    "Keine Verbindung zu Supabase.": "No connection to Supabase.",
+    "Keine Zeile erkannt": "No row recognised",
+    "Konto aktiv": "Account active",
+    "Kopfzeile und mindestens eine Produktzeile einfügen.": "Paste a header row and at least one product row.",
+    "Kurz gesagt": "In short",
+    "Können wir unsere bestehende Liste übernehmen?": "Can we bring our existing list over?",
+    "Laden fehlgeschlagen": "Loading failed",
+    "Lagerleitung": "Stock manager",
+    "Lagerort anlegen": "Create location",
+    "Lagerorte": "Locations",
+    "Lesezugriff": "Read access",
+    "Letzte 12 Monate": "Last 12 months",
+    "Letzte 3 Monate": "Last 3 months",
+    "Letzte 30 Tage": "Last 30 days",
+    "Licht": "Light",
+    "Licht an": "Light on",
+    "Licht aus": "Light off",
+    "Link senden": "Send link",
+    "Link verfallen": "Link expired",
+    "Löst aus": "Triggers",
+    "Mail an ": "Mail to ",
+    "Mail ist unterwegs": "The mail is on its way",
+    "Mailversand": "Mail delivery",
+    "Mailversand prüfen": "Check mail delivery",
+    "Mehrere Lager, mehrere Schichten": "Several stockrooms, several shifts",
+    "Meistbewegte Artikel": "Most moved items",
+    "Menge buchen": "Book quantity",
+    "Menge oben eintragen oder hier nach Einheiten aufteilen.": "Enter the quantity above, or split it into units here.",
+    "Merkmal": "Attribute",
+    "Merkmal anlegen": "Create attribute",
+    "Min.": "Min.",
+    "Mindestbestand und Mail": "Minimum stock and mail",
+    "Mit verbundenem R2 landet die Datei im Bucket der Firma.": "With R2 connected the file lands in the company's bucket.",
+    "Mitarbeitende Person": "Worker",
+    "Mittwoch": "Wednesday",
+    "Montag": "Monday",
+    "Nachbestellen": "Reorder",
+    "Nachfüllung": "Refill",
+    "Name des Events": "Event name",
+    "Name des Merkmals": "Attribute name",
+    "Name fehlt": "Name missing",
+    "Name ist frei.": "The name is free.",
+    "Neuer Bestand: ": "New stock: ",
+    "Neuer Lagerort": "New location",
+    "Neuer Preis": "New price",
+    "Neues Event": "New event",
+    "Neues Event planen": "Plan a new event",
+    "Nicht gespeichert": "Not saved",
+    "Nicht möglich": "Not possible",
+    "Nichts gefunden": "Nothing found",
+    "Nichts zu importieren": "Nothing to import",
+    "Noch keine Artikel": "No items yet",
+    "Noch nicht übernommen.": "Not applied yet.",
+    "Nur verantwortliche Person": "Responsible person only",
+    "Oder Code eingeben": "Or type the code",
+    "Ohne Datenbank wird nichts verschickt.": "Without a database nothing is sent.",
+    "Ohne Namen kann nicht gespeichert werden.": "Nothing is saved without a name.",
+    "Ohne Namen wird nicht gespeichert.": "Nothing is saved without a name.",
+    "Ohne Namen wird nicht übernommen.": "Nothing is applied without a name.",
+    "Passwort geändert": "Password changed",
+    "Passwort vergessen?": "Forgotten your password?",
+    "Passwort wiederholen": "Repeat password",
+    "Passwort zurücksetzen": "Reset password",
+    "Passwort-Mail gesendet": "Password mail sent",
+    "Person entfernt": "Person removed",
+    "Personen unbegrenzt": "Unlimited people",
+    "Pflichtfeld — ohne Namen wird nicht gespeichert.": "Required — nothing is saved without a name.",
+    "Positionen": "Positions",
+    "Preis eintragen": "Enter price",
+    "Preis heute": "Price today",
+    "Preisverlauf und Umsatz": "Price history and revenue",
+    "Preisänderungen": "Price changes",
+    "Produkt ausgewählt": "product selected",
+    "Produkt deaktivieren": "Deactivate product",
+    "Produkt wieder aktivieren": "Reactivate product",
+    "Produktart": "Product type",
+    "Produkte ausgewählt": "products selected",
+    "Produkte exportiert": "Products exported",
+    "Produkte importiert": "products imported",
+    "Produktname auf dem Etikett": "Product name on the label",
+    "Profil": "Profile",
+    "Profil und Feinrechte": "Profile and fine-grained rights",
+    "Profildaten und Rechte darf nur die inhabende Person ändern.": "Only the owner may change profile data and rights.",
+    "QR-Etiketten in fünf Formaten": "QR labels in five formats",
+    "R2 · privat, signierter Zugriff": "R2 · private, signed access",
+    "Rechte unten ankreuzen": "Tick the rights below",
+    "Regel aktiv: ": "Rule active: ",
+    "Registrierung": "Registration",
+    "Registrierung fehlgeschlagen": "Registration failed",
+    "Rollen und Rechte": "Roles and rights",
+    "Rollen und Rechte pro Person": "Roles and rights per person",
+    "Sammelmail: ": "Digest mail: ",
+    "Scan, Mindestbestand, Bestellliste": "Scan, minimum stock, order list",
+    "Scan-Entnahme": "Scan withdrawal",
+    "Schlüssel abgelehnt — brevo_api_key in sc_config prüfen.": "Key rejected — check brevo_api_key in sc_config.",
+    "Schon vorhanden": "Already there",
+    "Sehen andere Firmen unsere Daten?": "Can other companies see our data?",
+    "So läuft es": "How it works",
+    "Spalten erkannt": "columns recognised",
+    "Sperren": "Block",
+    "Stammdaten": "Master data",
+    "Stand gespeichert.": "Saved as shown.",
+    "Status setzen darf nur ": "The status may only be set by ",
+    "Status zurückgesetzt": "Status reset",
+    "Status: ist bestellt": "Status: ordered",
+    "Stellvertretung 1": "Deputy 1",
+    "Stellvertretung 2": "Deputy 2",
+    "Stellvertretung 3": "Deputy 3",
+    "Stück": "piece",
+    "Suchen": "Search",
+    "Summe im Zeitraum": "Total in the period",
+    "Svenska": "Swedish",
+    "Systemdienste": "System services",
+    "Testmail abgeschickt": "Test mail sent",
+    "Testmail an": "Test mail to",
+    "Testmail senden": "Send test mail",
+    "Testzugang": "Test access",
+    "Treffer": "hits",
+    "Umsatz als CSV": "Revenue as CSV",
+    "Unter der Kopfzeile fehlt noch eine Produktzeile.": "A product row under the header is still missing.",
+    "Upload fehlgeschlagen": "Upload failed",
+    "Verantwortliche + Stellvertretung im CC": "Responsible person + deputies in CC",
+    "Verantwortliche und Stellvertretung": "Responsible person and deputies",
+    "Verantwortung": "Responsibility",
+    "Verantwortung je Artikel": "Responsibility per item",
+    "Verhältnis": "Ratio",
+    "Vorbereitet": "Prepared",
+    "Vorgang": "Operation",
+    "Vorgemerkt": "Noted",
+    "Warnmail bei Entnahme": "Warning mail on withdrawal",
+    "Was kostet es wirklich?": "What does it really cost?",
+    "Was meistens gefragt wird.": "What people usually ask.",
+    "Wechseln": "Switch",
+    "Wer bekommt die Mail?": "Who gets the mail?",
+    "Wer bekommt die Warnmails?": "Who gets the warning mails?",
+    "Wie MHD überwachen": "How to watch best-before dates",
+    "Wie kommen wir wieder heraus?": "How do we get out again?",
+    "Wie mache ich …?": "How do I …?",
+    "Wieder aktiv": "Active again",
+    "Wiederholung stimmt überein": "The repeat matches",
+    "Wird hochgeladen": "Uploading",
+    "Zeilen gelesen": "rows read",
+    "Zeilen ohne Namen verworfen": "rows without a name dropped",
+    "Zeilen übersprungen (Name fehlt oder doppelt)": "rows skipped (name missing or duplicate)",
+    "Zeitraum": "Period",
+    "Zu ": "For ",
+    "Zugang aktivieren": "Activate access",
+    "Zugang sofort gesperrt, Buchungen bleiben im Verlauf": "Access blocked at once, bookings stay in the history",
+    "Zugang sperren": "Block access",
+    "ausgewählt": "selected",
+    "bestellt": "ordered",
+    "davon nachzubestellen": "of those to reorder",
+    "deaktiviert": "deactivated",
+    "derzeit gratis": "free for now",
+    "erkannt": "recognised",
+    "erster Preis": "first price",
+    "für immer": "for ever",
+    "gebucht": "booked",
+    "gerade eben": "just now",
+    "größer als ": "larger than ",
+    "gültig 3 Stunden": "valid for 3 hours",
+    "gültig ab ": "valid from ",
+    "ja": "yes",
+    "ja — erscheint in allen Listen": "yes — appears in every list",
+    "je Monat, geplant": "per month, planned",
+    "keine Regel": "no rule",
+    "kleiner als ": "smaller than ",
+    "kleinste Einheit": "smallest unit",
+    "nachbestellen": "reorder",
+    "nein — aus Listen ausgeblendet": "no — hidden from lists",
+    "neue Einheit": "new unit",
+    "neue Lagerorte": "new locations",
+    "niedrig": "low",
+    "ohne CC an Stellvertretung": "without CC to deputies",
+    "sichtbaren Artikeln": "visible items",
+    "unten bestätigen": "confirm below",
+    "unter Mindestbestand ": "below minimum stock ",
+    "unterwegs": "in flight",
+    "verbergen": "hide",
+    "verbleibende Zeit": "time remaining",
+    "vorhanden": "available",
+    "wird die neue kleinste Einheit": "becomes the new smallest unit",
+    "zeigen": "show",
+    "Änderungen übernehmen": "Apply changes",
+    "Übernommen": "Applied",
+    "— bitte wählen —": "— please choose —",
+    "— keine —": "— none —",
+    "Lager": "Stock",
+    "Verwaltung": "Administration",
+    " gibt es keinen Zugang. Bitte Adresse prüfen oder Firma neu registrieren.": " there is no access. Check the address or register the company again.",
+    "Absender nicht verifiziert — in Brevo unter Senders freischalten.": "Sender not verified — approve it in Brevo under Senders.",
+    "Alles, was ein Betriebslager braucht — und nichts, was danach noch erklärt werden muss.": "Everything a company stockroom needs — and nothing that needs explaining afterwards.",
+    "Beispieldaten, nichts wird gespeichert. Systemdienste und Kostenbremse sind sichtbar.": "Sample data, nothing is saved. System services and the cost brake are visible.",
+    "Bestehende Listen mit Vorlage übernehmen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.": "Bring existing lists over with the template. Item number, minimum stock, location and supplier come along.",
+    "Bilder geprüft — noch kein Code erkannt. Näher heran, mehr Licht, Code gerade halten.": "frames checked — no code yet. Move closer, add light, hold the code straight.",
+    "Danach läuft das Lager von selbst. Jeder Schritt hakt sich ab, sobald er erledigt ist.": "After that the stockroom runs itself. Each step ticks itself off once it is done.",
+    "Das Anlegen in der Datenbank schlägt fehl. schema.sql im SQL-Editor erneut ausführen.": "Creating the record in the database fails. Run schema.sql again in the SQL editor.",
+    "Den Bestellstatus dürfen nur die verantwortliche Person und ihre Stellvertretungen setzen.": "Only the responsible person and their deputies may set the order status.",
+    "Den Namen gibt es schon — mit anderem Lagerort oder anderer Quantität ist das in Ordnung.": "The name already exists — that is fine with a different location or quantity.",
+    "Der Zugriff wurde abgelehnt. In der Adresszeile auf das Schloss tippen, die Kamera erlauben und erneut starten.": "Access was denied. Tap the padlock in the address bar, allow the camera and start again.",
+    "Die Antwort von Brevo steht in ein paar Sekunden in der Tabelle.": "Brevo's reply will be in the table within a few seconds.",
+    "Die Erkennung konnte nicht geladen werden. Bitte den Code unten eintippen.": "The reader could not be loaded. Please type the code below.",
+    "Die Kamera ist von einem anderen Programm belegt. Andere Apps schließen und erneut versuchen.": "Another program is using the camera. Close other apps and try again.",
+    "Die Tagesgrenze für Mails ist erreicht. Die Einladung ist gespeichert und gilt drei Stunden.": "The daily mail limit is reached. The invitation is saved and valid for three hours.",
+    "Die genaue Meldung steht oben. Die Schritte zum Mailversand stehen in „Registrierung und Mail\".": "The exact message is above. The mail-delivery steps are in \"Registrierung und Mail\".",
+    "Diese E-Mail-Adresse ist bereits registriert. Bitte anmelden oder das Passwort zurücksetzen.": "This email address is already registered. Please sign in or reset the password.",
+    "Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.": "This setting applies company-wide and can only be changed at the highest permission level.",
+    "Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen.": "This code belongs to another company. It cannot be opened from this account.",
+    "Dieses Produkt gibt es schon: gleicher Name, gleicher Lagerort, gleiche Quantität. Ändere eines davon.": "This product already exists: same name, same location, same quantity. Change one of them.",
+    "Ein QR-Code je Artikel oder Regalplatz. Scannen, Menge tippen, fertig — auch mit Handschuhen bedienbar.": "One QR code per item or shelf slot. Scan, type the quantity, done — usable with gloves on.",
+    "Eine neue Rolle startet mit den Rechten für Ansehen und Buchen. Alles Weitere hier ankreuzen.": "A new role starts with viewing and booking rights. Tick everything else here.",
+    "Eine verantwortliche Person und bis zu drei Stellvertretungen. Die Warnmail geht an sie, in CC an die Stellvertretung.": "One responsible person and up to three deputies. The warning mail goes to them, with the deputies in CC.",
+    "Entnahme oder Nachfüllung eintragen. Der Bestand schreibt sich fort, die Buchung bleibt mit Person und Zeit im Verlauf.": "Enter a withdrawal or a refill. The stock updates itself, the booking stays in the history with person and time.",
+    "Firma anlegen, Artikel importieren, Etiketten drucken. Danach scannt das Team.": "Create the company, import the items, print the labels. After that the team scans.",
+    "In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und die CSV-Datei wählen.": "In Excel use Save As to write a CSV (semicolon separated) and pick that file.",
+    "In der Kopfzeile fehlt eine Spalte „Name\" (oder „Artikelname\"). Ohne sie ist nicht erkennbar, was ein Produkt ist.": "The header has no \"Name\" column (or \"Artikelname\"). Without it there is no way to tell what a product is.",
+    "Inhabende Person, Lagerleitung, Mitarbeitende, Leser — und einzelne Rechte pro Person, wenn eine Rolle nicht passt.": "Owner, stock manager, worker, viewer — plus individual rights per person when a role does not fit.",
+    "Kein Artikel mit dieser Kennung. Etikett neu drucken oder Code eintippen.": "No item with that identifier. Print a new label or type the code.",
+    "Kein Eintrag passt zu diesem Stichwort. Versuche ein einzelnes Wort — etwa „Mail\", „Etikett\" oder „Import\".": "No entry matches that keyword. Try a single word — \"Mail\", \"Etikett\" or \"Import\".",
+    "Keine Karte nötig · Einrichtung in einer Stunde · jederzeit kündbar": "No card needed · set up in an hour · cancel any time",
+    "Keine Mails, kein Tracking. Sichtbar nur für Verantwortliche und Stellvertretung.": "No mails, no tracking. Visible only to the responsible person and the deputies.",
+    "Kurze Antworten zu allem, was im Lager täglich vorkommt. Tippe ein Stichwort ein, um zu filtern.": "Short answers to everything that comes up in the stockroom day to day. Type a keyword to filter.",
+    "Lagerverwaltung für Betriebe. Betrieben von der Internet GmbH.": "Stock management for companies. Operated by Internet GmbH.",
+    "Name, Lagerort und Quantität stimmen mit einem bestehenden Produkt überein.": "Name, location and quantity match an existing product.",
+    "Nichts ausgewählt — gerechnet wird über alle aktiven Produkte.": "Nothing selected — the figures cover every active product.",
+    "Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.": "Only people from this company — the stock mails go to their stored addresses.",
+    "Nur die Kopfzeile mit allen Feldern. Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt.": "Just the header with every field. Fill it in row by row — one row is one product.",
+    "Produkt, Bestand und alle Buchungen werden entfernt. Das lässt sich nicht zurückholen.": "Product, stock and every booking are removed. This cannot be undone.",
+    "QR-Code am Regal mit dem Handy scannen. Kein Gerät kaufen, keine App installieren — die Kamera genügt.": "Scan the shelf QR code with a phone. No device to buy, no app to install — the camera is enough.",
+    "QR-Etiketten in fünf Formaten, von 2×4 bis 5×13 je Blatt, dazu die Endlosrolle mit 62 mm.": "QR labels in five formats, from 2×4 to 5×13 per sheet, plus the 62 mm continuous roll.",
+    "Registrierung ist abgeschaltet: Authentication → Providers → Email → Enable Sign-ups einschalten.": "Registration is switched off: turn on Authentication → Providers → Email → Enable Sign-ups.",
+    "Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person.": "Role: worker. The owner sets the rights.",
+    "Sofort, täglich, wöchentlich oder monatlich. Sammelmails fassen alles zu einer Bestellliste zusammen.": "At once, daily, weekly or monthly. Digest mails gather everything into one order list.",
+    "Supabase konnte die Mail nicht übergeben. SMTP-Zugang prüfen: Project Settings → Authentication → SMTP Settings.": "Supabase could not hand the mail over. Check the SMTP access: Project Settings → Authentication → SMTP Settings.",
+    "Unter dem Mindestbestand geht die Warnung raus — sofort oder gesammelt als Bestellliste, je nach Einstellung.": "Below the minimum the warning goes out — at once or gathered into an order list, depending on the setting.",
+    "Wer etwas herausnimmt, scannt. Alles andere passiert von selbst.": "Whoever takes something out scans it. Everything else happens by itself.",
+    "Zu dieser Adresse gibt es schon ein Konto. Anmelden oder Passwort zurücksetzen.": "There is already an account for this address. Sign in or reset the password.",
+    "Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.": "Too many failed attempts. The account is locked for 15 minutes and a warning mail has gone out.",
+    "Alle Tarife sind derzeit kostenlos. Bevor sich daran etwas ändert, melden wir uns — ohne Zustimmung wird nichts abgebucht.": "Every plan is free at the moment. Before that changes we will get in touch — nothing is charged without consent.",
+    "Artikel und Mengen eintragen — auch deaktivierte. Beim Anlegen entsteht automatisch die Bedarfs- und Bestellliste mit den Fehlmengen.": "Enter items and quantities — deactivated ones too. Saving creates the requirement and order list with the shortfalls.",
+    "Demo-Daten: Im verbundenen Betrieb stehen hier die echten Firmen. Zugang erhält nur, wer in der Liste platform_admins eingetragen ist.": "Sample data: in live operation the real companies appear here. Only people listed in platform_admins get access.",
+    "Der Mailversand ist noch nicht eingerichtet. In Supabase im SQL-Editor die Datei supabase/mail.sql ausführen und dort im Block sc_config den Brevo-Schlüssel eintragen. Die Einladung ist gespeichert und gilt drei Stunden — der Link lässt sich auch von Hand weitergeben.": "Mail delivery is not set up yet. Run supabase/mail.sql in the Supabase SQL editor and enter the Brevo key in the sc_config block. The invitation is saved and valid for three hours — the link can also be passed on by hand.",
+    "Derzeit nichts. Die Tarife stehen oben, damit klar ist, was später wofür gilt. Wird abgerechnet, fragen wir vorher — ohne Zustimmung passiert nichts.": "Nothing at the moment. The plans are above so it is clear what will apply later. If billing starts we ask first — nothing happens without consent.",
+    "Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.": "Signing in requires a password and a bot check. The second factor via an authenticator app is built in but switched off — it can be enabled later without setting up accounts again.",
+    "Die Auswahl, die beim Anlegen eines Produkts und in allen Filtern erscheint. Ein Lagerort lässt sich nur löschen, wenn kein Produkt mehr darin liegt.": "The choices offered when creating a product and in every filter. A location can only be deleted once no product sits in it.",
+    "Die Kamera funktioniert nur über eine verschlüsselte Verbindung. Beim ersten Mal fragt der Browser um Erlaubnis — ohne Zustimmung bleibt das Bild schwarz.": "The camera only works over an encrypted connection. The first time, the browser asks for permission — without consent the picture stays black.",
+    "Die Trennung steckt nicht in der Oberfläche, sondern in der Datenbank: jede Zeile trägt eine Firmenkennung, und die Regel dazu lässt nur die eigene durch. Auch ein Zugriff an der Oberfläche vorbei bringt nichts.": "The separation is not in the interface but in the database: every row carries a company identifier and the rule only lets your own through. Going around the interface gains nothing.",
+    "Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.": "The smallest unit has factor 1. A crate of twelve bottles gets factor 12, a pallet of 32 crates gets 384. Bookings are always in the smallest unit.",
+    "Die verantwortliche Person des Artikels, in CC die Stellvertretung. Auf Wunsch statt Einzelmails eine gesammelte Bestellliste zu einer festen Uhrzeit.": "The item's responsible person, with the deputies in CC. On request a gathered order list at a fixed time instead of single mails.",
+    "Dieser Browser gibt keinen Zugriff auf die Kamera. Das ist meist der Fall, wenn die Seite nicht über https:// geladen wurde. Bitte den Code unten eintippen.": "This browser gives no camera access. That usually means the page was not loaded over https://. Please type the code below.",
+    "Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.": "This product is deactivated: no bookings, no mails, no stock history. It only shows up for responsible people and deputies.",
+    "Eine Rolle ist eine Vorlage: Wer sie bekommt, startet mit genau diesen Rechten. Einzelne Personen lassen sich danach weiter oben abweichend einstellen. Die inhabende Person darf immer alles und ist deshalb nicht änderbar.": "A role is a template: whoever gets it starts with exactly these rights. Individual people can then be set differently above. The owner may always do everything and therefore cannot be changed.",
+    "Enthält den heutigen Stand. Zum Ändern eines Bestands die Zahl überschreiben und die Datei wieder hochladen — bestehende Produkte werden dabei übersprungen, nur neue Zeilen kommen hinzu.": "Contains today's figures. To change a stock level overwrite the number and upload the file again — existing products are skipped, only new rows are added.",
+    "Entnahme am Regal scannen, Bestand ist sofort aktuell. Unterschreitet ein Artikel den Mindestbestand, geht die Mail an die verantwortliche Person — nicht an alle.": "Scan the withdrawal at the shelf and the stock is current at once. If an item drops below its minimum the mail goes to the responsible person — not to everyone.",
+    "In Supabase ist der Captcha-Schutz aktiv. Dann braucht config.js den TURNSTILE_SITE_KEY, und in Supabase muss der passende Secret Key stehen.": "Captcha protection is active in Supabase. Then config.js needs TURNSTILE_SITE_KEY and Supabase needs the matching secret key.",
+    "Ja. Die Importvorlage herunterladen, eigene Daten hineinkopieren, hochladen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.": "Yes. Download the import template, copy your own data in, upload. Item number, minimum stock, location and supplier come along.",
+    "Jede Preisänderung gilt ab ihrem Datum. Der Umsatz nimmt für jede Entnahme den Preis, der an diesem Tag gültig war — über ein Produkt oder über mehrere zusammen.": "Every price change applies from its date. Revenue takes, for each withdrawal, the price valid on that day — for one product or several together.",
+    "Kündigung jederzeit. Produktliste, Bestandsverlauf und Bestellliste lassen sich als CSV herunterladen, danach wird die Firma samt Daten gelöscht.": "Cancel at any time. Product list, stock history and order list can be downloaded as CSV, after which the company and its data are deleted.",
+    "Liegt config.js neben der Seite, und stehen dort SUPABASE_URL und SUPABASE_ANON_KEY? Nach dem Hochladen die Seite mit Strg+Umschalt+R (Mac: Cmd+Umschalt+R) neu laden.": "Is config.js next to the page, and does it hold SUPABASE_URL and SUPABASE_ANON_KEY? After uploading, reload with Ctrl+Shift+R (Mac: Cmd+Shift+R).",
+    "Mailgrenze erreicht. Ohne eigenen SMTP-Zugang erlaubt Supabase nur wenige Mails pro Stunde — SMTP-Daten von Brevo eintragen.": "Mail limit reached. Without your own SMTP access Supabase allows only a few mails per hour — enter the Brevo SMTP details.",
+    "Nein. Jede Zeile trägt eine Firmenkennung, und die Datenbank gibt nur Zeilen der eigenen Firma heraus. Das gilt auch für Zugriffe an der Oberfläche vorbei.": "No. Every row carries a company identifier and the database only hands out rows of your own company. That also holds for access that bypasses the interface.",
+    "Nein. Jedes Handy mit Kamera genügt, der QR-Code klebt am Regal. Etiketten druckst du selbst, auf normalem Papier oder mit einem Rollendrucker.": "No. Any phone with a camera is enough, the QR code sticks to the shelf. You print the labels yourself, on ordinary paper or with a roll printer.",
+    "Preise ohne Umsatzsteuer. Ein Wechsel ist jederzeit möglich, eine Kündigung ebenso — die eigenen Daten lassen sich vorher als CSV herausziehen.": "Prices exclude VAT. Switching is possible at any time, as is cancelling — your own data can be pulled out as CSV beforehand.",
+    "Produktbilder liegen in einer geschlossenen Ablage und werden über Adressen geladen, die nach einer Stunde verfallen. Der Mailschlüssel liegt in der Datenbank, nicht im Browser.": "Product images sit in a closed store and load through addresses that expire after an hour. The mail key sits in the database, not in the browser.",
+    "Scheidet jemand aus dem Unternehmen aus, können Profildaten hier geändert, der Zugang gesperrt oder die Person entfernt werden.": "When someone leaves the company, profile data can be changed here, access blocked, or the person removed.",
+    "Wer den Verlauf behalten will, schaltet das Produkt stattdessen auf „nicht aktiv\" — es verschwindet dann aus allen Listen, bleibt aber auffindbar.": "To keep the history, set the product to \"not active\" instead — it then disappears from every list but stays findable.",
+    "Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.": "Extra fields for every product. Choose a name and a type — and, if you like, what the field triggers in stock management.",
+    "Lagerorte anlegen": "Create locations",
+    "Einstellungen → Lagerorte: Regal, Schrank, Halle.": "Settings → Locations: shelf, cabinet, hall.",
+    "Produkte anlegen oder Tabelle importieren": "Create products or import a spreadsheet",
+    "Stammdaten → Produktverwaltung: einzeln eintragen oder eine CSV hochladen.": "Master data → Product management: enter them one by one or upload a CSV.",
+    "QR-Etiketten drucken": "Print QR labels",
+    "Ein Code je Produkt, ans Regal geklebt.": "One code per product, stuck to the shelf.",
+    "Team einladen": "Invite the team",
+    "Wer bucht, braucht einen Zugang.": "Whoever books needs an account.",
+    "Mailversand prüfen": "Check mail delivery",
+    "Einmal testen, damit Warnungen ankommen.": "Test it once so warnings arrive.",
+    "Übersicht": "Overview", "Produkte": "Products", "Produktverwaltung": "Product management", "Rollen": "Roles", "Rollen und ihre Standardrechte": "Roles and their default rights", "Standardrechte": "Default rights", "Neue Rolle": "New role", "Rolle anlegen": "Create role", "Rechte": "rights", "Person": "person", "Personen": "people", "Fremdes Etikett": "Foreign label", "Kein Zugriff": "No access", "Bearbeiten": "Edit", "Produkt löschen": "Delete product", "Wirklich vollständig löschen?": "Delete this permanently?", "Endgültig löschen": "Delete permanently", "Aktiv": "Active", "Gelesener Code": "Code read", "Noch kein Code gelesen": "No code read yet", "Vorlage herunterladen": "Download template", "Ausgefüllte Liste hier hochladen": "Upload your filled-in list here", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Drag a file here or click · .csv up to 5 MB", "Leere Liste — nur Kopfzeile": "Empty list — header only", "Mit allen vorhandenen Produkten": "With every existing product", "Vorlage mit Bestand": "Template with stock", "Leere Vorlage": "Empty template", "Vorlage": "Template", "Datei unten hochladen, Spalten prüfen, importieren": "Upload the file below, check the columns, import", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Pick a template: empty, or with today\u2019s stock", "Scannen": "Scan", "Produkt anlegen": "Add product",
     "QR-Codes": "QR codes", "Team & Rechte": "Team & rights", "Einstellungen": "Settings",
     "Betriebs-Konsole": "Operator console", "Angemeldet als": "Signed in as", "Abmelden": "Sign out",
     "Hell": "Light", "Dunkel": "Dark", "System": "System", "Artikel im Lager": "Items in stock",
@@ -2576,7 +3114,447 @@ const DICT = {
     "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registration and sign-in are protected by rate limiting, a bot check and a lockout after five failed attempts."
   },
   sv: {
-    "Übersicht": "Översikt", "Produkte": "Produkter", "Produktverwaltung": "Artikelhantering", "Vorlage herunterladen": "Ladda ner mall", "Ausgefüllte Liste hier hochladen": "Ladda upp din ifyllda lista här", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Dra en fil hit eller klicka · .csv upp till 5 MB", "Leere Liste — nur Kopfzeile": "Tom lista — bara rubrik", "Mit allen vorhandenen Produkten": "Med alla befintliga artiklar", "Vorlage mit Bestand": "Mall med lager", "Leere Vorlage": "Tom mall", "Vorlage": "Mall", "Datei unten hochladen, Spalten prüfen, importieren": "Ladda upp filen nedan, kontrollera kolumnerna, importera", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Välj mall: tom eller med dagens lager", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
+    " oder die Stellvertretung.": " eller ersättarna.",
+    "15 Personen": "15 personer",
+    "2 000 Artikel": "2 000 artiklar",
+    "3 Personen": "3 personer",
+    "300 Artikel": "300 artiklar",
+    "4 von 128": "4 av 128",
+    "Abgelehnt": "Avvisad",
+    "Adresse fehlt": "Adress saknas",
+    "Adresse prüfen": "Kontrollera adressen",
+    "Alle": "Alla",
+    "Alle Arten": "Alla typer",
+    "Alle Felder sind änderbar.": "Alla fält går att ändra.",
+    "Alle Lagerorte": "Alla lagerplatser",
+    "Alle Lieferanten": "Alla leverantörer",
+    "Alle Personen": "Alla personer",
+    "Alle Produkte": "Alla artiklar",
+    "Alle Zeilen übernommen": "Alla rader övertagna",
+    "Alle anderen Sitzungen wurden abgemeldet.": "Alla andra sessioner loggades ut.",
+    "Alle auswählen": "Välj alla",
+    "Als bestellt markieren": "Markera som beställd",
+    "Anfrage läuft noch — in ein paar Sekunden erneut abrufen.": "Förfrågan pågår — hämta igen om några sekunder.",
+    "Angelegt, aber nicht verschickt": "Skapad, men inte skickad",
+    "Angemeldet als Marie Kohl": "Inloggad som Marie Kohl",
+    "Anhalten": "Stoppa",
+    "Anmeldung fehlgeschlagen": "Inloggningen misslyckades",
+    "Ansehen": "Visa",
+    "Antwort am nächsten Werktag": "Svar nästa arbetsdag",
+    "Antwort von Brevo": "Svar från Brevo",
+    "Antworten abrufen": "Hämta svar",
+    "Anzahl": "Antal",
+    "Artikel auswählen": "Välj artiklar",
+    "Artikel in der Auswahl": "artiklar i urvalet",
+    "Artikel unbegrenzt": "Obegränsat antal artiklar",
+    "Artikel vermerkt": "artiklar noterade",
+    "Artikel zusammengefasst": "artiklar sammanslagna",
+    "Artikel-ID auf dem Etikett": "Artikel-ID på etiketten",
+    "Auf Etikett drucken": "Skriv ut på etikett",
+    "Aufgefüllt": "Påfylld",
+    "Ausblenden": "Dölj",
+    "Auswahl": "Urval",
+    "Auswahl leeren": "Töm urvalet",
+    "Auswahl zurücksetzen": "Återställ urvalet",
+    "Bedarfsliste erstellt": "Behovslista skapad",
+    "Bedarfsliste exportiert": "Behovslista exporterad",
+    "Bedarfslisten für Events": "Behovslistor för evenemang",
+    "Beim Lieferanten öffnen": "Öppna hos leverantören",
+    "Beliebig kombinierbar. Leer heißt: alles.": "Kombinera fritt. Tomt betyder allt.",
+    "Benachrichtigungen und Bestandsverlauf laufen wieder.": "Aviseringar och lagerhistorik fungerar igen.",
+    "Benötigt": "Behövs",
+    "Bestand danach": "Lager efteråt",
+    "Bestand im Zeitverlauf": "Lager över tid",
+    "Bestand ok": "Lager ok",
+    "Bestand umgerechnet": "Lagret omräknat",
+    "Bestandsverlauf dieses Produkts ansehen": "Visa artikelns lagerhistorik",
+    "Bestandsverlauf exportiert": "Lagerhistorik exporterad",
+    "Bestandsverlauf mit Grafik": "Lagerhistorik med diagram",
+    "Bestellliste exportiert": "Beställningslista exporterad",
+    "Bestellung zurücknehmen": "Ångra beställningen",
+    "Betreff": "Ämne",
+    "Bild gespeichert": "Bilden sparad",
+    "Bild hochladen": "Ladda upp bild",
+    "Bild wird noch geladen …": "Bilden laddas fortfarande …",
+    "Bilder und Datenblätter je Artikel": "Bilder och datablad per artikel",
+    "Bitte eine vollständige E-Mail-Adresse eintragen.": "Ange en fullständig e-postadress.",
+    "Bot-Prüfung bei Anmeldung und Registrierung": "Botkontroll vid inloggning och registrering",
+    "Brauchen wir besondere Geräte?": "Behöver vi särskild utrustning?",
+    "Brevo hat die Mail angenommen.": "Brevo tog emot meddelandet.",
+    "Buchung sperren, wenn gesetzt": "Spärra bokning när satt",
+    "CC: ": "Kopia: ",
+    "Das Passwort erfüllt die Vorgaben von Supabase nicht.": "Lösenordet uppfyller inte Supabases krav.",
+    "Datei nicht lesbar": "Filen går inte att läsa",
+    "Datenbank in einer EU-Region": "Databas i en EU-region",
+    "Datenquelle": "Datakälla",
+    "Datum": "Datum",
+    "Deaktiviert": "Inaktiverad",
+    "Demo": "Demo",
+    "Demo-Modus": "Demoläge",
+    "Demo: lokal ablegen": "Demo: spara lokalt",
+    "Der Link gilt 15 Minuten.": "Länken gäller i 15 minuter.",
+    "Derzeit kostenlos": "Gratis just nu",
+    "Deutsch": "Tyska",
+    "Die Anzahl muss eine ganze Zahl ab 2 sein.": "Antalet måste vara ett heltal från 2 och uppåt.",
+    "Die Datei ist leer.": "Filen är tom.",
+    "Die ersten fünf Schritte": "De första fem stegen",
+    "Dienstag": "Tisdag",
+    "Diese Datei kann der Browser nicht lesen": "Webbläsaren kan inte läsa den här filen",
+    "Diese Einheit gibt es schon.": "Den enheten finns redan.",
+    "Dieses Gerät erlaubt das Licht nicht über den Browser.": "Enheten tillåter inte lampan via webbläsaren.",
+    "Donnerstag": "Torsdag",
+    "Drei Handgriffe, kein Papier.": "Tre handgrepp, inget papper.",
+    "Eigene Daten jederzeit als CSV heraus": "Egna data ut som CSV när som helst",
+    "Eigene Merkmale": "Egna egenskaper",
+    "Eigene Merkmale mit Regeln": "Egna egenskaper med regler",
+    "Ein Lager, eine Stunde Einrichtung.": "Ett lager, en timmes installation.",
+    "Eine Firma sieht nur ihre eigenen Zeilen.": "Ett företag ser bara sina egna rader.",
+    "Eine Spalte pro Feld, inklusive eigener Merkmale.": "En kolumn per fält, egna egenskaper inkluderade.",
+    "Eingefügte Liste": "Inklistrad lista",
+    "Einheit": "Enhet",
+    "Einheit anlegen": "Skapa enhet",
+    "Einheiten dieses Produkts": "Artikelns enheter",
+    "Einladung gesendet": "Inbjudan skickad",
+    "Einrichtung": "Installation",
+    "Einträge": "poster",
+    "Einzelnes Produkt": "Enskild artikel",
+    "Endlosrolle · 62 mm breit": "Löpande rulle · 62 mm bred",
+    "English": "Engelska",
+    "Entnahme": "Uttag",
+    "Entnommen": "Uttaget",
+    "Entsperren": "Lås upp",
+    "Erkannt und zugeordnet.": "Identifierad och kopplad.",
+    "Erledigen": "Gör det",
+    "Erst Artikel und Mengen hinzufügen.": "Lägg till artiklar och antal först.",
+    "Erst arbeiten, dann zahlen.": "Arbeta först, betala sedan.",
+    "Erst eine CSV-Datei wählen.": "Välj en CSV-fil först.",
+    "Es wurde keine Kamera gefunden.": "Ingen kamera hittades.",
+    "Etiketten 62 mm": "Etiketter 62 mm",
+    "Etiketten drucken": "Skriv ut etiketter",
+    "Etiketten in allen Formaten": "Etiketter i alla format",
+    "Etikettformat": "Etikettformat",
+    "Event": "Evenemang",
+    "Event anlegen und Bedarfsliste erstellen": "Skapa evenemang och behovslista",
+    "Events": "Evenemang",
+    "Excel- und CSV-Import": "Excel- och CSV-import",
+    "Excel-Import": "Excel-import",
+    "Excel-Import, Events, Bestandsverlauf": "Excel-import, evenemang, lagerhistorik",
+    "Fehler": "Fel",
+    "Fehlmengen berechnet": "Bristtal beräknade",
+    "Fehlt": "Saknas",
+    "Feinrechte pro Person": "Detaljerade rättigheter per person",
+    "Feld steht ab jetzt in jedem Produkt.": "Fältet finns nu på varje artikel.",
+    "Firma, Personen, Produkte und Verlauf entfernt": "Företag, personer, artiklar och historik borttagna",
+    "Fragen": "Frågor",
+    "Freitag": "Fredag",
+    "Funktionen": "Funktioner",
+    "Für das Lager gedacht, nicht für die Buchhaltung.": "Gjort för lagret, inte för bokföringen.",
+    "Für ein Lager und ein kleines Team": "För ett lager och ett litet team",
+    "Für gewachsene Lagerstrukturen": "För vuxna lagerstrukturer",
+    "Gelesen, aber kein Produkt mit dieser Kennung.": "Läst, men ingen artikel med den beteckningen.",
+    "Gelöscht": "Borttagen",
+    "Geplante Events": "Planerade evenemang",
+    "Gesamter Zeitraum": "Hela perioden",
+    "Gescannt": "Skannad",
+    "Grund: ": "Orsak: ",
+    "Gültig ab": "Gäller från",
+    "Hilfe": "Hjälp",
+    "Hinzufügen": "Lägg till",
+    "Im Demo-Modus wird nichts verschickt.": "I demoläge skickas ingenting.",
+    "In Bestellliste aufnehmen": "Ta med i beställningslistan",
+    "In config.js ist SUPABASE_ANON_KEY leer.": "SUPABASE_ANON_KEY är tom i config.js.",
+    "In config.js ist SUPABASE_URL leer.": "SUPABASE_URL är tom i config.js.",
+    "Inhabende Person": "Ägare",
+    "Ist bestellt": "Är beställd",
+    "Ja / Nein": "Ja / Nej",
+    "Jede Buchung bleibt mit Person und Zeit nachvollziehbar": "Varje bokning går att spåra med person och tid",
+    "Kamera aus": "Kameran av",
+    "Kamera läuft": "Kameran igång",
+    "Kamera nicht verfügbar": "Kameran är inte tillgänglig",
+    "Kamera starten": "Starta kameran",
+    "Kamera starten, dann den Code am Regal erfassen": "Starta kameran och fånga koden på hyllan",
+    "Kamera starten, dann einen Code vor die Linse halten.": "Starta kameran och håll en kod framför linsen.",
+    "Kein Konto zu dieser Adresse": "Inget konto för den adressen",
+    "Kein Tracking, keine Werbe-Cookies": "Ingen spårning, inga reklamkakor",
+    "Keine Bewegungen für diese Auswahl.": "Inga rörelser för det här urvalet.",
+    "Keine Verbindung zu Supabase.": "Ingen anslutning till Supabase.",
+    "Keine Zeile erkannt": "Ingen rad identifierad",
+    "Konto aktiv": "Kontot aktivt",
+    "Kopfzeile und mindestens eine Produktzeile einfügen.": "Klistra in en rubrikrad och minst en artikelrad.",
+    "Kurz gesagt": "Kort sagt",
+    "Können wir unsere bestehende Liste übernehmen?": "Kan vi ta med vår befintliga lista?",
+    "Laden fehlgeschlagen": "Inläsningen misslyckades",
+    "Lagerleitung": "Lageransvarig",
+    "Lagerort anlegen": "Skapa lagerplats",
+    "Lagerorte": "Lagerplatser",
+    "Lesezugriff": "Läsbehörighet",
+    "Letzte 12 Monate": "Senaste 12 månaderna",
+    "Letzte 3 Monate": "Senaste 3 månaderna",
+    "Letzte 30 Tage": "Senaste 30 dagarna",
+    "Licht": "Lampa",
+    "Licht an": "Lampa på",
+    "Licht aus": "Lampa av",
+    "Link senden": "Skicka länk",
+    "Link verfallen": "Länken har gått ut",
+    "Löst aus": "Utlöser",
+    "Mail an ": "Mejl till ",
+    "Mail ist unterwegs": "Mejlet är på väg",
+    "Mailversand": "Mejlutskick",
+    "Mailversand prüfen": "Kontrollera mejlutskick",
+    "Mehrere Lager, mehrere Schichten": "Flera lager, flera skift",
+    "Meistbewegte Artikel": "Mest rörliga artiklar",
+    "Menge buchen": "Boka antal",
+    "Menge oben eintragen oder hier nach Einheiten aufteilen.": "Ange antalet ovan, eller dela upp det i enheter här.",
+    "Merkmal": "Egenskap",
+    "Merkmal anlegen": "Skapa egenskap",
+    "Min.": "Min.",
+    "Mindestbestand und Mail": "Miniminivå och mejl",
+    "Mit verbundenem R2 landet die Datei im Bucket der Firma.": "Med R2 ansluten hamnar filen i företagets bucket.",
+    "Mitarbeitende Person": "Medarbetare",
+    "Mittwoch": "Onsdag",
+    "Montag": "Måndag",
+    "Nachbestellen": "Beställ på nytt",
+    "Nachfüllung": "Påfyllning",
+    "Name des Events": "Evenemangets namn",
+    "Name des Merkmals": "Egenskapens namn",
+    "Name fehlt": "Namn saknas",
+    "Name ist frei.": "Namnet är ledigt.",
+    "Neuer Bestand: ": "Nytt lager: ",
+    "Neuer Lagerort": "Ny lagerplats",
+    "Neuer Preis": "Nytt pris",
+    "Neues Event": "Nytt evenemang",
+    "Neues Event planen": "Planera ett nytt evenemang",
+    "Nicht gespeichert": "Inte sparat",
+    "Nicht möglich": "Inte möjligt",
+    "Nichts gefunden": "Inget hittades",
+    "Nichts zu importieren": "Inget att importera",
+    "Noch keine Artikel": "Inga artiklar än",
+    "Noch nicht übernommen.": "Inte tillämpat än.",
+    "Nur verantwortliche Person": "Endast ansvarig person",
+    "Oder Code eingeben": "Eller skriv koden",
+    "Ohne Datenbank wird nichts verschickt.": "Utan databas skickas ingenting.",
+    "Ohne Namen kann nicht gespeichert werden.": "Inget sparas utan namn.",
+    "Ohne Namen wird nicht gespeichert.": "Inget sparas utan namn.",
+    "Ohne Namen wird nicht übernommen.": "Inget tillämpas utan namn.",
+    "Passwort geändert": "Lösenordet ändrat",
+    "Passwort vergessen?": "Glömt lösenordet?",
+    "Passwort wiederholen": "Upprepa lösenordet",
+    "Passwort zurücksetzen": "Återställ lösenordet",
+    "Passwort-Mail gesendet": "Lösenordsmejl skickat",
+    "Person entfernt": "Personen borttagen",
+    "Personen unbegrenzt": "Obegränsat antal personer",
+    "Pflichtfeld — ohne Namen wird nicht gespeichert.": "Obligatoriskt — inget sparas utan namn.",
+    "Positionen": "Poster",
+    "Preis eintragen": "Ange pris",
+    "Preis heute": "Pris i dag",
+    "Preisverlauf und Umsatz": "Prishistorik och omsättning",
+    "Preisänderungen": "Prisändringar",
+    "Produkt ausgewählt": "artikel vald",
+    "Produkt deaktivieren": "Inaktivera artikeln",
+    "Produkt wieder aktivieren": "Aktivera artikeln igen",
+    "Produktart": "Artikeltyp",
+    "Produkte ausgewählt": "artiklar valda",
+    "Produkte exportiert": "Artiklar exporterade",
+    "Produkte importiert": "artiklar importerade",
+    "Produktname auf dem Etikett": "Artikelnamn på etiketten",
+    "Profil": "Profil",
+    "Profil und Feinrechte": "Profil och detaljrättigheter",
+    "Profildaten und Rechte darf nur die inhabende Person ändern.": "Bara ägaren får ändra profiluppgifter och rättigheter.",
+    "QR-Etiketten in fünf Formaten": "QR-etiketter i fem format",
+    "R2 · privat, signierter Zugriff": "R2 · privat, signerad åtkomst",
+    "Rechte unten ankreuzen": "Kryssa i rättigheterna nedan",
+    "Regel aktiv: ": "Regel aktiv: ",
+    "Registrierung": "Registrering",
+    "Registrierung fehlgeschlagen": "Registreringen misslyckades",
+    "Rollen und Rechte": "Roller och rättigheter",
+    "Rollen und Rechte pro Person": "Roller och rättigheter per person",
+    "Sammelmail: ": "Samlingsmejl: ",
+    "Scan, Mindestbestand, Bestellliste": "Skanning, miniminivå, beställningslista",
+    "Scan-Entnahme": "Uttag via skanning",
+    "Schlüssel abgelehnt — brevo_api_key in sc_config prüfen.": "Nyckeln avvisades — kontrollera brevo_api_key i sc_config.",
+    "Schon vorhanden": "Finns redan",
+    "Sehen andere Firmen unsere Daten?": "Kan andra företag se våra data?",
+    "So läuft es": "Så fungerar det",
+    "Spalten erkannt": "kolumner identifierade",
+    "Sperren": "Spärra",
+    "Stammdaten": "Grunddata",
+    "Stand gespeichert.": "Sparat som det står.",
+    "Status setzen darf nur ": "Statusen får bara sättas av ",
+    "Status zurückgesetzt": "Statusen återställd",
+    "Status: ist bestellt": "Status: beställd",
+    "Stellvertretung 1": "Ersättare 1",
+    "Stellvertretung 2": "Ersättare 2",
+    "Stellvertretung 3": "Ersättare 3",
+    "Stück": "styck",
+    "Suchen": "Sök",
+    "Summe im Zeitraum": "Summa i perioden",
+    "Svenska": "Svenska",
+    "Systemdienste": "Systemtjänster",
+    "Testmail abgeschickt": "Testmejl skickat",
+    "Testmail an": "Testmejl till",
+    "Testmail senden": "Skicka testmejl",
+    "Testzugang": "Testinloggning",
+    "Treffer": "träffar",
+    "Umsatz als CSV": "Omsättning som CSV",
+    "Unter der Kopfzeile fehlt noch eine Produktzeile.": "Det saknas fortfarande en artikelrad under rubriken.",
+    "Upload fehlgeschlagen": "Uppladdningen misslyckades",
+    "Verantwortliche + Stellvertretung im CC": "Ansvarig + ersättare som kopia",
+    "Verantwortliche und Stellvertretung": "Ansvarig och ersättare",
+    "Verantwortung": "Ansvar",
+    "Verantwortung je Artikel": "Ansvar per artikel",
+    "Verhältnis": "Förhållande",
+    "Vorbereitet": "Förberett",
+    "Vorgang": "Åtgärd",
+    "Vorgemerkt": "Noterat",
+    "Warnmail bei Entnahme": "Varningsmejl vid uttag",
+    "Was kostet es wirklich?": "Vad kostar det egentligen?",
+    "Was meistens gefragt wird.": "Det som oftast frågas.",
+    "Wechseln": "Byt",
+    "Wer bekommt die Mail?": "Vem får mejlet?",
+    "Wer bekommt die Warnmails?": "Vem får varningsmejlen?",
+    "Wie MHD überwachen": "Hur bäst före-datum bevakas",
+    "Wie kommen wir wieder heraus?": "Hur tar vi oss ut igen?",
+    "Wie mache ich …?": "Hur gör jag …?",
+    "Wieder aktiv": "Aktiv igen",
+    "Wiederholung stimmt überein": "Upprepningen stämmer",
+    "Wird hochgeladen": "Laddas upp",
+    "Zeilen gelesen": "rader lästa",
+    "Zeilen ohne Namen verworfen": "rader utan namn borttagna",
+    "Zeilen übersprungen (Name fehlt oder doppelt)": "rader hoppades över (namn saknas eller dubblett)",
+    "Zeitraum": "Period",
+    "Zu ": "För ",
+    "Zugang aktivieren": "Aktivera åtkomst",
+    "Zugang sofort gesperrt, Buchungen bleiben im Verlauf": "Åtkomsten spärras genast, bokningar blir kvar i historiken",
+    "Zugang sperren": "Spärra åtkomst",
+    "ausgewählt": "valda",
+    "bestellt": "beställd",
+    "davon nachzubestellen": "varav att beställa",
+    "deaktiviert": "inaktiverad",
+    "derzeit gratis": "gratis just nu",
+    "erkannt": "identifierad",
+    "erster Preis": "första priset",
+    "für immer": "för alltid",
+    "gebucht": "bokat",
+    "gerade eben": "nyss",
+    "größer als ": "större än ",
+    "gültig 3 Stunden": "gäller i 3 timmar",
+    "gültig ab ": "gäller från ",
+    "ja": "ja",
+    "ja — erscheint in allen Listen": "ja — syns i alla listor",
+    "je Monat, geplant": "per månad, planerat",
+    "keine Regel": "ingen regel",
+    "kleiner als ": "mindre än ",
+    "kleinste Einheit": "minsta enhet",
+    "nachbestellen": "beställ på nytt",
+    "nein — aus Listen ausgeblendet": "nej — dold i listor",
+    "neue Einheit": "ny enhet",
+    "neue Lagerorte": "nya lagerplatser",
+    "niedrig": "låg",
+    "ohne CC an Stellvertretung": "utan kopia till ersättare",
+    "sichtbaren Artikeln": "synliga artiklar",
+    "unten bestätigen": "bekräfta nedan",
+    "unter Mindestbestand ": "under miniminivån ",
+    "unterwegs": "på väg",
+    "verbergen": "dölj",
+    "verbleibende Zeit": "återstående tid",
+    "vorhanden": "finns",
+    "wird die neue kleinste Einheit": "blir den nya minsta enheten",
+    "zeigen": "visa",
+    "Änderungen übernehmen": "Tillämpa ändringar",
+    "Übernommen": "Tillämpat",
+    "— bitte wählen —": "— välj —",
+    "— keine —": "— ingen —",
+    "Lager": "Lager",
+    "Verwaltung": "Administration",
+    " gibt es keinen Zugang. Bitte Adresse prüfen oder Firma neu registrieren.": " finns ingen åtkomst. Kontrollera adressen eller registrera företaget på nytt.",
+    "Absender nicht verifiziert — in Brevo unter Senders freischalten.": "Avsändaren är inte verifierad — godkänn den i Brevo under Senders.",
+    "Alles, was ein Betriebslager braucht — und nichts, was danach noch erklärt werden muss.": "Allt ett företagslager behöver — och inget som måste förklaras efteråt.",
+    "Beispieldaten, nichts wird gespeichert. Systemdienste und Kostenbremse sind sichtbar.": "Exempeldata, inget sparas. Systemtjänster och kostnadsbromsen syns.",
+    "Bestehende Listen mit Vorlage übernehmen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.": "Ta med befintliga listor via mallen. Artikelnummer, miniminivå, plats och leverantör följer med.",
+    "Bilder geprüft — noch kein Code erkannt. Näher heran, mehr Licht, Code gerade halten.": "bildrutor kontrollerade — ingen kod än. Kom närmare, mer ljus, håll koden rakt.",
+    "Danach läuft das Lager von selbst. Jeder Schritt hakt sich ab, sobald er erledigt ist.": "Sedan sköter lagret sig självt. Varje steg bockas av när det är klart.",
+    "Das Anlegen in der Datenbank schlägt fehl. schema.sql im SQL-Editor erneut ausführen.": "Det går inte att skapa posten i databasen. Kör schema.sql igen i SQL-editorn.",
+    "Den Bestellstatus dürfen nur die verantwortliche Person und ihre Stellvertretungen setzen.": "Bara ansvarig person och ersättarna får sätta beställningsstatusen.",
+    "Den Namen gibt es schon — mit anderem Lagerort oder anderer Quantität ist das in Ordnung.": "Namnet finns redan — det går bra med en annan lagerplats eller kvantitet.",
+    "Der Zugriff wurde abgelehnt. In der Adresszeile auf das Schloss tippen, die Kamera erlauben und erneut starten.": "Åtkomsten nekades. Tryck på hänglåset i adressfältet, tillåt kameran och starta om.",
+    "Die Antwort von Brevo steht in ein paar Sekunden in der Tabelle.": "Brevos svar står i tabellen om några sekunder.",
+    "Die Erkennung konnte nicht geladen werden. Bitte den Code unten eintippen.": "Läsaren kunde inte laddas. Skriv koden nedan.",
+    "Die Kamera ist von einem anderen Programm belegt. Andere Apps schließen und erneut versuchen.": "Ett annat program använder kameran. Stäng andra appar och försök igen.",
+    "Die Tagesgrenze für Mails ist erreicht. Die Einladung ist gespeichert und gilt drei Stunden.": "Dagsgränsen för mejl är nådd. Inbjudan är sparad och gäller i tre timmar.",
+    "Die genaue Meldung steht oben. Die Schritte zum Mailversand stehen in „Registrierung und Mail\".": "Det exakta meddelandet står ovan. Stegen för mejlutskick finns i \"Registrierung und Mail\".",
+    "Diese E-Mail-Adresse ist bereits registriert. Bitte anmelden oder das Passwort zurücksetzen.": "Den här e-postadressen är redan registrerad. Logga in eller återställ lösenordet.",
+    "Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.": "Inställningen gäller hela företaget och kan bara ändras på högsta behörighetsnivån.",
+    "Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen.": "Koden tillhör ett annat företag. Den går inte att öppna från det här kontot.",
+    "Dieses Produkt gibt es schon: gleicher Name, gleicher Lagerort, gleiche Quantität. Ändere eines davon.": "Artikeln finns redan: samma namn, samma lagerplats, samma kvantitet. Ändra något av dem.",
+    "Ein QR-Code je Artikel oder Regalplatz. Scannen, Menge tippen, fertig — auch mit Handschuhen bedienbar.": "En QR-kod per artikel eller hyllplats. Skanna, skriv antalet, klart — går att använda med handskar.",
+    "Eine neue Rolle startet mit den Rechten für Ansehen und Buchen. Alles Weitere hier ankreuzen.": "En ny roll börjar med rättigheter att visa och boka. Kryssa i allt annat här.",
+    "Eine verantwortliche Person und bis zu drei Stellvertretungen. Die Warnmail geht an sie, in CC an die Stellvertretung.": "En ansvarig person och upp till tre ersättare. Varningsmejlet går till dem, med ersättarna som kopia.",
+    "Entnahme oder Nachfüllung eintragen. Der Bestand schreibt sich fort, die Buchung bleibt mit Person und Zeit im Verlauf.": "Ange uttag eller påfyllning. Lagret uppdateras, bokningen ligger kvar i historiken med person och tid.",
+    "Firma anlegen, Artikel importieren, Etiketten drucken. Danach scannt das Team.": "Skapa företaget, importera artiklarna, skriv ut etiketterna. Sedan skannar teamet.",
+    "In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und die CSV-Datei wählen.": "Använd Spara som i Excel för att skapa en CSV (semikolon) och välj den filen.",
+    "In der Kopfzeile fehlt eine Spalte „Name\" (oder „Artikelname\"). Ohne sie ist nicht erkennbar, was ein Produkt ist.": "Rubrikraden saknar en kolumn \"Name\" (eller \"Artikelname\"). Utan den går det inte att se vad som är en artikel.",
+    "Inhabende Person, Lagerleitung, Mitarbeitende, Leser — und einzelne Rechte pro Person, wenn eine Rolle nicht passt.": "Ägare, lageransvarig, medarbetare, läsare — plus enskilda rättigheter per person när en roll inte passar.",
+    "Kein Artikel mit dieser Kennung. Etikett neu drucken oder Code eintippen.": "Ingen artikel med den beteckningen. Skriv ut en ny etikett eller skriv koden.",
+    "Kein Eintrag passt zu diesem Stichwort. Versuche ein einzelnes Wort — etwa „Mail\", „Etikett\" oder „Import\".": "Ingen post matchar sökordet. Prova ett enda ord — \"Mail\", \"Etikett\" eller \"Import\".",
+    "Keine Karte nötig · Einrichtung in einer Stunde · jederzeit kündbar": "Inget kort behövs · klart på en timme · säg upp när som helst",
+    "Keine Mails, kein Tracking. Sichtbar nur für Verantwortliche und Stellvertretung.": "Inga mejl, ingen spårning. Syns bara för ansvarig person och ersättarna.",
+    "Kurze Antworten zu allem, was im Lager täglich vorkommt. Tippe ein Stichwort ein, um zu filtern.": "Korta svar på allt som händer i lagret varje dag. Skriv ett sökord för att filtrera.",
+    "Lagerverwaltung für Betriebe. Betrieben von der Internet GmbH.": "Lagerhantering för företag. Drivs av Internet GmbH.",
+    "Name, Lagerort und Quantität stimmen mit einem bestehenden Produkt überein.": "Namn, lagerplats och kvantitet stämmer med en befintlig artikel.",
+    "Nichts ausgewählt — gerechnet wird über alle aktiven Produkte.": "Inget valt — siffrorna gäller alla aktiva artiklar.",
+    "Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.": "Bara personer från det här företaget — lagermejlen går till deras sparade adresser.",
+    "Nur die Kopfzeile mit allen Feldern. Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt.": "Bara rubriken med alla fält. Fyll i rad för rad — en rad är en artikel.",
+    "Produkt, Bestand und alle Buchungen werden entfernt. Das lässt sich nicht zurückholen.": "Artikel, lager och alla bokningar tas bort. Det går inte att ångra.",
+    "QR-Code am Regal mit dem Handy scannen. Kein Gerät kaufen, keine App installieren — die Kamera genügt.": "Skanna hyllans QR-kod med mobilen. Ingen utrustning att köpa, ingen app att installera — kameran räcker.",
+    "QR-Etiketten in fünf Formaten, von 2×4 bis 5×13 je Blatt, dazu die Endlosrolle mit 62 mm.": "QR-etiketter i fem format, från 2×4 till 5×13 per ark, plus löprullen på 62 mm.",
+    "Registrierung ist abgeschaltet: Authentication → Providers → Email → Enable Sign-ups einschalten.": "Registrering är avstängd: slå på Authentication → Providers → Email → Enable Sign-ups.",
+    "Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person.": "Roll: medarbetare. Ägaren sätter rättigheterna.",
+    "Sofort, täglich, wöchentlich oder monatlich. Sammelmails fassen alles zu einer Bestellliste zusammen.": "Direkt, dagligen, veckovis eller månadsvis. Samlingsmejl samlar allt i en beställningslista.",
+    "Supabase konnte die Mail nicht übergeben. SMTP-Zugang prüfen: Project Settings → Authentication → SMTP Settings.": "Supabase kunde inte lämna över mejlet. Kontrollera SMTP: Project Settings → Authentication → SMTP Settings.",
+    "Unter dem Mindestbestand geht die Warnung raus — sofort oder gesammelt als Bestellliste, je nach Einstellung.": "Under miniminivån går varningen ut — direkt eller samlad i en beställningslista, beroende på inställning.",
+    "Wer etwas herausnimmt, scannt. Alles andere passiert von selbst.": "Den som tar ut något skannar. Allt annat sker av sig självt.",
+    "Zu dieser Adresse gibt es schon ein Konto. Anmelden oder Passwort zurücksetzen.": "Det finns redan ett konto för adressen. Logga in eller återställ lösenordet.",
+    "Zu viele Fehlversuche. Das Konto ist 15 Minuten gesperrt, eine Warnmail ist raus.": "För många misslyckade försök. Kontot är låst i 15 minuter och ett varningsmejl har skickats.",
+    "Alle Tarife sind derzeit kostenlos. Bevor sich daran etwas ändert, melden wir uns — ohne Zustimmung wird nichts abgebucht.": "Alla planer är gratis just nu. Innan det ändras hör vi av oss — inget dras utan samtycke.",
+    "Artikel und Mengen eintragen — auch deaktivierte. Beim Anlegen entsteht automatisch die Bedarfs- und Bestellliste mit den Fehlmengen.": "Ange artiklar och antal — även inaktiverade. När du sparar skapas behovs- och beställningslistan med bristerna.",
+    "Demo-Daten: Im verbundenen Betrieb stehen hier die echten Firmen. Zugang erhält nur, wer in der Liste platform_admins eingetragen ist.": "Exempeldata: i skarp drift står de riktiga företagen här. Bara den som står i platform_admins får åtkomst.",
+    "Der Mailversand ist noch nicht eingerichtet. In Supabase im SQL-Editor die Datei supabase/mail.sql ausführen und dort im Block sc_config den Brevo-Schlüssel eintragen. Die Einladung ist gespeichert und gilt drei Stunden — der Link lässt sich auch von Hand weitergeben.": "Mejlutskicket är inte klart än. Kör supabase/mail.sql i Supabases SQL-editor och ange Brevo-nyckeln i sc_config-blocket. Inbjudan är sparad och gäller i tre timmar — länken går också att skicka för hand.",
+    "Derzeit nichts. Die Tarife stehen oben, damit klar ist, was später wofür gilt. Wird abgerechnet, fragen wir vorher — ohne Zustimmung passiert nichts.": "Ingenting just nu. Planerna står ovan så att det är tydligt vad som gäller senare. Om fakturering börjar frågar vi först — inget sker utan samtycke.",
+    "Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.": "Inloggning kräver lösenord och botkontroll. Andra faktorn via en autentiseringsapp finns inbyggd men är avstängd — den kan slås på senare utan att konton måste läggas upp igen.",
+    "Die Auswahl, die beim Anlegen eines Produkts und in allen Filtern erscheint. Ein Lagerort lässt sich nur löschen, wenn kein Produkt mehr darin liegt.": "De val som erbjuds när en artikel skapas och i alla filter. En lagerplats går bara att ta bort när ingen artikel ligger där.",
+    "Die Kamera funktioniert nur über eine verschlüsselte Verbindung. Beim ersten Mal fragt der Browser um Erlaubnis — ohne Zustimmung bleibt das Bild schwarz.": "Kameran fungerar bara över en krypterad anslutning. Första gången frågar webbläsaren om lov — utan samtycke förblir bilden svart.",
+    "Die Trennung steckt nicht in der Oberfläche, sondern in der Datenbank: jede Zeile trägt eine Firmenkennung, und die Regel dazu lässt nur die eigene durch. Auch ein Zugriff an der Oberfläche vorbei bringt nichts.": "Åtskillnaden ligger inte i gränssnittet utan i databasen: varje rad bär en företagsbeteckning och regeln släpper bara igenom den egna. Att gå förbi gränssnittet ger ingenting.",
+    "Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.": "Minsta enheten har faktor 1. En back med tolv flaskor får faktor 12, en pall med 32 backar får 384. Bokning sker alltid i minsta enheten.",
+    "Die verantwortliche Person des Artikels, in CC die Stellvertretung. Auf Wunsch statt Einzelmails eine gesammelte Bestellliste zu einer festen Uhrzeit.": "Artikelns ansvariga person, med ersättarna som kopia. På begäran en samlad beställningslista vid en fast tid i stället för enstaka mejl.",
+    "Dieser Browser gibt keinen Zugriff auf die Kamera. Das ist meist der Fall, wenn die Seite nicht über https:// geladen wurde. Bitte den Code unten eintippen.": "Webbläsaren ger ingen kameraåtkomst. Oftast beror det på att sidan inte laddades via https://. Skriv koden nedan.",
+    "Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.": "Artikeln är inaktiverad: inga bokningar, inga mejl, ingen lagerhistorik. Den syns bara för ansvariga och ersättare.",
+    "Eine Rolle ist eine Vorlage: Wer sie bekommt, startet mit genau diesen Rechten. Einzelne Personen lassen sich danach weiter oben abweichend einstellen. Die inhabende Person darf immer alles und ist deshalb nicht änderbar.": "En roll är en mall: den som får den börjar med exakt dessa rättigheter. Enskilda personer kan sedan ställas in avvikande ovan. Ägaren får alltid göra allt och går därför inte att ändra.",
+    "Enthält den heutigen Stand. Zum Ändern eines Bestands die Zahl überschreiben und die Datei wieder hochladen — bestehende Produkte werden dabei übersprungen, nur neue Zeilen kommen hinzu.": "Innehåller dagens siffror. För att ändra ett lagersaldo skriver du över talet och laddar upp filen igen — befintliga artiklar hoppas över, bara nya rader läggs till.",
+    "Entnahme am Regal scannen, Bestand ist sofort aktuell. Unterschreitet ein Artikel den Mindestbestand, geht die Mail an die verantwortliche Person — nicht an alle.": "Skanna uttaget vid hyllan så är lagret aktuellt direkt. Om en artikel går under miniminivån går mejlet till ansvarig person — inte till alla.",
+    "In Supabase ist der Captcha-Schutz aktiv. Dann braucht config.js den TURNSTILE_SITE_KEY, und in Supabase muss der passende Secret Key stehen.": "Captcha-skyddet är aktivt i Supabase. Då behöver config.js TURNSTILE_SITE_KEY och Supabase behöver motsvarande secret key.",
+    "Ja. Die Importvorlage herunterladen, eigene Daten hineinkopieren, hochladen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.": "Ja. Ladda ner importmallen, kopiera in egna data, ladda upp. Artikelnummer, miniminivå, plats och leverantör följer med.",
+    "Jede Preisänderung gilt ab ihrem Datum. Der Umsatz nimmt für jede Entnahme den Preis, der an diesem Tag gültig war — über ein Produkt oder über mehrere zusammen.": "Varje prisändring gäller från sitt datum. Omsättningen tar, för varje uttag, det pris som gällde den dagen — för en artikel eller flera tillsammans.",
+    "Kündigung jederzeit. Produktliste, Bestandsverlauf und Bestellliste lassen sich als CSV herunterladen, danach wird die Firma samt Daten gelöscht.": "Säg upp när som helst. Artikellista, lagerhistorik och beställningslista kan laddas ner som CSV, därefter raderas företaget och dess data.",
+    "Liegt config.js neben der Seite, und stehen dort SUPABASE_URL und SUPABASE_ANON_KEY? Nach dem Hochladen die Seite mit Strg+Umschalt+R (Mac: Cmd+Umschalt+R) neu laden.": "Ligger config.js bredvid sidan, och står SUPABASE_URL och SUPABASE_ANON_KEY där? Ladda om med Ctrl+Skift+R (Mac: Cmd+Skift+R) efter uppladdning.",
+    "Mailgrenze erreicht. Ohne eigenen SMTP-Zugang erlaubt Supabase nur wenige Mails pro Stunde — SMTP-Daten von Brevo eintragen.": "Mejlgränsen är nådd. Utan egen SMTP tillåter Supabase bara några mejl i timmen — ange Brevos SMTP-uppgifter.",
+    "Nein. Jede Zeile trägt eine Firmenkennung, und die Datenbank gibt nur Zeilen der eigenen Firma heraus. Das gilt auch für Zugriffe an der Oberfläche vorbei.": "Nej. Varje rad bär en företagsbeteckning och databasen lämnar bara ut rader från det egna företaget. Det gäller även åtkomst förbi gränssnittet.",
+    "Nein. Jedes Handy mit Kamera genügt, der QR-Code klebt am Regal. Etiketten druckst du selbst, auf normalem Papier oder mit einem Rollendrucker.": "Nej. Vilken mobil som helst med kamera räcker, QR-koden sitter på hyllan. Etiketterna skriver du ut själv, på vanligt papper eller med en rulletikettskrivare.",
+    "Preise ohne Umsatzsteuer. Ein Wechsel ist jederzeit möglich, eine Kündigung ebenso — die eigenen Daten lassen sich vorher als CSV herausziehen.": "Priser exklusive moms. Byte går när som helst, liksom uppsägning — egna data kan hämtas ut som CSV i förväg.",
+    "Produktbilder liegen in einer geschlossenen Ablage und werden über Adressen geladen, die nach einer Stunde verfallen. Der Mailschlüssel liegt in der Datenbank, nicht im Browser.": "Artikelbilder ligger i ett stängt förråd och laddas via adresser som går ut efter en timme. Mejlnyckeln ligger i databasen, inte i webbläsaren.",
+    "Scheidet jemand aus dem Unternehmen aus, können Profildaten hier geändert, der Zugang gesperrt oder die Person entfernt werden.": "När någon slutar kan profiluppgifter ändras här, åtkomsten spärras eller personen tas bort.",
+    "Wer den Verlauf behalten will, schaltet das Produkt stattdessen auf „nicht aktiv\" — es verschwindet dann aus allen Listen, bleibt aber auffindbar.": "För att behålla historiken sätter du artikeln på \"inte aktiv\" i stället — den försvinner då ur alla listor men går att hitta.",
+    "Zusätzliche Felder für jedes Produkt. Wähle Name und Art — und wenn gewünscht, was das Feld in der Bestandsverwaltung auslöst.": "Extra fält för varje artikel. Välj namn och typ — och om du vill, vad fältet utlöser i lagerhanteringen.",
+    "Lagerorte anlegen": "Skapa lagerplatser",
+    "Einstellungen → Lagerorte: Regal, Schrank, Halle.": "Inställningar → Lagerplatser: hylla, skåp, hall.",
+    "Produkte anlegen oder Tabelle importieren": "Skapa artiklar eller importera ett kalkylblad",
+    "Stammdaten → Produktverwaltung: einzeln eintragen oder eine CSV hochladen.": "Grunddata → Artikelhantering: ange dem en och en eller ladda upp en CSV.",
+    "QR-Etiketten drucken": "Skriv ut QR-etiketter",
+    "Ein Code je Produkt, ans Regal geklebt.": "En kod per artikel, fastsatt på hyllan.",
+    "Team einladen": "Bjud in teamet",
+    "Wer bucht, braucht einen Zugang.": "Den som bokar behöver ett konto.",
+    "Mailversand prüfen": "Kontrollera mejlutskick",
+    "Einmal testen, damit Warnungen ankommen.": "Testa en gång så att varningar kommer fram.",
+    "Übersicht": "Översikt", "Produkte": "Produkter", "Produktverwaltung": "Artikelhantering", "Rollen": "Roller", "Rollen und ihre Standardrechte": "Roller och deras standardrättigheter", "Standardrechte": "Standardrättigheter", "Neue Rolle": "Ny roll", "Rolle anlegen": "Skapa roll", "Rechte": "rättigheter", "Person": "person", "Personen": "personer", "Fremdes Etikett": "Främmande etikett", "Kein Zugriff": "Ingen åtkomst", "Bearbeiten": "Redigera", "Produkt löschen": "Ta bort artikel", "Wirklich vollständig löschen?": "Ta bort helt?", "Endgültig löschen": "Ta bort permanent", "Aktiv": "Aktiv", "Gelesener Code": "Läst kod", "Noch kein Code gelesen": "Ingen kod läst än", "Vorlage herunterladen": "Ladda ner mall", "Ausgefüllte Liste hier hochladen": "Ladda upp din ifyllda lista här", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Dra en fil hit eller klicka · .csv upp till 5 MB", "Leere Liste — nur Kopfzeile": "Tom lista — bara rubrik", "Mit allen vorhandenen Produkten": "Med alla befintliga artiklar", "Vorlage mit Bestand": "Mall med lager", "Leere Vorlage": "Tom mall", "Vorlage": "Mall", "Datei unten hochladen, Spalten prüfen, importieren": "Ladda upp filen nedan, kontrollera kolumnerna, importera", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Välj mall: tom eller med dagens lager", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
     "QR-Codes": "QR-koder", "Team & Rechte": "Team & rättigheter", "Einstellungen": "Inställningar",
     "Betriebs-Konsole": "Operatörskonsol", "Angemeldet als": "Inloggad som", "Abmelden": "Logga ut",
     "Hell": "Ljust", "Dunkel": "Mörkt", "System": "System", "Artikel im Lager": "Artiklar i lager",
@@ -3010,9 +3988,12 @@ class Component extends DCLogic {
       helpQuery: "", onboardHidden: false, qrPrinted: false, mailChecked: false,
       camState: "idle", camErrorText: "", torchOn: false, facing: "environment",
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
+      editing: false, editDraft: null, confirmDelete: false,
+      roleDefs: null, newRoleName: "", companyId: null,
+      readRaw: "", readAt: 0, readFrames: 0, readMiss: "",
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
-      live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
+      live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "", meId: null,
       photoUrl: "", photoFor: null, platformAdmin: false,
       guard: GUARD_DEFAULT, limits: LIMITS_DEFAULT, mailsToday: 0, storageMb: 340, scanCode: "",
       // Eigene Merkmale je Firma. trigger: was eine Regel auslösen kann.
@@ -3162,6 +4143,8 @@ class Component extends DCLogic {
         })) : prev.companies,
         role: profile ? profile.role : prev.role,
         meNameLive: profile ? (profile.name || profile.email) : "",
+        meId: profile ? profile.id : prev.meId,
+        companyId: profile ? profile.company_id : prev.companyId,
         companyLive: profile && profile.companies ? profile.companies.name : "",
         currentId: products.some(p => p.id === prev.currentId) ? prev.currentId : (products[0] ? products[0].id : null),
         eventId: events.some(e => e.id === prev.eventId) ? prev.eventId : (events[0] ? events[0].id : null),
@@ -3265,6 +4248,16 @@ class Component extends DCLogic {
         this.tr("Liegt config.js neben der Seite, und stehen dort SUPABASE_URL und SUPABASE_ANON_KEY? Nach dem Hochladen die Seite mit Strg+Umschalt+R (Mac: Cmd+Umschalt+R) neu laden.");
     }
     return this.tr("In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.");
+  }
+
+  // Klartext statt Fehlercode, wenn der Mailversand noch nicht eingerichtet ist.
+  mailSetupHint(msg) {
+    const m = String(msg || "").toLowerCase();
+    if (/brevo-schlüssel fehlt|brevo_api_key/.test(m)) {
+      return this.tr("Der Mailversand ist noch nicht eingerichtet. In Supabase im SQL-Editor die Datei supabase/mail.sql ausführen und dort im Block sc_config den Brevo-Schlüssel eintragen. Die Einladung ist gespeichert und gilt drei Stunden — der Link lässt sich auch von Hand weitergeben.");
+    }
+    if (/tagesgrenze/.test(m)) return this.tr("Die Tagesgrenze für Mails ist erreicht. Die Einladung ist gespeichert und gilt drei Stunden.");
+    return String(msg || "");
   }
 
   // Aus der Fehlermeldung von Supabase die wahrscheinliche Ursache ableiten.
@@ -3415,7 +4408,9 @@ class Component extends DCLogic {
         many = devs.filter(d => d.kind === "videoinput").length > 1;
       } catch (e) {}
       this.lastCode = null;
+      this.frames = 0;
       this.scanning = true;
+      this.setState({ readRaw: "", readFrames: 0, readMiss: "" });
       this.setState({ camState: "running", camErrorText: "", torchOn: false,
                       hasTorch: !!(caps && caps.torch), hasSwitch: many });
       this.detectLoop();
@@ -3496,19 +4491,27 @@ class Component extends DCLogic {
       if (!this.scanning) return;
       const vid = this.video && this.video.current;
       if (vid && vid.readyState >= 2 && vid.videoWidth) {
+        this.frames = (this.frames || 0) + 1;
+        // Nur gelegentlich in den Zustand schreiben — sonst zeichnet React
+        // bei jedem Bild neu und die Erkennung wird langsam.
+        if (this.frames % 8 === 0) this.setState({ readFrames: this.frames });
         try {
+          // Immer über eine Zeichenfläche gehen: manche Browser liefern für
+          // ein <video> kein brauchbares Bild an die Erkennung.
+          if (!this.canvas) this.canvas = document.createElement("canvas");
+          const w = Math.min(760, vid.videoWidth);
+          const h = Math.round(w * vid.videoHeight / vid.videoWidth);
+          this.canvas.width = w; this.canvas.height = h;
+          const ctx = this.canvas.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(vid, 0, 0, w, h);
+
           if (this.detector) {
-            const hits = await this.detector.detect(vid);
+            const hits = await this.detector.detect(this.canvas);
             if (hits && hits.length) return this.onCode(hits[0].rawValue);
           } else {
             const jsQR = await this.loadFallback();
-            if (!this.canvas) this.canvas = document.createElement("canvas");
-            const w = Math.min(640, vid.videoWidth);
-            const h = Math.round(w * vid.videoHeight / vid.videoWidth);
-            this.canvas.width = w; this.canvas.height = h;
-            const ctx = this.canvas.getContext("2d", { willReadFrequently: true });
-            ctx.drawImage(vid, 0, 0, w, h);
-            const hit = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+            // "attemptBoth" erkennt auch hell-auf-dunkel gedruckte Codes.
+            const hit = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "attemptBoth" });
             if (hit && hit.data) return this.onCode(hit.data);
           }
         } catch (e) {
@@ -3531,8 +4534,25 @@ class Component extends DCLogic {
   // eine Adresse, die die Kennung hinten trägt — so drucken die Etiketten.
   onCode(raw) {
     const text = String(raw || "").trim();
+    // Immer anzeigen, was gelesen wurde — auch wenn es zu keinem Produkt passt.
+    if (text) this.setState({ readRaw: text, readAt: Date.now() });
     if (!text || text === this.lastCode) { this.scanT = setTimeout(() => this.detectLoop(), 400); return; }
     this.lastCode = text;
+
+    // Trägt der Code eine Firmenkennung, muss sie zur angemeldeten Firma
+    // passen. Sonst wird abgebrochen — ein fremdes Etikett führt nirgendwohin.
+    if (/^SC1\|/.test(text)) {
+      const parts = text.split("|");
+      if (parts[1] !== this.companyKey()) {
+        this.setState({ readMiss: text });
+        this.say(this.tr("Fremdes Etikett"), this.tr("Kein Zugriff"),
+          this.tr("Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen."));
+        setTimeout(() => { this.lastCode = null; }, 2000);
+        this.scanT = setTimeout(() => this.detectLoop(), 1200);
+        return;
+      }
+    }
+
     const tail = text.split(/[\/?#=]/).filter(Boolean).pop() || text;
     const keys = [text.toLowerCase(), tail.toLowerCase()];
     const hit = this.state.products.find(p =>
@@ -3543,6 +4563,7 @@ class Component extends DCLogic {
       this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} });
       this.say(this.tr("Gescannt"), hit.name, hit.ort);
     } else {
+      this.setState({ readMiss: text });
       this.say(this.tr("Nicht gefunden"), text.slice(0, 40), this.tr("Kein Artikel mit dieser Kennung. Etikett neu drucken oder Code eintippen."));
       setTimeout(() => { this.lastCode = null; }, 1500);
       this.scanT = setTimeout(() => this.detectLoop(), 900);
@@ -3603,6 +4624,51 @@ class Component extends DCLogic {
       if (diff > 0) out.push({ datum: this.dayStr(Date.now() - (h.length - 1 - i) * step * 864e5), menge: diff });
     }
     return out;
+  }
+
+  // Rollen als Daten: Schlüssel, Bezeichnung, Standardrechte. Die vier
+  // mitgelieferten Rollen sind die Startaufstellung; eigene kommen dazu.
+  roleDefs() {
+    if (this.state.roleDefs) return this.state.roleDefs;
+    const lang = this.state.lang;
+    return ["owner", "manager", "worker", "reader"].map(k => ({
+      key: k,
+      label: (ROLES[k] && (ROLES[k][lang] || ROLES[k].de)) || k,
+      perms: PERM_LIST.filter(p => p[2].includes(k)).map(p => p[0]),
+      system: true
+    }));
+  }
+
+  setRoleDefs(next) { this.setState({ roleDefs: next }); }
+
+  roleLabelFor(key) {
+    const d = this.roleDefs().find(r => r.key === key);
+    if (d) return d.label;
+    const r = ROLES[key];
+    return (r && (r[this.state.lang] || r.de)) || key;
+  }
+
+  // ── Firmenschranke für QR-Etiketten ──────────────────────────
+  // Auf dem Etikett steht nicht nur die Artikelkennung, sondern auch, zu
+  // welcher Firma sie gehört. Wer einen fremden Code scannt, bekommt eine
+  // Absage — ohne Produktnamen, ohne Bestand, ohne Hinweis auf die Firma.
+  companyKey() {
+    return String(this.state.companyId || (this.state.live ? "unbekannt" : "demo")).slice(0, 12);
+  }
+
+  qrPayload(p) { return "SC1|" + this.companyKey() + "|" + p.id; }
+
+  // Initialen: erster Buchstabe des ersten und des letzten Namensteils.
+  // Ein einzelner Name gibt seine ersten zwei Buchstaben, damit die Kachel
+  // nie leer bleibt; Zusätze wie "· Betrieb" werden vorher abgeschnitten.
+  initialsOf(name) {
+    const parts = String(name || "").split("·")[0]
+      .replace(/[^\p{L}\p{N}\s.-]/gu, " ")
+      .split(/[\s.-]+/)
+      .filter(p => p && !/^(dr|prof|van|von|de|der|den|di|du|la|le|el)$/i.test(p));
+    if (!parts.length) return "??";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
   // Zahl aus einem Eingabefeld, leere Eingabe zählt als 0.
@@ -3678,18 +4744,53 @@ class Component extends DCLogic {
     document.documentElement.setAttribute("data-sc-theme", dark ? "dark" : "light");
   }
 
+  // Die Übersetzung greift auf den gesamten sichtbaren Textbestand zu, nicht
+  // nur auf besonders ausgezeichnete Stellen: jeder Textknoten und jede
+  // sprechende Eigenschaft wird beim ersten Mal im Original gemerkt und
+  // danach aus dem Wörterbuch ersetzt. Dadurch bleibt beim Sprachwechsel
+  // kein Feld stehen, auch in später hinzugekommenen Bereichen nicht.
   applyLang() {
     const lang = this.state.lang;
-    document.querySelectorAll("[data-i18n]").forEach(n => {
-      if (!n.dataset.i18nSrc) n.dataset.i18nSrc = n.textContent;
-      const src = n.dataset.i18nSrc.trim();
-      const out = lang === "de" ? src : ((DICT[lang] && DICT[lang][src]) || src);
-      if (n.textContent.trim() !== out) n.textContent = out;
+    const dict = DICT[lang] || {};
+    const ph = (PH && PH[lang]) || {};
+    const look = (src, table) => {
+      if (lang === "de") return src;
+      const t = String(src).trim();
+      if (table[t]) return String(src).replace(t, table[t]);
+      if (dict[t]) return String(src).replace(t, dict[t]);
+      return src;
+    };
+
+    const root = document.body;
+    if (!root) return;
+    const SKIP = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, TEXTAREA: 1, CODE: 1, PRE: 1, SVG: 1 };
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: n => {
+        const p = n.parentElement;
+        if (!p || SKIP[p.tagName] || p.closest("svg")) return NodeFilter.FILTER_REJECT;
+        return String(n.nodeValue).trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
     });
-    document.querySelectorAll("[data-i18n-ph]").forEach(n => {
-      if (!n.dataset.i18nPhSrc) n.dataset.i18nPhSrc = n.getAttribute("placeholder") || "";
-      const src = n.dataset.i18nPhSrc;
-      n.setAttribute("placeholder", lang === "de" ? src : ((PH[lang] && PH[lang][src]) || src));
+    if (!this.langSrc) this.langSrc = new WeakMap();
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(n => {
+      // Das Original merken, sobald der Knoten zum ersten Mal auf Deutsch steht.
+      if (!this.langSrc.has(n)) this.langSrc.set(n, n.nodeValue);
+      const src = this.langSrc.get(n);
+      const out = look(src, dict);
+      if (n.nodeValue !== out) n.nodeValue = out;
+    });
+
+    // Platzhalter, Titel und Vorlesetexte gehören genauso dazu.
+    ["placeholder", "title", "aria-label"].forEach(attr => {
+      document.querySelectorAll("[" + attr + "]").forEach(el => {
+        const key = "lang" + attr.replace(/-/g, "");
+        if (!el.dataset[key]) el.dataset[key] = el.getAttribute(attr) || "";
+        const src = el.dataset[key];
+        const out = attr === "placeholder" ? look(src, ph) : look(src, dict);
+        if (el.getAttribute(attr) !== out) el.setAttribute(attr, out);
+      });
     });
   }
 
@@ -3702,6 +4803,7 @@ class Component extends DCLogic {
   }
   go(screen) {
     clearTimeout(this.menuT);
+    if (screen !== "detail") this.setState({ editing: false, editDraft: null, confirmDelete: false });
     if (screen !== "scan") this.stopCamera();
     this.setState({ screen, menu: null, burgerOpen: false });
   }
@@ -3863,6 +4965,7 @@ class Component extends DCLogic {
       { n: 5, title: "Mailversand prüfen", note: "Einmal testen, damit Warnungen ankommen.",
         done: !!st.mailChecked, go: "settings" }
     ];
+    const roleDefs = this.roleDefs();
     const baseUnit = (this.unitsFor(cur)[0] || {}).name || this.tr("Stück");
     const revDays = this.toNum(st.hRange) || 90;
     const revBase = st.pricePicked.length
@@ -3960,7 +5063,7 @@ class Component extends DCLogic {
 
     const qrPx = LABEL_FORMATS[st.labelFormat].qr;
     const qrSheet = products.filter(p => st.qrPicked.includes(p.id)).map(p => ({
-      name: p.name, id: p.id, top: st.qrTop, bottom: st.qrBottom, svg: this.qrEl(p.id + p.ean, qrPx),
+      name: p.name, id: p.id, top: st.qrTop, bottom: st.qrBottom, svg: this.qrEl(this.qrPayload(p), qrPx),
       withName: st.showName, withId: st.showId
     }));
     const qq = st.qrQuery.toLowerCase();
@@ -4039,7 +5142,7 @@ class Component extends DCLogic {
       lang, role: st.role, isSuper: st.live ? st.platformAdmin : st.role === "super",
       adminLive: st.live && st.platformAdmin,
       adminDemo: !st.live,
-      roleLabel: (ROLES[st.role] || ROLES.owner)[lang] || ROLES.owner.de,
+      roleLabel: this.roleLabelFor(st.role),
       meName: meLabel,
       companyName: st.companyLive || (st.role === "super" ? "Betriebszugang" : "Internet GmbH"),
       sourceLabel: st.source,
@@ -4112,7 +5215,7 @@ class Component extends DCLogic {
       toggleUser: () => { clearTimeout(this.menuT); this.setState(s => ({ menu: s.menu === "user" ? null : "user" })); },
       burgerOpen: st.burgerOpen,
       toggleBurger: () => this.setState(s => ({ burgerOpen: !s.burgerOpen, menu: null })),
-      meInitials: st.role === "super" ? "IG" : "MK",
+      meInitials: this.initialsOf(meLabel),
       goDashboard: () => this.go("dashboard"), goProducts: () => this.go("products"), goScan: () => this.go("scan"),
       goNew: () => this.go("new"), goQr: () => this.go("qr"), goTeam: () => this.go("team"),
       goSettings: () => this.go("settings"), goAdmin: () => this.go("admin"),
@@ -4282,6 +5385,163 @@ class Component extends DCLogic {
             String(r.sum.toFixed(2)).replace(".", ",")]));
         this.download("stockcontrol-umsatz.csv", rows);
         this.say("Export", this.tr("Umsatz als CSV"), revSel.length + " " + this.tr("Produkte"));
+      },
+
+      // ── Produkt bearbeiten ─────────────────────────────────
+      canEditProduct: st.role === "owner" || st.role === "manager",
+      editing: st.editing,
+      editFields: (() => {
+        const d = st.editDraft || {};
+        const f = (k, label, opts) => Object.assign({
+          label: this.tr(label), value: d[k] == null ? "" : String(d[k]),
+          isSelect: false, isText: true, type: "text", mode: "text", span: "auto", hint: "",
+          options: [],
+          set: e => this.setState(prev => ({ editDraft: Object.assign({}, prev.editDraft, { [k]: e.target.value }) }))
+        }, opts || {});
+        const num = { type: "number", mode: "numeric" };
+        return [
+          f("name", "Name", { span: "1 / -1" }),
+          f("ean", "EAN", { hint: "4001234567890" }),
+          f("ist", "Istbestand", num),
+          f("min", "Mindestbestand", num),
+          f("bestellmenge", "Bestellmenge", num),
+          f("ort", "Lagerort", { isSelect: true, isText: false,
+            options: places.map(p => ({ value: p, label: p })) }),
+          f("quantitaet", "Quantität", { hint: "Kasten (12 Flaschen)" }),
+          f("preis", "Preis", { hint: "8,49 €" }),
+          f("mhd", "MHD", { hint: "30.04.2027" }),
+          f("lieferant", "Lieferant"),
+          f("verantwortlich", "Verantwortlich", { isSelect: true, isText: false,
+            options: (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name })) }),
+          f("vertretung", "Stellvertretung", { hint: "mit Komma trennen" }),
+          f("kategorien", "Kategorien", { span: "1 / -1", hint: "mit Komma trennen" }),
+          f("link", "Link zum Produkt", { span: "1 / -1", hint: "https://" }),
+          f("aktiv", "Aktiv", { isSelect: true, isText: false, options: [
+            { value: "ja", label: this.tr("ja — erscheint in allen Listen") },
+            { value: "nein", label: this.tr("nein — aus Listen ausgeblendet") }] })
+        ];
+      })(),
+      editSaveDisabled: !st.editDraft || !String((st.editDraft || {}).name || "").trim(),
+      editNote: !st.editDraft ? "" : (!String(st.editDraft.name || "").trim()
+        ? this.tr("Ohne Namen wird nicht gespeichert.")
+        : this.tr("Alle Felder sind änderbar.")),
+      editNoteColor: (st.editDraft && !String(st.editDraft.name || "").trim())
+        ? "var(--color-accent-700)" : "var(--sc-ink-2)",
+      startEdit: () => this.setState({
+        confirmDelete: false, editing: true,
+        editDraft: {
+          name: cur.name, ean: cur.ean === "—" ? "" : cur.ean,
+          ist: cur.ist, min: cur.min, bestellmenge: cur.bestellmenge,
+          ort: cur.ort, quantitaet: cur.quantitaet === "—" ? "" : cur.quantitaet,
+          preis: cur.preis === "—" ? "" : cur.preis, mhd: cur.mhd === "—" ? "" : cur.mhd,
+          lieferant: cur.lieferant === "—" ? "" : cur.lieferant,
+          verantwortlich: cur.verantwortlich, vertretung: cur.vertretung === "—" ? "" : cur.vertretung,
+          kategorien: (cur.kategorien || []).join(", "), link: cur.link || "",
+          aktiv: cur.aktiv === false ? "nein" : "ja"
+        }
+      }),
+      cancelEdit: () => this.setState({ editing: false, editDraft: null }),
+      saveEdit: () => {
+        const d = st.editDraft || {};
+        const name = String(d.name || "").trim();
+        if (!name) return;
+        const ist = this.toNum(d.ist), min = this.toNum(d.min);
+        const patch = {
+          name, ean: String(d.ean || "").trim() || "—",
+          ist, min, bestellmenge: this.toNum(d.bestellmenge),
+          ort: String(d.ort || "").trim() || cur.ort,
+          quantitaet: String(d.quantitaet || "").trim() || "—",
+          preis: String(d.preis || "").trim() || "—",
+          mhd: String(d.mhd || "").trim() || "—",
+          lieferant: String(d.lieferant || "").trim() || "—",
+          verantwortlich: String(d.verantwortlich || "").trim() || cur.verantwortlich,
+          vertretung: String(d.vertretung || "").trim() || "—",
+          kategorien: String(d.kategorien || "").split(",").map(x => x.trim()).filter(Boolean),
+          link: String(d.link || "").trim(),
+          aktiv: d.aktiv !== "nein",
+          status: ist < min ? "low" : "ok",
+          geaendert: meLabel
+        };
+        this.setState(prev => ({
+          products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, patch) : p),
+          editing: false, editDraft: null
+        }));
+        this.remote(api => api.updateProduct(cur.id, {
+          name: patch.name, ean: patch.ean === "—" ? null : patch.ean,
+          ist: patch.ist, min: patch.min, bestellmenge: patch.bestellmenge,
+          ort: patch.ort, quantitaet: patch.quantitaet === "—" ? null : patch.quantitaet,
+          lieferant: patch.lieferant === "—" ? null : patch.lieferant,
+          link: patch.link || null, kategorien: patch.kategorien,
+          aktiv: patch.aktiv, status: patch.status
+        }));
+        this.say(this.tr("Produkt"), this.tr("Übernommen"), name + " · " + patch.ort);
+      },
+
+      // ── Produkt löschen ────────────────────────────────────
+      confirmDelete: st.confirmDelete,
+      deleteWarning: cur.name + " — " + this.tr("Produkt, Bestand und alle Buchungen werden entfernt. Das lässt sich nicht zurückholen."),
+      askDelete: () => this.setState({ confirmDelete: true, editing: false }),
+      cancelDelete: () => this.setState({ confirmDelete: false }),
+      doDelete: () => {
+        const gone = cur.name;
+        this.setState(prev => {
+          const rest = prev.products.filter(p => p.id !== cur.id);
+          return { products: rest, confirmDelete: false, editing: false, editDraft: null,
+                   screen: "products", currentId: rest[0] ? rest[0].id : null };
+        });
+        this.remote(api => api.deleteProduct(cur.id));
+        this.say(this.tr("Produkt"), this.tr("Gelöscht"), gone);
+      },
+
+      // ── Rollen verwalten ───────────────────────────────────
+      canManageRoles: st.role === "owner",
+      roleCards: roleDefs.map(rd => {
+        const used = (st.members || []).filter(m => m.role === rd.key).length;
+        const locked = rd.key === "owner";
+        return {
+          label: rd.label,
+          locked,
+          usage: used + " " + (used === 1 ? this.tr("Person") : this.tr("Personen")),
+          permCount: rd.perms.length + " " + this.tr("Rechte"),
+          summaryLabel: this.tr("Standardrechte"),
+          cannotDelete: locked || rd.system || used > 0,
+          rename: e => {
+            const v = e.target.value;
+            this.setRoleDefs(roleDefs.map(x => x.key === rd.key ? Object.assign({}, x, { label: v }) : x));
+          },
+          remove: () => {
+            if (locked || rd.system || used > 0) return;
+            this.setRoleDefs(roleDefs.filter(x => x.key !== rd.key));
+            this.say(this.tr("Rolle"), this.tr("Gelöscht"), rd.label);
+          },
+          perms: PERM_LIST.map(p => ({
+            label: this.tr(p[1]),
+            on: locked ? true : rd.perms.includes(p[0]),
+            locked,
+            toggle: () => {
+              if (locked) return;
+              const has = rd.perms.includes(p[0]);
+              this.setRoleDefs(roleDefs.map(x => x.key === rd.key
+                ? Object.assign({}, x, { perms: has ? x.perms.filter(k => k !== p[0]) : x.perms.concat(p[0]) })
+                : x));
+            }
+          }))
+        };
+      }),
+      newRoleName: st.newRoleName,
+      setNewRoleName: e => this.setState({ newRoleName: e.target.value }),
+      addRoleDisabled: !String(st.newRoleName || "").trim()
+        || roleDefs.some(r => r.label.toLowerCase() === String(st.newRoleName).trim().toLowerCase()),
+      addRole: () => {
+        const label = String(st.newRoleName || "").trim();
+        if (!label) return;
+        const key = "r" + Date.now().toString(36);
+        this.setRoleDefs(roleDefs.concat({
+          key, label, system: false,
+          perms: ["view", "withdraw", "refill", "qr", "history"]
+        }));
+        this.setState({ newRoleName: "" });
+        this.say(this.tr("Rolle"), this.tr("Angelegt"), label + " · " + this.tr("Rechte unten ankreuzen"));
       },
 
       places, filtered, filteredCount: filtered.length,
@@ -4519,6 +5779,21 @@ class Component extends DCLogic {
         }
         window.print();
       },
+
+      // ── Was steht gerade im Code? ─────────────────────────
+      readoutLabel: st.readRaw ? this.tr("Gelesener Code") : this.tr("Noch kein Code gelesen"),
+      readoutText: st.readRaw || "—",
+      readoutNote: (() => {
+        if (!st.camRunning && !st.readRaw && st.camState !== "running") return this.tr("Kamera starten, dann einen Code vor die Linse halten.");
+        if (!st.readRaw) return st.readFrames
+          ? st.readFrames + " " + this.tr("Bilder geprüft — noch kein Code erkannt. Näher heran, mehr Licht, Code gerade halten.")
+          : this.tr("Bild wird noch geladen …");
+        if (st.readMiss && st.readMiss === st.readRaw) return this.tr("Gelesen, aber kein Produkt mit dieser Kennung.");
+        return this.tr("Erkannt und zugeordnet.");
+      })(),
+      readoutColor: st.readRaw
+        ? (st.readMiss === st.readRaw ? "#ffc9a8" : "#bfe3c0")
+        : "rgba(255,255,255,.62)",
 
       videoRef: this.video,
       scanCode: st.scanCode,
@@ -4814,7 +6089,9 @@ class Component extends DCLogic {
         const name = (st.draftName || "").trim(), email = (st.draftEmail || "").trim();
         if (!name) { this.say(this.tr("Profil"), this.tr("Name fehlt"), this.tr("Ohne Namen wird nicht übernommen.")); return; }
         if (!/.+@.+\..+/.test(email)) { this.say(this.tr("Profil"), this.tr("Adresse prüfen"), this.tr("Bitte eine vollständige E-Mail-Adresse eintragen.")); return; }
-        const wasMe = picked.name === meLabel;
+        // Über die Kennung, damit ein zweiter gleicher Name nicht die
+        // eigene Anzeige überschreibt; ohne Kennung bleibt der Name übrig.
+        const wasMe = st.meId ? picked.id === st.meId : picked.name === meLabel;
         this.setState(prev => {
           const next = {
             members: prev.members.map(m => m.id === picked.id ? Object.assign({}, m, { name, email }) : m),
@@ -4939,8 +6216,23 @@ class Component extends DCLogic {
         if (!this.withinLimit("members", st.members.length)) return;
         if (!this.withinLimit("mailsPerDay", st.mailsToday)) return;
         this.setState(s => ({ mailsToday: s.mailsToday + 1 }));
-        this.remote(api => api.inviteMember({ email: st.inviteEmail, role: "worker" }));
-        this.say("Brevo", this.tr("Einladung gesendet"), (st.inviteEmail || "name@internet-gmbh.de") + " · " + this.tr("gültig 3 Stunden"));
+        const to = st.inviteEmail || "name@internet-gmbh.de";
+        if (!st.live || !this.api) {
+          this.say(this.tr("Einladung"), this.tr("Vorgemerkt"), to + " · " + this.tr("Ohne Datenbank wird nichts verschickt."));
+          return;
+        }
+        this.api.inviteMember({ email: to, role: "worker" })
+          .then(res => {
+            if (res && res.mailError) {
+              // Die Einladung steht, nur der Versand fehlt — das muss man
+              // auseinanderhalten, sonst sucht man am falschen Ende.
+              this.say(this.tr("Einladung"), this.tr("Angelegt, aber nicht verschickt"),
+                to + " — " + this.mailSetupHint(res.mailError));
+            } else {
+              this.say("Brevo", this.tr("Einladung gesendet"), to + " · " + this.tr("gültig 3 Stunden"));
+            }
+          })
+          .catch(err => this.say("Supabase", this.tr("Nicht gespeichert"), String((err && err.message) || err)));
       },
 
       setMailNow: () => { this.setState({ mailMode: "now" }); this.remote(api => api.saveSettings({ mail_mode: "now" })); },

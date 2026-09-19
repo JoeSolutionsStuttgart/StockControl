@@ -169,6 +169,16 @@ export async function updateProduct(id, patch) {
   return ok(await sb.from("products").update(patch).eq("id", id).select().single());
 }
 
+// Endgültig löschen. Bewegungen und Benachrichtigungen hängen per
+// "on delete cascade" daran und verschwinden mit. Wer den Verlauf behalten
+// will, setzt stattdessen aktiv = false.
+export async function deleteProduct(id) {
+  const sb = await client();
+  const { error } = await sb.from("products").delete().eq("id", id);
+  if (error) throw error;
+  return true;
+}
+
 export async function importProducts(rows) {
   const sb = await client();
   return ok(await sb.from("products").upsert(rows, { onConflict: "company_id,ean" }).select());
@@ -192,11 +202,18 @@ export async function movementsFor(productId) {
 
 /* ── Team ───────────────────────────────────────────────── */
 
+// Die Einladung wird immer gespeichert. Scheitert der Mailversand — meist
+// weil supabase/mail.sql noch nicht eingespielt ist — wird das gemeldet,
+// aber die Einladung bleibt gültig und der Link lässt sich von Hand geben.
 export async function inviteMember({ email, role }) {
   const sb = await client();
   const row = ok(await sb.from("invitations").insert({ email, role }).select().single());
-  await sendMail({ template: "invitation", to: email, data: { token: row.token, role } });
-  return row;
+  try {
+    await sendMail({ template: "invitation", to: email, data: { token: row.token, role } });
+    return row;
+  } catch (err) {
+    return Object.assign({}, row, { mailError: (err && err.message) || String(err) });
+  }
 }
 
 export async function acceptInvitation({ token, email, password, name, captchaToken }) {
