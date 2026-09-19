@@ -34,8 +34,31 @@
   html[data-sc-theme="dark"] .input { background: #121619; }
   html[data-sc-theme="dark"] .btn-primary { color: #11151a; }
   /* Weichere Haut über der Industry-Basis: runde Ecken, gefüllte Flächen, klare Abhebung */
-  :root { --sc-card: #ffffff; --sc-ground: #ebebec; --sc-radius: 12px; }
-  html[data-sc-theme="dark"] { --sc-card: #1d242b; --sc-ground: #121619; }
+  :root {
+    --sc-card: #ffffff; --sc-ground: #e8edf2; --sc-radius: 12px;
+    --sc-ink-2: #4a5663;      /* zweite Textebene: kräftig, nicht durchscheinend */
+    --sc-ink-3: #6c7885;      /* stille Beschriftungen */
+    --sc-tint: color-mix(in srgb, var(--color-accent) 10%, var(--sc-card));
+  }
+  html[data-sc-theme="dark"] {
+    --sc-card: #1d242b; --sc-ground: #121619;
+    --sc-ink-2: #a9b7c4; --sc-ink-3: #8593a1;
+  }
+  .card-kicker { color: var(--color-accent-700); letter-spacing: 0.12em; }
+  .text-muted { color: var(--sc-ink-2) !important; }
+  h1, h2, h3, h4 { text-wrap: pretty; }
+  /* Der Heldenabschnitt der Startseite ist ein Stahlfeld — dort dreht sich die
+     Tintenskala, damit die zweite Textebene lesbar bleibt. */
+  [data-landing-hero] { --sc-ink-2: rgba(255,255,255,.82); --sc-ink-3: rgba(255,255,255,.66); }
+  [data-landing-hero] .card {
+    color: var(--color-text);
+    --sc-ink-2: #4a5663; --sc-ink-3: #6c7885;
+  }
+  /* Der zweite Knopf steht auf dem Stahlfeld und braucht helle Kanten */
+  [data-landing-hero] .btn-secondary {
+    background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.55); color: #fff;
+  }
+  [data-landing-hero] .btn-secondary:hover { background: rgba(255,255,255,.2); }
   .blueprint > .corner { display: none; }
   .card, .dialog, .blueprint, .input, .btn, .seg, select, textarea { border-radius: var(--sc-radius); }
   .btn-icon { border-radius: var(--sc-radius); }
@@ -119,8 +142,7 @@
           <sc-if value="{{ menuStamm }}" hint-placeholder-val="{{ false }}">
             <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); left: 0; min-width: 215px; background: var(--sc-card); padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; z-index: 40">
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-              <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produkt anlegen</span></button>
-              <button class="btn" style="{{ navImport }}" onClick="{{ goNew }}"><span data-i18n>Excel-Import</span></button>
+              <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produktverwaltung</span></button>
               <button class="btn" style="{{ navQr }}" onClick="{{ goQr }}"><span data-i18n>QR-Codes</span></button>
             </div>
           </sc-if>
@@ -162,7 +184,7 @@
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
               <div>
                 <div style="font-size: 13px; font-weight: 500">{{ meName }}</div>
-                <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ roleLabel }} · {{ companyName }}</div>
+                <div style="font-size: 12px; color: var(--sc-ink-2)">{{ roleLabel }} · {{ companyName }}</div>
               </div>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
@@ -180,7 +202,7 @@
     <sc-if value="{{ burgerOpen }}" hint-placeholder-val="{{ false }}">
       <div data-burger-panel style="border-top: 1px solid var(--color-divider); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: var(--space-3)">
         <div>
-          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Lager</div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-bottom: 4px" data-i18n>Lager</div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
             <button class="btn" style="{{ navDashboard }}" onClick="{{ goDashboard }}"><span data-i18n>Übersicht</span></button>
             <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
@@ -190,15 +212,14 @@
           </div>
         </div>
         <div>
-          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Stammdaten</div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-bottom: 4px" data-i18n>Stammdaten</div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
-            <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produkt anlegen</span></button>
-            <button class="btn" style="{{ navImport }}" onClick="{{ goNew }}"><span data-i18n>Excel-Import</span></button>
+            <button class="btn" style="{{ navNew }}" onClick="{{ goNew }}"><span data-i18n>Produktverwaltung</span></button>
             <button class="btn" style="{{ navQr }}" onClick="{{ goQr }}"><span data-i18n>QR-Codes</span></button>
           </div>
         </div>
         <div>
-          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 50%, transparent); margin-bottom: 4px" data-i18n>Verwaltung</div>
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-bottom: 4px" data-i18n>Verwaltung</div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
             <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
             <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
@@ -240,7 +261,7 @@
                   <span style="width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; background: {{ ob.dotBg }}; color: {{ ob.dotFg }}">{{ ob.mark }}</span>
                   <div style="min-width: 0">
                     <div style="font-size: 13.5px; font-family: var(--font-heading)">{{ ob.title }}</div>
-                    <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ ob.note }}</div>
+                    <div style="font-size: 12px; color: var(--sc-ink-2)">{{ ob.note }}</div>
                   </div>
                   <button class="{{ ob.cls }}" style="white-space: nowrap; font-size: 12.5px; padding-inline: 12px" onClick="{{ ob.go }}">{{ ob.action }}</button>
                 </div>
@@ -309,7 +330,7 @@
                         <button class="btn btn-ghost" onClick="{{ row.toggleOrdered }}">{{ row.action }}</button>
                       </sc-if>
                       <sc-if value="{{ row.locked }}" hint-placeholder-val="{{ false }}">
-                        <span style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 45%, transparent)">{{ row.lockNote }}</span>
+                        <span style="font-size: 11px; color: var(--sc-ink-3)">{{ row.lockNote }}</span>
                       </sc-if>
                     </td>
                   </tr>
@@ -332,7 +353,7 @@
                   <div style="font-family: var(--font-heading); font-size: 18px; color: var(--color-accent)">{{ m.delta }}</div>
                   <div style="min-width: 0">
                     <div style="font-size: 13px; font-weight: 500">{{ m.name }}</div>
-                    <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.who }} · {{ m.when }}</div>
+                    <div style="font-size: 12px; color: var(--sc-ink-2)">{{ m.who }} · {{ m.when }}</div>
                   </div>
                 </div>
               </sc-for>
@@ -388,10 +409,10 @@
                 <tr style="cursor: pointer; {{ p.rowStyle }}" onClick="{{ p.open }}">
                   <td style="font-weight: 500">
                     {{ p.name }}
-                    <div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
+                    <div style="font-size: 11px; color: var(--sc-ink-3)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
                   </td>
                   <td style="text-align: right; font-variant-numeric: tabular-nums">{{ p.ist }}</td>
-                  <td style="text-align: right; font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ p.min }}</td>
+                  <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.min }}</td>
                   <td><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
                   <td class="text-muted">{{ p.ort }}</td>
                   <td style="text-align: right"><span style="color: var(--color-accent); font-size: 12px" data-i18n>Details</span></td>
@@ -425,7 +446,7 @@
                 <span data-i18n>Bild hochladen</span>
                 <input type="file" accept="image/*" style="display: none" onChange="{{ uploadPhoto }}">
               </label>
-              <div style="font-size: 10px; text-align: center; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ storageLabel }}</div>
+              <div style="font-size: 10px; text-align: center; color: var(--sc-ink-3)">{{ storageLabel }}</div>
             </div>
             <div style="flex: 1; min-width: 200px">
               <div class="card-kicker">{{ current.ean }}</div>
@@ -438,16 +459,16 @@
               </div>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4)">
                 <div>
-                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Istbestand</div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Istbestand</div>
                   <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ current.ist }}</div>
                 </div>
                 <div>
-                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Mindestbestand</div>
-                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ current.min }}</div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Mindestbestand</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--sc-ink-2)">{{ current.min }}</div>
                 </div>
                 <div>
-                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Bestellmenge</div>
-                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ current.bestellmenge }}</div>
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Bestellmenge</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--sc-ink-2)">{{ current.bestellmenge }}</div>
                 </div>
               </div>
             </div>
@@ -456,17 +477,17 @@
           <div class="hr"></div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-4) var(--space-6)">
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Lagerort</div><div style="font-size: 14px">{{ current.ort }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Verantwortlich</div><div style="font-size: 14px">{{ current.verantwortlich }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Stellvertretung</div><div style="font-size: 14px">{{ current.vertretung }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>MHD</div><div style="font-size: 14px">{{ current.mhd }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Preis</div><div style="font-size: 14px">{{ current.preis }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Quantität</div><div style="font-size: 14px">{{ current.quantitaet }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Lieferant</div><div style="font-size: 14px">{{ current.lieferant }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Letzte Entnahme</div><div style="font-size: 14px">{{ current.entnahme }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Letzte Auffüllung</div><div style="font-size: 14px">{{ current.auffuell }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lagerort</div><div style="font-size: 14px">{{ current.ort }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Verantwortlich</div><div style="font-size: 14px">{{ current.verantwortlich }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Stellvertretung</div><div style="font-size: 14px">{{ current.vertretung }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>MHD</div><div style="font-size: 14px">{{ current.mhd }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Preis</div><div style="font-size: 14px">{{ current.preis }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Quantität</div><div style="font-size: 14px">{{ current.quantitaet }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lieferant</div><div style="font-size: 14px">{{ current.lieferant }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Entnahme</div><div style="font-size: 14px">{{ current.entnahme }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Auffüllung</div><div style="font-size: 14px">{{ current.auffuell }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
           </div>
         </section>
 
@@ -489,11 +510,11 @@
                   </div>
                 </sc-for>
               </div>
-              <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 58%, transparent)">{{ unitSumNote }}</div>
+              <div style="font-size: 12.5px; color: var(--sc-ink-2)">{{ unitSumNote }}</div>
             </sc-if>
             <details style="border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding-top: var(--space-2)">
               <summary style="font-family: var(--font-heading); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: var(--space-2)" data-i18n>Einheiten dieses Produkts</summary>
-              <p style="font-size: 12.5px; line-height: 1.5; margin: var(--space-2) 0; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.</p>
+              <p style="font-size: 12.5px; line-height: 1.5; margin: var(--space-2) 0; color: var(--sc-ink-2)" data-i18n>Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.</p>
               <div style="display: flex; flex-direction: column; gap: 2px">
                 <sc-for list="{{ unitList }}" as="ul" hint-placeholder-count="2">
                   <div style="display: flex; align-items: center; gap: var(--space-2); padding: 6px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
@@ -537,11 +558,11 @@
             <p class="card-body" style="margin: 0" data-i18n>Den Bestellstatus dürfen nur die verantwortliche Person und ihre Stellvertretungen setzen.</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3)">
               <div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Verantwortlich</div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Verantwortlich</div>
                 <div style="font-size: 14px">{{ current.verantwortlich }}</div>
               </div>
               <div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Stellvertretung</div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Stellvertretung</div>
                 <div style="font-size: 14px">{{ current.vertretung }}</div>
               </div>
             </div>
@@ -662,7 +683,7 @@
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; margin-top: var(--space-2)">
             <button class="btn btn-secondary" onClick="{{ resetHistory }}"><span data-i18n>Auswahl zurücksetzen</span></button>
-            <span style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ hSummary }}</span>
+            <span style="font-size: 12px; color: var(--sc-ink-2)">{{ hSummary }}</span>
           </div>
         </section>
 
@@ -678,15 +699,15 @@
               <h4 style="margin: 0" data-i18n>Summe im Zeitraum</h4>
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: var(--space-3)">
                 <div>
-                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Entnommen</div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Entnommen</div>
                   <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1; color: var(--color-accent-700)">{{ hTaken }}</div>
                 </div>
                 <div>
-                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Aufgefüllt</div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Aufgefüllt</div>
                   <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1">{{ hAdded }}</div>
                 </div>
                 <div>
-                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Buchungen</div>
+                  <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Buchungen</div>
                   <div style="font-family: var(--font-heading); font-size: 28px; line-height: 1.1">{{ hCount }}</div>
                 </div>
               </div>
@@ -746,7 +767,7 @@
                 </table>
               </div>
               <sc-if value="{{ hEmpty }}" hint-placeholder-val="{{ false }}">
-                <div style="padding: var(--space-6); text-align: center; font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Keine Bewegungen für diese Auswahl.</div>
+                <div style="padding: var(--space-6); text-align: center; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Keine Bewegungen für diese Auswahl.</div>
               </sc-if>
             </div>
           </sc-if>
@@ -767,19 +788,19 @@
               <button class="{{ pp.cls }}" style="white-space: nowrap" onClick="{{ pp.toggle }}">{{ pp.name }}</button>
             </sc-for>
           </div>
-          <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 58%, transparent)">{{ priceSelNote }}</div>
+          <div style="font-size: 12px; color: var(--sc-ink-2)">{{ priceSelNote }}</div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3)">
             <div class="blueprint" style="padding: var(--space-3)">
-              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Umsatz</div>
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Umsatz</div>
               <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--color-accent-700)">{{ revenueTotal }}</div>
             </div>
             <div class="blueprint" style="padding: var(--space-3)">
-              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Entnommen</div>
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Entnommen</div>
               <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ revenueQty }}</div>
             </div>
             <div class="blueprint" style="padding: var(--space-3)">
-              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Preisänderungen</div>
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Preisänderungen</div>
               <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ priceChangeCount }}</div>
             </div>
           </div>
@@ -805,7 +826,7 @@
             </tbody>
           </table>
 
-          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: color-mix(in srgb, var(--color-text) 58%, transparent)" data-i18n>Preisänderungen</div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: var(--sc-ink-2)" data-i18n>Preisänderungen</div>
           <table class="table" style="margin: 0">
             <thead>
               <tr>
@@ -877,7 +898,7 @@
               <tbody>
                 <sc-for list="{{ evRows }}" as="r" hint-placeholder-count="4">
                   <tr style="{{ r.rowStyle }}">
-                    <td style="font-weight: 500">{{ r.name }}<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ r.id }} {{ r.offLabel }}</div></td>
+                    <td style="font-weight: 500">{{ r.name }}<div style="font-size: 11px; color: var(--sc-ink-3)">{{ r.id }} {{ r.offLabel }}</div></td>
                     <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.benoetigt }}</td>
                     <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.bestand }}</td>
                     <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 500">{{ r.fehlt }}</td>
@@ -990,7 +1011,7 @@
                 </sc-for>
               </select>
             </div>
-            <div style="grid-column: 1 / -1; font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
+            <div style="grid-column: 1 / -1; font-size: 12px; color: var(--sc-ink-2); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
             <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
             <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" min="0" step="1" value="{{ npIst }}" onInput="{{ setNpIst }}"></div>
             <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" min="0" step="1" value="{{ npOrder }}" onInput="{{ setNpOrder }}"></div>
@@ -1033,31 +1054,38 @@
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Viele Produkte aus einer Tabelle importieren</h4>
           <ol style="margin: 0; padding-left: 18px; font-size: 13px; display: flex; flex-direction: column; gap: 6px">
-            <li data-i18n>Vorlage mit allen Feldern herunterladen</li>
+            <li data-i18n>Vorlage wählen: leer oder mit dem heutigen Bestand</li>
             <li data-i18n>Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt</li>
             <li data-i18n>In Excel über „Speichern unter" als CSV ablegen (Trennzeichen Semikolon)</li>
-            <li data-i18n>CSV hochladen oder Liste einfügen, Spalten prüfen, importieren</li>
+            <li data-i18n>Datei unten hochladen, Spalten prüfen, importieren</li>
           </ol>
-          <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>CSV-Vorlage herunterladen</span></button>
-          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
-            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer; white-space: nowrap">
-              <span data-i18n>Datei auswählen</span>
-              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
-            </label>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 1; min-width: 190px; margin: 0">
+              <label data-i18n>Vorlage</label>
+              <select class="input" value="{{ tplMode }}" onChange="{{ setTplMode }}">
+                <option value="empty">{{ tplEmptyLabel }}</option>
+                <option value="filled">{{ tplFilledLabel }}</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>Vorlage herunterladen</span></button>
           </div>
+          <div style="font-size: 12px; color: var(--sc-ink-2)">{{ tplNote }}</div>
 
-          <div class="hr"></div>
-          <h4 style="margin: 0" data-i18n>Oder die Liste hier einfügen</h4>
-          <p class="card-body" style="margin: 0" data-i18n>Schneller als der Umweg über eine Datei: in Excel den Bereich samt Kopfzeile markieren, kopieren und hier einfügen. Der Tabulator zwischen den Spalten wird erkannt.</p>
-          <textarea class="input" rows="7" value="{{ pasteText }}" onInput="{{ setPasteText }}" data-i18n-ph placeholder="Name	Istbestand	Mindestbestand	Lagerort
-Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.5; resize: vertical; min-height: 120px"></textarea>
-          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
-            <button class="btn btn-secondary" style="white-space: nowrap" disabled="{{ pasteDisabled }}" onClick="{{ readPaste }}"><span data-i18n>Liste prüfen</span></button>
-            <span style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ pasteNote }}</span>
-          </div>
+          <label style="display: block; cursor: pointer; margin-top: var(--space-2); border: 2px dashed var(--color-accent); border-radius: var(--sc-radius); background: color-mix(in srgb, var(--color-accent) 8%, var(--sc-card)); padding: var(--space-6) var(--space-4); text-align: center">
+            <div style="width: 42px; height: 42px; margin: 0 auto var(--space-3); border-radius: 50%; background: var(--color-accent); display: grid; place-items: center">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 16V4"></path><path d="M7 9l5-5 5 5"></path><path d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2"></path>
+              </svg>
+            </div>
+            <div style="font-family: var(--font-heading); font-size: 21px; line-height: 1.15" data-i18n>Ausgefüllte Liste hier hochladen</div>
+            <div style="font-size: 13px; margin-top: 4px; color: var(--sc-ink-2)" data-i18n>Datei hierher ziehen oder klicken · .csv bis 5 MB</div>
+            <span class="btn btn-primary" style="margin-top: var(--space-4); white-space: nowrap; pointer-events: none"><span data-i18n>Datei auswählen</span></span>
+            <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+          </label>
+          <sc-if value="{{ hasImportFile }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 13px; color: var(--color-accent-700)">{{ importFileNote }}</div>
+          </sc-if>
+
           <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
             <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
               <table class="table">
@@ -1091,7 +1119,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                 <option value="5x13">5 × 13 · 38 × 21 mm · 65 je Blatt</option>
                 <option value="roll">Endlosrolle · 62 mm breit</option>
               </select>
-              <div style="font-size: 11.5px; margin-top: 4px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ labelNote }}</div>
+              <div style="font-size: 11.5px; margin-top: 4px; color: var(--sc-ink-2)">{{ labelNote }}</div>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
               <button class="btn btn-secondary" onClick="{{ selectAllQr }}">{{ selectAllLabel }}</button>
@@ -1115,14 +1143,14 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                 <label data-i18n>Artikel auswählen</label>
                 <input class="input" type="search" data-i18n-ph placeholder="Suchen nach Name, EAN, Lagerort …" onInput="{{ setQrQuery }}">
               </div>
-              <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); padding-bottom: 10px">{{ qrCountLabel }}</div>
+              <div style="font-size: 12px; color: var(--sc-ink-2); padding-bottom: 10px">{{ qrCountLabel }}</div>
             </div>
             <div style="max-height: 232px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); border-radius: var(--sc-radius); background: var(--sc-ground)">
               <sc-for list="{{ qrPickList }}" as="q" hint-placeholder-count="7">
                 <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
                   <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
                   <span style="flex: 1; min-width: 0; font-size: 13px">{{ q.name }}</span>
-                  <span style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ q.meta }}</span>
+                  <span style="font-size: 11px; color: var(--sc-ink-3)">{{ q.meta }}</span>
                 </label>
               </sc-for>
             </div>
@@ -1159,7 +1187,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
               <tbody>
                 <sc-for list="{{ members }}" as="u" hint-placeholder-count="5">
                   <tr>
-                    <td><div style="font-weight: 500">{{ u.name }}</div><div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ u.email }}</div></td>
+                    <td><div style="font-weight: 500">{{ u.name }}</div><div style="font-size: 11px; color: var(--sc-ink-3)">{{ u.email }}</div></td>
                     <td>
                       <select class="input" style="width: 150px" value="{{ u.role }}" onChange="{{ u.setRole }}">
                         <option value="owner">Inhabende Person</option>
@@ -1216,7 +1244,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
               <div style="font-size: 12px; color: var(--color-accent-700)" data-i18n>Profildaten und Rechte darf nur die inhabende Person ändern.</div>
             </sc-if>
             <div class="hr"></div>
-            <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Feinrechte</div>
+            <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Feinrechte</div>
             <sc-if value="{{ isLastOwner }}" hint-placeholder-val="{{ false }}">
               <div style="padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-size: 12.5px; line-height: 1.45; color: var(--color-accent-800)" data-i18n>Diese Person verwaltet aktuell allein die Rechte. Rolle, Zugang und das Recht „Rechte ändern" sind deshalb gesperrt — vergib die Rolle zuerst an jemand anderen.</div>
             </sc-if>
@@ -1252,7 +1280,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
               <label data-i18n>Suchen</label>
               <input class="input" value="{{ helpQuery }}" data-i18n-ph placeholder="z. B. Etikett, Mail, Einheit" onInput="{{ setHelpQuery }}">
             </div>
-            <span style="font-size: 12.5px; padding-bottom: 9px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ helpCountNote }}</span>
+            <span style="font-size: 12.5px; padding-bottom: 9px; color: var(--sc-ink-2)">{{ helpCountNote }}</span>
           </div>
         </section>
 
@@ -1266,7 +1294,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                   <summary style="font-family: var(--font-heading); font-size: 16px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)">{{ hi.q }}</summary>
                   <div style="margin-top: var(--space-2); display: flex; flex-direction: column; gap: 6px">
                     <sc-for list="{{ hi.a }}" as="par" hint-placeholder-count="2">
-                      <p style="margin: 0; font-size: 13.5px; line-height: 1.6; max-width: 76ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ par }}</p>
+                      <p style="margin: 0; font-size: 13.5px; line-height: 1.6; max-width: 76ch; color: var(--sc-ink-2)">{{ par }}</p>
                     </sc-for>
                   </div>
                   <sc-if value="{{ hi.hasLink }}" hint-placeholder-val="{{ false }}">
@@ -1318,7 +1346,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
               <div style="display: flex; flex-wrap: wrap; gap: 6px var(--space-2); align-items: center; padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
                 <div style="flex: 1; min-width: 120px">
                   <div style="font-size: 13.5px; font-weight: 500">{{ a.name }}</div>
-                  <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ a.typeLabel }}</div>
+                  <div style="font-size: 11.5px; color: var(--sc-ink-2)">{{ a.typeLabel }}</div>
                 </div>
                 <span class="{{ a.triggerClass }}" style="white-space: nowrap">{{ a.triggerLabel }}</span>
                 <button class="btn btn-ghost" style="padding: 0 6px; white-space: nowrap" onClick="{{ a.remove }}"><span data-i18n>Entfernen</span></button>
@@ -1373,7 +1401,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                 <label class="seg-opt" style="{{ segCcOff }}"><input type="radio" name="sc-cc" onChange="{{ setCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
               </div>
             </div>
-            <div style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: 6px" data-i18n>Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.</div>
+            <div style="font-size: 12px; color: var(--sc-ink-2); margin-top: 6px" data-i18n>Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.</div>
           </div>
           <div class="blueprint" style="padding: var(--space-3); margin-top: var(--space-2)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -1412,7 +1440,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
             <div class="field"><label data-i18n>Neues Passwort</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -1433,7 +1461,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
             <div class="field"><label data-i18n>Neues Passwort wiederholen</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw2 }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -1516,11 +1544,11 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                       <td style="white-space: nowrap; vertical-align: top">{{ m.when }}</td>
                       <td style="vertical-align: top">
                         <div>{{ m.subject }}</div>
-                        <div style="font-size: 11.5px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.to }}</div>
+                        <div style="font-size: 11.5px; color: var(--sc-ink-2)">{{ m.to }}</div>
                       </td>
                       <td style="vertical-align: top">
                         <span class="{{ m.tagClass }}">{{ m.statusLabel }}</span>
-                        <div style="font-size: 11.5px; margin-top: 3px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ m.hint }}</div>
+                        <div style="font-size: 11.5px; margin-top: 3px; color: var(--sc-ink-2)">{{ m.hint }}</div>
                       </td>
                     </tr>
                   </sc-for>
@@ -1541,7 +1569,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
                 <div>
                   <div style="display: flex; justify-content: space-between; gap: var(--space-3); font-size: 12.5px; margin-bottom: 4px">
                     <span>{{ qr.label }}</span>
-                    <span style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ qr.text }}</span>
+                    <span style="font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ qr.text }}</span>
                   </div>
                   <div style="height: 5px; border-radius: 999px; background: color-mix(in srgb, var(--color-text) 9%, transparent); overflow: hidden">
                     <div style="height: 100%; width: {{ qr.pct }}; background: {{ qr.color }}"></div>
@@ -1575,7 +1603,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
             <tbody>
               <sc-for list="{{ companies }}" as="c" hint-placeholder-count="6">
                 <tr>
-                  <td><div style="font-weight: 500">{{ c.name }}</div><div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 50%, transparent)">{{ c.admin }}</div></td>
+                  <td><div style="font-weight: 500">{{ c.name }}</div><div style="font-size: 11px; color: var(--sc-ink-3)">{{ c.admin }}</div></td>
                   <td><span class="tag tag-neutral">{{ c.plan }}</span></td>
                   <td>{{ c.users }}</td>
                   <td>{{ c.items }}</td>
@@ -1609,9 +1637,9 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
         <div style="width: 30px; height: 30px; border-radius: 10px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 16px; color: var(--sc-card)">S</div>
         <div style="font-family: var(--font-heading); font-size: 20px; letter-spacing: -0.01em">{{ serviceName }}</div>
       </div>
-      <a href="#funktionen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Funktionen</a>
-      <a href="#preise" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Preise</a>
-      <a href="#fragen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Fragen</a>
+      <a href="#funktionen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: var(--sc-ink-2)" data-i18n>Funktionen</a>
+      <a href="#preise" data-wide-only style="font-size: 13.5px; text-decoration: none; color: var(--sc-ink-2)" data-i18n>Preise</a>
+      <a href="#fragen" data-wide-only style="font-size: 13.5px; text-decoration: none; color: var(--sc-ink-2)" data-i18n>Fragen</a>
       <select class="input" style="width: 74px; flex: none; padding-inline: 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
         <option value="de">DE</option>
         <option value="en">EN</option>
@@ -1622,17 +1650,17 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
     </div>
   </header>
 
-  <section data-landing-hero style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-8); padding-bottom: var(--space-8)">
+  <section data-landing-hero style="background: var(--color-accent-900); color: #fff; padding: var(--space-8) var(--space-6)"><div style="max-width: 1120px; margin: 0 auto">
     <div data-two style="align-items: center">
       <div style="min-width: 0">
-        <span class="tag tag-accent" style="margin-bottom: var(--space-4); display: inline-block" data-i18n>Derzeit kostenlos</span>
+        <span class="tag" style="margin-bottom: var(--space-4); display: inline-block; background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.4); color: #fff" data-i18n>Derzeit kostenlos</span>
         <h1 style="font-family: var(--font-heading); font-size: clamp(34px, 5vw, 52px); line-height: 1.03; letter-spacing: -0.02em; margin: 0 0 var(--space-4)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
-        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Entnahme am Regal scannen, Bestand ist sofort aktuell. Unterschreitet ein Artikel den Mindestbestand, geht die Mail an die verantwortliche Person — nicht an alle.</p>
+        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: var(--sc-ink-2)" data-i18n>Entnahme am Regal scannen, Bestand ist sofort aktuell. Unterschreitet ein Artikel den Mindestbestand, geht die Mail an die verantwortliche Person — nicht an alle.</p>
         <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4)">
           <button class="btn btn-primary" style="height: 48px; padding-inline: 26px; font-size: 15px; white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
           <button class="btn btn-secondary" style="height: 48px; padding-inline: 22px; font-size: 15px; white-space: nowrap" onClick="{{ viewLogin }}"><span data-i18n>Ich habe ein Konto</span></button>
         </div>
-        <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Keine Karte nötig · Einrichtung in einer Stunde · jederzeit kündbar</div>
+        <div style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Keine Karte nötig · Einrichtung in einer Stunde · jederzeit kündbar</div>
       </div>
 
       <div class="card" style="padding: var(--space-3); gap: var(--space-2)">
@@ -1651,37 +1679,38 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           </thead>
           <tbody>
             <tr>
-              <td>Nitrilhandschuhe M<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal A-2</div></td>
+              <td>Nitrilhandschuhe M<div style="font-size: 11px; color: var(--sc-ink-2)">Regal A-2</div></td>
               <td align="right" style="font-variant-numeric: tabular-nums">18</td>
-              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">40</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">40</td>
               <td align="right"><span class="tag tag-accent">niedrig</span></td>
             </tr>
             <tr>
-              <td>Kabelbinder 200 mm<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal C-1</div></td>
+              <td>Kabelbinder 200 mm<div style="font-size: 11px; color: var(--sc-ink-2)">Regal C-1</div></td>
               <td align="right" style="font-variant-numeric: tabular-nums">640</td>
-              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">200</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">200</td>
               <td align="right"><span class="tag tag-neutral">ok</span></td>
             </tr>
             <tr>
-              <td>Etiketten 62 mm<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Lager 1</div></td>
+              <td>Etiketten 62 mm<div style="font-size: 11px; color: var(--sc-ink-2)">Lager 1</div></td>
               <td align="right" style="font-variant-numeric: tabular-nums">3</td>
-              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">10</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">10</td>
               <td align="right"><span class="tag tag-outline">bestellt</span></td>
             </tr>
             <tr>
-              <td>Reinigungstücher<div style="font-size: 11px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">Regal B-4</div></td>
+              <td>Reinigungstücher<div style="font-size: 11px; color: var(--sc-ink-2)">Regal B-4</div></td>
               <td align="right" style="font-variant-numeric: tabular-nums">96</td>
-              <td align="right" style="font-variant-numeric: tabular-nums; color: color-mix(in srgb, var(--color-text) 60%, transparent)">50</td>
+              <td align="right" style="font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">50</td>
               <td align="right"><span class="tag tag-neutral">ok</span></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
+    </div>
   </section>
 
-  <section style="background: var(--sc-card); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
-    <div style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-4); padding-bottom: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); font-size: 13px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+  <section style="background: var(--sc-card); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
+    <div style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); padding-top: var(--space-4); padding-bottom: var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-4) var(--space-8); font-size: 13px; color: var(--sc-ink-2)">
       <span data-i18n>QR-Etiketten in fünf Formaten</span>
       <span data-i18n>Excel- und CSV-Import</span>
       <span data-i18n>Rollen und Rechte pro Person</span>
@@ -1693,61 +1722,61 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
   <section style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6)">
     <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>So läuft es</div>
     <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Drei Handgriffe, kein Papier.</h2>
-    <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Wer etwas herausnimmt, scannt. Alles andere passiert von selbst.</p>
+    <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: var(--sc-ink-2)" data-i18n>Wer etwas herausnimmt, scannt. Alles andere passiert von selbst.</p>
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-6)">
         <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
           <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">1</div>
           <div>
             <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Scannen</h3>
-            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>QR-Code am Regal mit dem Handy scannen. Kein Gerät kaufen, keine App installieren — die Kamera genügt.</p>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>QR-Code am Regal mit dem Handy scannen. Kein Gerät kaufen, keine App installieren — die Kamera genügt.</p>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
           <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">2</div>
           <div>
             <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Menge buchen</h3>
-            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Entnahme oder Nachfüllung eintragen. Der Bestand schreibt sich fort, die Buchung bleibt mit Person und Zeit im Verlauf.</p>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Entnahme oder Nachfüllung eintragen. Der Bestand schreibt sich fort, die Buchung bleibt mit Person und Zeit im Verlauf.</p>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--space-3); align-items: start">
           <div style="width: 34px; height: 34px; border-radius: 50%; background: var(--color-accent); color: var(--sc-card); display: grid; place-items: center; font-family: var(--font-heading); font-size: 17px">3</div>
           <div>
             <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0; margin-bottom: 4px" data-i18n>Nachbestellen</h3>
-            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Unter dem Mindestbestand geht die Warnung raus — sofort oder gesammelt als Bestellliste, je nach Einstellung.</p>
+            <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Unter dem Mindestbestand geht die Warnung raus — sofort oder gesammelt als Bestellliste, je nach Einstellung.</p>
           </div>
         </div>
     </div>
   </section>
 
-  <section id="funktionen" style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); background: var(--sc-card); max-width: none">
+  <section id="funktionen" style="width: 100%; padding: var(--space-8) var(--space-6); background: var(--sc-tint)">
     <div style="max-width: 1120px; margin: 0 auto">
       <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Funktionen</div>
       <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Für das Lager gedacht, nicht für die Buchhaltung.</h2>
-      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Alles, was ein Betriebslager braucht — und nichts, was danach noch erklärt werden muss.</p>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: var(--sc-ink-2)" data-i18n>Alles, was ein Betriebslager braucht — und nichts, was danach noch erklärt werden muss.</p>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4)">
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Scan-Entnahme</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Ein QR-Code je Artikel oder Regalplatz. Scannen, Menge tippen, fertig — auch mit Handschuhen bedienbar.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Ein QR-Code je Artikel oder Regalplatz. Scannen, Menge tippen, fertig — auch mit Handschuhen bedienbar.</p>
         </div>
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Verantwortung je Artikel</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Eine verantwortliche Person und bis zu drei Stellvertretungen. Die Warnmail geht an sie, in CC an die Stellvertretung.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Eine verantwortliche Person und bis zu drei Stellvertretungen. Die Warnmail geht an sie, in CC an die Stellvertretung.</p>
         </div>
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Mindestbestand und Mail</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Sofort, täglich, wöchentlich oder monatlich. Sammelmails fassen alles zu einer Bestellliste zusammen.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Sofort, täglich, wöchentlich oder monatlich. Sammelmails fassen alles zu einer Bestellliste zusammen.</p>
         </div>
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Etiketten drucken</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>QR-Etiketten in fünf Formaten, von 2×4 bis 5×13 je Blatt, dazu die Endlosrolle mit 62 mm.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>QR-Etiketten in fünf Formaten, von 2×4 bis 5×13 je Blatt, dazu die Endlosrolle mit 62 mm.</p>
         </div>
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Excel-Import</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Bestehende Listen mit Vorlage übernehmen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Bestehende Listen mit Vorlage übernehmen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
         </div>
         <div class="card">
           <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Rollen und Rechte</h3>
-          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Inhabende Person, Lagerleitung, Mitarbeitende, Leser — und einzelne Rechte pro Person, wenn eine Rolle nicht passt.</p>
+          <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Inhabende Person, Lagerleitung, Mitarbeitende, Leser — und einzelne Rechte pro Person, wenn eine Rolle nicht passt.</p>
         </div>
       </div>
     </div>
@@ -1758,8 +1787,8 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       <div style="min-width: 0">
         <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Sicherheit</div>
         <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Eine Firma sieht nur ihre eigenen Zeilen.</h2>
-        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-bottom: var(--space-4)" data-i18n>Die Trennung steckt nicht in der Oberfläche, sondern in der Datenbank: jede Zeile trägt eine Firmenkennung, und die Regel dazu lässt nur die eigene durch. Auch ein Zugriff an der Oberfläche vorbei bringt nichts.</p>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Produktbilder liegen in einer geschlossenen Ablage und werden über Adressen geladen, die nach einer Stunde verfallen. Der Mailschlüssel liegt in der Datenbank, nicht im Browser.</p>
+        <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: var(--sc-ink-2); margin-bottom: var(--space-4)" data-i18n>Die Trennung steckt nicht in der Oberfläche, sondern in der Datenbank: jede Zeile trägt eine Firmenkennung, und die Regel dazu lässt nur die eigene durch. Auch ein Zugriff an der Oberfläche vorbei bringt nichts.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Produktbilder liegen in einer geschlossenen Ablage und werden über Adressen geladen, die nach einer Stunde verfallen. Der Mailschlüssel liegt in der Datenbank, nicht im Browser.</p>
       </div>
       <div class="card">
         <h3 style="font-family: var(--font-heading); font-size: 20px; margin: 0" data-i18n>Kurz gesagt</h3>
@@ -1789,21 +1818,21 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
     </div>
   </section>
 
-  <section id="preise" style="max-width: 1120px; width: 100%; margin: 0 auto; padding: var(--space-8) var(--space-6); background: var(--sc-card); max-width: none">
+  <section id="preise" style="width: 100%; padding: var(--space-8) var(--space-6); background: var(--sc-card)">
     <div style="max-width: 1120px; margin: 0 auto">
       <div style="font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-accent-700); margin-bottom: var(--space-2)" data-i18n>Preise</div>
       <h2 style="font-family: var(--font-heading); font-size: clamp(26px, 3.4vw, 36px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--space-3)" data-i18n>Erst arbeiten, dann zahlen.</h2>
-      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Alle Tarife sind derzeit kostenlos. Bevor sich daran etwas ändert, melden wir uns — ohne Zustimmung wird nichts abgebucht.</p>
+      <p style="font-size: 16px; line-height: 1.55; margin: 0 0 var(--space-6); max-width: 58ch; color: var(--sc-ink-2)" data-i18n>Alle Tarife sind derzeit kostenlos. Bevor sich daran etwas ändert, melden wir uns — ohne Zustimmung wird nichts abgebucht.</p>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4); align-items: start">
 
         <div class="card" style="gap: var(--space-3)">
           <div>
             <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Start</div>
-            <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für ein Lager und ein kleines Team</div>
+            <div style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Für ein Lager und ein kleines Team</div>
           </div>
           <div style="display: flex; align-items: baseline; gap: 6px">
             <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">0 €</span>
-            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>für immer</span>
+            <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>für immer</span>
           </div>
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
             <li data-i18n>3 Personen</li>
@@ -1818,13 +1847,13 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <div style="display: flex; align-items: flex-start; gap: var(--space-2)">
             <div style="margin-right: auto">
               <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Team</div>
-              <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Mehrere Lager, mehrere Schichten</div>
+              <div style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Mehrere Lager, mehrere Schichten</div>
             </div>
             <span class="tag tag-accent" data-i18n>derzeit gratis</span>
           </div>
           <div style="display: flex; align-items: baseline; gap: 6px">
             <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">19 €</span>
-            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>je Monat, geplant</span>
+            <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>je Monat, geplant</span>
           </div>
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
             <li data-i18n>15 Personen</li>
@@ -1839,11 +1868,11 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
         <div class="card" style="gap: var(--space-3)">
           <div>
             <div style="font-family: var(--font-heading); font-size: 22px" data-i18n>Betrieb</div>
-            <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für gewachsene Lagerstrukturen</div>
+            <div style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Für gewachsene Lagerstrukturen</div>
           </div>
           <div style="display: flex; align-items: baseline; gap: 6px">
             <span style="font-family: var(--font-heading); font-size: 38px; line-height: 1">49 €</span>
-            <span style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>je Monat, geplant</span>
+            <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>je Monat, geplant</span>
           </div>
           <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; font-size: 13.5px">
             <li data-i18n>Personen unbegrenzt</li>
@@ -1855,7 +1884,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <button class="btn btn-secondary btn-block" style="white-space: nowrap" onClick="{{ viewRegister }}"><span data-i18n>Kostenlos starten</span></button>
         </div>
       </div>
-      <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-4)" data-i18n>Preise ohne Umsatzsteuer. Ein Wechsel ist jederzeit möglich, eine Kündigung ebenso — die eigenen Daten lassen sich vorher als CSV herausziehen.</p>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-4)" data-i18n>Preise ohne Umsatzsteuer. Ein Wechsel ist jederzeit möglich, eine Kündigung ebenso — die eigenen Daten lassen sich vorher als CSV herausziehen.</p>
     </div>
   </section>
 
@@ -1865,27 +1894,27 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
     <div style="margin-top: var(--space-4)">
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Was kostet es wirklich?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Derzeit nichts. Die Tarife stehen oben, damit klar ist, was später wofür gilt. Wird abgerechnet, fragen wir vorher — ohne Zustimmung passiert nichts.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Derzeit nichts. Die Tarife stehen oben, damit klar ist, was später wofür gilt. Wird abgerechnet, fragen wir vorher — ohne Zustimmung passiert nichts.</p>
       </details>
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Brauchen wir besondere Geräte?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Nein. Jedes Handy mit Kamera genügt, der QR-Code klebt am Regal. Etiketten druckst du selbst, auf normalem Papier oder mit einem Rollendrucker.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Nein. Jedes Handy mit Kamera genügt, der QR-Code klebt am Regal. Etiketten druckst du selbst, auf normalem Papier oder mit einem Rollendrucker.</p>
       </details>
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Können wir unsere bestehende Liste übernehmen?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Ja. Die Importvorlage herunterladen, eigene Daten hineinkopieren, hochladen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Ja. Die Importvorlage herunterladen, eigene Daten hineinkopieren, hochladen. Artikelnummer, Mindestbestand, Ort und Lieferant kommen mit.</p>
       </details>
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Wer bekommt die Warnmails?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Die verantwortliche Person des Artikels, in CC die Stellvertretung. Auf Wunsch statt Einzelmails eine gesammelte Bestellliste zu einer festen Uhrzeit.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Die verantwortliche Person des Artikels, in CC die Stellvertretung. Auf Wunsch statt Einzelmails eine gesammelte Bestellliste zu einer festen Uhrzeit.</p>
       </details>
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Sehen andere Firmen unsere Daten?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Nein. Jede Zeile trägt eine Firmenkennung, und die Datenbank gibt nur Zeilen der eigenen Firma heraus. Das gilt auch für Zugriffe an der Oberfläche vorbei.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Nein. Jede Zeile trägt eine Firmenkennung, und die Datenbank gibt nur Zeilen der eigenen Firma heraus. Das gilt auch für Zugriffe an der Oberfläche vorbei.</p>
       </details>
       <details style="border-bottom: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding: var(--space-3) 0">
         <summary style="font-family: var(--font-heading); font-size: 18px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)" data-i18n>Wie kommen wir wieder heraus?</summary>
-        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); margin-top: var(--space-2)" data-i18n>Kündigung jederzeit. Produktliste, Bestandsverlauf und Bestellliste lassen sich als CSV herunterladen, danach wird die Firma samt Daten gelöscht.</p>
+        <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2); margin-top: var(--space-2)" data-i18n>Kündigung jederzeit. Produktliste, Bestandsverlauf und Bestellliste lassen sich als CSV herunterladen, danach wird die Firma samt Daten gelöscht.</p>
       </details>
     </div>
   </section>
@@ -1905,28 +1934,28 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <div style="width: 24px; height: 24px; border-radius: 8px; background: var(--color-accent); display: grid; place-items: center; font-family: var(--font-heading); font-size: 13px; color: var(--sc-card)">S</div>
           <div style="font-family: var(--font-heading); font-size: 17px">{{ serviceName }}</div>
         </div>
-        <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Lagerverwaltung für Betriebe. Betrieben von der Internet GmbH.</div>
+        <div style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Lagerverwaltung für Betriebe. Betrieben von der Internet GmbH.</div>
       </div>
       <div style="display: flex; flex-direction: column; gap: 7px">
-        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Produkt</div>
-        <a href="#funktionen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Funktionen</a>
-        <a href="#preise" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Preise</a>
-        <a href="#fragen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Fragen</a>
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Produkt</div>
+        <a href="#funktionen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Funktionen</a>
+        <a href="#preise" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Preise</a>
+        <a href="#fragen" style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left; text-decoration: none" data-i18n>Fragen</a>
       </div>
       <div style="display: flex; flex-direction: column; gap: 7px">
-        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Rechtliches</div>
-        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewImpressum }}"><span data-i18n>Impressum</span></button>
-        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewDatenschutz }}"><span data-i18n>Datenschutz</span></button>
-        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewAgb }}"><span data-i18n>AGB</span></button>
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Rechtliches</div>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left" onClick="{{ viewImpressum }}"><span data-i18n>Impressum</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left" onClick="{{ viewDatenschutz }}"><span data-i18n>Datenschutz</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left" onClick="{{ viewAgb }}"><span data-i18n>AGB</span></button>
       </div>
       <div style="display: flex; flex-direction: column; gap: 7px">
-        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Zugang</div>
-        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
-        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); cursor: pointer; text-align: left" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
+        <div style="font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Zugang</div>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left" onClick="{{ viewLogin }}"><span data-i18n>Anmelden</span></button>
+        <button style="background: none; border: 0; padding: 0; font: inherit; font-size: 12.5px; color: var(--sc-ink-2); cursor: pointer; text-align: left" onClick="{{ viewRegister }}"><span data-i18n>Firma registrieren</span></button>
       </div>
     </div>
     <div style="border-top: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-      <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ serviceName }} · Internet GmbH</div>
+      <div style="max-width: 1120px; margin: 0 auto; padding: var(--space-3) var(--space-6); font-size: 12px; color: var(--sc-ink-2)">{{ serviceName }} · Internet GmbH</div>
     </div>
   </footer>
 </div>
@@ -1963,7 +1992,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
     <sc-if value="{{ legalIsImpressum }}" hint-placeholder-val="{{ true }}">
       <div>
         <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Impressum</h1>
-        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Angaben gemäß § 5 Digitale-Dienste-Gesetz.</p>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: var(--sc-ink-2)" data-i18n>Angaben gemäß § 5 Digitale-Dienste-Gesetz.</p>
 
         <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>Anbieter</h2>
         <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Firmenname]<br>[Straße und Hausnummer]<br>[PLZ und Ort]<br>[Land]</p>
@@ -1994,7 +2023,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
     <sc-if value="{{ legalIsDatenschutz }}" hint-placeholder-val="{{ false }}">
       <div>
         <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Datenschutzerklärung</h1>
-        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Diese Erklärung beschreibt, welche Daten bei der Nutzung der Lagerverwaltung verarbeitet werden, zu welchem Zweck und auf welcher Grundlage.</p>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: var(--sc-ink-2)" data-i18n>Diese Erklärung beschreibt, welche Daten bei der Nutzung der Lagerverwaltung verarbeitet werden, zu welchem Zweck und auf welcher Grundlage.</p>
 
         <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>1 · Verantwortlicher</h2>
         <p style="font-size: 14px; line-height: 1.7; margin: 0 0 var(--space-3)">[Firmenname]<br>[Straße und Hausnummer]<br>[PLZ und Ort]<br><span data-i18n>E-Mail</span>: [datenschutz@domain.de]</p>
@@ -2042,14 +2071,14 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
         <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>8 · Datensicherheit</h2>
         <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Die Übertragung erfolgt verschlüsselt. In der Datenbank trennt eine Regel auf Zeilenebene die Firmen voneinander: Anfragen geben nur Zeilen der eigenen Firma heraus. Dateien liegen in einer geschlossenen Ablage und werden über Adressen ausgeliefert, die nach einer Stunde verfallen.</p>
 
-        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: var(--sc-ink-2); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
       </div>
     </sc-if>
 
     <sc-if value="{{ legalIsAgb }}" hint-placeholder-val="{{ false }}">
       <div>
         <h1 style="font-family: var(--font-heading); font-size: 34px; line-height: 1.08; margin: 0 0 var(--space-2)" data-i18n>Allgemeine Geschäftsbedingungen</h1>
-        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent)" data-i18n>Für die Nutzung der Lagerverwaltung durch Unternehmen.</p>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: var(--sc-ink-2)" data-i18n>Für die Nutzung der Lagerverwaltung durch Unternehmen.</p>
 
         <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 1 Geltungsbereich</h2>
         <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Diese Bedingungen gelten für die Nutzung der Lagerverwaltung zwischen [Firmenname] als Anbieter und dem Kunden. Der Dienst richtet sich an Unternehmen; eine Nutzung durch Verbraucher ist nicht vorgesehen.</p>
@@ -2084,13 +2113,13 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
         <h2 style="font-family: var(--font-heading); font-size: 26px; line-height: 1.12; margin: var(--space-6) 0 var(--space-2)" data-i18n>§ 11 Recht und Gerichtsstand</h2>
         <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch" data-i18n>Es gilt deutsches Recht. Gerichtsstand ist, soweit zulässig, [Ort].</p>
 
-        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: color-mix(in srgb, var(--color-text) 60%, transparent); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
+        <p style="font-size: 14px; line-height: 1.6; margin: 0 0 var(--space-3); max-width: 70ch; color: var(--sc-ink-2); margin-top: var(--space-6)" data-i18n>Stand: [Monat Jahr]</p>
       </div>
     </sc-if>
   </main>
 
   <footer style="border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); background: var(--sc-card)">
-    <div style="max-width: 820px; margin: 0 auto; padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">
+    <div style="max-width: 820px; margin: 0 auto; padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-4); flex-wrap: wrap; font-size: 12.5px; color: var(--sc-ink-2)">
       <span style="margin-right: auto">{{ serviceName }} · Internet GmbH</span>
       <button style="background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer" onClick="{{ viewLanding }}"><span data-i18n>Startseite</span></button>
     </div>
@@ -2122,7 +2151,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
 
   <div data-authintro style="min-width: 0">
     <h1 style="font-family: var(--font-heading); font-size: clamp(30px, 4vw, 44px); line-height: 1.06; letter-spacing: -0.02em; margin: 0 0 var(--space-4)" data-i18n>Das Lager im Griff — mit einem Scan.</h1>
-    <p style="font-size: 16px; line-height: 1.6; max-width: 26em; margin: 0 0 var(--space-6); color: color-mix(in srgb, var(--color-text) 72%, transparent)" data-i18n>Scannen, Menge eingeben, fertig. Den Rest macht das System.</p>
+    <p style="font-size: 16px; line-height: 1.6; max-width: 26em; margin: 0 0 var(--space-6); color: var(--sc-ink-2)" data-i18n>Scannen, Menge eingeben, fertig. Den Rest macht das System.</p>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-4) var(--space-6); margin-bottom: var(--space-6)">
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
@@ -2143,7 +2172,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       </div>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: color-mix(in srgb, var(--color-text) 55%, transparent)">
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--sc-ink-2)">
       <span style="width: 26px; height: 1px; background: var(--color-accent)"></span>
       <span data-i18n>Derzeit kostenlos, jederzeit kündbar.</span>
     </div>
@@ -2163,7 +2192,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
         <button class="card elev-sm" style="text-align: left; cursor: pointer; width: 100%; padding: var(--space-6); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3)" onClick="{{ viewRegister }}">
           <span>
             <span style="display: block; font-family: var(--font-heading); font-size: 23px; line-height: 1.15" data-i18n>Registrieren</span>
-            <span style="display: block; font-size: 13.5px; color: color-mix(in srgb, var(--color-text) 62%, transparent); margin-top: 2px" data-i18n>Neue Firma anlegen</span>
+            <span style="display: block; font-size: 13.5px; color: var(--sc-ink-2); margin-top: 2px" data-i18n>Neue Firma anlegen</span>
           </span>
           <span style="font-size: 22px; color: var(--color-accent)">→</span>
         </button>
@@ -2180,7 +2209,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>Passwort</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="current-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setAuthPw }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -2219,7 +2248,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -2240,7 +2269,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort wiederholen</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw2 }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -2276,19 +2305,19 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: color-mix(in srgb, var(--color-text) 55%, transparent)" data-i18n>Derzeit kostenlos, jederzeit kündbar.</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Derzeit kostenlos, jederzeit kündbar.</div>
         </div>
       </sc-if>
 
       <sc-if value="{{ authIsConfirm }}" hint-placeholder-val="{{ false }}">
         <div style="text-align: center">
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>E-Mail bestätigen</h3>
-          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ confirmNote }}</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)">{{ confirmNote }}</p>
           <div style="font-family: var(--font-heading); font-size: 40px; line-height: 1; color: {{ clockColor }}">{{ clock }}</div>
-          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-6); color: color-mix(in srgb, var(--color-text) 55%, transparent)">{{ clockLabel }}</div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--space-6); color: var(--sc-ink-2)">{{ clockLabel }}</div>
           <sc-if value="{{ regFailed }}" hint-placeholder-val="{{ false }}">
             <div style="padding: 10px 12px; margin-bottom: var(--space-3); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ regError }}</div>
-            <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); color: color-mix(in srgb, var(--color-text) 72%, transparent)">{{ regHint }}</div>
+            <div style="padding: 10px 12px; margin-bottom: var(--space-4); border-radius: var(--radius-md); font-size: 12.5px; text-align: left; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); color: var(--sc-ink-2)">{{ regHint }}</div>
           </sc-if>
           <button class="btn btn-secondary btn-block" style="height: 46px; font-size: 15px" onClick="{{ resendMail }}"><span data-i18n>Neue Mail anfordern</span></button>
           <div style="display: flex; justify-content: center; margin-top: var(--space-3)">
@@ -2300,7 +2329,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       <sc-if value="{{ authIsMfa }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Zweiter Faktor</h3>
-          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Sechsstelligen Code aus deiner Authenticator-App eingeben.</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Sechsstelligen Code aus deiner Authenticator-App eingeben.</p>
           <div class="field" style="margin-bottom: var(--space-4)">
             <label data-i18n>Code</label>
             <input class="input" inputmode="numeric" autocomplete="one-time-code" maxlength="6" style="font-family: var(--font-heading); font-size: 24px; letter-spacing: 0.3em; text-align: center" onInput="{{ setMfaCode }}">
@@ -2312,7 +2341,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       <sc-if value="{{ authIsForgot }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Passwort zurücksetzen</h3>
-          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Wir schicken dir einen Link, der 15 Minuten gültig ist.</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Wir schicken dir einen Link, der 15 Minuten gültig ist.</p>
           <div class="field" style="margin-bottom: var(--space-4)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" onInput="{{ setAuthEmail }}"></div>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" onClick="{{ sendReset }}"><span data-i18n>Link senden</span></button>
         </div>
@@ -2321,13 +2350,13 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       <sc-if value="{{ authIsInvite }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Zugang einrichten</h3>
-          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 65%, transparent)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: color-mix(in srgb, var(--color-text) 55%, transparent)" onClick="{{ togglePw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
                 <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
@@ -2375,7 +2404,7 @@ Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace,
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
       <div class="card-kicker">{{ toastKicker }}</div>
       <div style="font-family: var(--font-heading); font-size: 16px">{{ toastTitle }}</div>
-      <div style="font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 65%, transparent)">{{ toastBody }}</div>
+      <div style="font-size: 12.5px; color: var(--sc-ink-2)">{{ toastBody }}</div>
       <button class="btn btn-ghost" style="padding: 0; margin-top: 4px" onClick="{{ closeToast }}"><span data-i18n>Schließen</span></button>
     </div>
   </div>
@@ -2395,7 +2424,7 @@ const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRo
 
 const DICT = {
   en: {
-    "Übersicht": "Overview", "Produkte": "Products", "Scannen": "Scan", "Produkt anlegen": "Add product",
+    "Übersicht": "Overview", "Produkte": "Products", "Produktverwaltung": "Product management", "Vorlage herunterladen": "Download template", "Ausgefüllte Liste hier hochladen": "Upload your filled-in list here", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Drag a file here or click · .csv up to 5 MB", "Leere Liste — nur Kopfzeile": "Empty list — header only", "Mit allen vorhandenen Produkten": "With every existing product", "Vorlage mit Bestand": "Template with stock", "Leere Vorlage": "Empty template", "Vorlage": "Template", "Datei unten hochladen, Spalten prüfen, importieren": "Upload the file below, check the columns, import", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Pick a template: empty, or with today\u2019s stock", "Scannen": "Scan", "Produkt anlegen": "Add product",
     "QR-Codes": "QR codes", "Team & Rechte": "Team & rights", "Einstellungen": "Settings",
     "Betriebs-Konsole": "Operator console", "Angemeldet als": "Signed in as", "Abmelden": "Sign out",
     "Hell": "Light", "Dunkel": "Dark", "System": "System", "Artikel im Lager": "Items in stock",
@@ -2547,7 +2576,7 @@ const DICT = {
     "Registrierung und Anmeldung sind durch Rate-Limit, Bot-Prüfung und Sperre nach fünf Fehlversuchen geschützt.": "Registration and sign-in are protected by rate limiting, a bot check and a lockout after five failed attempts."
   },
   sv: {
-    "Übersicht": "Översikt", "Produkte": "Produkter", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
+    "Übersicht": "Översikt", "Produkte": "Produkter", "Produktverwaltung": "Artikelhantering", "Vorlage herunterladen": "Ladda ner mall", "Ausgefüllte Liste hier hochladen": "Ladda upp din ifyllda lista här", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Dra en fil hit eller klicka · .csv upp till 5 MB", "Leere Liste — nur Kopfzeile": "Tom lista — bara rubrik", "Mit allen vorhandenen Produkten": "Med alla befintliga artiklar", "Vorlage mit Bestand": "Mall med lager", "Leere Vorlage": "Tom mall", "Vorlage": "Mall", "Datei unten hochladen, Spalten prüfen, importieren": "Ladda upp filen nedan, kontrollera kolumnerna, importera", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Välj mall: tom eller med dagens lager", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
     "QR-Codes": "QR-koder", "Team & Rechte": "Team & rättigheter", "Einstellungen": "Inställningar",
     "Betriebs-Konsole": "Operatörskonsol", "Angemeldet als": "Inloggad som", "Abmelden": "Logga ut",
     "Hell": "Ljust", "Dunkel": "Mörkt", "System": "System", "Artikel im Lager": "Artiklar i lager",
@@ -2845,11 +2874,11 @@ const HELP_TOPICS = [
           "Löschen geht nur, solange kein Produkt darin liegt — sonst wäre der Ort eines Produkts plötzlich leer. Der Zähler rechts zeigt, wie viele Produkte betroffen sind."],
       go: "settings", linkLabel: "Zu den Lagerorten" },
     { q: "Wie lege ich ein Produkt an?",
-      a: ["Stammdaten → Produkt anlegen. Pflicht ist nur der Name; alles andere lässt sich später ergänzen.",
+      a: ["Stammdaten → Produktverwaltung. Pflicht ist nur der Name; alles andere lässt sich später ergänzen.",
           "Gleiche Namen sind erlaubt, solange sich Lagerort oder Quantität unterscheiden — „Wasser 0,5 l\" kann im Keller und in der Küche liegen. Stimmen Name, Lagerort und Quantität überein, bleibt der Knopf gesperrt."],
       go: "new", linkLabel: "Produkt anlegen" },
     { q: "Wie übernehme ich eine bestehende Liste?",
-      a: ["Stammdaten → Produkt anlegen, unten die Karte „Viele Produkte aus einer Tabelle importieren\". Entweder die CSV-Vorlage herunterladen und ausgefüllt hochladen — oder den Bereich in Excel kopieren und unter „Oder die Liste hier einfügen\" einsetzen.",
+      a: ["Stammdaten → Produktverwaltung, unten die Karte „Viele Produkte aus einer Tabelle importieren\". Bei „Vorlage\" wählen, ob die Datei leer sein soll oder den heutigen Bestand enthält, herunterladen, ausfüllen und in das blau umrandete Feld hochladen.",
           "Excel-Dateien kann der Browser nicht lesen. In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und diese Datei wählen.",
           "Erkannt werden Spalten wie Name, Artikelnummer, Istbestand, Mindestbestand, Lagerort, Preis, Lieferant. Zeilen ohne Namen gelten als Zwischenüberschrift und werden übersprungen — Kategoriezeilen landen also nicht als Produkt im Lager."],
       go: "new", linkLabel: "Zum Import" },
@@ -2980,7 +3009,7 @@ class Component extends DCLogic {
       priceHist: {}, pricePicked: [], pcProduct: "", pcDate: "", pcPrice: "",
       helpQuery: "", onboardHidden: false, qrPrinted: false, mailChecked: false,
       camState: "idle", camErrorText: "", torchOn: false, facing: "environment",
-      hasTorch: false, hasSwitch: false, pasteText: "", importMap: [],
+      hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -3020,7 +3049,7 @@ class Component extends DCLogic {
 
   screenKey(label) {
     return { "Übersicht":"dashboard", "Produkte":"products", "Scannen":"scan", "QR-Codes":"qr",
-      "Produkt anlegen":"new", "Team & Rechte":"team", "Einstellungen":"settings",
+      "Produkt anlegen":"new", "Produktverwaltung":"new", "Team & Rechte":"team", "Einstellungen":"settings",
       "Bestandsverlauf":"history", "Events":"events" }[label] || "dashboard";
   }
   roleKey(label) {
@@ -3363,7 +3392,7 @@ class Component extends DCLogic {
   async startCamera() {
     if (this.state.camState === "running") return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      this.setState({ camState: "error", camErrorText: this.tr("Dieser Browser gibt keinen Zugriff auf die Kamera. Bitte den Code unten eintippen.") });
+      this.setState({ camState: "error", camErrorText: this.tr("Dieser Browser gibt keinen Zugriff auf die Kamera. Das ist meist der Fall, wenn die Seite nicht über https:// geladen wurde. Bitte den Code unten eintippen.") });
       return;
     }
     try {
@@ -3386,11 +3415,13 @@ class Component extends DCLogic {
         many = devs.filter(d => d.kind === "videoinput").length > 1;
       } catch (e) {}
       this.lastCode = null;
+      this.scanning = true;
       this.setState({ camState: "running", camErrorText: "", torchOn: false,
                       hasTorch: !!(caps && caps.torch), hasSwitch: many });
       this.detectLoop();
     } catch (err) {
       const n = String((err && err.name) || "");
+      this.scanning = false;
       const msg = n === "NotAllowedError"
         ? this.tr("Der Zugriff wurde abgelehnt. In der Adresszeile auf das Schloss tippen, die Kamera erlauben und erneut starten.")
         : n === "NotFoundError"
@@ -3403,6 +3434,7 @@ class Component extends DCLogic {
   }
 
   stopCamera() {
+    this.scanning = false;
     cancelAnimationFrame(this.rafId);
     clearTimeout(this.scanT);
     if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
@@ -3433,25 +3465,35 @@ class Component extends DCLogic {
   loadFallback() {
     if (window.jsQR) return Promise.resolve(window.jsQR);
     if (this.jsqrP) return this.jsqrP;
-    this.jsqrP = new Promise((res, rej) => {
+    const urls = [
+      "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js",
+      "https://unpkg.com/jsqr@1.4.0/dist/jsQR.js",
+      "https://cdn.jsdelivr.net/gh/cozmo/jsQR@master/dist/jsQR.js"
+    ];
+    const tryOne = i => new Promise((res, rej) => {
+      if (i >= urls.length) return rej(new Error("jsQR konnte nicht geladen werden"));
       const el = document.createElement("script");
-      el.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
-      el.onload = () => res(window.jsQR);
-      el.onerror = () => rej(new Error("jsQR konnte nicht geladen werden"));
+      el.src = urls[i];
+      el.onload = () => window.jsQR ? res(window.jsQR) : tryOne(i + 1).then(res, rej);
+      el.onerror = () => tryOne(i + 1).then(res, rej);
       document.head.appendChild(el);
     });
+    this.jsqrP = tryOne(0);
     return this.jsqrP;
   }
 
   detectLoop() {
-    if (this.state.camState !== "running") return;
+    // Die Schleife hängt an einem eigenen Merker, nicht am React-Zustand:
+    // setState wirkt erst nach diesem Durchlauf, ein Blick auf state.camState
+    // wäre hier noch der alte Wert und die Erkennung würde nie anlaufen.
+    if (!this.scanning) return;
     if (!this.detector && window.BarcodeDetector) {
       try { this.detector = new window.BarcodeDetector({ formats: ["qr_code", "ean_13", "code_128"] }); }
       catch (e) { this.detector = null; }
     }
 
     const step = async () => {
-      if (this.state.camState !== "running") return;
+      if (!this.scanning) return;
       const vid = this.video && this.video.current;
       if (vid && vid.readyState >= 2 && vid.videoWidth) {
         try {
@@ -3470,7 +3512,11 @@ class Component extends DCLogic {
             if (hit && hit.data) return this.onCode(hit.data);
           }
         } catch (e) {
-          if (!this.detector && !window.jsQR) {
+          // Bringt die eingebaute Erkennung dieses Format nicht, wird auf
+          // den nachgeladenen Leser umgeschwenkt statt abzubrechen.
+          if (this.detector) { this.detector = null; }
+          else if (!window.jsQR) {
+            this.scanning = false;
             this.setState({ camState: "error", camErrorText: this.tr("Die Erkennung konnte nicht geladen werden. Bitte den Code unten eintippen.") });
             return;
           }
@@ -3737,7 +3783,7 @@ class Component extends DCLogic {
   }
   rulesFor(v, v2) {
     const lang = this.state.lang;
-    const dim = "color-mix(in srgb, var(--color-text) 55%, transparent)";
+    const dim = "var(--sc-ink-2)";
     const rows = this.pwRules(v).map(r => ({ label: r[lang] || r.de, mark: r.ok ? "✓" : "", color: r.ok ? "var(--color-accent-700)" : dim }));
     if (v2 !== undefined) {
       const same = v.length > 0 && v === v2;
@@ -3750,7 +3796,7 @@ class Component extends DCLogic {
     const lang = this.state.lang;
     const rows = rules.map((r, i) => React.createElement("div", {
       key: i, style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "12px",
-        color: r.ok ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)" }
+        color: r.ok ? "var(--color-accent-700)" : "var(--sc-ink-2)" }
     }, [
       React.createElement("span", { key: "b", style: { width: "13px", height: "13px", flex: "none", border: "1px solid currentColor",
         display: "grid", placeItems: "center", fontSize: "9px", lineHeight: 1 } }, r.ok ? "✓" : ""),
@@ -3759,7 +3805,7 @@ class Component extends DCLogic {
     if (v2 !== undefined) {
       const same = v.length > 0 && v === v2;
       rows.push(React.createElement("div", { key: "m", style: { display: "flex", alignItems: "center", gap: "7px", fontSize: "12px",
-        color: same ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)" } }, [
+        color: same ? "var(--color-accent-700)" : "var(--sc-ink-2)" } }, [
         React.createElement("span", { key: "b", style: { width: "13px", height: "13px", flex: "none", border: "1px solid currentColor",
           display: "grid", placeItems: "center", fontSize: "9px", lineHeight: 1 } }, same ? "✓" : ""),
         React.createElement("span", { key: "t" }, this.tr("Wiederholung stimmt überein"))
@@ -3808,7 +3854,7 @@ class Component extends DCLogic {
     const onboardSteps = [
       { n: 1, title: "Lagerorte anlegen", note: "Einstellungen → Lagerorte: Regal, Schrank, Halle.",
         done: (st.placesOwn || []).length > 0, go: "settings" },
-      { n: 2, title: "Produkte anlegen oder Tabelle importieren", note: "Einzeln eintragen oder eine CSV hochladen.",
+      { n: 2, title: "Produkte anlegen oder Tabelle importieren", note: "Stammdaten → Produktverwaltung: einzeln eintragen oder eine CSV hochladen.",
         done: st.products.length > 0, go: "new" },
       { n: 3, title: "QR-Etiketten drucken", note: "Ein Code je Produkt, ans Regal geklebt.",
         done: !!st.qrPrinted, go: "qr" },
@@ -4002,7 +4048,7 @@ class Component extends DCLogic {
       screenTitle: {
         dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
         events: this.tr("Events"), history: this.tr("Bestandsverlauf"),
-        new: this.tr("Produkt anlegen"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
+        new: this.tr("Produktverwaltung"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
         settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole"),
         help: this.tr("Hilfe")
       }[st.screen] || "",
@@ -4043,7 +4089,7 @@ class Component extends DCLogic {
         title: this.tr(x.title), note: this.tr(x.note),
         mark: x.done ? "✓" : String(x.n),
         dotBg: x.done ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 10%, transparent)",
-        dotFg: x.done ? "var(--sc-card)" : "color-mix(in srgb, var(--color-text) 70%, transparent)",
+        dotFg: x.done ? "var(--sc-card)" : "var(--sc-ink-2)",
         cls: x.done ? "btn btn-ghost" : "btn btn-secondary",
         action: x.done ? this.tr("Ansehen") : this.tr("Erledigen"),
         go: () => this.go(x.go)
@@ -4052,7 +4098,6 @@ class Component extends DCLogic {
       navDashboard: this.navStyle("dashboard"), navProducts: this.navStyle("products"), navScan: this.navStyle("scan"),
       navNew: this.navStyle("new"), navQr: this.navStyle("qr"), navTeam: this.navStyle("team"),
       navSettings: this.navStyle("settings"), navAdmin: this.navStyle("admin"),
-      navImport: this.navStyle("import"),
       grpLager: this.groupStyle(["dashboard", "products", "scan", "detail"]),
       grpStamm: this.groupStyle(["new", "qr"]),
       grpVerw: this.groupStyle(["team", "settings", "admin"]),
@@ -4136,7 +4181,7 @@ class Component extends DCLogic {
       })(),
       unitNoteColor: (() => {
         const raw = String(st.newUnitFactor || "").trim();
-        return (/^[0-9]+$/.test(raw) && Number(raw) >= 2) ? "color-mix(in srgb, var(--color-text) 58%, transparent)" : "var(--color-accent-700)";
+        return (/^[0-9]+$/.test(raw) && Number(raw) >= 2) ? "var(--sc-ink-2)" : "var(--color-accent-700)";
       })(),
       addUnitDisabled: !String(st.newUnitName || "").trim()
         || !/^[0-9]+$/.test(String(st.newUnitFactor || "").trim())
@@ -4199,8 +4244,8 @@ class Component extends DCLogic {
               datum: e.datum.split("-").reverse().join("."), name: r.p.name,
               preis: this.money(e.preis),
               delta: d == null ? this.tr("erster Preis") : (d > 0 ? "+" : "") + this.money(d),
-              color: d == null ? "color-mix(in srgb, var(--color-text) 50%, transparent)"
-                : (d > 0 ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 70%, transparent)")
+              color: d == null ? "var(--sc-ink-3)"
+                : (d > 0 ? "var(--color-accent-700)" : "var(--sc-ink-2)")
             });
           });
         });
@@ -4493,6 +4538,16 @@ class Component extends DCLogic {
       toggleTorch: () => this.toggleTorch(),
       switchCamera: () => this.switchCamera(),
 
+      tplMode: st.tplMode,
+      setTplMode: e => this.setState({ tplMode: e.target.value }),
+      tplEmptyLabel: this.tr("Leere Liste — nur Kopfzeile"),
+      tplFilledLabel: this.tr("Mit allen vorhandenen Produkten") + " (" + activeProducts.length + ")",
+      tplNote: st.tplMode === "filled"
+        ? this.tr("Enthält den heutigen Stand. Zum Ändern eines Bestands die Zahl überschreiben und die Datei wieder hochladen — bestehende Produkte werden dabei übersprungen, nur neue Zeilen kommen hinzu.")
+        : this.tr("Nur die Kopfzeile mit allen Feldern. Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt."),
+      hasImportFile: !!st.importFile,
+      importFileNote: st.importFile ? "✓ " + st.importFile : "",
+
       pasteText: st.pasteText,
       setPasteText: e => this.setState({ pasteText: e.target.value }),
       pasteDisabled: String(st.pasteText || "").trim().split(/\r?\n/).filter(x => x.trim()).length < 2,
@@ -4604,16 +4659,31 @@ class Component extends DCLogic {
             : ""));
       },
       downloadTemplate: () => {
+        // Kopfzeile trägt alle Felder, inklusive der eigenen Merkmale.
         const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
           this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"), this.tr("Lieferant"),
           this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
           .concat(st.attrs.map(a => a.name));
-        const example = ["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
-          "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)", "Getränke Nord GmbH",
-          "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
-          .concat(st.attrs.map(() => ""));
-        this.download("stockcontrol-vorlage.csv", [head, example]);
-        this.say("Excel", this.tr("Vorlage heruntergeladen"), this.tr("Eine Spalte pro Feld, inklusive eigener Merkmale."));
+        const clean = v => (v == null || v === "—") ? "" : v;
+        const rows = [head];
+        if (st.tplMode === "filled") {
+          activeProducts.forEach(p => rows.push([
+            p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
+            clean(p.preis), clean(p.quantitaet), clean(p.lieferant), clean(p.verantwortlich),
+            clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
+          ].concat(st.attrs.map(() => ""))));
+        } else {
+          rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
+            "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)", "Getränke Nord GmbH",
+            "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
+            .concat(st.attrs.map(() => "")));
+        }
+        const filled = st.tplMode === "filled";
+        this.download(filled ? "stockcontrol-bestand.csv" : "stockcontrol-vorlage.csv", rows);
+        this.say("Excel", filled ? this.tr("Vorlage mit Bestand") : this.tr("Leere Vorlage"),
+          filled
+            ? activeProducts.length + " " + (activeProducts.length === 1 ? this.tr("Produkt") : this.tr("Produkte")) + " " + this.tr("übernommen")
+            : this.tr("Eine Spalte pro Feld, inklusive eigener Merkmale."));
       },
       npName: st.npName, npEan: st.npEan, npResp: st.npResp,
       npD1: st.npD1, npD2: st.npD2, npD3: st.npD3,
@@ -4643,7 +4713,7 @@ class Component extends DCLogic {
         if (products.some(p => String(p.name).trim().toLowerCase() === n)) return this.tr("Den Namen gibt es schon — mit anderem Lagerort oder anderer Quantität ist das in Ordnung.");
         return this.tr("Name ist frei.");
       })(),
-      npNameColor: dupKey() ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)",
+      npNameColor: dupKey() ? "var(--color-accent-700)" : "var(--sc-ink-2)",
       npDisabled: !(st.npName || "").trim() || !!dupKey(),
       createProduct: () => {
         const name = (st.npName || "").trim();
@@ -4739,7 +4809,7 @@ class Component extends DCLogic {
         ? this.tr("Noch nicht übernommen.") : this.tr("Stand gespeichert."),
       profileNoteColor: st.draftFor === picked.id
         && ((st.draftName || "").trim() !== (picked.name || "") || (st.draftEmail || "").trim() !== (picked.email || ""))
-        ? "var(--color-accent-700)" : "color-mix(in srgb, var(--color-text) 55%, transparent)",
+        ? "var(--color-accent-700)" : "var(--sc-ink-2)",
       saveProfile: () => {
         const name = (st.draftName || "").trim(), email = (st.draftEmail || "").trim();
         if (!name) { this.say(this.tr("Profil"), this.tr("Name fehlt"), this.tr("Ohne Namen wird nicht übernommen.")); return; }
@@ -5155,7 +5225,7 @@ class Component extends DCLogic {
           ? this.tr("Die Registrierung wurde abgelehnt:")
           : this.tr("Wir haben dir einen Link geschickt. Er gilt 15 Minuten."),
       clock: String(Math.floor(st.confirmLeft / 60)).padStart(2, "0") + ":" + String(st.confirmLeft % 60).padStart(2, "0"),
-      clockColor: st.confirmLeft > 0 ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 45%, transparent)",
+      clockColor: st.confirmLeft > 0 ? "var(--color-accent)" : "var(--sc-ink-3)",
       clockLabel: st.confirmLeft > 0 ? this.tr("verbleibende Zeit") : this.tr("Link verfallen"),
       linkAlive: st.confirmLeft > 0, linkDead: st.confirmLeft <= 0,
       resetClock: () => this.setState({ confirmLeft: 900 }),
