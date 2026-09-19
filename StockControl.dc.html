@@ -564,32 +564,7 @@
               </div>
               <div style="font-size: 12.5px; color: var(--sc-ink-2)">{{ unitSumNote }}</div>
             </sc-if>
-            <details style="border-top: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); padding-top: var(--space-2)">
-              <summary style="font-family: var(--font-heading); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: var(--space-2)" data-i18n>Einheiten dieses Produkts</summary>
-              <p style="font-size: 12.5px; line-height: 1.5; margin: var(--space-2) 0; color: var(--sc-ink-2)" data-i18n>Die kleinste Einheit hat den Faktor 1. Eine Kiste mit zwölf Flaschen bekommt den Faktor 12, eine Palette mit 32 Kisten den Faktor 384. Gebucht wird immer in der kleinsten Einheit.</p>
-              <div style="display: flex; flex-direction: column; gap: 2px">
-                <sc-for list="{{ unitList }}" as="ul" hint-placeholder-count="2">
-                  <div style="display: flex; align-items: center; gap: var(--space-2); padding: 6px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                    <span style="font-size: 13px; margin-right: auto">{{ ul.name }}</span>
-                    <span class="tag tag-neutral">{{ ul.factorLabel }}</span>
-                    <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ ul.locked }}" onClick="{{ ul.remove }}"><span data-i18n>Löschen</span></button>
-                  </div>
-                </sc-for>
-              </div>
-              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end; margin-top: var(--space-2)">
-                <div class="field" style="flex: 2; min-width: 130px; margin: 0"><label data-i18n>Einheit</label><input class="input" value="{{ newUnitName }}" data-i18n-ph placeholder="z. B. Kiste" onInput="{{ setNewUnitName }}"></div>
-                <div class="field" style="flex: 2; min-width: 165px; margin: 0">
-                  <label data-i18n>Verhältnis</label>
-                  <select class="input" value="{{ newUnitDir }}" onChange="{{ setNewUnitDir }}">
-                    <option value="up">{{ dirUpLabel }}</option>
-                    <option value="down">{{ dirDownLabel }}</option>
-                  </select>
-                </div>
-                <div class="field" style="flex: 1; min-width: 90px; margin: 0"><label data-i18n>Anzahl</label><input class="input" inputmode="numeric" value="{{ newUnitFactor }}" onInput="{{ setNewUnitFactor }}"></div>
-                <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addUnitDisabled }}" onClick="{{ addUnit }}"><span data-i18n>Einheit anlegen</span></button>
-              </div>
-              <div style="font-size: 12.5px; margin-top: 5px; color: {{ unitNoteColor }}">{{ unitFactorNote }}</div>
-            </details>
+
             <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
             <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
             <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
@@ -602,6 +577,42 @@
             <sc-if value="{{ statusLocked }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)">{{ statusLockedNote }}</div>
             </sc-if>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+              <h4 style="margin: 0; margin-right: auto" data-i18n>Quantitäten</h4>
+              <span class="tag tag-neutral">{{ unitCountLabel }}</span>
+            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Kiste, Palette, Einzelflasche — lege hier fest, in welchen Größen dieses Produkt bewegt wird. Gebucht wird immer in der kleinsten; oben erscheint dann je Größe ein eigenes Feld.</p>
+
+            <div style="display: flex; flex-direction: column; gap: 2px">
+              <sc-for list="{{ unitList }}" as="ul" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <span style="font-size: 13.5px; margin-right: auto">{{ ul.name }}</span>
+                  <span class="tag tag-neutral">{{ ul.factorLabel }}</span>
+                  <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ ul.locked }}" onClick="{{ ul.remove }}"><span data-i18n>Löschen</span></button>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: var(--space-2); align-items: end">
+              <div class="field" style="margin: 0"><label data-i18n>Name der Quantität</label><input class="input" value="{{ newUnitName }}" data-i18n-ph placeholder="z. B. Kiste" onInput="{{ setNewUnitName }}"></div>
+              <div class="field" style="margin: 0">
+                <label data-i18n>Verhältnis</label>
+                <select class="input" value="{{ newUnitDir }}" onChange="{{ setNewUnitDir }}">
+                  <option value="up">{{ dirUpLabel }}</option>
+                  <option value="down">{{ dirDownLabel }}</option>
+                </select>
+              </div>
+              <div class="field" style="margin: 0"><label data-i18n>Anzahl</label><input class="input" inputmode="numeric" value="{{ newUnitFactor }}" onInput="{{ setNewUnitFactor }}"></div>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addUnitDisabled }}" onClick="{{ addUnit }}"><span data-i18n>Quantität anlegen</span></button>
+              <span style="font-size: 12.5px; color: {{ unitNoteColor }}">{{ unitFactorNote }}</span>
+            </div>
+            <p style="margin: 0; font-size: 12px; color: var(--sc-ink-2)" data-i18n>Beispiel: eine Flasche ist die kleinste Größe. „Kiste, größer als Flasche, 12" ergibt 1 Kiste = 12 Flaschen. Eine Palette mit 32 Kisten ist dann „größer als Flasche, 384".</p>
           </section>
 
           <section class="card blueprint">
@@ -2965,6 +2976,11 @@ const DICT = {
     "Wer bucht, braucht einen Zugang.": "Whoever books needs an account.",
     "Mailversand prüfen": "Check mail delivery",
     "Einmal testen, damit Warnungen ankommen.": "Test it once so warnings arrive.",
+    "Quantitäten": "Quantities", "Name der Quantität": "Quantity name", "Quantität anlegen": "Create quantity",
+    "Größe": "size", "Größen": "sizes", "Import nicht gespeichert": "Import not saved",
+    "Buchung nicht gespeichert": "Booking not saved", "Zugang nicht eingerichtet": "Access not set up",
+    "Konto angelegt": "Account created", "Bitte Vor- und Nachnamen eintragen.": "Please enter a first and last name.",
+    "Bitte die Adresse eintragen, an die die Einladung ging.": "Please enter the address the invitation went to.",
     "Übersicht": "Overview", "Produkte": "Products", "Produktverwaltung": "Product management", "Rollen": "Roles", "Rollen und ihre Standardrechte": "Roles and their default rights", "Standardrechte": "Default rights", "Neue Rolle": "New role", "Rolle anlegen": "Create role", "Rechte": "rights", "Person": "person", "Personen": "people", "Fremdes Etikett": "Foreign label", "Kein Zugriff": "No access", "Bearbeiten": "Edit", "Produkt löschen": "Delete product", "Wirklich vollständig löschen?": "Delete this permanently?", "Endgültig löschen": "Delete permanently", "Aktiv": "Active", "Gelesener Code": "Code read", "Noch kein Code gelesen": "No code read yet", "Vorlage herunterladen": "Download template", "Ausgefüllte Liste hier hochladen": "Upload your filled-in list here", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Drag a file here or click · .csv up to 5 MB", "Leere Liste — nur Kopfzeile": "Empty list — header only", "Mit allen vorhandenen Produkten": "With every existing product", "Vorlage mit Bestand": "Template with stock", "Leere Vorlage": "Empty template", "Vorlage": "Template", "Datei unten hochladen, Spalten prüfen, importieren": "Upload the file below, check the columns, import", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Pick a template: empty, or with today\u2019s stock", "Scannen": "Scan", "Produkt anlegen": "Add product",
     "QR-Codes": "QR codes", "Team & Rechte": "Team & rights", "Einstellungen": "Settings",
     "Betriebs-Konsole": "Operator console", "Angemeldet als": "Signed in as", "Abmelden": "Sign out",
@@ -3557,6 +3573,11 @@ const DICT = {
     "Wer bucht, braucht einen Zugang.": "Den som bokar behöver ett konto.",
     "Mailversand prüfen": "Kontrollera mejlutskick",
     "Einmal testen, damit Warnungen ankommen.": "Testa en gång så att varningar kommer fram.",
+    "Quantitäten": "Kvantiteter", "Name der Quantität": "Kvantitetens namn", "Quantität anlegen": "Skapa kvantitet",
+    "Größe": "storlek", "Größen": "storlekar", "Import nicht gespeichert": "Importen sparades inte",
+    "Buchung nicht gespeichert": "Bokningen sparades inte", "Zugang nicht eingerichtet": "Åtkomsten kunde inte skapas",
+    "Konto angelegt": "Kontot skapat", "Bitte Vor- und Nachnamen eintragen.": "Ange för- och efternamn.",
+    "Bitte die Adresse eintragen, an die die Einladung ging.": "Ange adressen som inbjudan skickades till.",
     "Übersicht": "Översikt", "Produkte": "Produkter", "Produktverwaltung": "Artikelhantering", "Rollen": "Roller", "Rollen und ihre Standardrechte": "Roller och deras standardrättigheter", "Standardrechte": "Standardrättigheter", "Neue Rolle": "Ny roll", "Rolle anlegen": "Skapa roll", "Rechte": "rättigheter", "Person": "person", "Personen": "personer", "Fremdes Etikett": "Främmande etikett", "Kein Zugriff": "Ingen åtkomst", "Bearbeiten": "Redigera", "Produkt löschen": "Ta bort artikel", "Wirklich vollständig löschen?": "Ta bort helt?", "Endgültig löschen": "Ta bort permanent", "Aktiv": "Aktiv", "Gelesener Code": "Läst kod", "Noch kein Code gelesen": "Ingen kod läst än", "Vorlage herunterladen": "Ladda ner mall", "Ausgefüllte Liste hier hochladen": "Ladda upp din ifyllda lista här", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Dra en fil hit eller klicka · .csv upp till 5 MB", "Leere Liste — nur Kopfzeile": "Tom lista — bara rubrik", "Mit allen vorhandenen Produkten": "Med alla befintliga artiklar", "Vorlage mit Bestand": "Mall med lager", "Leere Vorlage": "Tom mall", "Vorlage": "Mall", "Datei unten hochladen, Spalten prüfen, importieren": "Ladda upp filen nedan, kontrollera kolumnerna, importera", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Välj mall: tom eller med dagens lager", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
     "QR-Codes": "QR-koder", "Team & Rechte": "Team & rättigheter", "Einstellungen": "Inställningar",
     "Betriebs-Konsole": "Operatörskonsol", "Angemeldet als": "Inloggad som", "Abmelden": "Logga ut",
@@ -4092,6 +4113,12 @@ class Component extends DCLogic {
         return;
       }
       this.api = api;
+      if (this.pendingInvite) {
+        // Fremde Sitzung abmelden und auf dem Einladungsschirm stehen bleiben.
+        try { await api.signOut(); } catch (e) {}
+        this.setState({ live: true, authed: false, authView: "invite", source: "Supabase", connectError: "" });
+        return;
+      }
       const sess = await api.session();
       if (!sess) { this.setState({ live: true, authed: false, authView: "login", source: "Supabase", connectError: "" }); return; }
       await this.refresh();
@@ -4128,6 +4155,12 @@ class Component extends DCLogic {
         kategorien: r.kategorien || [], entnahme: when(r.entnahme_am), auffuell: when(r.auffuell_am),
         geaendert: nameOf(r.geaendert_von), aktiv: r.aktiv !== false, hist: [r.ist]
       }));
+      // Einheiten und Preisverlauf hängen am Produkt und kommen mit zurück.
+      const units = {}, priceHist = {};
+      d.products.forEach(r => {
+        if (Array.isArray(r.einheiten) && r.einheiten.length) units[r.id] = r.einheiten;
+        if (Array.isArray(r.preis_hist) && r.preis_hist.length) priceHist[r.id] = r.preis_hist;
+      });
       const movements = d.movements.map(mv => {
         const p = d.products.find(x => x.id === mv.product_id) || {};
         return { name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
@@ -4138,6 +4171,12 @@ class Component extends DCLogic {
       }));
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
+        units, priceHist,
+        roleDefs: (d.settings && Array.isArray(d.settings.roles) && d.settings.roles.length)
+          ? d.settings.roles : null,
+        placesOwn: (d.settings && Array.isArray(d.settings.places) && d.settings.places.length)
+          ? d.settings.places
+          : Array.from(new Set(products.map(p => p.ort).filter(o => o && o !== "—"))),
         platformAdmin: isAdmin,
         companies: companies ? companies.map(c => ({
           id: c.id, name: c.name, admin: c.admin_email || "—", plan: c.plan === "gratis" ? "Gratis" : c.plan,
@@ -4557,8 +4596,11 @@ class Component extends DCLogic {
       }
     }
 
-    const tail = text.split(/[\/?#=]/).filter(Boolean).pop() || text;
-    const keys = [text.toLowerCase(), tail.toLowerCase()];
+    // Mögliche Schreibweisen: "SC1|<Firma>|<Artikel>", eine Adresse mit der
+    // Kennung am Ende, oder die blanke Kennung. Alle Teile kommen in den
+    // Vergleich — vorher fiel der Artikel aus "SC1|…|P-002" durchs Raster.
+    const parts = text.split(/[|\/?#=&]/).map(x => x.trim()).filter(Boolean);
+    const keys = [text].concat(parts).map(x => x.toLowerCase());
     const hit = this.state.products.find(p =>
       keys.includes(String(p.id).toLowerCase()) || keys.includes(String(p.ean).toLowerCase()));
     if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
@@ -4630,6 +4672,26 @@ class Component extends DCLogic {
     return out;
   }
 
+  // Lagerorte gehören der Firma und liegen in den Einstellungen.
+  savePlaces(list) {
+    this.remote(api => api.saveSettings({ places: list }));
+  }
+
+  // Einheitenleiter am Produkt. Wird eine kleinere Einheit nachgetragen,
+  // müssen Bestand, Mindestbestand und Bestellmenge mit umgerechnet werden
+  // — sonst bedeutete dieselbe Zahl plötzlich etwas anderes.
+  saveUnits(id, list, factor) {
+    const p = this.state.products.find(x => x.id === id);
+    if (!p) return;
+    const patch = { einheiten: list };
+    if (factor > 1) {
+      patch.ist = p.ist * factor;
+      patch.min = p.min * factor;
+      patch.bestellmenge = p.bestellmenge * factor;
+    }
+    this.remote(api => api.updateProduct(id, patch));
+  }
+
   // Eine Buchung wirkt sofort auf alles, was von ihr abhängt: Bestand,
   // Status, Verlaufskurve, Bewegungsliste und die Zähler auf der Übersicht.
   // Die Einheitenfelder werden geleert, damit die nächste Buchung bei null
@@ -4676,7 +4738,19 @@ class Component extends DCLogic {
     }));
   }
 
-  setRoleDefs(next) { this.setState({ roleDefs: next }); }
+  // Rollen gehören der Firma und liegen in den Einstellungen. Beim
+  // Umbenennen läuft je Tastendruck ein Aufruf ein — deshalb wird das
+  // Schreiben gebündelt und erst nach einer kurzen Pause abgeschickt.
+  setRoleDefs(next, immediate) {
+    this.setState({ roleDefs: next });
+    clearTimeout(this.roleSaveT);
+    if (immediate) this.saveRoles(next);
+    else this.roleSaveT = setTimeout(() => this.saveRoles(next), 700);
+  }
+
+  saveRoles(list) {
+    this.remote(api => api.saveSettings({ roles: list }));
+  }
 
   roleLabelFor(key) {
     const d = this.roleDefs().find(r => r.key === key);
@@ -4756,6 +4830,11 @@ class Component extends DCLogic {
     try {
       const m = (location.hash || "").match(/invite=([^&]+)/);
       if (m) {
+        // Merker für connect(): eine bereits angemeldete Sitzung im selben
+        // Browser — etwa die der inhabenden Person — darf die Einladung
+        // nicht überholen. Sonst landet die eingeladene Person im fremden
+        // Konto statt in ihrem eigenen.
+        this.pendingInvite = true;
         this.setState({ authed: false, authView: "invite", inviteToken: decodeURIComponent(m[1]) });
         history.replaceState(null, "", location.pathname + location.search);
       }
@@ -4773,6 +4852,7 @@ class Component extends DCLogic {
   componentWillUnmount() {
     clearInterval(this.tick);
     clearTimeout(this.menuT);
+    clearTimeout(this.roleSaveT);
     this.stopCamera();
     if (this.mq) this.mq.removeEventListener("change", this.mqL);
   }
@@ -5307,12 +5387,13 @@ class Component extends DCLogic {
         name: u.name,
         factorLabel: u.faktor === 1 ? this.tr("kleinste Einheit") : "× " + u.faktor,
         locked: Number(u.faktor) === 1,
-        remove: () => this.setState(prev => ({
-          units: Object.assign({}, prev.units, {
-            [cur.id]: this.unitsFor(cur).filter(x => x.name !== u.name)
-          })
-        }))
+        remove: () => {
+          const next = this.unitsFor(cur).filter(x => x.name !== u.name);
+          this.saveUnits(cur.id, next, 1);
+          this.setState(prev => ({ units: Object.assign({}, prev.units, { [cur.id]: next }) }));
+        }
       })),
+      unitCountLabel: (() => { const n = this.unitsFor(cur).length; return n + " " + (n === 1 ? this.tr("Größe") : this.tr("Größen")); })(),
       newUnitName: st.newUnitName, newUnitFactor: st.newUnitFactor, newUnitDir: st.newUnitDir,
       setNewUnitName: e => this.setState({ newUnitName: e.target.value }),
       setNewUnitFactor: e => this.setState({ newUnitFactor: e.target.value }),
@@ -5347,6 +5428,7 @@ class Component extends DCLogic {
         const next = st.newUnitDir === "down"
           ? list.map(u => ({ name: u.name, faktor: Number(u.faktor) * n })).concat({ name, faktor: 1 })
           : list.concat({ name, faktor: n });
+        this.saveUnits(cur.id, next, st.newUnitDir === "down" ? n : 1);
         this.setState(prev => ({
           units: Object.assign({}, prev.units, { [cur.id]: next }),
           products: st.newUnitDir === "down"
@@ -5413,8 +5495,10 @@ class Component extends DCLogic {
         const day = st.pcDate || this.dayStr(Date.now());
         const p = products.find(x => x.id === id);
         if (!p || val == null) return;
+        const list0 = (this.priceHistFor(p) || []).filter(e => e.datum !== day).concat({ datum: day, preis: val });
+        this.remote(api => api.updateProduct(id, { preis_hist: list0, preis: val }));
         this.setState(prev => {
-          const list = (this.priceHistFor(p) || []).filter(e => e.datum !== day).concat({ datum: day, preis: val });
+          const list = list0;
           return {
             priceHist: Object.assign({}, prev.priceHist, { [id]: list }),
             products: prev.products.map(x => x.id === id ? Object.assign({}, x, { preis: this.money(val) }) : x),
@@ -5558,7 +5642,7 @@ class Component extends DCLogic {
           },
           remove: () => {
             if (locked || rd.system || used > 0) return;
-            this.setRoleDefs(roleDefs.filter(x => x.key !== rd.key));
+            this.setRoleDefs(roleDefs.filter(x => x.key !== rd.key), true);
             this.say(this.tr("Rolle"), this.tr("Gelöscht"), rd.label);
           },
           perms: PERM_LIST.map(p => ({
@@ -5570,7 +5654,7 @@ class Component extends DCLogic {
               const has = rd.perms.includes(p[0]);
               this.setRoleDefs(roleDefs.map(x => x.key === rd.key
                 ? Object.assign({}, x, { perms: has ? x.perms.filter(k => k !== p[0]) : x.perms.concat(p[0]) })
-                : x));
+                : x), true);
             }
           }))
         };
@@ -5586,7 +5670,7 @@ class Component extends DCLogic {
         this.setRoleDefs(roleDefs.concat({
           key, label, system: false,
           perms: ["view", "withdraw", "refill", "qr", "history"]
-        }));
+        }), true);
         this.setState({ newRoleName: "" });
         this.say(this.tr("Rolle"), this.tr("Angelegt"), label + " · " + this.tr("Rechte unten ankreuzen"));
       },
@@ -5600,7 +5684,9 @@ class Component extends DCLogic {
           locked: used > 0,
           remove: () => {
             if (used > 0) return;
-            this.setState(prev => ({ placesOwn: (prev.placesOwn || []).filter(x => x !== pl) }));
+            const next = (st.placesOwn || []).filter(x => x !== pl);
+            this.setState({ placesOwn: next });
+            this.savePlaces(next);
             this.say(this.tr("Lagerort"), this.tr("Gelöscht"), pl);
           }
         };
@@ -5612,7 +5698,9 @@ class Component extends DCLogic {
       addPlace: () => {
         const v = String(st.newPlace || "").trim();
         if (!v || places.some(p => p.toLowerCase() === v.toLowerCase())) return;
-        this.setState(prev => ({ placesOwn: (prev.placesOwn || []).concat(v), newPlace: "" }));
+        const next = (st.placesOwn || []).concat(v);
+        this.setState({ placesOwn: next, newPlace: "" });
+        this.savePlaces(next);
         this.say(this.tr("Lagerort"), this.tr("Angelegt"), v);
       },
       mailTime: st.mailTime, mailDay: st.mailDay,
@@ -5880,10 +5968,12 @@ class Component extends DCLogic {
 
       setScanCode: e => this.setState({ scanCode: e.target.value }),
       openScanCode: () => {
-        const code = String(st.scanCode || "").trim().toLowerCase();
-        const hit = products.find(p => p.id.toLowerCase() === code || p.ean === code);
-        if (hit) this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "" });
-        else this.say(this.tr("Nicht gefunden"), code || "—", this.tr("Kein Artikel mit dieser ID oder EAN."));
+        // Derselbe Weg wie beim Kamerafund: die Eingabe darf der ganze
+        // Nutzinhalt eines Etiketts sein, nicht nur die blanke Kennung.
+        const raw = String(st.scanCode || "").trim();
+        if (!raw) return;
+        this.lastCode = null;
+        this.onCode(raw);
       },
       scanTargets: products.slice(0, 3).map(p => ({
         label: p.id + " · " + p.name.split(",")[0],
@@ -5957,6 +6047,21 @@ class Component extends DCLogic {
           placesOwn: (prev.placesOwn || []).concat(newPlaces),
           importDone: false, importParsed: [], importMap: [], importFile: ""
         }));
+        // Mit Datenbank: die Zeilen wandern sofort nach Supabase und werden
+        // danach frisch geladen. Ohne diesen Schritt wären sie nach einem
+        // Neuladen der Seite wieder fort.
+        if (st.live && this.api) {
+          this.api.importProducts(fresh.map(p => ({
+            name: p.name, ean: p.ean === "—" ? null : p.ean,
+            ist: p.ist, min: p.min, bestellmenge: p.bestellmenge,
+            ort: p.ort === "—" ? null : p.ort,
+            quantitaet: p.quantitaet === "—" ? null : p.quantitaet,
+            lieferant: p.lieferant === "—" ? null : p.lieferant,
+            link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
+          })))
+            .then(() => { this.savePlaces(places.concat(newPlaces)); return this.refresh(); })
+            .catch(err => this.say("Supabase", this.tr("Import nicht gespeichert"), String((err && err.message) || err)));
+        }
         this.go("products");
         this.say("Import",
           fresh.length + " " + (fresh.length === 1 ? this.tr("Produkt importiert") : this.tr("Produkte importiert")),
@@ -6583,6 +6688,7 @@ class Component extends DCLogic {
           token: st.inviteToken, email: mail, password: st.regPw, name, captchaToken: st.captchaToken
         })
           .then(() => {
+            this.pendingInvite = false;
             this.setState({ authView: "confirm", confirmLeft: 900, regState: "wait" });
             this.say(this.tr("Einladung"), this.tr("Konto angelegt"),
               this.tr("Zum Schluss den Link in der Bestätigungsmail anklicken — danach steht der Zugang zu dieser Firma."));

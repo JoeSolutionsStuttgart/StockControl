@@ -179,9 +179,12 @@ export async function deleteProduct(id) {
   return true;
 }
 
+// Neue Zeilen anlegen. Bewusst ein Einfügen und kein Überschreiben:
+// die Oberfläche hat doppelte Namen vorher schon aussortiert, und eine
+// Zeile ohne EAN hätte beim Überschreiben kein verlässliches Merkmal.
 export async function importProducts(rows) {
   const sb = await client();
-  return ok(await sb.from("products").upsert(rows, { onConflict: "company_id,ean" }).select());
+  return ok(await sb.from("products").insert(rows).select());
 }
 
 /* ── Entnahme und Nachfüllung ───────────────────────────── */
@@ -279,9 +282,17 @@ export async function createEvent({ name, datum, ort, items }) {
 
 /* ── Einstellungen ──────────────────────────────────────── */
 
+// Einstellungen gehören genau einer Firma; company_id ist der Primärschlüssel
+// und wird — anders als bei Produkten — von keinem Trigger gesetzt. Deshalb
+// muss er mitgeschickt werden, sonst schreibt PostgREST NULL und die Zeile
+// scheitert am Schlüssel wie an der Zugriffsregel.
 export async function saveSettings(patch) {
   const sb = await client();
-  return ok(await sb.from("settings").upsert(patch).select().single());
+  const me = await myProfile();
+  if (!me || !me.company_id) throw new Error("Kein aktives Firmenprofil");
+  return ok(await sb.from("settings")
+    .upsert(Object.assign({ company_id: me.company_id }, patch), { onConflict: "company_id" })
+    .select().single());
 }
 
 /* ── Große Dateien: Cloudflare R2 über einen Worker ─────── */
