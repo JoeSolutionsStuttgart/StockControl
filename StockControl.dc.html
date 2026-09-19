@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/styles.css">
 <script src="_ds/industry-85ce1d10-e39e-4223-9b36-36d43fb2efe5/_ds_bundle.js"></script>
 <script src="image-slot.js"></script>
+<script src="qr.js"></script>
 <style>
   html, body { margin: 0; }
   html[data-sc-theme="dark"] {
@@ -1237,10 +1238,11 @@
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div class="card-kicker" data-i18n>Rollen</div>
-            <h4 style="margin: 0" data-i18n>Rollen und ihre Standardrechte</h4>
-            <p class="card-body" style="margin: 0" data-i18n>Eine Rolle ist eine Vorlage: Wer sie bekommt, startet mit genau diesen Rechten. Einzelne Personen lassen sich danach weiter oben abweichend einstellen. Die inhabende Person darf immer alles und ist deshalb nicht änderbar.</p>
+            <details>
+              <summary style="font-family: var(--font-heading); font-size: 19px; cursor: pointer; display: flex; align-items: center; gap: var(--space-3)"><span data-i18n>Rollen und ihre Standardrechte</span><span class="tag tag-neutral" style="font-family: var(--font-body)">{{ roleCountLabel }}</span></summary>
+            <p class="card-body" style="margin: var(--space-3) 0 0" data-i18n>Eine Rolle ist eine Vorlage: Wer sie bekommt, startet mit genau diesen Rechten. Einzelne Personen lassen sich danach weiter oben abweichend einstellen. Die inhabende Person darf immer alles und ist deshalb nicht änderbar.</p>
 
-            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3)">
               <sc-for list="{{ roleCards }}" as="rl" hint-placeholder-count="4">
                 <div class="blueprint" style="padding: var(--space-3); background: var(--sc-ground)">
                   <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
@@ -1264,14 +1266,15 @@
               </sc-for>
             </div>
 
-            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end; margin-top: var(--space-3)">
               <div class="field" style="flex: 1; min-width: 190px; margin: 0">
                 <label data-i18n>Neue Rolle</label>
                 <input class="input" value="{{ newRoleName }}" data-i18n-ph placeholder="z. B. Schichtleitung" onInput="{{ setNewRoleName }}">
               </div>
               <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addRoleDisabled }}" onClick="{{ addRole }}"><span data-i18n>Rolle anlegen</span></button>
             </div>
-            <div style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Eine neue Rolle startet mit den Rechten für Ansehen und Buchen. Alles Weitere hier ankreuzen.</div>
+            <div style="font-size: 12px; margin-top: var(--space-2); color: var(--sc-ink-2)" data-i18n>Eine neue Rolle startet mit den Rechten für Ansehen und Buchen. Alles Weitere hier ankreuzen.</div>
+            </details>
           </section>
         </sc-if>
 
@@ -2448,9 +2451,9 @@
       <sc-if value="{{ authIsInvite }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Zugang einrichten</h3>
-          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Einladung zu Internet GmbH · läuft in 2 Std. 41 Min. ab</p>
-          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name"></div>
-          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" value="a.reuss@internet-gmbh.de" readonly="{{ true }}"></div>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)">{{ inviteIntro }}</p>
+          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Name</label><input class="input" autocomplete="name" value="{{ inviteName }}" data-i18n-ph placeholder="Vor- und Nachname" onInput="{{ setInviteName }}"></div>
+          <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" autocomplete="username" value="{{ inviteMail }}" onInput="{{ setInviteMail }}"></div>
           <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort</label>
             <div style="position: relative; display: flex">
               <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setRegPw }}">
@@ -3990,6 +3993,7 @@ class Component extends DCLogic {
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
       roleDefs: null, newRoleName: "", companyId: null,
+      inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
       readRaw: "", readAt: 0, readFrames: 0, readMiss: "",
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
@@ -4626,6 +4630,39 @@ class Component extends DCLogic {
     return out;
   }
 
+  // Eine Buchung wirkt sofort auf alles, was von ihr abhängt: Bestand,
+  // Status, Verlaufskurve, Bewegungsliste und die Zähler auf der Übersicht.
+  // Die Einheitenfelder werden geleert, damit die nächste Buchung bei null
+  // beginnt und nicht versehentlich die alte Menge wiederholt.
+  applyBooking(cur, next, under, deltaLabel, who) {
+    const now = new Date();
+    const stamp = now.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" }) +
+      " · " + now.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    this.setState(prev => ({
+      qty: 1, unitQty: {},
+      products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
+        ist: next,
+        status: next < p.min ? (p.status === "ordered" ? "ordered" : "low") : "ok",
+        hist: (p.hist || []).concat(next).slice(-24),
+        entnahme: deltaLabel.charAt(0) === "−" ? stamp : p.entnahme,
+        auffuell: deltaLabel.charAt(0) === "+" ? stamp : p.auffuell,
+        geaendert: who
+      }) : p),
+      movements: [{ name: cur.name, delta: deltaLabel, who: who, when: this.tr("gerade eben") }]
+        .concat(prev.movements).slice(0, 8)
+    }));
+  }
+
+  // Mit Datenbank: buchen und danach den echten Stand nachladen, damit
+  // Bestand, Status und Benachrichtigung aus der Quelle kommen und nicht
+  // aus der Schätzung im Browser.
+  bookRemote(id, delta, note) {
+    if (!this.state.live || !this.api) return;
+    this.api.bookMovement({ productId: id, delta, note })
+      .then(() => this.refresh())
+      .catch(err => this.say("Supabase", this.tr("Buchung nicht gespeichert"), String((err && err.message) || err)));
+  }
+
   // Rollen als Daten: Schlüssel, Bezeichnung, Standardrechte. Die vier
   // mitgelieferten Rollen sind die Startaufstellung; eigene kommen dazu.
   roleDefs() {
@@ -4713,6 +4750,16 @@ class Component extends DCLogic {
         mailChecked: localStorage.getItem("sc-mail-checked") === "1"
       });
     } catch (e) {}
+    // Einladungslink: die Adresse trägt #invite=<Merkmal>. Wer darüber
+    // kommt, richtet zuerst sein Passwort ein und ist danach in genau
+    // dieser Firma — ein eigenes Konto, keine geteilten Zugangsdaten.
+    try {
+      const m = (location.hash || "").match(/invite=([^&]+)/);
+      if (m) {
+        this.setState({ authed: false, authView: "invite", inviteToken: decodeURIComponent(m[1]) });
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    } catch (e) {}
     this.connect();
     this.tick = setInterval(() => {
       if (!this.state.authed && this.state.authView === "confirm" && this.state.confirmLeft > 0) {
@@ -4775,10 +4822,15 @@ class Component extends DCLogic {
     const nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(n => {
-      // Das Original merken, sobald der Knoten zum ersten Mal auf Deutsch steht.
-      if (!this.langSrc.has(n)) this.langSrc.set(n, n.nodeValue);
-      const src = this.langSrc.get(n);
+      // Steht im Knoten nicht mehr das, was zuletzt hier hineingeschrieben
+      // wurde, hat die Anwendung ihn neu gesetzt — etwa weil sich ein
+      // Bestand geändert hat. Dann gilt der neue Wert als Original.
+      // Ohne diese Prüfung würde die Übersetzung jede lebende Zahl
+      // auf ihren ersten Stand zurückschreiben.
+      const seen = this.langSrc.get(n);
+      const src = (seen && seen.out === n.nodeValue) ? seen.src : n.nodeValue;
       const out = look(src, dict);
+      this.langSrc.set(n, { src: src, out: out });
       if (n.nodeValue !== out) n.nodeValue = out;
     });
 
@@ -4786,10 +4838,14 @@ class Component extends DCLogic {
     ["placeholder", "title", "aria-label"].forEach(attr => {
       document.querySelectorAll("[" + attr + "]").forEach(el => {
         const key = "lang" + attr.replace(/-/g, "");
-        if (!el.dataset[key]) el.dataset[key] = el.getAttribute(attr) || "";
-        const src = el.dataset[key];
+        const now = el.getAttribute(attr) || "";
+        // Gleiche Regel wie oben: was die Anwendung selbst gesetzt hat,
+        // ist das neue Original.
+        const src = (el.dataset[key + "out"] === now && el.dataset[key] != null) ? el.dataset[key] : now;
         const out = attr === "placeholder" ? look(src, ph) : look(src, dict);
-        if (el.getAttribute(attr) !== out) el.setAttribute(attr, out);
+        el.dataset[key] = src;
+        el.dataset[key + "out"] = out;
+        if (now !== out) el.setAttribute(attr, out);
       });
     });
   }
@@ -4820,47 +4876,37 @@ class Component extends DCLogic {
   }
   segStyle(on) { return on ? "background: var(--color-accent); color: var(--color-bg)" : ""; }
 
-  qr(seed) {
-    let h = 2166136261;
-    for (const ch of String(seed)) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
-    const rnd = () => { h ^= h << 13; h >>>= 0; h ^= h >>> 17; h ^= h << 5; h >>>= 0; return h / 4294967296; };
-    const n = 25, g = [];
-    for (let y = 0; y < n; y++) { g.push([]); for (let x = 0; x < n; x++) g[y].push(rnd() > 0.52); }
-    const finder = (ox, oy) => {
-      for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
-        const edge = x === 0 || y === 0 || x === 6 || y === 6;
-        const core = x >= 2 && x <= 4 && y >= 2 && y <= 4;
-        g[oy + y][ox + x] = edge || core;
-      }
-      for (let i = 0; i < 8; i++) {
-        if (oy + 7 < n && ox + i < n) g[oy + 7][ox + i] = false;
-        if (ox + 7 < n && oy + i < n) g[oy + i][ox + 7] = false;
-        if (ox - 1 >= 0 && oy + i < n) g[oy + i][ox - 1] = false;
-        if (oy - 1 >= 0 && ox + i < n) g[oy - 1][ox + i] = false;
-      }
-    };
-    finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
-    for (let i = 8; i < n - 8; i++) { g[6][i] = i % 2 === 0; g[i][6] = i % 2 === 0; }
-    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) {
-      const edge = x === 0 || y === 0 || x === 4 || y === 4;
-      g[n - 7 + y][n - 7 + x] = edge || (x === 2 && y === 2);
+  // Echter QR-Code aus qr.js. Der Rückfall zeichnet nur ein graues Feld —
+  // besser ein sichtbar leeres Etikett als ein unlesbares Muster.
+  qrEl(text, px) {
+    const R = React.createElement;
+    let code = null;
+    try { code = window.SCQR && window.SCQR.encode(String(text)); } catch (e) { code = null; }
+    if (!code) {
+      return R("div", { style: {
+        width: px, height: px, display: "grid", placeItems: "center",
+        background: "#f2f2f3", border: "1px solid #c8c8cb", fontSize: 10, color: "#6c7885",
+        fontFamily: "Helvetica, Arial, sans-serif", textAlign: "center", padding: 4, boxSizing: "border-box"
+      } }, this.tr("QR-Code nicht erzeugbar"));
     }
+    const q = 4;                                   // Ruhezone, von der Norm verlangt
+    const n = code.size, box = n + q * 2;
     const rects = [];
     for (let y = 0; y < n; y++) {
       let run = 0;
       for (let x = 0; x <= n; x++) {
-        const on = x < n && g[y][x];
+        const on = x < n && code.modules[y][x];
         if (on) run++;
-        else if (run) { rects.push(React.createElement("rect", { key: y + "-" + x, x: x - run + 2, y: y + 2, width: run, height: 1 })); run = 0; }
+        else if (run) {
+          rects.push(R("rect", { key: y + "-" + x, x: x - run + q, y: y + q, width: run, height: 1 }));
+          run = 0;
+        }
       }
     }
-    return rects;
-  }
-  qrEl(seed, px) {
-    return React.createElement("svg", {
-      viewBox: "0 0 29 29", width: px, height: px, shapeRendering: "crispEdges",
+    return R("svg", {
+      viewBox: "0 0 " + box + " " + box, width: px, height: px, shapeRendering: "crispEdges",
       style: { display: "block", background: "#fff" }
-    }, React.createElement("g", { fill: "#1d1f20" }, this.qr(seed)));
+    }, R("g", { fill: "#1d1f20" }, rects));
   }
 
   chart(input) {
@@ -5495,6 +5541,7 @@ class Component extends DCLogic {
 
       // ── Rollen verwalten ───────────────────────────────────
       canManageRoles: st.role === "owner",
+      roleCountLabel: roleDefs.length + " " + (roleDefs.length === 1 ? this.tr("Rolle") : this.tr("Rollen")),
       roleCards: roleDefs.map(rd => {
         const used = (st.members || []).filter(m => m.role === rd.key).length;
         const locked = rd.key === "owner";
@@ -5581,7 +5628,7 @@ class Component extends DCLogic {
         statusLabel: this.statusOf(cur).label, tagClass: this.statusOf(cur).tag,
         linkLabel: this.tr("Beim Lieferanten öffnen"),
         link: "https://example.com/" + cur.id.toLowerCase(),
-        qr: this.qrEl(cur.id + cur.ean, 110),
+        qr: this.qrEl(this.qrPayload(cur), 110),
         chart: this.chart(cur.hist)
       }),
       qty: st.qty,
@@ -5591,15 +5638,8 @@ class Component extends DCLogic {
       withdraw: () => {
         const next = Math.max(0, cur.ist - st.qty);
         const under = next < cur.min;
-        this.setState(prev => ({
-          qty: 1,
-          products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
-            ist: next, status: under ? (p.status === "ordered" ? "ordered" : "low") : "ok",
-            entnahme: "15.09.2026 · jetzt", geaendert: this.state.role === "super" ? "Betrieb" : "Marie Kohl"
-          }) : p),
-          movements: [{ name: cur.name, delta: "−" + st.qty, who: "Marie Kohl", when: this.tr("gerade eben") }].concat(prev.movements).slice(0, 6)
-        }));
-        this.remote(api => api.bookMovement({ productId: cur.id, delta: -st.qty, note: "Entnahme" }));
+        this.applyBooking(cur, next, under, "−" + st.qty, meLabel);
+        this.bookRemote(cur.id, -st.qty, "Entnahme");
         if (under && st.mailMode === "now" && !this.withinLimit("mailsPerDay", st.mailsToday)) {
           // Tagesgrenze erreicht: Buchung bleibt, die Mail wandert in die
           // Bestellliste statt sie zu verschicken.
@@ -5616,14 +5656,8 @@ class Component extends DCLogic {
       },
       refill: () => {
         const next = cur.ist + st.qty;
-        this.setState(prev => ({
-          qty: 1,
-          products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, {
-            ist: next, status: next < p.min ? "low" : "ok", auffuell: "15.09.2026 · jetzt", geaendert: "Marie Kohl"
-          }) : p),
-          movements: [{ name: cur.name, delta: "+" + st.qty, who: "Marie Kohl", when: this.tr("gerade eben") }].concat(prev.movements).slice(0, 6)
-        }));
-        this.remote(api => api.bookMovement({ productId: cur.id, delta: st.qty, note: "Nachfüllung" }));
+        this.applyBooking(cur, next, false, "+" + st.qty, meLabel);
+        this.bookRemote(cur.id, st.qty, "Nachfüllung");
         this.say(this.tr("Nachfüllung"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next + " · " + this.tr("Status zurückgesetzt"));
       },
       hasPhoto: !!st.photoUrl, noPhoto: !st.photoUrl,
@@ -6316,6 +6350,12 @@ class Component extends DCLogic {
       authIsLogin: st.authView === "login", authIsRegister: st.authView === "register",
       authIsConfirm: st.authView === "confirm", authIsForgot: st.authView === "forgot",
       authIsInvite: st.authView === "invite",
+      inviteIntro: st.inviteToken
+        ? this.tr("Die Einladung gilt drei Stunden. Lege ein Passwort fest — danach gehört das Konto dir und niemand sonst kann es benutzen.")
+        : this.tr("Ohne Einladungslink lässt sich hier kein Zugang einrichten. Bitte den Link aus der Einladungsmail öffnen."),
+      inviteName: st.inviteName, inviteMail: st.inviteMail,
+      setInviteName: e => this.setState({ inviteName: e.target.value }),
+      setInviteMail: e => this.setState({ inviteMail: e.target.value }),
       // Angedeuteter Verlauf auf der Startseite: Treppenlinie mit
       // Mindestbestand-Marke, ohne Achsen und Zahlen.
       heroChart: (() => {
@@ -6529,7 +6569,29 @@ class Component extends DCLogic {
             .catch(err => this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)));
         }
       },
-      doInvite: () => { this.setState({ authed: true, role: "worker", screen: "scan" }); this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person.")); },
+      doInvite: () => {
+        const name = String(st.inviteName || "").trim();
+        const mail = String(st.inviteMail || "").trim();
+        if (!name) { this.say(this.tr("Einladung"), this.tr("Name fehlt"), this.tr("Bitte Vor- und Nachnamen eintragen.")); return; }
+        if (!/.+@.+\..+/.test(mail)) { this.say(this.tr("Einladung"), this.tr("Adresse prüfen"), this.tr("Bitte die Adresse eintragen, an die die Einladung ging.")); return; }
+        if (!st.live || !this.api) {
+          this.setState({ authed: true, role: "worker", screen: "scan", meNameLive: name });
+          this.say(this.tr("Einladung"), this.tr("Konto aktiv"), this.tr("Rolle: Mitarbeitende Person. Rechte setzt die inhabende Person."));
+          return;
+        }
+        this.api.acceptInvitation({
+          token: st.inviteToken, email: mail, password: st.regPw, name, captchaToken: st.captchaToken
+        })
+          .then(() => {
+            this.setState({ authView: "confirm", confirmLeft: 900, regState: "wait" });
+            this.say(this.tr("Einladung"), this.tr("Konto angelegt"),
+              this.tr("Zum Schluss den Link in der Bestätigungsmail anklicken — danach steht der Zugang zu dieser Firma."));
+          })
+          .catch(err => {
+            const msg = String((err && err.message) || err);
+            this.say("Supabase", this.tr("Zugang nicht eingerichtet"), msg + " — " + this.regHintFor(msg));
+          });
+      },
       viewLogin: () => this.setState({ authView: "login" }),
       viewRegister: () => this.setState({ authView: "register" }),
       viewInvite: () => this.setState({ authView: "invite" }),
