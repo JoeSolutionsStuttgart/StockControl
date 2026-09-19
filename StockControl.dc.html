@@ -557,24 +557,49 @@
         <div class="blueprint" style="width: 330px; max-width: 100%; padding: 14px; background: var(--color-surface)">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="position: relative; aspect-ratio: 9 / 16; background: var(--color-accent-900); overflow: hidden; display: flex; flex-direction: column">
-            <div style="padding: 10px 12px; display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums">
-              <span>9:41</span><span>{{ serviceName }}</span><span>100 %</span>
+            <video ref="{{ videoRef }}" playsinline autoplay muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ camOpacity }}"></video>
+
+            <div style="position: relative; z-index: 2; padding: 10px 12px; display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,.75); font-variant-numeric: tabular-nums; background: linear-gradient(rgba(0,0,0,.35), transparent)">
+              <span>{{ camStateLabel }}</span><span>{{ serviceName }}</span>
             </div>
-            <div style="flex: 1; position: relative; display: grid; place-items: center">
+
+            <div style="position: relative; z-index: 2; flex: 1; display: grid; place-items: center">
               <div style="width: 68%; aspect-ratio: 1; border: 2px solid rgba(255,255,255,.85); position: relative">
                 <div style="position: absolute; left: 0; right: 0; height: 2px; background: var(--color-accent-300); animation: sc-scan 1.9s ease-in-out infinite alternate"></div>
               </div>
-              <div style="position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,.8)" data-i18n>QR-Code im Rahmen halten</div>
+              <div style="position: absolute; bottom: 14px; left: 10px; right: 10px; text-align: center; font-size: 12px; line-height: 1.4; color: rgba(255,255,255,.88); text-shadow: 0 1px 3px rgba(0,0,0,.6)">{{ camHint }}</div>
             </div>
-            <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,.28)">
-              <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Code eingeben</div>
+
+            <div style="position: relative; z-index: 2; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: rgba(0,0,0,.45)">
+              <sc-if value="{{ camIdle }}" hint-placeholder-val="{{ true }}">
+                <button class="btn btn-primary btn-block" style="white-space: nowrap" onClick="{{ startCamera }}"><span data-i18n>Kamera starten</span></button>
+              </sc-if>
+              <sc-if value="{{ camRunning }}" hint-placeholder-val="{{ false }}">
+                <div style="display: flex; gap: 6px">
+                  <button class="btn" style="flex: 1; border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px; white-space: nowrap" onClick="{{ stopCamera }}"><span data-i18n>Anhalten</span></button>
+                  <sc-if value="{{ hasTorch }}" hint-placeholder-val="{{ false }}">
+                    <button class="btn" style="border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px; white-space: nowrap" onClick="{{ toggleTorch }}">{{ torchLabel }}</button>
+                  </sc-if>
+                  <sc-if value="{{ hasSwitch }}" hint-placeholder-val="{{ false }}">
+                    <button class="btn" style="border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px; white-space: nowrap" onClick="{{ switchCamera }}"><span data-i18n>Wechseln</span></button>
+                  </sc-if>
+                </div>
+              </sc-if>
+              <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,.6)" data-i18n>Oder Code eingeben</div>
               <div style="display: flex; gap: 6px">
-                <input class="input" data-i18n-ph placeholder="Artikel-ID oder EAN" onInput="{{ setScanCode }}" style="flex: 1; min-width: 0; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff">
+                <input class="input" data-i18n-ph placeholder="Artikel-ID oder EAN" value="{{ scanCode }}" onInput="{{ setScanCode }}" style="flex: 1; min-width: 0; background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); color: #fff">
                 <button class="btn" style="border-color: rgba(255,255,255,.35); color: #fff; font-size: 13px; white-space: nowrap" onClick="{{ openScanCode }}"><span data-i18n>Öffnen</span></button>
               </div>
             </div>
           </div>
         </div>
+        <sc-if value="{{ camError }}" hint-placeholder-val="{{ false }}">
+          <div class="card" style="max-width: 420px">
+            <h4 style="margin: 0" data-i18n>Kamera nicht verfügbar</h4>
+            <p class="card-body" style="margin: 0">{{ camErrorText }}</p>
+          </div>
+        </sc-if>
+        <p class="text-muted" style="max-width: 420px; text-align: center; margin: 0; font-size: 12px" data-i18n>Die Kamera funktioniert nur über eine verschlüsselte Verbindung. Beim ersten Mal fragt der Browser um Erlaubnis — ohne Zustimmung bleibt das Bild schwarz.</p>
       </div>
       </sc-if>
 
@@ -1011,9 +1036,41 @@
             <li data-i18n>Vorlage mit allen Feldern herunterladen</li>
             <li data-i18n>Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt</li>
             <li data-i18n>In Excel über „Speichern unter" als CSV ablegen (Trennzeichen Semikolon)</li>
-            <li data-i18n>CSV hier hochladen, Spalten prüfen, importieren</li>
+            <li data-i18n>CSV hochladen oder Liste einfügen, Spalten prüfen, importieren</li>
           </ol>
           <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>CSV-Vorlage herunterladen</span></button>
+          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
+            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer; white-space: nowrap">
+              <span data-i18n>Datei auswählen</span>
+              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+            </label>
+          </div>
+
+          <div class="hr"></div>
+          <h4 style="margin: 0" data-i18n>Oder die Liste hier einfügen</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Schneller als der Umweg über eine Datei: in Excel den Bereich samt Kopfzeile markieren, kopieren und hier einfügen. Der Tabulator zwischen den Spalten wird erkannt.</p>
+          <textarea class="input" rows="7" value="{{ pasteText }}" onInput="{{ setPasteText }}" data-i18n-ph placeholder="Name	Istbestand	Mindestbestand	Lagerort
+Kaffeebohnen 1 kg	18	40	Küche · Oberschrank" style="font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; line-height: 1.5; resize: vertical; min-height: 120px"></textarea>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+            <button class="btn btn-secondary" style="white-space: nowrap" disabled="{{ pasteDisabled }}" onClick="{{ readPaste }}"><span data-i18n>Liste prüfen</span></button>
+            <span style="font-size: 12px; color: color-mix(in srgb, var(--color-text) 60%, transparent)">{{ pasteNote }}</span>
+          </div>
+          <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
+              <table class="table">
+                <thead><tr><th data-i18n>Spalte in Datei</th><th data-i18n>Feld im System</th><th data-i18n>Prüfung</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="4">
+                    <tr><td>{{ r.col }}</td><td class="text-muted">{{ r.field }}</td><td><span class="{{ r.tagClass }}">{{ r.check }}</span></td></tr>
+                  </sc-for>
+                </tbody>
+              </table>
+              <button class="btn btn-primary" onClick="{{ runImport }}">{{ importBtnLabel }}</button>
+            </div>
+          </sc-if>
 
         </section>
       </div>
@@ -1291,28 +1348,6 @@
             </div>
             <button class="btn btn-primary" disabled="{{ attrDisabled }}" onClick="{{ addAttr }}"><span data-i18n>Merkmal anlegen</span></button>
           </div>
-          <div class="blueprint" style="border-style: dashed; padding: var(--space-6); text-align: center; margin-top: var(--space-2)">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div style="font-family: var(--font-heading); font-size: 17px" data-i18n>Datei hierher ziehen</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>.csv, bis 5 MB — Excel-Dateien vorher als CSV speichern</div>
-            <label class="btn btn-secondary" style="margin-top: var(--space-3); cursor: pointer">
-              <span data-i18n>Datei auswählen</span>
-              <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
-            </label>
-          </div>
-          <sc-if value="{{ importDone }}" hint-placeholder-val="{{ false }}">
-            <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
-              <table class="table">
-                <thead><tr><th data-i18n>Spalte in Datei</th><th data-i18n>Feld im System</th><th data-i18n>Prüfung</th></tr></thead>
-                <tbody>
-                  <sc-for list="{{ importRows }}" as="r" hint-placeholder-count="4">
-                    <tr><td>{{ r.col }}</td><td class="text-muted">{{ r.field }}</td><td><span class="{{ r.tagClass }}">{{ r.check }}</span></td></tr>
-                  </sc-for>
-                </tbody>
-              </table>
-              <button class="btn btn-primary" onClick="{{ runImport }}">{{ importBtnLabel }}</button>
-            </div>
-          </sc-if>
         </section>
 
         <section class="card blueprint">
@@ -2394,6 +2429,13 @@ const DICT = {
     "CSV-Vorlage herunterladen": "Download CSV template", "Datei hierher ziehen": "Drag a file here",
     ".csv, bis 5 MB — Excel-Dateien vorher als CSV speichern": ".csv, up to 5 MB — save Excel files as CSV first", "Beispieldatei prüfen": "Check sample file",
     "Spalte in Datei": "Column in file", "Feld im System": "Field in system", "Prüfung": "Check",
+    "Produkte importieren": "products — import", "1 Produkt importieren": "Import 1 product",
+    "Produkt importiert": "product imported", "Zeile übersprungen (Name fehlt oder doppelt)": "row skipped (name missing or duplicate)",
+    "neuer Lagerort": "new location", "Zeile gelesen": "row read",
+    "wird übersprungen": "skipped", "Spalte erkannt": "column recognised",
+    "Zeile ohne Namen verworfen": "row without a name dropped", "Zeile": "row",
+    "Zeile unter der Kopfzeile": "row under the header", "Zeilen unter der Kopfzeile": "rows under the header",
+    "„Liste prüfen\" drücken": "press Check list",
     "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
     "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Role", "Feinrechte": "Fine-grained rights", "Team einladen": "Invite someone",
@@ -2539,6 +2581,13 @@ const DICT = {
     "CSV-Vorlage herunterladen": "Ladda ner CSV-mall", "Datei hierher ziehen": "Dra en fil hit",
     ".csv, bis 5 MB — Excel-Dateien vorher als CSV speichern": ".csv, upp till 5 MB — spara Excel-filer som CSV först", "Beispieldatei prüfen": "Kontrollera exempelfil",
     "Spalte in Datei": "Kolumn i filen", "Feld im System": "Fält i systemet", "Prüfung": "Kontroll",
+    "Produkte importieren": "artiklar — importera", "1 Produkt importieren": "Importera 1 artikel",
+    "Produkt importiert": "artikel importerad", "Zeile übersprungen (Name fehlt oder doppelt)": "rad hoppades över (namn saknas eller dubblett)",
+    "neuer Lagerort": "ny lagerplats", "Zeile gelesen": "rad läst",
+    "wird übersprungen": "hoppas över", "Spalte erkannt": "kolumn identifierad",
+    "Zeile ohne Namen verworfen": "rad utan namn borttagen", "Zeile": "rad",
+    "Zeile unter der Kopfzeile": "rad under rubriken", "Zeilen unter der Kopfzeile": "rader under rubriken",
+    "„Liste prüfen\" drücken": "tryck Kontrollera listan",
     "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
     "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Roll", "Feinrechte": "Detaljrättigheter", "Team einladen": "Bjud in någon",
@@ -2800,7 +2849,7 @@ const HELP_TOPICS = [
           "Gleiche Namen sind erlaubt, solange sich Lagerort oder Quantität unterscheiden — „Wasser 0,5 l\" kann im Keller und in der Küche liegen. Stimmen Name, Lagerort und Quantität überein, bleibt der Knopf gesperrt."],
       go: "new", linkLabel: "Produkt anlegen" },
     { q: "Wie übernehme ich eine bestehende Liste?",
-      a: ["Stammdaten → Excel-Import. Erst die CSV-Vorlage herunterladen, eigene Daten hineinkopieren, dann hochladen.",
+      a: ["Stammdaten → Produkt anlegen, unten die Karte „Viele Produkte aus einer Tabelle importieren\". Entweder die CSV-Vorlage herunterladen und ausgefüllt hochladen — oder den Bereich in Excel kopieren und unter „Oder die Liste hier einfügen\" einsetzen.",
           "Excel-Dateien kann der Browser nicht lesen. In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und diese Datei wählen.",
           "Erkannt werden Spalten wie Name, Artikelnummer, Istbestand, Mindestbestand, Lagerort, Preis, Lieferant. Zeilen ohne Namen gelten als Zwischenüberschrift und werden übersprungen — Kategoriezeilen landen also nicht als Produkt im Lager."],
       go: "new", linkLabel: "Zum Import" },
@@ -2867,19 +2916,11 @@ const HELP_TOPICS = [
   ]}
 ];
 
-const IMPORT_ROWS = [
-  { col:"Artikelname", field:"Name", check:"ok" },
-  { col:"EAN", field:"EAN", check:"ok" },
-  { col:"Menge", field:"Istbestand", check:"ok" },
-  { col:"Min", field:"Mindestbestand", check:"ok" },
-  { col:"Ort", field:"Lagerort", check:"neu" },
-  { col:"Haltbar bis", field:"MHD", check:"format" },
-  { col:"Zuständig", field:"Verantwortliche Person", check:"ok" }
-];
 
 class Component extends DCLogic {
   constructor(props) {
     super(props);
+    this.video = React.createRef();
     const start = (props && props.startView) || "Anmeldung";
     this.state = {
       // Ohne Anmeldung startet die Seite immer auf der Anmeldemaske.
@@ -2938,6 +2979,8 @@ class Component extends DCLogic {
       units: {}, unitQty: {}, newUnitName: "", newUnitFactor: "12", newUnitDir: "up",
       priceHist: {}, pricePicked: [], pcProduct: "", pcDate: "", pcPrice: "",
       helpQuery: "", onboardHidden: false, qrPrinted: false, mailChecked: false,
+      camState: "idle", camErrorText: "", torchOn: false, facing: "environment",
+      hasTorch: false, hasSwitch: false, pasteText: "", importMap: [],
       captcha: false, captchaToken: "", mfaCode: "", mfaFactor: null,
       mfaActive: false, mfaEnrollQr: "",
       live: false, source: "Demo-Daten", brand: null, meNameLive: "", companyLive: "",
@@ -3286,13 +3329,178 @@ class Component extends DCLogic {
       if (!row.name || filled < 2) { dropped++; continue; }
       rows.push(row);
     }
-    const known = Object.keys(idx).length;
+    // Zuordnung mitgeben, damit die Prüftabelle die echte Datei zeigt
+    // und nicht eine erfundene Beispielliste.
+    const LABEL = {
+      name: "Name", ean: "EAN", ist: "Istbestand", min: "Mindestbestand",
+      bestellmenge: "Bestellmenge", ort: "Lagerort", mhd: "MHD", preis: "Preis",
+      quantitaet: "Quantität", lieferant: "Lieferant",
+      verantwortlich: "Verantwortliche Person", vertretung: "Stellvertretung",
+      kategorien: "Kategorien", link: "Link zum Produkt"
+    };
+    const raw = this.splitCsvLine(head, sep);
+    const used = Object.keys(idx);
+    const map = used.map(f => ({ col: raw[idx[f]] || cols[idx[f]], field: LABEL[f] || f, check: "ok" }));
+    const usedIdx = used.map(f => idx[f]);
+    raw.forEach((c, i) => {
+      if (c && usedIdx.indexOf(i) < 0) map.push({ col: c, field: "—", check: "skip" });
+    });
+
+    const known = used.length;
     return {
-      rows,
-      hint: known + " " + this.tr("Spalten erkannt") +
-        (dropped ? " · " + dropped + " " + this.tr("Zeilen ohne Namen verworfen") : "") +
+      rows, map,
+      hint: known + " " + (known === 1 ? this.tr("Spalte erkannt") : this.tr("Spalten erkannt")) +
+        (dropped ? " · " + dropped + " " + (dropped === 1 ? this.tr("Zeile ohne Namen verworfen") : this.tr("Zeilen ohne Namen verworfen")) : "") +
         " · " + this.tr("unten bestätigen")
     };
+  }
+
+  // ── QR-Erkennung mit der Kamera ───────────────────────────────
+  // Zwei Wege: moderne Browser bringen BarcodeDetector mit (Chrome auf
+  // Android), sonst wird jsQR nachgeladen und Bild für Bild geprüft.
+  // Beides braucht eine verschlüsselte Verbindung — auf GitHub Pages gegeben.
+
+  async startCamera() {
+    if (this.state.camState === "running") return;
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      this.setState({ camState: "error", camErrorText: this.tr("Dieser Browser gibt keinen Zugriff auf die Kamera. Bitte den Code unten eintippen.") });
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: this.state.facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+      this.stream = stream;
+      const v = this.video && this.video.current;
+      if (v) {
+        v.srcObject = stream;
+        v.setAttribute("playsinline", "");
+        try { await v.play(); } catch (e) {}
+      }
+      const track = stream.getVideoTracks()[0];
+      const caps = (track && track.getCapabilities) ? track.getCapabilities() : {};
+      let many = false;
+      try {
+        const devs = await navigator.mediaDevices.enumerateDevices();
+        many = devs.filter(d => d.kind === "videoinput").length > 1;
+      } catch (e) {}
+      this.lastCode = null;
+      this.setState({ camState: "running", camErrorText: "", torchOn: false,
+                      hasTorch: !!(caps && caps.torch), hasSwitch: many });
+      this.detectLoop();
+    } catch (err) {
+      const n = String((err && err.name) || "");
+      const msg = n === "NotAllowedError"
+        ? this.tr("Der Zugriff wurde abgelehnt. In der Adresszeile auf das Schloss tippen, die Kamera erlauben und erneut starten.")
+        : n === "NotFoundError"
+          ? this.tr("Es wurde keine Kamera gefunden.")
+          : n === "NotReadableError"
+            ? this.tr("Die Kamera ist von einem anderen Programm belegt. Andere Apps schließen und erneut versuchen.")
+            : String((err && err.message) || err);
+      this.setState({ camState: "error", camErrorText: msg });
+    }
+  }
+
+  stopCamera() {
+    cancelAnimationFrame(this.rafId);
+    clearTimeout(this.scanT);
+    if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
+    const v = this.video && this.video.current;
+    if (v) v.srcObject = null;
+    if (this.state.camState === "running") this.setState({ camState: "idle", torchOn: false });
+  }
+
+  async toggleTorch() {
+    const track = this.stream && this.stream.getVideoTracks()[0];
+    if (!track || !track.applyConstraints) return;
+    const on = !this.state.torchOn;
+    try {
+      await track.applyConstraints({ advanced: [{ torch: on }] });
+      this.setState({ torchOn: on });
+    } catch (e) {
+      this.say(this.tr("Licht"), this.tr("Nicht möglich"), this.tr("Dieses Gerät erlaubt das Licht nicht über den Browser."));
+    }
+  }
+
+  switchCamera() {
+    const next = this.state.facing === "environment" ? "user" : "environment";
+    this.stopCamera();
+    this.setState({ facing: next }, () => this.startCamera());
+  }
+
+  // jsQR nur bei Bedarf nachladen — moderne Browser brauchen es nicht.
+  loadFallback() {
+    if (window.jsQR) return Promise.resolve(window.jsQR);
+    if (this.jsqrP) return this.jsqrP;
+    this.jsqrP = new Promise((res, rej) => {
+      const el = document.createElement("script");
+      el.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
+      el.onload = () => res(window.jsQR);
+      el.onerror = () => rej(new Error("jsQR konnte nicht geladen werden"));
+      document.head.appendChild(el);
+    });
+    return this.jsqrP;
+  }
+
+  detectLoop() {
+    if (this.state.camState !== "running") return;
+    if (!this.detector && window.BarcodeDetector) {
+      try { this.detector = new window.BarcodeDetector({ formats: ["qr_code", "ean_13", "code_128"] }); }
+      catch (e) { this.detector = null; }
+    }
+
+    const step = async () => {
+      if (this.state.camState !== "running") return;
+      const vid = this.video && this.video.current;
+      if (vid && vid.readyState >= 2 && vid.videoWidth) {
+        try {
+          if (this.detector) {
+            const hits = await this.detector.detect(vid);
+            if (hits && hits.length) return this.onCode(hits[0].rawValue);
+          } else {
+            const jsQR = await this.loadFallback();
+            if (!this.canvas) this.canvas = document.createElement("canvas");
+            const w = Math.min(640, vid.videoWidth);
+            const h = Math.round(w * vid.videoHeight / vid.videoWidth);
+            this.canvas.width = w; this.canvas.height = h;
+            const ctx = this.canvas.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(vid, 0, 0, w, h);
+            const hit = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "dontInvert" });
+            if (hit && hit.data) return this.onCode(hit.data);
+          }
+        } catch (e) {
+          if (!this.detector && !window.jsQR) {
+            this.setState({ camState: "error", camErrorText: this.tr("Die Erkennung konnte nicht geladen werden. Bitte den Code unten eintippen.") });
+            return;
+          }
+        }
+      }
+      this.rafId = requestAnimationFrame(step);
+    };
+    this.scanT = setTimeout(step, 300);
+  }
+
+  // Ein Code wurde gelesen. Erlaubt sind die Artikelkennung, eine EAN und
+  // eine Adresse, die die Kennung hinten trägt — so drucken die Etiketten.
+  onCode(raw) {
+    const text = String(raw || "").trim();
+    if (!text || text === this.lastCode) { this.scanT = setTimeout(() => this.detectLoop(), 400); return; }
+    this.lastCode = text;
+    const tail = text.split(/[\/?#=]/).filter(Boolean).pop() || text;
+    const keys = [text.toLowerCase(), tail.toLowerCase()];
+    const hit = this.state.products.find(p =>
+      keys.includes(String(p.id).toLowerCase()) || keys.includes(String(p.ean).toLowerCase()));
+    if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
+    if (hit) {
+      this.stopCamera();
+      this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} });
+      this.say(this.tr("Gescannt"), hit.name, hit.ort);
+    } else {
+      this.say(this.tr("Nicht gefunden"), text.slice(0, 40), this.tr("Kein Artikel mit dieser Kennung. Etikett neu drucken oder Code eintippen."));
+      setTimeout(() => { this.lastCode = null; }, 1500);
+      this.scanT = setTimeout(() => this.detectLoop(), 900);
+    }
   }
 
   // Einheitenleiter eines Produkts. Die kleinste Einheit hat Faktor 1;
@@ -3403,7 +3611,12 @@ class Component extends DCLogic {
     this.mqL = () => { if (this.state.theme === "System") this.applyTheme(); };
     this.mq.addEventListener("change", this.mqL);
   }
-  componentWillUnmount() { clearInterval(this.tick); if (this.mq) this.mq.removeEventListener("change", this.mqL); }
+  componentWillUnmount() {
+    clearInterval(this.tick);
+    clearTimeout(this.menuT);
+    this.stopCamera();
+    if (this.mq) this.mq.removeEventListener("change", this.mqL);
+  }
   componentDidUpdate() {
     this.applyTheme();
     this.applyLang();
@@ -3443,6 +3656,7 @@ class Component extends DCLogic {
   }
   go(screen) {
     clearTimeout(this.menuT);
+    if (screen !== "scan") this.stopCamera();
     this.setState({ screen, menu: null, burgerOpen: false });
   }
   groupStyle(keys) {
@@ -3571,7 +3785,15 @@ class Component extends DCLogic {
     const meLabel = st.meNameLive || (st.role === "super" ? "Internet GmbH · Betrieb" : "Marie Kohl");
     // Gleiche Namen sind erlaubt — nur die Kombination aus Name, Lagerort und
     // Quantität muss eindeutig bleiben.
-    const key = (n, o, q) => [n, o, q].map(v => String(v || "").trim().toLowerCase()).join("|");
+    // "—" ist der Platzhalter für „nicht angegeben" und muss demselben Token
+    // entsprechen wie ein leeres Feld — sonst greift die Dopplungsprüfung nicht.
+    const norm = v => {
+      const x = String(v == null ? "" : v).trim().toLowerCase();
+      return (x === "—" || x === "-") ? "" : x;
+    };
+    const key = (n, o, q) => [n, o, q].map(norm).join("|");
+    // Welcher Lagerort landet wirklich in der Zeile, wenn das Feld leer ist?
+    const placeOf = v => String(v || "").trim() || places[0] || "—";
     // Auswahl für Preisverlauf und Umsatz: ausgewählte Produkte, sonst alle aktiven.
     // Hilfe filtern: ein Eintrag zählt, wenn Frage oder Antwort das Stichwort trägt.
     const hq = String(st.helpQuery || "").trim().toLowerCase();
@@ -3610,7 +3832,7 @@ class Component extends DCLogic {
     const dupKey = () => {
       const n = (st.npName || "").trim();
       if (!n) return null;
-      const k = key(n, st.npPlace, st.npQty);
+      const k = key(n, placeOf(st.npPlace), st.npQty);
       return st.products.some(p => key(p.name, p.ort, p.quantitaet) === k) ? k : null;
     };
     const mine = p => p.verantwortlich === meLabel || String(p.vertretung || "").includes(meLabel);
@@ -4253,6 +4475,45 @@ class Component extends DCLogic {
         window.print();
       },
 
+      videoRef: this.video,
+      scanCode: st.scanCode,
+      camIdle: st.camState !== "running",
+      camRunning: st.camState === "running",
+      camError: st.camState === "error",
+      camErrorText: st.camErrorText,
+      camOpacity: st.camState === "running" ? 1 : 0,
+      camStateLabel: st.camState === "running" ? this.tr("Kamera läuft") : this.tr("Kamera aus"),
+      camHint: st.camState === "running"
+        ? this.tr("QR-Code im Rahmen halten")
+        : this.tr("Kamera starten, dann den Code am Regal erfassen"),
+      hasTorch: st.hasTorch, hasSwitch: st.hasSwitch,
+      torchLabel: st.torchOn ? this.tr("Licht aus") : this.tr("Licht an"),
+      startCamera: () => this.startCamera(),
+      stopCamera: () => this.stopCamera(),
+      toggleTorch: () => this.toggleTorch(),
+      switchCamera: () => this.switchCamera(),
+
+      pasteText: st.pasteText,
+      setPasteText: e => this.setState({ pasteText: e.target.value }),
+      pasteDisabled: String(st.pasteText || "").trim().split(/\r?\n/).filter(x => x.trim()).length < 2,
+      pasteNote: (() => {
+        const lines = String(st.pasteText || "").trim().split(/\r?\n/).filter(x => x.trim());
+        if (!lines.length) return this.tr("Kopfzeile und mindestens eine Produktzeile einfügen.");
+        if (lines.length < 2) return this.tr("Unter der Kopfzeile fehlt noch eine Produktzeile.");
+        return (lines.length - 1) + " " + (lines.length === 2 ? this.tr("Zeile unter der Kopfzeile") : this.tr("Zeilen unter der Kopfzeile")) + " · " + this.tr("„Liste prüfen\" drücken");
+      })(),
+      readPaste: () => {
+        const out = this.parseImport(st.pasteText);
+        if (!out.rows.length) {
+          this.setState({ importDone: false, importParsed: [], importMap: [] });
+          this.say("Import", this.tr("Keine Zeile erkannt"), out.hint);
+          return;
+        }
+        this.setState({ importDone: true, importParsed: out.rows, importMap: out.map,
+          importFile: this.tr("Eingefügte Liste") + " · " + out.rows.length + " " + (out.rows.length === 1 ? this.tr("Zeile") : this.tr("Zeilen")) });
+        this.say("Import", out.rows.length + " " + (out.rows.length === 1 ? this.tr("Zeile gelesen") : this.tr("Zeilen gelesen")), out.hint);
+      },
+
       setScanCode: e => this.setState({ scanCode: e.target.value }),
       openScanCode: () => {
         const code = String(st.scanCode || "").trim().toLowerCase();
@@ -4266,12 +4527,15 @@ class Component extends DCLogic {
       })),
 
       importDone: st.importDone,
-      importRows: IMPORT_ROWS.map(r => ({
-        col: r.col, field: this.tr(r.field),
-        check: { ok: this.tr("erkannt"), neu: this.tr("neuer Lagerort"), format: this.tr("Datum wird konvertiert") }[r.check],
-        tagClass: r.check === "ok" ? "tag tag-neutral" : "tag tag-outline"
+      importRows: (st.importMap || []).map(r => ({
+        col: r.col, field: r.field === "—" ? "—" : this.tr(r.field),
+        check: r.check === "skip" ? this.tr("wird übersprungen") : this.tr("erkannt"),
+        tagClass: r.check === "skip" ? "tag tag-outline" : "tag tag-neutral"
       })),
-      importBtnLabel: this.tr("48 Produkte importieren"),
+      importBtnLabel: (() => {
+        const n = (st.importParsed || []).length;
+        return n === 1 ? this.tr("1 Produkt importieren") : n + " " + this.tr("Produkte importieren");
+      })(),
       pickImportFile: e => {
         const file = e.target.files && e.target.files[0];
         if (!file) return;
@@ -4286,12 +4550,13 @@ class Component extends DCLogic {
         file.text().then(text => {
           const out = this.parseImport(text);
           if (!out.rows.length) {
-            this.setState({ importDone: false, importFile: file.name, importParsed: [] });
+            this.setState({ importDone: false, importFile: file.name, importParsed: [], importMap: [] });
             this.say("Import", this.tr("Keine Zeile erkannt"), out.hint);
             return;
           }
-          this.setState({ importDone: true, importFile: file.name + " · " + out.rows.length + " " + this.tr("Zeilen"), importParsed: out.rows });
-          this.say("Import", out.rows.length + " " + this.tr("Zeilen gelesen"), out.hint);
+          this.setState({ importDone: true, importParsed: out.rows, importMap: out.map,
+            importFile: file.name + " · " + out.rows.length + " " + (out.rows.length === 1 ? this.tr("Zeile") : this.tr("Zeilen")) });
+          this.say("Import", out.rows.length + " " + (out.rows.length === 1 ? this.tr("Zeile gelesen") : this.tr("Zeilen gelesen")), out.hint);
         }).catch(err => this.say("Import", this.tr("Datei nicht lesbar"), String((err && err.message) || err)));
       },
       importFileName: st.importFile || "",
@@ -4307,14 +4572,14 @@ class Component extends DCLogic {
         const fresh = [];
         let skipped = 0;
         parsed.forEach(r => {
-          const k = key(r.name, r.ort || (places[0] || "—"), r.quantitaet);
+          const k = key(r.name, placeOf(r.ort), r.quantitaet);
           if (!r.name.trim() || taken.has(k)) { skipped++; return; }
           taken.add(k);
           const ist = this.toNum(r.ist), min = this.toNum(r.min);
           fresh.push({
             id: "P-" + String(products.length + fresh.length + 1).padStart(3, "0"),
             name: r.name.trim(), ean: r.ean || "—", ist, min, bestellmenge: this.toNum(r.bestellmenge),
-            ort: r.ort || (places[0] || "—"), mhd: r.mhd || "—", preis: r.preis || "—",
+            ort: placeOf(r.ort), mhd: r.mhd || "—", preis: r.preis || "—",
             quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "",
             kategorien: String(r.kategorien || "").split(/[,;]/).map(x => x.trim()).filter(Boolean),
             status: ist < min ? "low" : "ok", aktiv: true,
@@ -4326,12 +4591,17 @@ class Component extends DCLogic {
         this.setState(prev => ({
           products: fresh.concat(prev.products),
           placesOwn: (prev.placesOwn || []).concat(newPlaces),
-          importDone: false, importParsed: [], importFile: ""
+          importDone: false, importParsed: [], importMap: [], importFile: ""
         }));
         this.go("products");
-        this.say("Import", fresh.length + " " + this.tr("Produkte importiert"),
-          (skipped ? skipped + " " + this.tr("Zeilen übersprungen (Name fehlt oder doppelt)") : this.tr("Alle Zeilen übernommen"))
-          + (newPlaces.length ? " · " + newPlaces.length + " " + this.tr("neue Lagerorte") : ""));
+        this.say("Import",
+          fresh.length + " " + (fresh.length === 1 ? this.tr("Produkt importiert") : this.tr("Produkte importiert")),
+          (skipped
+            ? skipped + " " + (skipped === 1 ? this.tr("Zeile übersprungen (Name fehlt oder doppelt)") : this.tr("Zeilen übersprungen (Name fehlt oder doppelt)"))
+            : this.tr("Alle Zeilen übernommen"))
+          + (newPlaces.length
+            ? " · " + newPlaces.length + " " + (newPlaces.length === 1 ? this.tr("neuer Lagerort") : this.tr("neue Lagerorte"))
+            : ""));
       },
       downloadTemplate: () => {
         const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
@@ -4391,7 +4661,7 @@ class Component extends DCLogic {
         const id = "P-" + String(products.length + 1).padStart(3, "0");
         const row = {
           id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
-          ort: st.npPlace || places[0] || "—", mhd: st.npMhd || "—", preis: st.npPrice || "—",
+          ort: placeOf(st.npPlace), mhd: st.npMhd || "—", preis: st.npPrice || "—",
           quantitaet: st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
           kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
           status: ist < min ? "low" : "ok", aktiv: true,
