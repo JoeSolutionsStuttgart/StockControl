@@ -3103,6 +3103,13 @@ const DICT = {
     "neue Zeile kommt in jedem Fall hinzu.": "new row is added in any case.",
     "Artikelkennung": "Item code",
     "Diese Kennung steht auf dem Etikett und ändert sich nie. Sie lässt sich beim Scannen auch von Hand eintippen.": "This code is printed on the label and never changes. It can also be typed in by hand when scanning.",
+    "Artikelkennung fehlt": "Item code missing",
+    "Die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor erneut ausführen — sonst sind gedruckte Etiketten nicht scannbar.": "The \"code\" column does not exist yet. Please run schema.sql again in the SQL editor — otherwise printed labels cannot be scanned.",
+    "Etiketten": "Labels",
+    "Kennung vergeben": "code assigned",
+    "Kennungen vergeben": "codes assigned",
+    "Neu drucken: ": "Reprint: ",
+    "Gespeichert, aber ohne Kennung: die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor ausführen — sonst sind gedruckte Etiketten nicht scannbar.": "Saved, but without a code: the \"code\" column does not exist yet. Please run schema.sql in the SQL editor — otherwise printed labels cannot be scanned.",
     "Übersicht": "Overview", "Produkte": "Products", "Produktverwaltung": "Product management", "Rollen": "Roles", "Rollen und ihre Standardrechte": "Roles and their default rights", "Standardrechte": "Default rights", "Neue Rolle": "New role", "Rolle anlegen": "Create role", "Rechte": "rights", "Person": "person", "Personen": "people", "Fremdes Etikett": "Foreign label", "Kein Zugriff": "No access", "Bearbeiten": "Edit", "Produkt löschen": "Delete product", "Wirklich vollständig löschen?": "Delete this permanently?", "Endgültig löschen": "Delete permanently", "Aktiv": "Active", "Gelesener Code": "Code read", "Noch kein Code gelesen": "No code read yet", "Vorlage herunterladen": "Download template", "Ausgefüllte Liste hier hochladen": "Upload your filled-in list here", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Drag a file here or click · .csv up to 5 MB", "Leere Liste — nur Kopfzeile": "Empty list — header only", "Mit allen vorhandenen Produkten": "With every existing product", "Vorlage mit Bestand": "Template with stock", "Leere Vorlage": "Empty template", "Vorlage": "Template", "Datei unten hochladen, Spalten prüfen, importieren": "Upload the file below, check the columns, import", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Pick a template: empty, or with today\u2019s stock", "Scannen": "Scan", "Produkt anlegen": "Add product",
     "QR-Codes": "QR codes", "Team & Rechte": "Team & rights", "Einstellungen": "Settings",
     "Betriebs-Konsole": "Operator console", "Angemeldet als": "Signed in as", "Abmelden": "Sign out",
@@ -3738,6 +3745,13 @@ const DICT = {
     "neue Zeile kommt in jedem Fall hinzu.": "ny rad läggs till i vilket fall som helst.",
     "Artikelkennung": "Artikelkod",
     "Diese Kennung steht auf dem Etikett und ändert sich nie. Sie lässt sich beim Scannen auch von Hand eintippen.": "Koden står på etiketten och ändras aldrig. Den går också att skriva in för hand vid skanning.",
+    "Artikelkennung fehlt": "Artikelkod saknas",
+    "Die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor erneut ausführen — sonst sind gedruckte Etiketten nicht scannbar.": "Kolumnen ”code” finns inte än. Kör schema.sql igen i SQL-editorn — annars går utskrivna etiketter inte att skanna.",
+    "Etiketten": "Etiketter",
+    "Kennung vergeben": "kod tilldelad",
+    "Kennungen vergeben": "koder tilldelade",
+    "Neu drucken: ": "Skriv ut igen: ",
+    "Gespeichert, aber ohne Kennung: die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor ausführen — sonst sind gedruckte Etiketten nicht scannbar.": "Sparat, men utan kod: kolumnen ”code” finns inte än. Kör schema.sql i SQL-editorn — annars går utskrivna etiketter inte att skanna.",
     "Übersicht": "Översikt", "Produkte": "Produkter", "Produktverwaltung": "Artikelhantering", "Rollen": "Roller", "Rollen und ihre Standardrechte": "Roller och deras standardrättigheter", "Standardrechte": "Standardrättigheter", "Neue Rolle": "Ny roll", "Rolle anlegen": "Skapa roll", "Rechte": "rättigheter", "Person": "person", "Personen": "personer", "Fremdes Etikett": "Främmande etikett", "Kein Zugriff": "Ingen åtkomst", "Bearbeiten": "Redigera", "Produkt löschen": "Ta bort artikel", "Wirklich vollständig löschen?": "Ta bort helt?", "Endgültig löschen": "Ta bort permanent", "Aktiv": "Aktiv", "Gelesener Code": "Läst kod", "Noch kein Code gelesen": "Ingen kod läst än", "Vorlage herunterladen": "Ladda ner mall", "Ausgefüllte Liste hier hochladen": "Ladda upp din ifyllda lista här", "Datei hierher ziehen oder klicken · .csv bis 5 MB": "Dra en fil hit eller klicka · .csv upp till 5 MB", "Leere Liste — nur Kopfzeile": "Tom lista — bara rubrik", "Mit allen vorhandenen Produkten": "Med alla befintliga artiklar", "Vorlage mit Bestand": "Mall med lager", "Leere Vorlage": "Tom mall", "Vorlage": "Mall", "Datei unten hochladen, Spalten prüfen, importieren": "Ladda upp filen nedan, kontrollera kolumnerna, importera", "Vorlage wählen: leer oder mit dem heutigen Bestand": "Välj mall: tom eller med dagens lager", "Scannen": "Skanna", "Produkt anlegen": "Nytt föremål",
     "QR-Codes": "QR-koder", "Team & Rechte": "Team & rättigheter", "Einstellungen": "Inställningar",
     "Betriebs-Konsole": "Operatörskonsol", "Angemeldet als": "Inloggad som", "Abmelden": "Logga ut",
@@ -4309,6 +4323,25 @@ class Component extends DCLogic {
       const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status }));
       const nameOf = id => (members.find(m => m.id === id) || {}).name || "—";
       const when = t => t ? new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "—";
+      // Produkte ohne dauerhafte Kennung bekommen eine, und zwar sofort
+      // und dauerhaft — sonst zeigt jedes gedruckte Etikett ins Leere.
+      let next = d.products.reduce((m, r) => {
+        const n = parseInt(String(r.code || "").replace(/\D/g, ""), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 0);
+      const missing = [];
+      d.products.forEach(r => {
+        if (!r.code) { r.code = "P-" + String(++next).padStart(3, "0"); missing.push(r); }
+      });
+      if (missing.length && this.api) {
+        Promise.all(missing.map(r => api.updateProduct(r.id, { code: r.code })))
+          .then(() => this.say(this.tr("Etiketten"),
+            missing.length + " " + (missing.length === 1 ? this.tr("Kennung vergeben") : this.tr("Kennungen vergeben")),
+            this.tr("Neu drucken: ") + missing.slice(0, 6).map(r => r.name + " (" + r.code + ")").join(", ")
+              + (missing.length > 6 ? " …" : "")))
+          .catch(() => this.say("Supabase", this.tr("Artikelkennung fehlt"),
+            this.tr("Die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor erneut ausführen — sonst sind gedruckte Etiketten nicht scannbar.")));
+      }
       const products = d.products.map(r => ({
         id: r.id, code: r.code || r.id, name: r.name, ean: r.ean || "—", ist: r.ist, min: r.min, bestellmenge: r.bestellmenge,
         ort: r.ort || "—", mhd: r.mhd || "—", preis: r.preis != null ? Number(r.preis).toFixed(2).replace(".", ",") + " €" : "—",
@@ -5022,6 +5055,53 @@ class Component extends DCLogic {
   // Auf dem Etikett steht die dauerhafte Kennung, nicht die interne UUID:
   // sie bleibt über Neuladen, Import und Umbenennen hinweg dieselbe.
   codeOf(p) { return (p && (p.code || p.id)) || ""; }
+
+  // Nächste freie Artikelkennung. Sie zählt über alle Produkte hinweg
+  // hoch, auch über gelöschte — eine einmal gedruckte Nummer wird nie
+  // ein zweites Mal vergeben.
+  nextCode(offset) {
+    // Nur Kennungen der Form "X-123" zählen mit. Eine interne UUID würde
+    // sonst als riesige Zahl gelesen und die nächste Kennung unbrauchbar
+    // machen — "P-400024624199337200000" stünde dann auf dem Etikett.
+    const max = this.state.products.reduce((m, p) => {
+      const hit = /^[A-Za-z]+-(\d{1,5})$/.exec(String(this.codeOf(p)).trim());
+      return hit ? Math.max(m, parseInt(hit[1], 10)) : m;
+    }, 0);
+    return "P-" + String(max + 1 + (offset || 0)).padStart(3, "0");
+  }
+
+  // PostgREST weist einen Schreibvorgang komplett zurück, sobald er eine
+  // unbekannte Spalte nennt. Solange schema.sql nicht gelaufen ist, gäbe
+  // es also gar kein Produkt mehr — deshalb hier ein zweiter Versuch ohne
+  // das Feld, verbunden mit dem Hinweis, was in der Datenbank fehlt.
+  // Eine Importzeile für die Datenbank. Beide Importwege — der gewöhnliche
+  // und der nach dem Konfliktfenster — schreiben dieselbe Form.
+  importRows(list, meId) {
+    return list.map(p => ({
+      code: p.code,
+      name: p.name, ean: p.ean === "—" ? null : p.ean,
+      ist: p.ist, min: p.min, bestellmenge: p.bestellmenge,
+      ort: p.ort === "—" ? null : p.ort,
+      quantitaet: p.quantitaet === "—" ? null : p.quantitaet,
+      lieferant: p.lieferant === "—" ? null : p.lieferant,
+      mhd: p.mhd === "—" ? null : p.mhd, preis: this.parsePrice(p.preis),
+      verantwortlich: this.personId(p.verantwortlich) || meId,
+      vertreter: this.personIds(p.vertretung),
+      link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
+    }));
+  }
+
+  withoutCode(err, payload, retry) {
+    const msg = String((err && (err.message || err.details)) || err);
+    if (!/'?code'? column|column .*code|PGRST204/i.test(msg)) throw err;
+    const strip = row => { const c = Object.assign({}, row); delete c.code; return c; };
+    const clean = Array.isArray(payload) ? payload.map(strip) : strip(payload);
+    return Promise.resolve(retry(clean)).then(res => {
+      this.say("Supabase", this.tr("Artikelkennung fehlt"),
+        this.tr("Gespeichert, aber ohne Kennung: die Spalte „code“ gibt es noch nicht. Bitte schema.sql im SQL-Editor ausführen — sonst sind gedruckte Etiketten nicht scannbar."));
+      return res;
+    });
+  }
   qrPayload(p) { return "SC1|" + this.companyKey() + "|" + this.codeOf(p); }
 
   // Initialen: erster Buchstabe des ersten und des letzten Namensteils.
@@ -6360,8 +6440,9 @@ class Component extends DCLogic {
           if (taken.has(k)) { skipped++; return; }
           taken.add(k);
           const ist = this.toNum(r.ist), min = this.toNum(r.min);
+          const code = this.nextCode(fresh.length);
           fresh.push({
-            id: "P-" + String(products.length + fresh.length + 1).padStart(3, "0"),
+            id: code, code,
             name: r.name.trim(), ean: r.ean || "—", ist, min, bestellmenge: this.toNum(r.bestellmenge),
             ort: placeOf(r.ort), mhd: r.mhd || "—", preis: r.preis || "—",
             quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "",
@@ -6385,17 +6466,9 @@ class Component extends DCLogic {
         // danach frisch geladen. Ohne diesen Schritt wären sie nach einem
         // Neuladen der Seite wieder fort.
         if (st.live && this.api) {
-          this.api.importProducts(fresh.map(p => ({
-            name: p.name, ean: p.ean === "—" ? null : p.ean,
-            ist: p.ist, min: p.min, bestellmenge: p.bestellmenge,
-            ort: p.ort === "—" ? null : p.ort,
-            quantitaet: p.quantitaet === "—" ? null : p.quantitaet,
-            lieferant: p.lieferant === "—" ? null : p.lieferant,
-            mhd: p.mhd === "—" ? null : p.mhd, preis: this.parsePrice(p.preis),
-            verantwortlich: this.personId(p.verantwortlich) || st.meId,
-            vertreter: this.personIds(p.vertretung),
-            link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
-          })))
+          const rows = this.importRows(fresh, st.meId);
+          this.api.importProducts(rows)
+            .catch(err => this.withoutCode(err, rows, r => this.api.importProducts(r)))
             .then(() => { this.savePlaces(places.concat(newPlaces)); return this.refresh(); })
             .catch(err => this.say("Supabase", this.tr("Import nicht gespeichert"), String((err && err.message) || err)));
         }
@@ -6483,17 +6556,11 @@ class Component extends DCLogic {
         }));
         if (st.live && this.api) {
           const jobs = [];
-          if (fresh.length) jobs.push(this.api.importProducts(fresh.map(p => ({
-            name: p.name, ean: p.ean === "—" ? null : p.ean,
-            ist: p.ist, min: p.min, bestellmenge: p.bestellmenge,
-            ort: p.ort === "—" ? null : p.ort,
-            quantitaet: p.quantitaet === "—" ? null : p.quantitaet,
-            lieferant: p.lieferant === "—" ? null : p.lieferant,
-            mhd: p.mhd === "—" ? null : p.mhd, preis: this.parsePrice(p.preis),
-            verantwortlich: this.personId(p.verantwortlich) || st.meId,
-            vertreter: this.personIds(p.vertretung),
-            link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
-          }))));
+          if (fresh.length) {
+            const rows = this.importRows(fresh, st.meId);
+            jobs.push(this.api.importProducts(rows)
+              .catch(err => this.withoutCode(err, rows, r => this.api.importProducts(r))));
+          }
           patches.forEach(x => {
             const db = {};
             if (x.patch.ort !== undefined) db.ort = x.patch.ort;
@@ -6586,9 +6653,9 @@ class Component extends DCLogic {
         }
         if (!this.withinLimit("products", products.length)) return;
         const ist = this.toNum(st.npIst), min = this.toNum(st.npMin);
-        const id = "P-" + String(products.length + 1).padStart(3, "0");
+        const id = this.nextCode();
         const row = {
-          id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
+          id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
           ort: placeOf(st.npPlace), mhd: st.npMhd || "—", preis: st.npPrice || "—",
           quantitaet: st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
           kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
@@ -6606,14 +6673,17 @@ class Component extends DCLogic {
         // Nach dem Anlegen neu laden: erst dann trägt das Produkt seine
         // dauerhafte Kennung aus der Datenbank, die auf das Etikett kommt.
         if (st.live && this.api) {
-          this.api.createProduct({
+          const payload = {
+            code: id,
             name, ean: st.npEan || null, ist, min, bestellmenge: this.toNum(st.npOrder),
             ort: row.ort, preis: this.parsePrice(st.npPrice), mhd: st.npMhd || null,
             quantitaet: st.npQty || null, lieferant: st.npSupplier || null,
             link: st.npLink || null, kategorien: row.kategorien, status: row.status,
             verantwortlich: this.personId(st.npResp) || st.meId,
             vertreter: this.personIds([st.npD1, st.npD2, st.npD3].join(","))
-          })
+          };
+          this.api.createProduct(payload)
+            .catch(err => this.withoutCode(err, payload, p => this.api.createProduct(p)))
             .then(() => this.refresh())
             .catch(err => this.say("Supabase", this.tr("Nicht gespeichert"), String((err && err.message) || err)));
         }
