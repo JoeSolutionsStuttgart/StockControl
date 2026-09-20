@@ -629,6 +629,8 @@
                 <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Artikelkennung</div>
                 <div style="font-family: ui-monospace, Menlo, monospace; font-size: 18px">{{ current.code }}</div>
                 <div style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Diese Kennung steht auf dem Etikett und ändert sich nie. Sie lässt sich beim Scannen auch von Hand eintippen.</div>
+                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2); margin-top: 6px" data-i18n>Scan-Adresse</div>
+                <div style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; line-height: 1.45; word-break: break-all; color: var(--sc-ink-2)">{{ current.qrLink }}</div>
               </div>
             </div>
             <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ printThisLabel }}"><span data-i18n>Etikett drucken</span></button>
@@ -987,6 +989,54 @@
         </section>
 
         <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Vorschau bis Datum</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Alles, was bis zu einem Stichtag in Events gebraucht wird, zusammengerechnet und gegen den heutigen Bestand gestellt.</p>
+            <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
+              <div class="field" style="flex: 1; min-width: 150px; margin: 0"><label data-i18n>Stichtag</label><input class="input" type="date" value="{{ fcDate }}" onChange="{{ setFcDate }}"></div>
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ fcDisabled }}" onClick="{{ runForecast }}"><span data-i18n>Vorschau rechnen</span></button>
+            </div>
+            <sc-if value="{{ fcOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
+                <div style="font-size: 12.5px; color: var(--sc-ink-2)">{{ fcSummary }}</div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                  <sc-for list="{{ fcEvents }}" as="fe" hint-placeholder-count="2">
+                    <span class="tag tag-neutral">{{ fe.label }}</span>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ fcHasRows }}" hint-placeholder-val="{{ false }}">
+                  <div style="overflow-x: auto; max-width: 100%">
+                    <table class="table" data-zebra style="min-width: 380px">
+                      <thead>
+                        <tr>
+                          <th data-i18n>Artikel</th>
+                          <th style="text-align: right" data-i18n>Bedarf</th>
+                          <th style="text-align: right" data-i18n>Bestand</th>
+                          <th style="text-align: right" data-i18n>Rest</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <sc-for list="{{ fcRows }}" as="fr" hint-placeholder-count="4">
+                          <tr>
+                            <td style="font-weight: 500">{{ fr.name }}<div style="font-size: 11px; color: var(--sc-ink-3)">{{ fr.note }}</div></td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums">{{ fr.need }}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums">{{ fr.stock }}</td>
+                            <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: {{ fr.color }}">{{ fr.rest }}</td>
+                          </tr>
+                        </sc-for>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+                    <button class="btn btn-secondary" onClick="{{ exportForecast }}"><span data-i18n>Als Excel exportieren</span></button>
+                    <button class="btn btn-ghost" onClick="{{ clearForecast }}"><span data-i18n>Vorschau schließen</span></button>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </section>
+
           <section class="card">
             <h4 style="margin: 0" data-i18n>Geplante Events</h4>
             <div style="display: flex; flex-direction: column; gap: var(--space-2)">
@@ -1430,7 +1480,15 @@
       </sc-if>
 
       <sc-if value="{{ onSettings }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Einstellungen" data-two>
+      <div data-screen-label="Einstellungen" style="display: flex; flex-direction: column; gap: var(--space-4)">
+
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Lager und Artikel</h3>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Lagerorte, Gebinde und eigene Felder</span>
+          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">01</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
+
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Lagerorte</h4>
@@ -1461,7 +1519,7 @@
                 <span data-i18n-keep style="font-size: 13px; margin-right: auto">{{ ud.name }}</span>
                 <span data-i18n-keep class="tag tag-neutral">{{ ud.relLabel }}</span>
                 <span class="tag tag-neutral">{{ ud.usedLabel }}</span>
-                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ ud.locked }}" onClick="{{ ud.remove }}"><span data-i18n>Löschen</span></button>
+                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ ud.remove }}"><span data-i18n>Löschen</span></button>
               </div>
             </sc-for>
           </div>
@@ -1526,6 +1584,15 @@
           </div>
         </section>
 
+        </div>
+
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Warnungen und Mail</h3>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Wann wer eine Nachricht bekommt</span>
+          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">02</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
+
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
@@ -1559,7 +1626,14 @@
           </div>
         </section>
 
-        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+        </div>
+
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Mein Konto</h3>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Sprache, Darstellung, Anmeldung</span>
+          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">03</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n>Sprache und Darstellung</h4>
@@ -1646,7 +1720,15 @@
             <p class="card-body" style="margin: 0" data-i18n>Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.</p>
           </section>
 
-          <sc-if value="{{ showSystemCards }}" hint-placeholder-val="{{ false }}">
+        </div>
+
+        <sc-if value="{{ showSystemCards }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>System und Kosten</h3>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Dienste, Mailversand prüfen, Grenzen</span>
+          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">04</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
           <section class="card">
             <div class="card-kicker" data-i18n>Systemdienste</div>
             <h4 style="margin: 0" data-i18n>Datenquelle</h4>
@@ -1727,8 +1809,8 @@
             </div>
             <p class="card-body" style="margin: var(--space-2) 0 0; font-size: 12.5px" data-i18n>Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.</p>
           </section>
-          </sc-if>
         </div>
+        </sc-if>
       </div>
       </sc-if>
 
@@ -2552,6 +2634,34 @@
 </div>
 </sc-if>
 
+<sc-if value="{{ askOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; inset: 0; z-index: 70; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
+    <div class="blueprint elev-lg" style="width: min(520px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: var(--space-4); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-3); animation: sc-in .18s ease-out">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="card-kicker">{{ askKicker }}</div>
+      <h3 style="font-family: var(--font-heading); font-size: 23px; margin: 0">{{ askTitle }}</h3>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)">{{ askText }}</p>
+      <sc-if value="{{ askHasList }}" hint-placeholder-val="{{ false }}">
+        <div class="blueprint" style="padding: var(--space-3); display: flex; flex-direction: column; gap: 5px; background: color-mix(in srgb, var(--color-accent) 9%, transparent)">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="card-kicker">{{ askListTitle }}</div>
+          <sc-for list="{{ askList }}" as="al" hint-placeholder-count="3">
+            <div style="font-size: 12.5px; line-height: 1.45">
+              <span style="font-weight: 600">{{ al.name }}</span>
+              <span style="color: var(--sc-ink-2)"> — {{ al.detail }}</span>
+            </div>
+          </sc-for>
+          <div style="font-size: 12px; color: var(--sc-ink-2)">{{ askMoreNote }}</div>
+        </div>
+      </sc-if>
+      <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+        <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ askConfirm }}">{{ askConfirmLabel }}</button>
+        <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ askCancel }}"><span data-i18n>Abbrechen</span></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ clashOpen }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide style="position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
     <div class="blueprint elev-lg" style="width: min(640px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: var(--space-4); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-3); animation: sc-in .18s ease-out">
@@ -3200,6 +3310,21 @@ const DICT = {
     "Mindestbestand erreicht": "Minimum reached", "vor 12 Wochen": "12 weeks ago", "heute": "today",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL and SUPABASE_ANON_KEY are missing in config.js. Without them there is no database and no mail. The steps are in SETUP.md.",
     "Code eingeben": "Enter code", "Artikel-ID oder EAN": "Item ID or EAN", "Öffnen": "Open",
+    "Scan-Adresse": "Scan address",
+    "Quantität löschen": "Delete quantity", "wird verwendet": "is in use", "Stelle": "place", "Stellen": "places",
+    "Diese Quantität ist im Einsatz: ": "This quantity is in use: ",
+    "Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig.": "If it is deleted, these products lose their conversion — booked amounts stay as they are. Quantities that refer to it become standalone.",
+    "Betroffen": "Affected", "weitere": "more", "Trotzdem löschen": "Delete anyway", "bezieht sich darauf": "refers to it",
+    "Vorschau bis Datum": "Preview up to a date", "Stichtag": "Cut-off date", "Vorschau rechnen": "Calculate preview",
+    "Alles, was bis zu einem Stichtag in Events gebraucht wird, zusammengerechnet und gegen den heutigen Bestand gestellt.": "Everything needed for events up to a cut-off date, added up and set against today's stock.",
+    "Bedarf": "Needed", "Rest": "Left", "Vorschau schließen": "Close preview", "Vorschau exportiert": "Preview exported",
+    "Bis zu diesem Datum ist kein Event geplant.": "No event is planned up to that date.",
+    "nicht ausreichend": "not sufficient", "Bestand reicht überall": "stock is sufficient throughout",
+    "fehlt: ": "short by: ", "danach unter Mindestbestand": "below minimum afterwards", "Nicht möglich": "Not possible",
+    "Lager und Artikel": "Stock and items", "Lagerorte, Gebinde und eigene Felder": "Locations, packs and custom fields",
+    "Warnungen und Mail": "Alerts and mail", "Wann wer eine Nachricht bekommt": "Who gets notified, and when",
+    "Mein Konto": "My account", "Sprache, Darstellung, Anmeldung": "Language, appearance, sign-in",
+    "System und Kosten": "System and cost", "Dienste, Mailversand prüfen, Grenzen": "Services, mail check, limits",
     "Nicht gefunden": "Not found", "Kein Artikel mit dieser ID oder EAN.": "No item with that ID or EAN.",
     "Datei auswählen": "Choose file", "Spalten geprüft — unten bestätigen.": "Columns checked — confirm below.",
     "Keine Datenbank verbunden": "No database connected",
@@ -3842,6 +3967,21 @@ const DICT = {
     "Mindestbestand erreicht": "Miniminivå nådd", "vor 12 Wochen": "för 12 veckor sedan", "heute": "idag",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL och SUPABASE_ANON_KEY saknas i config.js. Utan dem finns ingen databas och inga mejl. Stegen står i SETUP.md.",
     "Code eingeben": "Ange kod", "Artikel-ID oder EAN": "Artikel-ID eller EAN", "Öffnen": "Öppna",
+    "Scan-Adresse": "Skanningsadress",
+    "Quantität löschen": "Ta bort kvantitet", "wird verwendet": "används", "Stelle": "ställe", "Stellen": "ställen",
+    "Diese Quantität ist im Einsatz: ": "Kvantiteten används: ",
+    "Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig.": "Om den tas bort förlorar produkterna sin omräkning — bokade mängder står kvar. Kvantiteter som hänvisar till den blir fristående.",
+    "Betroffen": "Berörda", "weitere": "fler", "Trotzdem löschen": "Ta bort ändå", "bezieht sich darauf": "hänvisar till den",
+    "Vorschau bis Datum": "Förhandsvy till datum", "Stichtag": "Brytdatum", "Vorschau rechnen": "Räkna förhandsvy",
+    "Alles, was bis zu einem Stichtag in Events gebraucht wird, zusammengerechnet und gegen den heutigen Bestand gestellt.": "Allt som behövs för evenemang till ett brytdatum, summerat och ställt mot dagens lager.",
+    "Bedarf": "Behov", "Rest": "Kvar", "Vorschau schließen": "Stäng förhandsvy", "Vorschau exportiert": "Förhandsvy exporterad",
+    "Bis zu diesem Datum ist kein Event geplant.": "Inget evenemang är planerat till det datumet.",
+    "nicht ausreichend": "inte tillräckligt", "Bestand reicht überall": "lagret räcker överallt",
+    "fehlt: ": "saknas: ", "danach unter Mindestbestand": "under miniminivå efteråt", "Nicht möglich": "Inte möjligt",
+    "Lager und Artikel": "Lager och artiklar", "Lagerorte, Gebinde und eigene Felder": "Lagerplatser, förpackningar och egna fält",
+    "Warnungen und Mail": "Varningar och e-post", "Wann wer eine Nachricht bekommt": "Vem som får meddelande och när",
+    "Mein Konto": "Mitt konto", "Sprache, Darstellung, Anmeldung": "Språk, utseende, inloggning",
+    "System und Kosten": "System och kostnad", "Dienste, Mailversand prüfen, Grenzen": "Tjänster, e-postkontroll, gränser",
     "Nicht gefunden": "Hittades inte", "Kein Artikel mit dieser ID oder EAN.": "Ingen artikel med det ID:t eller EAN.",
     "Datei auswählen": "Välj fil", "Spalten geprüft — unten bestätigen.": "Kolumner kontrollerade — bekräfta nedan.",
     "Keine Datenbank verbunden": "Ingen databas ansluten",
@@ -4189,6 +4329,7 @@ class Component extends DCLogic {
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true },
+      ask: null, fcDate: "", fcOn: false,
       roleDefs: null, newRoleName: "", companyId: null,
       inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
       readRaw: "", readAt: 0, readFrames: 0, readMiss: "",
@@ -4273,6 +4414,9 @@ class Component extends DCLogic {
     try {
       const cfg = await import("./config.js");
       if (cfg.SERVICE_NAME) this.setState({ brand: cfg.SERVICE_NAME });
+      // Adresse für die Etiketten. Ohne Angabe wird die Adresse dieser
+      // Seite genommen — richtig, solange die App dort liegt, wo gescannt wird.
+      if (cfg.APP_URL) this.appUrl = String(cfg.APP_URL).trim().replace(/[#?].*$/, "");
       if (cfg.FREE_TIER_GUARD !== undefined) this.setState({ guard: !!cfg.FREE_TIER_GUARD });
       if (cfg.FREE_TIER_LIMITS) this.setState({ limits: Object.assign({}, LIMITS_DEFAULT, cfg.FREE_TIER_LIMITS) });
       if (cfg.TURNSTILE_SITE_KEY) {
@@ -4779,29 +4923,17 @@ class Component extends DCLogic {
     if (!text || text === this.lastCode) { this.scanT = setTimeout(() => this.detectLoop(), 400); return; }
     this.lastCode = text;
 
-    // Trägt der Code eine Firmenkennung, muss sie zur angemeldeten Firma
-    // passen. Sonst wird abgebrochen — ein fremdes Etikett führt nirgendwohin.
-    if (/^SC1\|/.test(text)) {
-      const parts = text.split("|");
-      if (parts[1] !== this.companyKey()) {
-        this.setState({ readMiss: text });
-        this.say(this.tr("Fremdes Etikett"), this.tr("Kein Zugriff"),
-          this.tr("Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen."));
-        setTimeout(() => { this.lastCode = null; }, 2000);
-        this.scanT = setTimeout(() => this.detectLoop(), 1200);
-        return;
-      }
+    // Ein fremdes Etikett führt nirgendwohin.
+    if (this.foreignCode(text)) {
+      this.setState({ readMiss: text });
+      this.say(this.tr("Fremdes Etikett"), this.tr("Kein Zugriff"),
+        this.tr("Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen."));
+      setTimeout(() => { this.lastCode = null; }, 2000);
+      this.scanT = setTimeout(() => this.detectLoop(), 1200);
+      return;
     }
 
-    // Mögliche Schreibweisen: "SC1|<Firma>|<Artikel>", eine Adresse mit der
-    // Kennung am Ende, oder die blanke Kennung. Alle Teile kommen in den
-    // Vergleich — vorher fiel der Artikel aus "SC1|…|P-002" durchs Raster.
-    const parts = text.split(/[|\/?#=&]/).map(x => x.trim()).filter(Boolean);
-    const keys = [text].concat(parts).map(x => x.toLowerCase());
-    const hit = this.state.products.find(p =>
-      keys.includes(String(this.codeOf(p)).toLowerCase()) ||
-      keys.includes(String(p.id).toLowerCase()) ||
-      keys.includes(String(p.ean).toLowerCase()));
+    const hit = this.findByCode(text);
     if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
     if (hit) {
       this.stopCamera();
@@ -4813,6 +4945,45 @@ class Component extends DCLogic {
       setTimeout(() => { this.lastCode = null; }, 1500);
       this.scanT = setTimeout(() => this.detectLoop(), 900);
     }
+  }
+
+  // ── Vorschau bis Stichtag ─────────────────────────────────────
+  // Alle Events bis zu einem Datum werden addiert und gegen den heutigen
+  // Bestand gestellt: was reicht und was vorher beschafft werden muss.
+  // Event-Daten stehen teils als "2026-10-02", teils als "02.10.2026" —
+  // beides muss der Vergleich verstehen. Alles andere („—") fällt raus.
+  isoDay(s) {
+    const t = String(s == null ? "" : s).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return t;
+    const m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(t);
+    if (m) return m[3] + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[1]).slice(-2);
+    return "";
+  }
+
+  forecast() {
+    const until = this.isoDay(this.state.fcDate);
+    const evs = until ? (this.state.events || []).filter(e => {
+      const d = this.isoDay(e.datum);
+      return d && d <= until;
+    }) : [];
+    const need = {};
+    evs.forEach(e => (e.items || []).forEach(it => {
+      need[it.id] = (need[it.id] || 0) + (Number(it.qty) || 0);
+    }));
+    const rows = Object.keys(need).map(id => {
+      const p = (this.state.products || []).find(x => x.id === id);
+      if (!p) return null;
+      const stock = Number(p.ist) || 0, n = need[id], rest = stock - n;
+      return {
+        name: p.name, id: this.codeOf(p), need: n, stock: stock, restNum: rest,
+        rest: (rest > 0 ? "+" : "") + rest,
+        note: rest < 0
+          ? this.tr("fehlt: ") + Math.abs(rest)
+          : (rest <= (Number(p.min) || 0) ? this.tr("danach unter Mindestbestand") : p.ort),
+        color: rest < 0 ? "var(--color-accent-900)" : "inherit"
+      };
+    }).filter(Boolean).sort((a, b) => a.restNum - b.restNum);
+    return { evs: evs, rows: rows };
   }
 
   // ── Quantitäten der Firma ─────────────────────────────────────
@@ -5102,7 +5273,64 @@ class Component extends DCLogic {
       return res;
     });
   }
-  qrPayload(p) { return "SC1|" + this.companyKey() + "|" + this.codeOf(p); }
+  // Die Adresse, unter der diese App liegt — ohne Anhänge. Auf GitHub
+  // Pages ist das die Seitenadresse selbst; in config.js lässt sie sich
+  // mit APP_URL festschreiben, falls Etiketten für eine andere Adresse
+  // gedruckt werden sollen.
+  appBase() {
+    if (this.appUrl) return this.appUrl;
+    try {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        return location.origin + location.pathname;
+      }
+    } catch (e) {}
+    return "";
+  }
+
+  // Auf dem Etikett steht eine vollständige Adresse mit der Kennung hinten
+  // dran. Jede Handykamera erkennt sie als Link und öffnet damit direkt
+  // dieses Produkt — ohne App, ohne eigene Seite je Artikel. Die Firma
+  // steht mit drin, damit ein fremdes Etikett nichts verrät.
+  qrPayload(p) {
+    const base = this.appBase();
+    const tail = "#/p/" + this.companyKey() + "/" + encodeURIComponent(this.codeOf(p));
+    return base ? base + tail : "SC1|" + this.companyKey() + "|" + this.codeOf(p);
+  }
+
+  // Vergleich auf Buchstaben und Ziffern verkürzt: "P-001", "p001" und
+  // "P 001" sind dasselbe Etikett. Daran scheiterte die Suche bisher.
+  norm(x) { return String(x == null ? "" : x).toLowerCase().replace(/[^a-z0-9]/g, ""); }
+
+  // Ein gelesener Code kann sein: die blanke Kennung, eine EAN,
+  // "SC1|Firma|Kennung" oder eine Adresse mit "#/p/Firma/Kennung".
+  // Alle Bestandteile kommen in den Vergleich.
+  codeParts(text) {
+    const whole = String(text == null ? "" : text).trim();
+    const parts = whole.split(/[|\/?#=&\s]+/);
+    return [whole].concat(parts).map(x => this.norm(x)).filter(Boolean);
+  }
+
+  // Trägt der Code eine Firmenkennung, muss sie zur angemeldeten Firma
+  // passen. Sonst wird nichts geöffnet und nichts verraten.
+  foreignCode(text) {
+    const t = String(text == null ? "" : text);
+    const viaText = /^SC1\|([^|]*)\|/.exec(t);
+    const viaUrl = /#\/p\/([^\/?#]+)\/([^\/?#]+)/.exec(t);
+    let key = null;
+    if (viaText) key = viaText[1];
+    else if (viaUrl) { try { key = decodeURIComponent(viaUrl[1]); } catch (e) { key = viaUrl[1]; } }
+    if (key === null) return false;
+    return this.norm(key) !== this.norm(this.companyKey());
+  }
+
+  findByCode(text) {
+    const keys = this.codeParts(text);
+    if (!keys.length) return null;
+    return this.state.products.find(p =>
+      keys.includes(this.norm(this.codeOf(p))) ||
+      keys.includes(this.norm(p.id)) ||
+      keys.includes(this.norm(p.ean))) || null;
+  }
 
   // Initialen: erster Buchstabe des ersten und des letzten Namensteils.
   // Ein einzelner Name gibt seine ersten zwei Buchstaben, damit die Kachel
@@ -5149,10 +5377,68 @@ class Component extends DCLogic {
     return true;
   }
 
+  // ── Etikett-Link ──────────────────────────────────────────────
+  // Der QR-Code auf dem Etikett ist eine Adresse: "…/#/p/<Firma>/<Kennung>".
+  // Wer mit der Handykamera scannt, landet damit auf dieser Seite. Die
+  // Kennung wird hier ausgelesen und gemerkt; geöffnet wird das Produkt,
+  // sobald die Daten da sind — notfalls erst nach der Anmeldung.
+  readHashCode() {
+    let raw = "";
+    try {
+      let h = location.hash || "";
+      try { h = decodeURIComponent(h); } catch (e) {}
+      const m = /#\/p\/([^\/?#]+)(?:\/([^\/?#]+))?/.exec(h);
+      if (m) raw = m[2] ? "SC1|" + m[1] + "|" + m[2] : m[1];
+      else if (/[#&]p=/.test(h)) raw = (h.split(/[#&]p=/)[1] || "").split(/[&#]/)[0];
+      else {
+        const q = new URLSearchParams(location.search || "");
+        if (q.get("p")) raw = q.get("p");
+      }
+    } catch (e) { return false; }
+    if (!raw) return false;
+    this.pendingCode = raw;
+    // Die Adresse wird aufgeräumt, damit ein Neuladen nicht wieder
+    // dasselbe Produkt aufschlägt.
+    try {
+      const search = (location.search || "").replace(/([?&])p=[^&]*&?/, "$1").replace(/[?&]$/, "");
+      history.replaceState(null, "", location.pathname + search);
+    } catch (e) {}
+    return true;
+  }
+
+  openPending() {
+    const raw = this.pendingCode;
+    if (!raw) return;
+    // Ohne Anmeldung und ohne geladene Produkte bleibt der Merker stehen.
+    if (!this.state.authed || !this.state.products.length) return;
+    this.pendingCode = null;
+    if (this.foreignCode(raw)) {
+      this.say(this.tr("Fremdes Etikett"), this.tr("Kein Zugriff"),
+        this.tr("Dieser Code gehört zu einer anderen Firma. Innerhalb dieses Zugangs lässt er sich nicht öffnen."));
+      return;
+    }
+    const hit = this.findByCode(raw);
+    if (hit) {
+      this.stopCamera();
+      this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} });
+      this.say(this.tr("Gescannt"), hit.name, hit.ort);
+    } else {
+      // Kennung unbekannt: auf dem Scan-Schirm steht sie zum Nachsehen bereit.
+      this.setState({ screen: "scan", scanCode: String(raw), readRaw: String(raw), readMiss: String(raw) });
+      this.say(this.tr("Nicht gefunden"), String(raw).slice(0, 40),
+        this.tr("Kein Artikel mit dieser Kennung. Etikett neu drucken oder Code eintippen."));
+    }
+  }
+
   componentDidMount() {
     this.applyTheme();
     this.applyLang();
     this.localizeSlots();
+    this.readHashCode();
+    // Ein zweiter Scan bei offener App lädt die Seite nicht neu, sondern
+    // ändert nur die Adresse — auch das muss das Produkt öffnen.
+    this.hashL = () => { if (this.readHashCode()) this.openPending(); };
+    window.addEventListener("hashchange", this.hashL);
     try {
       this.setState({
         onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
@@ -5190,12 +5476,14 @@ class Component extends DCLogic {
     clearTimeout(this.menuT);
     clearTimeout(this.roleSaveT);
     this.stopCamera();
+    if (this.hashL) window.removeEventListener("hashchange", this.hashL);
     if (this.mq) this.mq.removeEventListener("change", this.mqL);
   }
   componentDidUpdate() {
     this.applyTheme();
     this.applyLang();
     this.localizeSlots();
+    if (this.pendingCode) this.openPending();
     if (this.state.screen === "detail" && this.state.photoFor !== this.state.currentId) {
       this.loadPhoto(this.state.currentId);
     }
@@ -5766,17 +6054,41 @@ class Component extends DCLogic {
 
       // ── Quantitäten der Firma (Einstellungen) ──────────────
       unitDefList: this.unitDefs().map(d => {
-        const used = this.unitDefs().filter(x => x.ref === d.name).length
-          + products.filter(p => (st.units[p.id] || []).some(u => u.name === d.name)).length;
+        // Wo die Quantität hängt: an Produkten und an anderen Quantitäten,
+        // die sich auf sie beziehen. Beides muss im Warnfenster stehen.
+        const viaUnits = this.unitDefs().filter(x => x.ref === d.name);
+        const viaProducts = products.filter(p => (st.units[p.id] || []).some(u => u.name === d.name));
+        const used = viaUnits.length + viaProducts.length;
+        const rows = viaProducts.map(p => ({ name: p.name, detail: p.ort }))
+          .concat(viaUnits.map(u => ({ name: u.name, detail: this.tr("bezieht sich darauf") })));
+        const drop = () => {
+          // Bezüge anderer Quantitäten würden ins Leere zeigen: sie werden
+          // eigenständig, statt eine kaputte Kette zu hinterlassen.
+          const next = this.unitDefs()
+            .filter(x => x.name !== d.name)
+            .map(x => x.ref === d.name ? { name: x.name } : x);
+          this.setState({ unitDefs: next, ask: null });
+          this.remote(api => api.saveSettings({ units: next }));
+          this.say(this.tr("Quantität"), this.tr("Gelöscht"), d.name);
+        };
         return {
           name: d.name, relLabel: this.relLabel(d),
           usedLabel: used === 0 ? this.tr("frei") : used + " ×",
-          locked: used > 0,
+          locked: false,
           remove: () => {
-            const next = this.unitDefs().filter(x => x.name !== d.name);
-            this.setState({ unitDefs: next });
-            this.remote(api => api.saveSettings({ units: next }));
-            this.say(this.tr("Quantität"), this.tr("Gelöscht"), d.name);
+            if (!used) { drop(); return; }
+            this.setState({ ask: {
+              kicker: this.tr("Quantität löschen"),
+              title: d.name + " " + this.tr("wird verwendet"),
+              text: this.tr("Diese Quantität ist im Einsatz: ") + used + " "
+                + (used === 1 ? this.tr("Stelle") : this.tr("Stellen")) + ". "
+                + this.tr("Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig."),
+              listTitle: this.tr("Betroffen"),
+              list: rows.slice(0, 8),
+              moreNote: rows.length > 8 ? "+ " + (rows.length - 8) + " " + this.tr("weitere") : "",
+              confirmLabel: this.tr("Trotzdem löschen"),
+              onOk: drop
+            } });
           }
         };
       }),
@@ -6106,6 +6418,7 @@ class Component extends DCLogic {
         link: "https://example.com/" + cur.id.toLowerCase(),
         qr: this.qrEl(this.qrPayload(cur), 110),
         code: this.codeOf(cur),
+        qrLink: this.qrPayload(cur),
         chart: this.chart(cur.hist)
       }),
       qty: st.qty,
@@ -6218,6 +6531,40 @@ class Component extends DCLogic {
         this.say(this.tr("Event"), this.tr("Bedarfsliste erstellt"), st.evItems.length + " " + this.tr("Positionen") + " · " + this.tr("Fehlmengen berechnet"));
       },
       exportEventList: () => this.say("Export", this.tr("Bedarfsliste exportiert"), (ev ? ev.name : "") + " · Excel (.xlsx)"),
+
+      // ── Vorschau bis Stichtag ──────────────────────────────
+      fcDate: st.fcDate,
+      fcDisabled: !st.fcDate,
+      setFcDate: e => this.setState({ fcDate: e.target.value, fcOn: false }),
+      runForecast: () => this.setState({ fcOn: true }),
+      clearForecast: () => this.setState({ fcOn: false }),
+      fcOn: !!(st.fcOn && st.fcDate),
+      fcEvents: this.forecast().evs.map(e => ({ label: e.name + " · " + e.datum })),
+      fcRows: this.forecast().rows,
+      fcHasRows: this.forecast().rows.length > 0,
+      fcSummary: (() => {
+        const f = this.forecast();
+        if (!f.evs.length) return this.tr("Bis zu diesem Datum ist kein Event geplant.");
+        const short = f.rows.filter(r => r.restNum < 0).length;
+        return f.evs.length + " " + (f.evs.length === 1 ? this.tr("Event") : this.tr("Events"))
+          + " · " + f.rows.length + " " + this.tr("Artikel")
+          + " · " + (short ? short + " " + this.tr("nicht ausreichend") : this.tr("Bestand reicht überall"));
+      })(),
+      exportForecast: () => {
+        const f = this.forecast();
+        const head = [this.tr("Artikel"), this.tr("Artikelkennung"), this.tr("Bedarf"), this.tr("Bestand"), this.tr("Rest")];
+        const text = [head].concat(f.rows.map(r => [r.name, r.id, r.need, r.stock, r.restNum]))
+          .map(cols => cols.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\r\n");
+        try {
+          const blob = new Blob(["\ufeff" + text], { type: "text/csv;charset=utf-8" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "vorschau-" + st.fcDate + ".csv";
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+          this.say("Export", this.tr("Vorschau exportiert"), st.fcDate);
+        } catch (err) { this.say("Export", this.tr("Nicht möglich"), String((err && err.message) || err)); }
+      },
 
       canOrder: (cur.status === "low" || cur.status === "ordered") && mine(cur),
       statusLocked: (cur.status === "low" || cur.status === "ordered") && !mine(cur),
@@ -6482,6 +6829,19 @@ class Component extends DCLogic {
             ? " · " + newPlaces.length + " " + (newPlaces.length === 1 ? this.tr("neuer Lagerort") : this.tr("neue Lagerorte"))
             : ""));
       },
+      // ── Rückfrage vor folgenreichen Schritten ──────────────
+      askOpen: !!st.ask,
+      askKicker: st.ask ? st.ask.kicker : "",
+      askTitle: st.ask ? st.ask.title : "",
+      askText: st.ask ? st.ask.text : "",
+      askHasList: !!(st.ask && (st.ask.list || []).length),
+      askListTitle: st.ask ? (st.ask.listTitle || "") : "",
+      askList: st.ask ? (st.ask.list || []) : [],
+      askMoreNote: st.ask ? (st.ask.moreNote || "") : "",
+      askConfirmLabel: st.ask ? (st.ask.confirmLabel || this.tr("Löschen")) : "",
+      askConfirm: () => { const a = st.ask; if (a && a.onOk) a.onOk(); else this.setState({ ask: null }); },
+      askCancel: () => this.setState({ ask: null }),
+
       // ── Hinweisfenster bei Namensgleichheit ────────────────
       clashOpen: (st.clashRows || []).length > 0,
       clashCount: (st.clashRows || []).length,
