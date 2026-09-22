@@ -295,6 +295,60 @@ export async function saveSettings(patch) {
     .select().single());
 }
 
+// Bestellungen: eigener Weg, weil die Einstellungen selbst der inhabenden
+// Person vorbehalten sind, Bestellungen aber jede berechtigte Person setzt.
+export async function setOrders(orders) {
+  const sb = await client();
+  const { error } = await sb.rpc("sc_set_orders", { p: orders || [] });
+  if (error) throw error;
+  return true;
+}
+
+/* ── Änderungsmelder ────────────────────────────────────── */
+// Statt im Takt zu fragen: jede eigene Änderung setzt ein Fähnchen in den
+// übrigen Konten der Firma. Realtime meldet es dort sofort; ist Realtime
+// nicht eingeschaltet, fragt die Oberfläche selten nach — ein Feld, eine
+// Zeile. Fehlen die Funktionen (schema.sql nicht erneut ausgeführt), wird
+// still nichts getan, statt Fehler zu werfen.
+
+export async function markDirty() {
+  const sb = await client();
+  const { error } = await sb.rpc("sc_mark_dirty");
+  return !error;
+}
+
+export async function clearDirty() {
+  const sb = await client();
+  const { error } = await sb.rpc("sc_clear_dirty");
+  return !error;
+}
+
+export async function dirtyFlag() {
+  const sb = await client();
+  const { data, error } = await sb.rpc("sc_dirty");
+  if (error) return null;
+  return !!data;
+}
+
+// Horcht auf das eigene Fähnchen. Liefert eine Funktion zum Abmelden,
+// oder null, wenn Realtime nicht zustande kommt — dann greift der Rückfall.
+export async function onDirty(cb) {
+  try {
+    const sb = await client();
+    const me = await myProfile();
+    if (!me || !me.id) return null;
+    let live = false;
+    const ch = sb.channel("sc-dirty-" + me.id)
+      .on("postgres_changes",
+          { event: "UPDATE", schema: "public", table: "profiles", filter: "id=eq." + me.id },
+          payload => { if (payload && payload.new && payload.new.needs_refresh) cb(); })
+      .subscribe(status => { if (status === "SUBSCRIBED") live = true; });
+    await new Promise(r => setTimeout(r, 2500));
+    if (!live) { try { sb.removeChannel(ch); } catch (e) {} return null; }
+    return () => { try { sb.removeChannel(ch); } catch (e) {} };
+  } catch (e) { return null; }
+}
+
 /* ── Große Dateien: Cloudflare R2 über einen Worker ─────── */
 // Der Bucket ist NICHT öffentlich und hat keine ausgelagerten Schlüssel:
 // der Worker hat ihn direkt gebunden. Er prüft am mitgeschickten Token,

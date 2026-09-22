@@ -87,6 +87,10 @@
   [data-burger-panel] .btn { min-height: 44px; justify-content: flex-start; }
   [data-cols] { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); }
   [data-two] { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  [data-detail] { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  [data-detail-main] { grid-column: 1; grid-row: 1 / span 2; }
+  [data-detail-book] { grid-column: 2; grid-row: 1; }
+  [data-detail-side] { grid-column: 2; grid-row: 2; }
   @media (max-width: 900px) {
     [data-topnav] { display: none !important; }
     [data-burger] { display: inline-flex !important; }
@@ -100,6 +104,11 @@
     [data-authintro] { order: 2; }
     [data-landing-bar] { padding: var(--space-2) var(--space-4) !important; gap: 6px !important; }
     [data-two] { grid-template-columns: minmax(0, 1fr); }
+    /* Am Handy steht das Buchen zuoberst: entnehmen und nachfüllen ist der
+       Grund, aus dem jemand mit dem Telefon vor dem Regal steht. */
+    [data-detail] { grid-template-columns: minmax(0, 1fr); }
+    [data-detail-main], [data-detail-book], [data-detail-side] { grid-column: 1; grid-row: auto; }
+    [data-detail-book] { order: -1; }
     [data-wide-only] { display: none !important; }
   }
   @keyframes sc-scan { 0% { top: 4%; } 100% { top: 92%; } }
@@ -132,6 +141,7 @@
               <button class="btn" style="{{ navDashboard }}" onClick="{{ goDashboard }}"><span data-i18n>Übersicht</span></button>
               <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
               <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
+              <button class="btn" style="{{ navOrders }}" onClick="{{ goOrders }}"><span data-i18n>Bestellungen</span></button>
               <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
               <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
             </div>
@@ -208,6 +218,7 @@
             <button class="btn" style="{{ navDashboard }}" onClick="{{ goDashboard }}"><span data-i18n>Übersicht</span></button>
             <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
             <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
+            <button class="btn" style="{{ navOrders }}" onClick="{{ goOrders }}"><span data-i18n>Bestellungen</span></button>
             <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
             <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
           </div>
@@ -340,6 +351,9 @@
             </table>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+              <sc-if value="{{ hasLow }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ orderAll }}"><span data-i18n-keep>{{ orderAllLabel }}</span></button>
+              </sc-if>
               <button class="btn btn-secondary" onClick="{{ exportOrderCsv }}"><span data-i18n>Als Excel exportieren</span></button>
               <button class="btn btn-secondary" onClick="{{ printPage }}"><span data-i18n>Als PDF drucken</span></button>
             </div>
@@ -430,8 +444,16 @@
       </sc-if>
 
       <sc-if value="{{ onDetail }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Produktdetail" data-two>
-        <section class="card blueprint" style="animation: sc-in .18s ease-out">
+      <div data-screen-label="Produktdetail" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <div data-print-hide style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+          <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ goProducts }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+            <span data-i18n>Zurück zu den Produkten</span>
+          </button>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)">{{ current.name }}</span>
+        </div>
+      <div data-detail>
+        <section class="card blueprint" data-detail-main style="animation: sc-in .18s ease-out">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap">
             <div style="width: 226px; flex: none; display: flex; flex-direction: column; gap: 6px">
@@ -462,6 +484,9 @@
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Istbestand</div>
                   <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ current.ist }}</div>
+                  <sc-if value="{{ hasStockSplit }}" hint-placeholder-val="{{ false }}">
+                    <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2); margin-top: 2px">{{ stockSplit }}</div>
+                  </sc-if>
                 </div>
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Mindestbestand</div>
@@ -499,7 +524,45 @@
           </sc-if>
         </section>
 
-        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <section class="card blueprint" data-detail-book>
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.</p>
+            <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
+              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ dec }}">−</button>
+              <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
+              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
+            </div>
+            <sc-if value="{{ hasUnitLadder }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: var(--space-2)">
+                <sc-for list="{{ unitRows }}" as="u" hint-placeholder-count="2">
+                  <div class="field" style="margin: 0">
+                    <label data-i18n-keep>{{ u.label }}</label>
+                    <input class="input" type="number" min="0" step="1" value="{{ u.qty }}" onInput="{{ u.set }}">
+                  </div>
+                </sc-for>
+              </div>
+              <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ unitSumNote }}</div>
+            </sc-if>
+            <sc-if value="{{ overStock }}" hint-placeholder-val="{{ false }}">
+              <div data-i18n-keep style="font-size: 12.5px; line-height: 1.45; padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ overStockNote }}</div>
+            </sc-if>
+
+            <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+            <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
+            <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
+            </sc-if>
+            <button class="btn btn-secondary btn-block" onClick="{{ toggleActive }}">{{ activeBtnLabel }}</button>
+            <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary btn-block" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
+            </sc-if>
+            <sc-if value="{{ statusLocked }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)">{{ statusLockedNote }}</div>
+            </sc-if>
+          </section>
+
+        <div data-detail-side style="display: flex; flex-direction: column; gap: var(--space-4)">
           <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
             <section class="card blueprint" style="border-color: var(--color-accent)">
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -543,41 +606,6 @@
               <p style="margin: 0; font-size: 12px; color: var(--sc-ink-2)" data-i18n>Wer den Verlauf behalten will, schaltet das Produkt stattdessen auf „nicht aktiv" — es verschwindet dann aus allen Listen, bleibt aber auffindbar.</p>
             </section>
           </sc-if>
-
-          <section class="card blueprint">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
-            <p class="card-body" style="margin: 0" data-i18n>Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.</p>
-            <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
-              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ dec }}">−</button>
-              <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
-              <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
-            </div>
-            <sc-if value="{{ hasUnitLadder }}" hint-placeholder-val="{{ false }}">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: var(--space-2)">
-                <sc-for list="{{ unitRows }}" as="u" hint-placeholder-count="2">
-                  <div class="field" style="margin: 0">
-                    <label data-i18n-keep>{{ u.label }}</label>
-                    <input class="input" type="number" min="0" step="1" value="{{ u.qty }}" onInput="{{ u.set }}">
-                  </div>
-                </sc-for>
-              </div>
-              <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ unitSumNote }}</div>
-            </sc-if>
-
-            <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
-            <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
-            <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
-              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
-            </sc-if>
-            <button class="btn btn-secondary btn-block" onClick="{{ toggleActive }}">{{ activeBtnLabel }}</button>
-            <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
-              <button class="btn btn-secondary btn-block" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
-            </sc-if>
-            <sc-if value="{{ statusLocked }}" hint-placeholder-val="{{ false }}">
-              <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)">{{ statusLockedNote }}</div>
-            </sc-if>
-          </section>
 
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -635,6 +663,13 @@
             </div>
             <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ printThisLabel }}"><span data-i18n>Etikett drucken</span></button>
           </section>
+        </div>
+      </div>
+        <div data-print-hide style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+          <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ goProducts }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+            <span data-i18n>Zurück zu den Produkten</span>
+          </button>
         </div>
       </div>
       </sc-if>
@@ -897,8 +932,17 @@
               </sc-for>
             </tbody>
           </table>
+          <sc-if value="{{ revenueHasMore }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="align-self: flex-start; font-size: 12.5px; padding: 3px 9px" onClick="{{ toggleRevenueMore }}"><span data-i18n-keep>{{ revenueMoreLabel }}</span></button>
+          </sc-if>
 
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: var(--sc-ink-2)" data-i18n>Preisänderungen</div>
+          <sc-if value="{{ hasPriceChart }}" hint-placeholder-val="{{ false }}">
+            <div class="blueprint" style="padding: var(--space-3)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              {{ priceChart }}
+            </div>
+          </sc-if>
           <table class="table" style="margin: 0">
             <thead>
               <tr>
@@ -919,6 +963,9 @@
               </sc-for>
             </tbody>
           </table>
+          <sc-if value="{{ priceHasMore }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="align-self: flex-start; font-size: 12.5px; padding: 3px 9px" onClick="{{ togglePricesMore }}"><span data-i18n-keep>{{ pricesMoreLabel }}</span></button>
+          </sc-if>
 
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
             <div class="field" style="flex: 2; min-width: 180px; margin: 0">
@@ -943,6 +990,54 @@
             <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ exportPriceCsv }}"><span data-i18n>Umsatz als CSV</span></button>
           </div>
         </section>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onOrders }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Bestellungen" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0" data-i18n>Offene Bestellungen</h4>
+            <span data-i18n-keep class="tag tag-neutral">{{ ordersCountLabel }}</span>
+          </div>
+          <p class="card-body" style="margin: 0" data-i18n>Was über die Bestellmail oder aus der Bestellliste in Bestellung gesetzt wurde, steht hier als Bündel. Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.</p>
+          <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ goDashboard }}"><span data-i18n>Zur Bestellliste</span></button>
+        </section>
+
+        <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ true }}">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Nichts in Bestellung</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Sobald ein Artikel in Bestellung gesetzt wird — hier, im Produkt oder über den Knopf in der Bestellmail — erscheint er an dieser Stelle.</p>
+          </section>
+        </sc-if>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); gap: var(--space-4); align-items: start">
+          <sc-for list="{{ orderCards }}" as="o" hint-placeholder-count="2">
+            <section class="card blueprint">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div data-i18n-keep class="card-kicker">{{ o.when }}</div>
+              <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+                <h4 data-i18n-keep style="margin: 0; margin-right: auto">{{ o.id }}</h4>
+                <span data-i18n-keep class="tag tag-accent">{{ o.countLabel }}</span>
+              </div>
+              <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ o.byLabel }}</div>
+              <button class="btn btn-primary" style="white-space: nowrap; align-self: flex-start" onClick="{{ o.backAll }}"><span data-i18n>Alles zurück in Bestand</span></button>
+              <div style="display: flex; flex-direction: column; gap: 2px">
+                <sc-for list="{{ o.items }}" as="oi" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font-size: 13.5px; font-weight: 500">{{ oi.name }}</div>
+                      <div data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.note }}</div>
+                    </div>
+                    <button class="btn btn-ghost" style="padding: 3px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.back }}"><span data-i18n>Zurück in Bestand</span></button>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+          </sc-for>
+        </div>
       </div>
       </sc-if>
 
@@ -1057,6 +1152,11 @@
               <div class="field"><label data-i18n>Datum</label><input class="input" type="date" value="{{ evDate }}" onChange="{{ setEvDate }}"></div>
               <div class="field"><label data-i18n>Ort</label><input class="input" value="{{ evPlace }}" onChange="{{ setEvPlace }}" data-i18n-ph placeholder="Werkstatt & Hof"></div>
             </div>
+            <div class="field" style="margin: 0">
+              <label data-i18n>Artikel suchen</label>
+              <input class="input" type="search" value="{{ evSearch }}" onInput="{{ setEvSearch }}" data-i18n-ph placeholder="Name, Kennung, EAN, Lagerort …">
+              <div data-i18n-keep style="font-size: 11.5px; color: var(--sc-ink-2); margin-top: 3px">{{ evFoundNote }}</div>
+            </div>
             <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
               <div class="field" style="flex: 1; min-width: 170px">
                 <label data-i18n>Artikel</label>
@@ -1067,6 +1167,16 @@
                 </select>
               </div>
               <div class="field" style="width: 92px"><label data-i18n>Menge</label><input class="input" type="number" min="1" value="{{ evQty }}" onChange="{{ setEvQty }}"></div>
+              <sc-if value="{{ hasEvUnits }}" hint-placeholder-val="{{ false }}">
+                <div class="field" style="flex: 1; min-width: 130px">
+                  <label data-i18n>Quantität</label>
+                  <select class="input" value="{{ evUnit }}" onChange="{{ setEvUnit }}">
+                    <sc-for list="{{ evUnits }}" as="eu" hint-placeholder-count="2">
+                      <option data-i18n-keep value="{{ eu.name }}">{{ eu.label }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+              </sc-if>
               <button class="btn btn-secondary" onClick="{{ addEvItem }}"><span data-i18n>Hinzufügen</span></button>
             </div>
             <sc-if value="{{ hasDraft }}" hint-placeholder-val="{{ false }}">
@@ -1074,7 +1184,8 @@
                 <sc-for list="{{ evDraft }}" as="d" hint-placeholder-count="2">
                   <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
                     <span style="flex: 1; min-width: 0; font-size: 13px">{{ d.name }}</span>
-                    <span style="font-family: var(--font-heading); font-size: 15px">{{ d.qty }}</span>
+                    <span data-i18n-keep style="font-family: var(--font-heading); font-size: 15px">{{ d.qty }}</span>
+                    <span data-i18n-keep style="font-size: 11.5px; color: var(--sc-ink-2)">{{ d.sub }}</span>
                     <button class="btn btn-ghost" style="padding: 0 6px" onClick="{{ d.remove }}">×</button>
                   </div>
                 </sc-for>
@@ -1182,10 +1293,7 @@
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
             <div class="field" style="flex: 1; min-width: 190px; margin: 0">
               <label data-i18n>Vorlage</label>
-              <select class="input" value="{{ tplMode }}" onChange="{{ setTplMode }}">
-                <option value="empty">{{ tplEmptyLabel }}</option>
-                <option value="filled">{{ tplFilledLabel }}</option>
-              </select>
+              <div data-i18n-keep class="input" style="display: flex; align-items: center; background: transparent">{{ tplModeLabel }}</div>
             </div>
             <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ downloadTemplate }}"><span data-i18n>Vorlage herunterladen</span></button>
           </div>
@@ -1424,8 +1532,8 @@
               </sc-for>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
-              <button class="btn btn-secondary" onClick="{{ allowAll }}"><span data-i18n>Alles erlauben</span></button>
-              <button class="btn btn-secondary" onClick="{{ denyAll }}"><span data-i18n>Alles sperren</span></button>
+              <button class="btn btn-secondary" onClick="{{ allowAll }}" disabled="{{ cannotManage }}"><span data-i18n>Alles erlauben</span></button>
+              <button class="btn btn-secondary" onClick="{{ denyAll }}" disabled="{{ cannotManage }}"><span data-i18n>Alles sperren</span></button>
             </div>
           </section>
         </div>
@@ -1502,6 +1610,9 @@
               </div>
             </sc-for>
           </div>
+          <sc-if value="{{ placeHasMore }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="align-self: flex-start; font-size: 12.5px; padding: 3px 9px" onClick="{{ togglePlaceMore }}"><span data-i18n-keep>{{ placeMoreLabel }}</span></button>
+          </sc-if>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
             <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neuer Lagerort</label><input class="input" value="{{ newPlace }}" data-i18n-ph placeholder="z. B. Halle 2 · Regal 4" onInput="{{ setNewPlace }}"></div>
             <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addPlaceDisabled }}" onClick="{{ addPlace }}"><span data-i18n>Lagerort anlegen</span></button>
@@ -1523,6 +1634,9 @@
               </div>
             </sc-for>
           </div>
+          <sc-if value="{{ unitHasMore }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="align-self: flex-start; font-size: 12.5px; padding: 3px 9px" onClick="{{ toggleUnitMore }}"><span data-i18n-keep>{{ unitMoreLabel }}</span></button>
+          </sc-if>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-2); align-items: end">
             <div class="field" style="margin: 0"><label data-i18n>Name der Quantität</label><input class="input" value="{{ newUnitName }}" data-i18n-ph placeholder="z. B. Kiste" onInput="{{ setNewUnitName }}"></div>
             <div class="field" style="margin: 0">
@@ -1559,6 +1673,9 @@
               </div>
             </sc-for>
           </div>
+          <sc-if value="{{ attrHasMore }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-ghost" style="align-self: flex-start; font-size: 12.5px; padding: 3px 9px" onClick="{{ toggleAttrMore }}"><span data-i18n-keep>{{ attrMoreLabel }}</span></button>
+          </sc-if>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-2); align-items: end; margin-top: var(--space-2)">
             <div class="field"><label data-i18n>Name des Merkmals</label><input class="input" value="{{ attrName }}" data-i18n-ph placeholder="z. B. Charge" onInput="{{ setAttrName }}"></div>
             <div class="field"><label data-i18n>Art</label>
@@ -1605,7 +1722,13 @@
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-2)">
             <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="{{ mailTime }}" onInput="{{ setMailTime }}"></div>
-            <div class="field"><label data-i18n>Wochentag</label><select class="input"><option>Montag</option><option>Dienstag</option><option>Mittwoch</option><option>Donnerstag</option><option>Freitag</option></select></div>
+            <div class="field"><label data-i18n>Wochentag</label>
+              <select class="input" value="{{ mailWeekday }}" onChange="{{ setMailWeekday }}">
+                <sc-for list="{{ mailWeekdays }}" as="wd" hint-placeholder-count="7">
+                  <option data-i18n-keep value="{{ wd.value }}">{{ wd.label }}</option>
+                </sc-for>
+              </select>
+            </div>
             <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" value="{{ mailDay }}" onInput="{{ setMailDay }}"></div>
           </div>
           <div class="field" style="margin-top: var(--space-2)">
@@ -3310,7 +3433,24 @@ const DICT = {
     "Mindestbestand erreicht": "Minimum reached", "vor 12 Wochen": "12 weeks ago", "heute": "today",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL and SUPABASE_ANON_KEY are missing in config.js. Without them there is no database and no mail. The steps are in SETUP.md.",
     "Code eingeben": "Enter code", "Artikel-ID oder EAN": "Item ID or EAN", "Öffnen": "Open",
-    "Scan-Adresse": "Scan address",
+    "Scan-Adresse": "Scan address", "Person verdeckt": "Person hidden", "Nur zum Ansehen": "View only",
+    "Bestellung nicht gespeichert": "Order not saved",
+    "Bitte supabase/schema.sql im SQL-Editor erneut ausführen.": "Please run supabase/schema.sql in the SQL editor again.",
+    "Bestellungen": "Orders", "Offene Bestellungen": "Open orders", "In Bestellung": "Order placed",
+    "Alle in Bestellung": "Order all", "Zurück in Bestand": "Back to stock", "Alles zurück in Bestand": "All back to stock",
+    "Nichts in Bestellung": "Nothing on order", "Zur Bestellliste": "To the order list", "bestellt von ": "ordered by ",
+    "Ohne Zuordnung": "Unassigned", "früher gesetzt": "set earlier", "Nichts offen": "Nothing open",
+    "Kein Artikel unter Mindestbestand.": "No item below minimum.", "steht schon in Bestellung": "is already on order",
+    "Bestand ": "Stock ", "Min ": "Min ", "am": "on the", "Samstag": "Saturday", "Sonntag": "Sunday",
+    "Zurück zu den Produkten": "Back to products", "Bestellung": "Order",
+    "Was über die Bestellmail oder aus der Bestellliste in Bestellung gesetzt wurde, steht hier als Bündel. Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.": "Whatever was put on order from the order mail or the order list appears here as a batch. While an item sits here it will not reappear in the order list and triggers no mail.",
+    "Sobald ein Artikel in Bestellung gesetzt wird — hier, im Produkt oder über den Knopf in der Bestellmail — erscheint er an dieser Stelle.": "As soon as an item is put on order — here, on the product, or via the button in the order mail — it shows up in this place.",
+
+    "Treffer": "hits", "Artikel suchen": "Search items", "Name, Kennung, EAN, Lagerort …": "Name, code, EAN, location …",
+    "Weniger anzeigen": "Show fewer", "weitere anzeigen": "more", "Nicht genug Bestand": "Not enough stock",
+    "Vorhanden: ": "Available: ", "Die Entnahme wurde nicht gebucht.": "The withdrawal was not booked.",
+    "Vorhanden sind nur ": "Only available: ", "so viel lässt sich nicht entnehmen.": "that much cannot be withdrawn.",
+    "Leere Liste mit einer Beispielzeile": "Empty list with one example row",
     "Quantität löschen": "Delete quantity", "wird verwendet": "is in use", "Stelle": "place", "Stellen": "places",
     "Diese Quantität ist im Einsatz: ": "This quantity is in use: ",
     "Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig.": "If it is deleted, these products lose their conversion — booked amounts stay as they are. Quantities that refer to it become standalone.",
@@ -3967,7 +4107,24 @@ const DICT = {
     "Mindestbestand erreicht": "Miniminivå nådd", "vor 12 Wochen": "för 12 veckor sedan", "heute": "idag",
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL och SUPABASE_ANON_KEY saknas i config.js. Utan dem finns ingen databas och inga mejl. Stegen står i SETUP.md.",
     "Code eingeben": "Ange kod", "Artikel-ID oder EAN": "Artikel-ID eller EAN", "Öffnen": "Öppna",
-    "Scan-Adresse": "Skanningsadress",
+    "Scan-Adresse": "Skanningsadress", "Person verdeckt": "Person dold", "Nur zum Ansehen": "Endast visning",
+    "Bestellung nicht gespeichert": "Beställningen sparades inte",
+    "Bitte supabase/schema.sql im SQL-Editor erneut ausführen.": "Kör supabase/schema.sql i SQL-editorn igen.",
+    "Bestellungen": "Beställningar", "Offene Bestellungen": "Öppna beställningar", "In Bestellung": "Lägg beställning",
+    "Alle in Bestellung": "Beställ alla", "Zurück in Bestand": "Tillbaka i lager", "Alles zurück in Bestand": "Allt tillbaka i lager",
+    "Nichts in Bestellung": "Inget beställt", "Zur Bestellliste": "Till beställningslistan", "bestellt von ": "beställd av ",
+    "Ohne Zuordnung": "Utan koppling", "früher gesetzt": "satt tidigare", "Nichts offen": "Inget öppet",
+    "Kein Artikel unter Mindestbestand.": "Ingen artikel under miniminivå.", "steht schon in Bestellung": "är redan beställd",
+    "Bestand ": "Lager ", "Min ": "Min ", "am": "den", "Samstag": "Lördag", "Sonntag": "Söndag",
+    "Zurück zu den Produkten": "Tillbaka till artiklarna", "Bestellung": "Beställning",
+    "Was über die Bestellmail oder aus der Bestellliste in Bestellung gesetzt wurde, steht hier als Bündel. Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.": "Det som beställts via beställningsmejlet eller listan står här som en bunt. Så länge en artikel står här kommer den inte tillbaka i beställningslistan och utlöser inget mejl.",
+    "Sobald ein Artikel in Bestellung gesetzt wird — hier, im Produkt oder über den Knopf in der Bestellmail — erscheint er an dieser Stelle.": "Så snart en artikel beställs — här, på produkten eller via knappen i beställningsmejlet — visas den på den här platsen.",
+
+    "Treffer": "träffar", "Artikel suchen": "Sök artiklar", "Name, Kennung, EAN, Lagerort …": "Namn, kod, EAN, lagerplats …",
+    "Weniger anzeigen": "Visa färre", "weitere anzeigen": "fler", "Nicht genug Bestand": "Inte tillräckligt lager",
+    "Vorhanden: ": "Finns: ", "Die Entnahme wurde nicht gebucht.": "Uttaget bokfördes inte.",
+    "Vorhanden sind nur ": "Det finns bara ", "so viel lässt sich nicht entnehmen.": "så mycket kan inte tas ut.",
+    "Leere Liste mit einer Beispielzeile": "Tom lista med en exempelrad",
     "Quantität löschen": "Ta bort kvantitet", "wird verwendet": "används", "Stelle": "ställe", "Stellen": "ställen",
     "Diese Quantität ist im Einsatz: ": "Kvantiteten används: ",
     "Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig.": "Om den tas bort förlorar produkterna sin omräkning — bokade mängder står kvar. Kvantiteter som hänvisar till den blir fristående.",
@@ -4284,6 +4441,7 @@ class Component extends DCLogic {
         items: [{ id: "SC-1001", qty: 24 }, { id: "SC-1002", qty: 4 }, { id: "SC-1007", qty: 6 }, { id: "SC-1009", qty: 3 }] }],
       eventId: "E-1", eventSort: "fehlt",
       evName: "", evDate: "", evPlace: "", evItems: [], evPick: "SC-1001", evQty: 1,
+      evSearch: "", evUnit: "",
       members: MEMBERS.map(m => Object.assign({}, m)),
       companies: COMPANIES.map(c => Object.assign({}, c)),
       movements: [
@@ -4329,7 +4487,8 @@ class Component extends DCLogic {
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true },
-      ask: null, fcDate: "", fcOn: false,
+      ask: null, fcDate: "", fcOn: false, showAll: {},
+      orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
       inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
       readRaw: "", readAt: 0, readFrames: 0, readMiss: "",
@@ -4535,7 +4694,11 @@ class Component extends DCLogic {
         evPick: products.some(p => p.id === prev.evPick) ? prev.evPick : (products[0] ? products[0].id : ""),
         pickedUser: members.some(m => m.id === prev.pickedUser) ? prev.pickedUser : (members[0] ? members[0].id : null),
         ccDeputies: d.settings ? d.settings.cc_deputies : prev.ccDeputies,
-        mailMode: d.settings ? d.settings.mail_mode : prev.mailMode
+        mailMode: d.settings ? d.settings.mail_mode : prev.mailMode,
+        mailTime: d.settings && d.settings.mail_time ? String(d.settings.mail_time).slice(0, 5) : prev.mailTime,
+        mailDay: d.settings && d.settings.mail_day != null ? String(d.settings.mail_day) : prev.mailDay,
+        mailWeekday: d.settings && d.settings.mail_weekday != null ? String(d.settings.mail_weekday) : prev.mailWeekday,
+        orders: d.settings && d.settings.orders ? d.settings.orders : prev.orders
       }));
     } catch (e) {
       this.say("Supabase", this.tr("Laden fehlgeschlagen"), String((e && e.message) || e));
@@ -5148,6 +5311,64 @@ class Component extends DCLogic {
     this.remote(api => api.updateProduct(id, patch));
   }
 
+  // Die Rechte, die für mich selbst gelten: die meiner Rolle, überlagert
+  // von den persönlichen Ausnahmen aus der Teamverwaltung. Die inhabende
+  // Person hat immer alle — sonst könnte sie sich selbst aussperren.
+  myPerms() {
+    const role = this.state.role;
+    if (role === "owner") return PERM_LIST.map(p => p[0]);
+    const rd = this.roleDefs().find(r => r.key === role);
+    let list = rd ? rd.perms.slice() : [];
+    const ov = (this.state.overrides || {})[this.state.meId] || {};
+    Object.keys(ov).forEach(k => {
+      if (ov[k]) { if (list.indexOf(k) < 0) list.push(k); }
+      else list = list.filter(x => x !== k);
+    });
+    return list;
+  }
+  may(key) { return this.myPerms().indexOf(key) >= 0; }
+
+  // Lange Listen in den Einstellungen: erst fünf Zeilen, der Rest auf
+  // Wunsch. Sonst wächst eine Karte ins Endlose.
+  capped(key, list) {
+    const open = !!(this.state.showAll || {})[key];
+    const rest = Math.max(0, list.length - 5);
+    return {
+      list: open ? list : list.slice(0, 5),
+      hasMore: rest > 0,
+      label: open ? this.tr("Weniger anzeigen") : "+ " + rest + " " + this.tr("weitere anzeigen"),
+      toggle: () => this.setState(prev => ({
+        showAll: Object.assign({}, prev.showAll, { [key]: !open })
+      }))
+    };
+  }
+
+  // Suchfeld der Eventplanung: Name, Kennung, EAN, Lagerort, Lieferant.
+  matchEv(p, q) {
+    const v = String(q == null ? "" : q).trim().toLowerCase();
+    if (!v) return true;
+    return [p.name, this.codeOf(p), p.ean, p.ort, p.lieferant]
+      .some(x => String(x == null ? "" : x).toLowerCase().includes(v));
+  }
+
+  // Bestand in Quantitäten ausgedrückt: aus 18 Flaschen werden
+  // „1 Kasten · 6 Flaschen". Gerechnet wird weiter in der kleinsten
+  // Einheit — die Aufteilung ist nur die Lesart für Menschen.
+  splitUnits(p, n) {
+    const list = this.unitsFor(p);
+    if (list.length < 2) return "";
+    const big = list.slice().sort((a, b) => Number(b.faktor) - Number(a.faktor));
+    let left = Math.max(0, Math.round(Number(n) || 0));
+    const parts = [];
+    big.forEach(u => {
+      const f = Number(u.faktor) || 1;
+      const k = Math.floor(left / f);
+      if (k > 0) { parts.push(k + " " + u.name); left -= k * f; }
+    });
+    if (!parts.length) return "0 " + (big[big.length - 1] || {}).name;
+    return parts.join(" · ");
+  }
+
   // Eine Buchung wirkt sofort auf alles, was von ihr abhängt: Bestand,
   // Status, Verlaufskurve, Bewegungsliste und die Zähler auf der Übersicht.
   // Die Einheitenfelder werden geleert, damit die nächste Buchung bei null
@@ -5372,9 +5593,100 @@ class Component extends DCLogic {
   remote(call) {
     if (!this.state.live || !this.api) return false;
     Promise.resolve(call(this.api))
-      .then(() => this.refresh())
+      .then(() => { this.pingOthers(); return this.refresh(); })
       .catch(e => this.say("Supabase", this.tr("Nicht gespeichert"), String((e && e.message) || e)));
     return true;
+  }
+
+  // ── Änderungsmelder ──────────────────────────────────────────
+  // Nach einer eigenen Änderung: Fähnchen in den übrigen Konten der Firma
+  // setzen und die anderen Tabs dieses Geräts sofort wecken.
+  pingOthers() {
+    try { if (this.chan) this.chan.postMessage({ t: Date.now() }); } catch (e) {}
+    if (this.api && this.api.markDirty) this.api.markDirty().catch(() => {});
+  }
+
+  // Mitten in einer Eingabe wird nicht neu geladen — das würde Getipptes
+  // überschreiben. Der Wunsch bleibt gemerkt und wird später eingelöst.
+  busy() {
+    const s = this.state;
+    return !!(s.editing || (s.clashRows || []).length || s.ask
+      || s.screen === "new" || s.screen === "import");
+  }
+
+  pullIfIdle() {
+    if (!this.state.live || !this.api || !this.state.authed) return;
+    if (this.busy()) { this.dirtyLater = true; return; }
+    this.dirtyLater = false;
+    this.refresh();
+    if (this.api.clearDirty) this.api.clearDirty().catch(() => {});
+  }
+
+  async watchChanges() {
+    // Auf die Anmeldung warten, dann horchen.
+    for (let i = 0; i < 60; i++) {
+      if (this.state.live && this.api && this.state.authed) break;
+      await new Promise(r => setTimeout(r, 500));
+    }
+    if (!this.api || !this.state.authed) return;
+    if (this.api.onDirty) {
+      this.unwatch = await this.api.onDirty(() => this.pullIfIdle()).catch(() => null);
+    }
+    if (!this.unwatch) {
+      // Rückfall, falls Realtime nicht eingeschaltet ist: alle 90 Sekunden
+      // ein Blick auf das eigene Fähnchen — ein Feld, eine Zeile.
+      this.dirtyT = setInterval(async () => {
+        if (document.hidden || !this.api || !this.state.authed) return;
+        try { if (await this.api.dirtyFlag()) this.pullIfIdle(); } catch (e) {}
+      }, 90000);
+    }
+    // Zurück im Vordergrund: einmal nachsehen, ob etwas liegen blieb.
+    this.visL = async () => {
+      if (document.hidden || !this.api || !this.state.authed) return;
+      if (this.dirtyLater) { this.pullIfIdle(); return; }
+      try { if (await this.api.dirtyFlag()) this.pullIfIdle(); } catch (e) {}
+    };
+    document.addEventListener("visibilitychange", this.visL);
+  }
+
+  // ── Bestellungen ─────────────────────────────────────────────
+  // Eine Bestellung fasst zusammen, was in einem Zug bestellt wurde. Der
+  // Status am Produkt bleibt die Wahrheit; die Liste gruppiert nur.
+  putInOrder(ids, who) {
+    const list = (ids || []).filter(Boolean);
+    if (!list.length) { this.say(this.tr("Bestellung"), this.tr("Nichts offen"), this.tr("Kein Artikel unter Mindestbestand.")); return; }
+    const batch = { id: "B-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(), by: who || "", items: list };
+    const orders = (this.state.orders || []).concat([batch]);
+    const products = this.state.products.map(p => list.indexOf(p.id) >= 0
+      ? Object.assign({}, p, { status: "ordered", geaendert: who || p.geaendert }) : p);
+    this.setState({ orders: orders, products: products });
+    this.remote(api => Promise.all(list.map(id => api.updateProduct(id, { status: "ordered" }))
+      .concat([api.setOrders(orders).catch(() => this.say("Supabase", this.tr("Bestellung nicht gespeichert"),
+        this.tr("Bitte supabase/schema.sql im SQL-Editor erneut ausführen.")))])));
+    this.say(this.tr("Bestellung"), list.length + " × " + this.tr("Artikel"), this.tr("Status: ist bestellt"));
+  }
+
+  backToStock(ids, orderId) {
+    const list = (ids || []).filter(Boolean);
+    if (!list.length) return;
+    const orders = (this.state.orders || [])
+      .map(o => (orderId && o.id !== orderId) ? o
+        : Object.assign({}, o, { items: (o.items || []).filter(x => list.indexOf(x) < 0) }))
+      .filter(o => (o.items || []).length);
+    const products = this.state.products.map(p => list.indexOf(p.id) >= 0
+      ? Object.assign({}, p, { status: (Number(p.ist) || 0) < (Number(p.min) || 0) ? "low" : "ok" }) : p);
+    this.setState({ orders: orders, products: products });
+    this.remote(api => Promise.all(list.map(id => {
+      const p = products.find(x => x.id === id);
+      return api.updateProduct(id, { status: p ? p.status : "ok" });
+    }).concat([api.setOrders(orders).catch(() => this.say("Supabase", this.tr("Bestellung nicht gespeichert"),
+        this.tr("Bitte supabase/schema.sql im SQL-Editor erneut ausführen.")))])));
+    this.say(this.tr("Bestellung"), this.tr("Status zurückgesetzt"), list.length + " × " + this.tr("Artikel"));
+  }
+
+  weekdayName(n) {
+    const names = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"];
+    return this.tr(names[(Number(n) || 1) - 1] || names[0]);
   }
 
   // ── Etikett-Link ──────────────────────────────────────────────
@@ -5387,6 +5699,11 @@ class Component extends DCLogic {
     try {
       let h = location.hash || "";
       try { h = decodeURIComponent(h); } catch (e) {}
+      // Knöpfe aus der Bestellmail: "#/order-all" setzt die ganze Liste,
+      // "#/order/P-003" genau einen Artikel auf „ist bestellt".
+      const all = /#\/order-all/.test(h);
+      const one = /#\/order\/([^\/?#]+)/.exec(h);
+      if (all || one) { this.pendingOrder = all ? "*" : one[1]; this.cleanUrl(); return true; }
       const m = /#\/p\/([^\/?#]+)(?:\/([^\/?#]+))?/.exec(h);
       if (m) raw = m[2] ? "SC1|" + m[1] + "|" + m[2] : m[1];
       else if (/[#&]p=/.test(h)) raw = (h.split(/[#&]p=/)[1] || "").split(/[&#]/)[0];
@@ -5397,13 +5714,45 @@ class Component extends DCLogic {
     } catch (e) { return false; }
     if (!raw) return false;
     this.pendingCode = raw;
-    // Die Adresse wird aufgeräumt, damit ein Neuladen nicht wieder
-    // dasselbe Produkt aufschlägt.
+    this.cleanUrl();
+    return true;
+  }
+
+  // Die Adresse wird aufgeräumt, damit ein Neuladen nicht wieder dasselbe
+  // Produkt aufschlägt oder eine Bestellung ein zweites Mal setzt.
+  cleanUrl() {
     try {
       const search = (location.search || "").replace(/([?&])p=[^&]*&?/, "$1").replace(/[?&]$/, "");
       history.replaceState(null, "", location.pathname + search);
     } catch (e) {}
-    return true;
+  }
+
+  // Der Knopf aus der Mail wird eingelöst, sobald Daten und Anmeldung da sind.
+  openPendingOrder() {
+    const raw = this.pendingOrder;
+    if (!raw) return;
+    if (!this.state.authed || !this.state.products.length) return;
+    this.pendingOrder = null;
+    const who = this.state.meNameLive || "";
+    if (raw === "*") {
+      const ids = this.state.products
+        .filter(p => p.aktiv !== false && p.status === "low").map(p => p.id);
+      this.putInOrder(ids, who);
+      this.go("orders");
+      return;
+    }
+    const hit = this.findByCode(raw);
+    if (!hit) {
+      this.say(this.tr("Bestellung"), this.tr("Nicht gefunden"), String(raw).slice(0, 40));
+      return;
+    }
+    if (hit.status === "ordered") {
+      this.go("orders");
+      this.say(this.tr("Bestellung"), hit.name, this.tr("steht schon in Bestellung"));
+      return;
+    }
+    this.putInOrder([hit.id], who);
+    this.go("orders");
   }
 
   openPending() {
@@ -5437,7 +5786,7 @@ class Component extends DCLogic {
     this.readHashCode();
     // Ein zweiter Scan bei offener App lädt die Seite nicht neu, sondern
     // ändert nur die Adresse — auch das muss das Produkt öffnen.
-    this.hashL = () => { if (this.readHashCode()) this.openPending(); };
+    this.hashL = () => { if (this.readHashCode()) { this.openPending(); this.openPendingOrder(); } };
     window.addEventListener("hashchange", this.hashL);
     try {
       this.setState({
@@ -5462,6 +5811,16 @@ class Component extends DCLogic {
       }
     } catch (e) {}
     this.connect();
+    // Produkte, die jemand anders anlegt oder bucht, sollen ohne Neuladen
+    // auftauchen — sonst findet der Scanner ein frisches Etikett nicht.
+    // Nachgefragt wird dafür nicht: jede Änderung setzt ein Fähnchen in den
+    // übrigen Konten der Firma, und das Fähnchen kommt von selbst an.
+    // Andere Tabs auf demselben Gerät hören auf einen gemeinsamen Kanal.
+    try {
+      this.chan = new BroadcastChannel("stockcontrol-pulse");
+      this.chan.onmessage = () => this.pullIfIdle();
+    } catch (e) { this.chan = null; }
+    this.watchChanges();
     this.tick = setInterval(() => {
       if (!this.state.authed && this.state.authView === "confirm" && this.state.confirmLeft > 0) {
         this.setState(s => ({ confirmLeft: s.confirmLeft - 1 }));
@@ -5473,6 +5832,10 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     clearInterval(this.tick);
+    clearInterval(this.dirtyT);
+    if (this.unwatch) this.unwatch();
+    if (this.visL) document.removeEventListener("visibilitychange", this.visL);
+    try { if (this.chan) this.chan.close(); } catch (e) {}
     clearTimeout(this.menuT);
     clearTimeout(this.roleSaveT);
     this.stopCamera();
@@ -5484,6 +5847,7 @@ class Component extends DCLogic {
     this.applyLang();
     this.localizeSlots();
     if (this.pendingCode) this.openPending();
+    if (this.pendingOrder) this.openPendingOrder();
     if (this.state.screen === "detail" && this.state.photoFor !== this.state.currentId) {
       this.loadPhoto(this.state.currentId);
     }
@@ -5645,6 +6009,63 @@ class Component extends DCLogic {
     ]);
   }
 
+  // Preisverlauf als Stufenkurve: ein Preis gilt bis zur nächsten Änderung,
+  // deshalb Stufen und keine schrägen Verbindungen. Bis zu vier Produkte
+  // liegen übereinander, mehr wäre nicht mehr lesbar.
+  priceChartEl(list) {
+    const R = React.createElement;
+    const series = list.slice(0, 4).map(p => ({
+      name: p.name,
+      pts: this.priceHistFor(p).slice().sort((a, b) => String(a.datum) < String(b.datum) ? -1 : 1)
+    })).filter(s => s.pts.length);
+    if (!series.length) return null;
+    const days = Array.from(new Set([].concat.apply([], series.map(s => s.pts.map(x => String(x.datum)))))).sort();
+    const vals = [].concat.apply([], series.map(s => s.pts.map(x => Number(x.preis) || 0)));
+    const hi = Math.max.apply(null, vals), lo = Math.min.apply(null, vals);
+    const top = hi + Math.max(0.2, (hi - lo) * 0.25), bottom = Math.max(0, lo - Math.max(0.2, (hi - lo) * 0.25));
+    const w = 300, h = 120, padL = 6, padR = 6, padT = 8, padB = 16;
+    const xOf = i => padL + (days.length < 2 ? (w - padL - padR) / 2 : i * (w - padL - padR) / (days.length - 1));
+    const yOf = v => padT + (h - padT - padB) * (1 - ((v - bottom) / ((top - bottom) || 1)));
+    const colors = ["var(--color-accent-700)", "var(--color-accent-500)", "var(--color-accent-900)", "var(--color-accent-300)"];
+    const kids = [
+      R("line", { key: "ax", x1: padL, y1: h - padB, x2: w - padR, y2: h - padB,
+        stroke: "color-mix(in srgb, currentColor 18%, transparent)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" })
+    ];
+    series.forEach((s, si) => {
+      // Für jeden Stichtag der zuletzt gültige Preis — daraus die Stufen.
+      let last = null;
+      const pts = [];
+      days.forEach((d, i) => {
+        const hit = s.pts.filter(x => String(x.datum) <= d).pop();
+        if (hit) last = Number(hit.preis) || 0;
+        if (last != null) pts.push([xOf(i), yOf(last)]);
+      });
+      if (!pts.length) return;
+      let path = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+      for (let i = 1; i < pts.length; i++) {
+        path += " H" + pts[i][0].toFixed(1) + " V" + pts[i][1].toFixed(1);
+      }
+      kids.push(R("path", { key: "p" + si, d: path, fill: "none", stroke: colors[si % colors.length],
+        strokeWidth: 1.6, vectorEffect: "non-scaling-stroke" }));
+      pts.forEach((pt, i) => kids.push(R("circle", { key: "c" + si + "_" + i, cx: pt[0], cy: pt[1], r: 2,
+        fill: colors[si % colors.length] })));
+    });
+    return R("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } }, [
+      R("div", { key: "sv", style: { display: "flex", justifyContent: "space-between", fontSize: "11px", opacity: 0.7 } }, [
+        R("span", { key: "a" }, this.money(bottom)), R("span", { key: "b" }, this.money(top))
+      ]),
+      R("svg", { key: "g", viewBox: "0 0 " + w + " " + h, style: { width: "100%", height: "150px", display: "block", color: "var(--color-text)" } }, kids),
+      R("div", { key: "ax", style: { display: "flex", justifyContent: "space-between", fontSize: "11px", opacity: 0.7 } }, [
+        R("span", { key: "a" }, days[0] || ""), R("span", { key: "b" }, days[days.length - 1] || "")
+      ]),
+      R("div", { key: "lg", style: { display: "flex", flexWrap: "wrap", gap: "10px", fontSize: "11.5px" } },
+        series.map((s, si) => R("span", { key: s.name + si, style: { display: "inline-flex", alignItems: "center", gap: "5px" } }, [
+          R("i", { key: "d", style: { width: "10px", height: "2px", background: colors[si % colors.length], display: "inline-block" } }),
+          R("span", { key: "n" }, s.name)
+        ])))
+    ]);
+  }
+
   pwRules(v) {
     return [
       { ok: v.length >= 10, de: "mindestens 10 Zeichen", en: "at least 10 characters", sv: "minst 10 tecken" },
@@ -5776,27 +6197,56 @@ class Component extends DCLogic {
       (!st.statusFilter || p.status === st.statusFilter)
     ).sort((a, b) => (a.aktiv === false ? 1 : 0) - (b.aktiv === false ? 1 : 0)).map(deco);
 
-    const low = activeProducts.filter(p => p.status === "low" || p.status === "ordered");
+    // Was schon in Bestellung ist, steht unter Bestellungen — und nicht
+    // noch einmal in der Bestellliste.
+    const low = activeProducts.filter(p => p.status === "low");
+    const ordered = activeProducts.filter(p => p.status === "ordered");
     const orderList = low.map(p => {
       const s = this.statusOf(p);
       return Object.assign({}, p, {
         statusLabel: s.label, tagClass: s.tag,
         mayOrder: mine(p), locked: !mine(p),
         lockNote: this.tr("nur ") + p.verantwortlich,
-        action: p.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Als bestellt markieren"),
-        toggleOrdered: () => {
-          const next = p.status === "ordered" ? "low" : "ordered";
-          this.setState(prev => ({ products: prev.products.map(x => x.id === p.id ? Object.assign({}, x, { status: next, geaendert: meLabel }) : x) }));
-          this.remote(api => api.updateProduct(p.id, { status: next }));
-        }
+        action: this.tr("In Bestellung"),
+        toggleOrdered: () => this.putInOrder([p.id], meLabel)
       });
     });
 
+    // Bestellungen: die gespeicherten Bündel, neueste zuerst. Artikel, die
+    // vor dieser Fassung auf „bestellt" gesetzt wurden, gehören zu keinem
+    // Bündel — sie kommen in eine eigene Kachel, damit sie nicht verloren
+    // gehen und sich zurücksetzen lassen.
+    const stamp = t => { try { return new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }); } catch (e) { return "—"; } };
+    const orderItem = (p, oid) => ({
+      name: p.name,
+      note: this.tr("Bestand ") + p.ist + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
+      back: () => this.backToStock([p.id], oid)
+    });
+    const orderCards = (st.orders || []).slice().reverse().map(o => {
+      const items = (o.items || []).map(id => products.find(p => p.id === id)).filter(Boolean);
+      return {
+        id: o.id, when: stamp(o.at),
+        byLabel: o.by ? this.tr("bestellt von ") + o.by : "",
+        countLabel: items.length + " × " + this.tr("Artikel"),
+        items: items.map(p => orderItem(p, o.id)),
+        backAll: () => this.backToStock(items.map(p => p.id), o.id)
+      };
+    }).filter(c => c.items.length);
+    const orphans = ordered.filter(p => !(st.orders || []).some(o => (o.items || []).indexOf(p.id) >= 0));
+    if (orphans.length) {
+      orderCards.push({
+        id: this.tr("Ohne Zuordnung"), when: this.tr("früher gesetzt"), byLabel: "",
+        countLabel: orphans.length + " × " + this.tr("Artikel"),
+        items: orphans.map(p => orderItem(p, null)),
+        backAll: () => this.backToStock(orphans.map(p => p.id), null)
+      });
+    }
+
     const mailLabels = {
       now: { de: "Sofort bei jeder Unterschreitung", en: "Immediately, every time", sv: "Direkt, varje gång" },
-      day: { de: "Täglich 07:30, gesammelt", en: "Daily 07:30, collected", sv: "Dagligen 07:30, samlat" },
-      week: { de: "Montags 07:30, gesammelt", en: "Mondays 07:30, collected", sv: "Måndagar 07:30, samlat" },
-      month: { de: "Am 1. um 07:30, gesammelt", en: "On the 1st at 07:30, collected", sv: "Den 1:a 07:30, samlat" }
+      day: { de: "Einmal am Tag, gesammelt", en: "Once a day, collected", sv: "En gång om dagen, samlat" },
+      week: { de: "Einmal in der Woche", en: "Once a week", sv: "En gång i veckan" },
+      month: { de: "Einmal im Monat", en: "Once a month", sv: "En gång i månaden" }
     };
 
     const FALLBACK_USER = { id: null, name: "—", email: "", role: "reader", status: "active" };
@@ -5814,7 +6264,14 @@ class Component extends DCLogic {
         return {
           label: this.tr(label), on, pinned,
           pinNote: pinned ? this.tr("gesetzt") : "",
+          locked: st.role !== "owner",
           toggle: () => {
+            // Ansehen darf jede berechtigte Person, ändern nur die inhabende.
+            if (st.role !== "owner") {
+              this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
+                this.tr("Profildaten und Rechte darf nur die inhabende Person ändern."));
+              return;
+            }
             if (pinned) {
               this.say(this.tr("Rechte"), this.tr("Das geht nicht"),
                 this.tr("Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen."));
@@ -5920,7 +6377,7 @@ class Component extends DCLogic {
 
       screenTitle: {
         dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
-        events: this.tr("Events"), history: this.tr("Bestandsverlauf"),
+        events: this.tr("Events"), history: this.tr("Bestandsverlauf"), orders: this.tr("Bestellungen"),
         new: this.tr("Produktverwaltung"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
         settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole"),
         help: this.tr("Hilfe")
@@ -5971,7 +6428,7 @@ class Component extends DCLogic {
       navDashboard: this.navStyle("dashboard"), navProducts: this.navStyle("products"), navScan: this.navStyle("scan"),
       navNew: this.navStyle("new"), navQr: this.navStyle("qr"), navTeam: this.navStyle("team"),
       navSettings: this.navStyle("settings"), navAdmin: this.navStyle("admin"),
-      grpLager: this.groupStyle(["dashboard", "products", "scan", "detail"]),
+      grpLager: this.groupStyle(["dashboard", "products", "scan", "detail", "orders"]),
       grpStamm: this.groupStyle(["new", "qr"]),
       grpVerw: this.groupStyle(["team", "settings", "admin"]),
       menuLager: st.menu === "lager", menuStamm: st.menu === "stamm",
@@ -6005,8 +6462,36 @@ class Component extends DCLogic {
       kpiLow: activeProducts.filter(p => p.status === "low").length,
       kpiOrdered: activeProducts.filter(p => p.status === "ordered").length,
       kpiToday: 3,
-      mailModeLabel: mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de,
-      orderList, movements: st.movements,
+      // Was eingestellt ist, steht auch so da: Uhrzeit, Wochentag und Tag
+      // im Monat wandern mit in jede Anzeige des Zeitplans.
+      mailModeLabel: (() => {
+        const base = mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de;
+        const t = st.mailTime || "07:30";
+        if (st.mailMode === "day") return base + " · " + t;
+        if (st.mailMode === "week") return base + " · " + this.weekdayName(st.mailWeekday) + ", " + t;
+        if (st.mailMode === "month") return base + " · " + this.tr("am") + " " + st.mailDay + ". · " + t;
+        return base;
+      })(),
+      orderList,
+      hasLow: low.length > 0,
+      orderAllLabel: this.tr("Alle in Bestellung") + " (" + low.filter(mine).length + ")",
+      orderAll: () => this.putInOrder(low.filter(mine).map(p => p.id), meLabel),
+
+      // ── Bestellungen ───────────────────────────────────────
+      onOrders: st.screen === "orders", navOrders: this.navStyle("orders"),
+      goOrders: () => this.go("orders"),
+      orderCards: orderCards,
+      noOrders: orderCards.length === 0,
+      ordersCountLabel: (() => {
+        const n = orderCards.reduce((a, c) => a + c.items.length, 0);
+        return orderCards.length + " × " + this.tr("Bestellung") + " · " + n + " × " + this.tr("Artikel");
+      })(),
+      // Ohne das Recht „Sehen, wer was entnommen hat" bleibt die Person
+      // verdeckt — die Bewegung selbst ist weiter sichtbar.
+      mayWho: this.may("who"),
+      movements: (st.movements || []).map(m => Object.assign({}, m, {
+        who: this.may("who") ? m.who : this.tr("Person verdeckt")
+      })),
 
       // ── Einheiten (Quantitäten) ─────────────────────────────
       hasUnitLadder: this.unitsFor(cur).length > 1,
@@ -6031,6 +6516,14 @@ class Component extends DCLogic {
         return parts.join(" + ") + " = " + st.qty + " " + base;
       })(),
       unitCountLabel: (() => { const n = this.unitsFor(cur).length; return n + " " + (n === 1 ? this.tr("Größe") : this.tr("Größen")); })(),
+      // Bestand als Quantitäten gelesen, plus Warnung, wenn die eingetippte
+      // Menge über dem Bestand liegt.
+      stockSplit: this.splitUnits(cur, cur.ist),
+      hasStockSplit: !!this.splitUnits(cur, cur.ist),
+      overStock: st.qty > cur.ist,
+      overStockNote: this.tr("Vorhanden sind nur ") + cur.ist
+        + (this.splitUnits(cur, cur.ist) ? " (" + this.splitUnits(cur, cur.ist) + ")" : "")
+        + " — " + this.tr("so viel lässt sich nicht entnehmen."),
       goUnitSettings: () => this.go("settings"),
       noUnitDefs: this.unitDefs().length === 0,
 
@@ -6053,7 +6546,10 @@ class Component extends DCLogic {
       }),
 
       // ── Quantitäten der Firma (Einstellungen) ──────────────
-      unitDefList: this.unitDefs().map(d => {
+      unitHasMore: this.unitDefs().length > 5,
+      unitMoreLabel: this.capped("units", this.unitDefs()).label,
+      toggleUnitMore: this.capped("units", this.unitDefs()).toggle,
+      unitDefList: this.capped("units", this.unitDefs().map(d => {
         // Wo die Quantität hängt: an Produkten und an anderen Quantitäten,
         // die sich auf sie beziehen. Beides muss im Warnfenster stehen.
         const viaUnits = this.unitDefs().filter(x => x.ref === d.name);
@@ -6091,7 +6587,7 @@ class Component extends DCLogic {
             } });
           }
         };
-      }),
+      })).list,
       unitDefNames: this.unitDefs().map(d => d.name),
       standaloneLabel: this.tr("eigenständig — ohne Bezug"),
       newUnitName: st.newUnitName, newUnitFactor: st.newUnitFactor, newUnitRef: st.newUnitRef,
@@ -6156,12 +6652,17 @@ class Component extends DCLogic {
       revenueTotal: this.money(revSel.reduce((a, r) => a + r.sum, 0)),
       revenueQty: revSel.reduce((a, r) => a + r.qty, 0),
       priceChangeCount: revSel.reduce((a, r) => a + this.priceHistFor(r.p).length, 0),
-      revenueRows: revSel.map(r => ({
+      revenueHasMore: revSel.length > 5,
+      revenueMoreLabel: this.capped("revenue", revSel).label,
+      toggleRevenueMore: this.capped("revenue", revSel).toggle,
+      revenueRows: this.capped("revenue", revSel.map(r => ({
         name: r.p.name, qty: r.qty,
         price: this.money(this.priceAt(r.p, this.dayStr(Date.now())) || 0),
         sum: this.money(r.sum)
-      })),
-      priceRows: (() => {
+      }))).list,
+      priceChart: this.priceChartEl(revSel.map(r => r.p)),
+      hasPriceChart: !!this.priceChartEl(revSel.map(r => r.p)),
+      priceRows: this.capped("prices", (() => {
         const out = [];
         revSel.forEach(r => {
           const h = this.priceHistFor(r.p);
@@ -6178,7 +6679,23 @@ class Component extends DCLogic {
           });
         });
         return out.reverse();
+      })()).list,
+      priceRowsCount: (() => {
+        let n = 0;
+        revSel.forEach(r => { n += this.priceHistFor(r.p).length; });
+        return n;
       })(),
+      priceHasMore: (() => {
+        let n = 0;
+        revSel.forEach(r => { n += this.priceHistFor(r.p).length; });
+        return n > 5;
+      })(),
+      pricesMoreLabel: (() => {
+        let n = 0;
+        revSel.forEach(r => { n += this.priceHistFor(r.p).length; });
+        return this.capped("prices", new Array(n)).label;
+      })(),
+      togglePricesMore: this.capped("prices", []).toggle,
       pcProduct: st.pcProduct || (products[0] ? products[0].id : ""),
       pcDate: st.pcDate || this.dayStr(Date.now()),
       pcPrice: st.pcPrice,
@@ -6376,7 +6893,10 @@ class Component extends DCLogic {
       },
 
       places, filtered, filteredCount: filtered.length,
-      placeList: places.map(pl => {
+      placeHasMore: places.length > 5,
+      placeMoreLabel: this.capped("places", places).label,
+      togglePlaceMore: this.capped("places", places).toggle,
+      placeList: this.capped("places", places.map(pl => {
         const used = products.filter(p => p.ort === pl).length;
         return {
           name: pl,
@@ -6390,7 +6910,7 @@ class Component extends DCLogic {
             this.say(this.tr("Lagerort"), this.tr("Gelöscht"), pl);
           }
         };
-      }),
+      })).list,
       newPlace: st.newPlace,
       setNewPlace: e => this.setState({ newPlace: e.target.value }),
       addPlaceDisabled: !String(st.newPlace || "").trim()
@@ -6403,7 +6923,9 @@ class Component extends DCLogic {
         this.savePlaces(next);
         this.say(this.tr("Lagerort"), this.tr("Angelegt"), v);
       },
-      mailTime: st.mailTime, mailDay: st.mailDay,
+      mailTime: st.mailTime, mailDay: st.mailDay, mailWeekday: st.mailWeekday,
+      mailWeekdays: [1, 2, 3, 4, 5, 6, 7].map(n => ({ value: String(n), label: this.weekdayName(n) })),
+      setMailWeekday: e => { const v = e.target.value; this.setState({ mailWeekday: v }); this.remote(api => api.saveSettings({ mail_weekday: this.toNum(v) })); },
       setMailTime: e => { const v = e.target.value; this.setState({ mailTime: v }); this.remote(api => api.saveSettings({ mail_time: v })); },
       setMailDay: e => { const v = e.target.value; this.setState({ mailDay: v }); this.remote(api => api.saveSettings({ mail_day: this.toNum(v) })); },
       visibleTotal: products.filter(visible).length,
@@ -6418,6 +6940,7 @@ class Component extends DCLogic {
         link: "https://example.com/" + cur.id.toLowerCase(),
         qr: this.qrEl(this.qrPayload(cur), 110),
         code: this.codeOf(cur),
+        geaendert: this.may("who") ? cur.geaendert : this.tr("Person verdeckt"),
         qrLink: this.qrPayload(cur),
         chart: this.chart(cur.hist)
       }),
@@ -6426,6 +6949,15 @@ class Component extends DCLogic {
       dec: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
       setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n }); },
       withdraw: () => {
+        // Mehr entnehmen als da ist, geht nicht: 1,5 Kisten geben keine
+        // 2 Kisten her. Die Absage nennt, was tatsächlich vorhanden ist.
+        if (st.qty > cur.ist) {
+          const have = this.splitUnits(cur, cur.ist);
+          this.say(this.tr("Nicht genug Bestand"),
+            this.tr("Vorhanden: ") + cur.ist + (have ? " · " + have : ""),
+            this.tr("Die Entnahme wurde nicht gebucht."));
+          return;
+        }
         const next = Math.max(0, cur.ist - st.qty);
         const under = next < cur.min;
         this.applyBooking(cur, next, under, "−" + st.qty, meLabel);
@@ -6504,7 +7036,41 @@ class Component extends DCLogic {
       sortByMissing: () => this.setState({ eventSort: "fehlt" }),
       thName: this.tr("Artikel") + sortMark("name"), thSupplier: this.tr("Lieferant") + sortMark("lieferant"),
       thPlace: this.tr("Lagerort") + sortMark("ort"), thMissing: this.tr("Fehlt") + sortMark("fehlt"),
-      evProducts: products.map(p => ({ id: p.id, label: p.aktiv === false ? p.name + " (" + this.tr("deaktiviert") + ")" : p.name })),
+      // Artikelauswahl mit Suchfeld: bei vielen Produkten ist das Scrollen
+      // durch eine Auswahlliste der langsamste Weg.
+      evSearch: st.evSearch,
+      setEvSearch: e => {
+        const q = e.target.value;
+        this.setState(prev => {
+          const hits = (prev.products || []).filter(p => this.matchEv(p, q));
+          // Wird die getroffene Auswahl ausgefiltert, rückt der erste
+          // Treffer nach — sonst zeigt das Feld etwas Unsichtbares.
+          const keep = hits.some(p => p.id === prev.evPick);
+          return { evSearch: q, evPick: keep ? prev.evPick : (hits[0] ? hits[0].id : prev.evPick) };
+        });
+      },
+      evProducts: products.filter(p => this.matchEv(p, st.evSearch)).map(p => ({
+        id: p.id, label: p.aktiv === false ? p.name + " (" + this.tr("deaktiviert") + ")" : p.name
+      })),
+      evFoundNote: (() => {
+        const n = products.filter(p => this.matchEv(p, st.evSearch)).length;
+        if (!String(st.evSearch || "").trim()) return "";
+        return n + " " + (n === 1 ? this.tr("Treffer") : this.tr("Treffer"));
+      })(),
+      // Quantität für die Position: die Leiter des gewählten Produkts.
+      evUnits: (() => {
+        const p = products.find(x => x.id === st.evPick);
+        const list = this.unitsFor(p);
+        if (list.length < 2) return [];
+        return list.slice().sort((a, b) => Number(a.faktor) - Number(b.faktor))
+          .map(u => ({ name: u.name, label: u.faktor === 1 ? u.name : u.name + " (× " + u.faktor + ")" }));
+      })(),
+      hasEvUnits: (() => {
+        const p = products.find(x => x.id === st.evPick);
+        return this.unitsFor(p).length > 1;
+      })(),
+      evUnit: st.evUnit,
+      setEvUnit: e => this.setState({ evUnit: e.target.value }),
       evName: st.evName, evDate: st.evDate, evPlace: st.evPlace, evQty: st.evQty, evPick: st.evPick,
       setEvName: e => this.setState({ evName: e.target.value }),
       setEvDate: e => this.setState({ evDate: e.target.value }),
@@ -6513,12 +7079,33 @@ class Component extends DCLogic {
       setEvQty: e => { const n = parseInt(e.target.value, 10); this.setState({ evQty: isNaN(n) || n < 1 ? 1 : n }); },
       evDraft: st.evItems.map((it, i) => {
         const p = products.find(x => x.id === it.id) || { name: it.id };
-        return { name: p.name, qty: it.qty, remove: () => this.setState(prev => ({ evItems: prev.evItems.filter((_, j) => j !== i) })) };
+        // In der Liste steht, was eingetippt wurde („2 Kasten"), und
+        // dahinter die Menge in der kleinsten Einheit.
+        return {
+          name: p.name,
+          qty: it.unitName && it.unitQty ? it.unitQty + " " + it.unitName : it.qty,
+          sub: it.unitName && it.unitQty ? "= " + it.qty : "",
+          remove: () => this.setState(prev => ({ evItems: prev.evItems.filter((_, j) => j !== i) }))
+        };
       }),
       hasDraft: st.evItems.length > 0,
       addEvItem: () => this.setState(prev => {
-        const found = prev.evItems.find(i => i.id === prev.evPick);
-        return { evItems: found ? prev.evItems.map(i => i.id === prev.evPick ? { id: i.id, qty: i.qty + prev.evQty } : i) : prev.evItems.concat({ id: prev.evPick, qty: prev.evQty }), evQty: 1 };
+        const p = (prev.products || []).find(x => x.id === prev.evPick);
+        const ladder = this.unitsFor(p);
+        const chosen = ladder.find(u => u.name === prev.evUnit);
+        const factor = chosen ? (Number(chosen.faktor) || 1) : 1;
+        const base = prev.evQty * factor;
+        const found = prev.evItems.find(i => i.id === prev.evPick && (i.unitName || "") === (chosen ? chosen.name : ""));
+        return {
+          evItems: found
+            ? prev.evItems.map(i => i === found
+                ? { id: i.id, qty: i.qty + base, unitName: i.unitName, unitQty: (i.unitQty || 0) + prev.evQty }
+                : i)
+            : prev.evItems.concat(chosen
+                ? { id: prev.evPick, qty: base, unitName: chosen.name, unitQty: prev.evQty }
+                : { id: prev.evPick, qty: base }),
+          evQty: 1
+        };
       }),
       createEvent: () => {
         if (!st.evItems.length) { this.say(this.tr("Event"), this.tr("Noch keine Artikel"), this.tr("Erst Artikel und Mengen hinzufügen.")); return; }
@@ -6569,11 +7156,10 @@ class Component extends DCLogic {
       canOrder: (cur.status === "low" || cur.status === "ordered") && mine(cur),
       statusLocked: (cur.status === "low" || cur.status === "ordered") && !mine(cur),
       statusLockedNote: this.tr("Status setzen darf nur ") + cur.verantwortlich + this.tr(" oder die Stellvertretung."),
-      orderBtnLabel: cur.status === "ordered" ? this.tr("Bestellung zurücknehmen") : this.tr("Status: ist bestellt"),
+      orderBtnLabel: cur.status === "ordered" ? this.tr("Zurück in Bestand") : this.tr("In Bestellung"),
       markOrdered: () => {
-        const next = cur.status === "ordered" ? "low" : "ordered";
-        this.setState(prev => ({ products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, { status: next }) : p) }));
-        this.remote(api => api.updateProduct(cur.id, { status: next }));
+        if (cur.status === "ordered") this.backToStock([cur.id], null);
+        else this.putInOrder([cur.id], meLabel);
       },
       hProducts: products.map(p => ({ id: p.id, name: p.name })),
       hCategories: Array.from(new Set(products.flatMap(p => p.kategorien || []))).sort(),
@@ -6596,7 +7182,7 @@ class Component extends DCLogic {
           when: fmt(e.date), name: p.name || e.productId,
           delta: (e.delta > 0 ? "+" : "−") + Math.abs(e.delta),
           color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
-          after: e.after, who: e.who, ort: p.ort || "—"
+          after: e.after, who: this.may("who") ? e.who : this.tr("Person verdeckt"), ort: p.ort || "—"
         };
       }),
       hTaken: taken, hAdded: added, hCount: hEntries.length, hTop,
@@ -6607,7 +7193,7 @@ class Component extends DCLogic {
         hEntries.slice().sort((a, b) => b.date - a.date).forEach(e => {
           const p = byId(e.productId) || {};
           rows.push([fmt(e.date), p.name || e.productId, p.ort || "", e.delta < 0 ? this.tr("Entnahme") : this.tr("Nachfüllung"),
-            e.delta, e.after, e.who]);
+            e.delta, e.after, this.may("who") ? e.who : this.tr("Person verdeckt")]);
         });
         this.download("bestandsverlauf.csv", rows);
         this.say("Export", this.tr("Bestandsverlauf exportiert"), hEntries.length + " " + this.tr("Buchungen") + " · bestandsverlauf.csv");
@@ -6675,7 +7261,10 @@ class Component extends DCLogic {
       setTplMode: e => this.setState({ tplMode: e.target.value }),
       tplEmptyLabel: this.tr("Leere Liste — nur Kopfzeile"),
       tplFilledLabel: this.tr("Mit allen vorhandenen Produkten") + " (" + activeProducts.length + ")",
-      tplNote: st.tplMode === "filled"
+      tplModeLabel: activeProducts.length
+        ? this.tr("Mit allen vorhandenen Produkten") + " (" + activeProducts.length + ")"
+        : this.tr("Leere Liste mit einer Beispielzeile"),
+      tplNote: activeProducts.length
         ? this.tr("Enthält den heutigen Stand. Zum Ändern eines Bestands die Zahl überschreiben und die Datei wieder hochladen — bestehende Produkte werden dabei übersprungen, nur neue Zeilen kommen hinzu.")
         : this.tr("Nur die Kopfzeile mit allen Feldern. Zeile für Zeile ausfüllen, eine Zeile ist ein Produkt."),
       hasImportFile: !!st.importFile,
@@ -6951,7 +7540,10 @@ class Component extends DCLogic {
           .concat(st.attrs.map(a => a.name));
         const clean = v => (v == null || v === "—") ? "" : v;
         const rows = [head];
-        if (st.tplMode === "filled") {
+        // Sind Produkte angelegt, kommen sie alle mit — eine Beispielzeile
+        // wäre dann nur eine Zeile, die niemand haben will. Ist noch nichts
+        // angelegt, zeigt genau eine Dummyzeile, wie es gemeint ist.
+        if (activeProducts.length) {
           activeProducts.forEach(p => rows.push([
             p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
             clean(p.preis), clean(p.quantitaet), clean(p.lieferant), clean(p.verantwortlich),
@@ -6963,7 +7555,7 @@ class Component extends DCLogic {
             "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
             .concat(st.attrs.map(() => "")));
         }
-        const filled = st.tplMode === "filled";
+        const filled = activeProducts.length > 0;
         this.download(filled ? "stockcontrol-bestand.csv" : "stockcontrol-vorlage.csv", rows);
         this.say("Excel", filled ? this.tr("Vorlage mit Bestand") : this.tr("Leere Vorlage"),
           filled
@@ -7183,13 +7775,16 @@ class Component extends DCLogic {
       })(),
       // ── Eigene Merkmale ─────────────────────────────────────
       attrTypeLabels: null,
-      attrList: st.attrs.map(a => ({
+      attrHasMore: st.attrs.length > 5,
+      attrMoreLabel: this.capped("attrs", st.attrs).label,
+      toggleAttrMore: this.capped("attrs", st.attrs).toggle,
+      attrList: this.capped("attrs", st.attrs.map(a => ({
         name: a.name,
         typeLabel: ATTR_TYPES[a.type] ? (ATTR_TYPES[a.type][lang] || ATTR_TYPES[a.type].de) : a.type,
         triggerLabel: a.trigger ? (ATTR_TRIGGERS[a.trigger][lang] || ATTR_TRIGGERS[a.trigger].de) : this.tr("keine Regel"),
         triggerClass: a.trigger ? "tag tag-accent" : "tag tag-outline",
         remove: () => this.setState(prev => ({ attrs: prev.attrs.filter(x => x.id !== a.id) }))
-      })),
+      }))).list,
       attrName: st.attrName, attrType: st.attrType, attrTrigger: st.attrTrigger,
       setAttrName: e => this.setState({ attrName: e.target.value }),
       setAttrType: e => this.setState({ attrType: e.target.value }),
@@ -7222,11 +7817,17 @@ class Component extends DCLogic {
       labelNote: LABEL_FORMATS[st.labelFormat].note,
 
       perms: permsFor(),
-      allowAll: () => this.setState(prev => {
+      allowAll: () => st.role !== "owner" ? this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
+          this.tr("Profildaten und Rechte darf nur die inhabende Person ändern.")) : this.setState(prev => {
         const next = Object.assign({}, prev.overrides); const o = {};
         PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next };
       }),
       denyAll: () => {
+        if (st.role !== "owner") {
+          this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
+            this.tr("Profildaten und Rechte darf nur die inhabende Person ändern."));
+          return;
+        }
         if (this.lastOwnerBlocked(picked)) return;
         this.setState(prev => {
           const next = Object.assign({}, prev.overrides); const o = {};
