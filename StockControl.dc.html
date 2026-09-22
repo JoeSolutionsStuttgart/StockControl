@@ -324,6 +324,7 @@
                   <th data-i18n>Min</th>
                   <th data-i18n>Bestellmenge</th>
                   <th data-i18n>Lieferant</th>
+                  <th data-i18n>Bestellmenge eintragen</th>
                   <th data-i18n>Status</th>
                   <th></th>
                 </tr>
@@ -336,6 +337,25 @@
                     <td>{{ row.min }}</td>
                     <td>{{ row.bestellmenge }}</td>
                     <td class="text-muted">{{ row.lieferant }}</td>
+                    <td>
+                      <div style="display: flex; flex-direction: column; gap: 4px; min-width: 190px">
+                        <sc-for list="{{ row.amountRows }}" as="ar" hint-placeholder-count="1">
+                          <div style="display: flex; gap: 4px">
+                            <input class="input" type="number" min="0" step="1" style="width: 68px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.qty }}" onInput="{{ ar.setQty }}">
+                            <select class="input" style="flex: 1; min-width: 88px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.unit }}" onChange="{{ ar.setUnit }}">
+                              <option value="" data-i18n>kleinste Einheit</option>
+                              <sc-for list="{{ row.unitOptions }}" as="uo" hint-placeholder-count="2">
+                                <option data-i18n-keep value="{{ uo.name }}">{{ uo.label }}</option>
+                              </sc-for>
+                            </select>
+                          </div>
+                        </sc-for>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+                          <button class="btn btn-ghost" style="padding: 1px 7px; font-size: 12px" onClick="{{ row.addAmount }}">+</button>
+                          <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ row.amountNote }}</span>
+                        </div>
+                      </div>
+                    </td>
                     <td><span class="{{ row.tagClass }}">{{ row.statusLabel }}</span></td>
                     <td style="text-align: right">
                       <sc-if value="{{ row.mayOrder }}" hint-placeholder-val="{{ true }}">
@@ -368,7 +388,7 @@
                   <div style="font-family: var(--font-heading); font-size: 18px; color: var(--color-accent)">{{ m.delta }}</div>
                   <div style="min-width: 0">
                     <div style="font-size: 13px; font-weight: 500">{{ m.name }}</div>
-                    <div style="font-size: 12px; color: var(--sc-ink-2)">{{ m.who }} · {{ m.when }}</div>
+                    <div style="font-size: 12px; color: var(--sc-ink-2)">{{ m.whoLine }}</div>
                   </div>
                 </div>
               </sc-for>
@@ -512,7 +532,9 @@
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lieferant</div><div style="font-size: 14px">{{ current.lieferant }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Entnahme</div><div style="font-size: 14px">{{ current.entnahme }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Auffüllung</div><div style="font-size: 14px">{{ current.auffuell }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
+            <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
+              <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
+            </sc-if>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
           </div>
 
@@ -528,6 +550,7 @@
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
             <p class="card-body" style="margin: 0" data-i18n>Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.</p>
+            <div data-i18n-keep style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)">{{ baseUnitLabel }}</div>
             <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
               <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ dec }}">−</button>
               <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
@@ -614,11 +637,17 @@
               <span class="tag tag-neutral">{{ unitCountLabel }}</span>
             </div>
             <p class="card-body" style="margin: 0" data-i18n>In welchen Gebinden wird dieses Produkt bewegt? Angehakte Quantitäten bekommen oben ein eigenes Buchungsfeld. Angelegt und ins Verhältnis gesetzt werden sie in den Einstellungen.</p>
+            <sc-if value="{{ unitPickLocked }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--color-accent-700)">
+                <span data-i18n>Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.</span>
+                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ startEdit }}"><span data-i18n>Bearbeiten</span></button>
+              </div>
+            </sc-if>
 
             <div style="display: flex; flex-direction: column; gap: 2px">
               <sc-for list="{{ unitPick }}" as="up" hint-placeholder-count="3">
                 <label style="display: flex; align-items: center; gap: var(--space-3); padding: 7px 2px; cursor: pointer; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                  <input type="checkbox" checked="{{ up.checked }}" onChange="{{ up.toggle }}" style="width: 17px; height: 17px; accent-color: var(--color-accent); flex: none">
+                  <input type="checkbox" checked="{{ up.checked }}" onChange="{{ up.toggle }}" disabled="{{ up.locked }}" style="width: 17px; height: 17px; accent-color: var(--color-accent); flex: none">
                   <span data-i18n-keep style="font-size: 13.5px; margin-right: auto">{{ up.name }}</span>
                   <span data-i18n-keep class="tag tag-neutral">{{ up.relLabel }}</span>
                 </label>
@@ -855,7 +884,9 @@
                       <th data-i18n>Artikel</th>
                       <th style="text-align: right" data-i18n>Menge</th>
                       <th style="text-align: right" data-i18n>Bestand danach</th>
-                      <th data-i18n>Person</th>
+                      <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
+                        <th data-i18n>Person</th>
+                      </sc-if>
                       <th data-i18n>Lagerort</th>
                     </tr>
                   </thead>
@@ -866,7 +897,9 @@
                         <td style="font-weight: 500">{{ r.name }}</td>
                         <td style="text-align: right; font-variant-numeric: tabular-nums; color: {{ r.color }}">{{ r.delta }}</td>
                         <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.after }}</td>
-                        <td class="text-muted">{{ r.who }}</td>
+                        <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
+                          <td class="text-muted">{{ r.who }}</td>
+                        </sc-if>
                         <td class="text-muted">{{ r.ort }}</td>
                       </tr>
                     </sc-for>
@@ -1023,15 +1056,51 @@
                 <span data-i18n-keep class="tag tag-accent">{{ o.countLabel }}</span>
               </div>
               <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ o.byLabel }}</div>
-              <button class="btn btn-primary" style="white-space: nowrap; align-self: flex-start" onClick="{{ o.backAll }}"><span data-i18n>Alles zurück in Bestand</span></button>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+                <sc-if value="{{ o.hasOpen }}" hint-placeholder-val="{{ true }}">
+                  <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.refillAll }}"><span data-i18n>Alle Positionen nachfüllen</span></button>
+                </sc-if>
+                <sc-if value="{{ o.allFilled }}" hint-placeholder-val="{{ false }}">
+                  <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.close }}"><span data-i18n>Bestellung abschließen</span></button>
+                </sc-if>
+                <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ o.backAll }}"><span data-i18n>Alles zurück in Bestand</span></button>
+              </div>
               <div style="display: flex; flex-direction: column; gap: 2px">
                 <sc-for list="{{ o.items }}" as="oi" hint-placeholder-count="3">
-                  <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                    <div style="flex: 1; min-width: 0">
-                      <div style="font-size: 13.5px; font-weight: 500">{{ oi.name }}</div>
-                      <div data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.note }}</div>
+                  <div style="display: flex; flex-direction: column; gap: 5px; padding: 8px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                    <div style="display: flex; align-items: center; gap: var(--space-2)">
+                      <div style="flex: 1; min-width: 0">
+                        <div style="font-size: 13.5px; font-weight: 500">{{ oi.name }}</div>
+                        <div data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.note }}</div>
+                      </div>
+                      <sc-if value="{{ oi.filled }}" hint-placeholder-val="{{ false }}">
+                        <span data-i18n-keep class="tag tag-neutral">{{ oi.filledLabel }}</span>
+                      </sc-if>
+                      <button class="btn btn-ghost" style="padding: 3px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.back }}"><span data-i18n>Zurück in Bestand</span></button>
                     </div>
-                    <button class="btn btn-ghost" style="padding: 3px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.back }}"><span data-i18n>Zurück in Bestand</span></button>
+                    <sc-if value="{{ oi.hasAmounts }}" hint-placeholder-val="{{ true }}">
+                    <sc-for list="{{ oi.amountRows }}" as="ar" hint-placeholder-count="1">
+                      <div style="display: flex; gap: 5px">
+                        <input class="input" type="number" min="0" step="1" style="width: 74px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.qty }}" disabled="{{ ar.locked }}" onInput="{{ ar.setQty }}">
+                        <select class="input" style="flex: 1; min-width: 96px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.unit }}" disabled="{{ ar.locked }}" onChange="{{ ar.setUnit }}">
+                          <option value="" data-i18n>kleinste Einheit</option>
+                          <sc-for list="{{ oi.unitOptions }}" as="uo" hint-placeholder-count="2">
+                            <option data-i18n-keep value="{{ uo.name }}">{{ uo.label }}</option>
+                          </sc-for>
+                        </select>
+                      </div>
+                    </sc-for>
+                    </sc-if>
+                    <sc-if value="{{ oi.orphan }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size: 11.5px; color: var(--sc-ink-3)" data-i18n>Ohne Bestellmengen — erst über die Bestellliste in Bestellung setzen, dann lässt sich hier nachgefüllt werden.</div>
+                    </sc-if>
+                    <sc-if value="{{ oi.open }}" hint-placeholder-val="{{ true }}">
+                      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+                        <button class="btn btn-ghost" style="padding: 1px 7px; font-size: 12px" onClick="{{ oi.addAmount }}">+</button>
+                        <button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button>
+                        <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.amountNote }}</span>
+                      </div>
+                    </sc-if>
                   </div>
                 </sc-for>
               </div>
@@ -1485,6 +1554,16 @@
             </div>
           </section>
 
+          <sc-if value="{{ noRights }}" hint-placeholder-val="{{ false }}">
+            <section class="card blueprint">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div class="card-kicker" data-i18n>Profil und Feinrechte</div>
+              <h4 style="margin: 0" data-i18n>Kein Zugriff auf die Rechteverwaltung</h4>
+              <p class="card-body" style="margin: 0" data-i18n>Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern" ausdrücklich bekommen hat.</p>
+            </section>
+          </sc-if>
+
+          <sc-if value="{{ mayRights }}" hint-placeholder-val="{{ true }}">
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div class="card-kicker" data-i18n>Profil und Feinrechte</div>
@@ -1536,6 +1615,7 @@
               <button class="btn btn-secondary" onClick="{{ denyAll }}" disabled="{{ cannotManage }}"><span data-i18n>Alles sperren</span></button>
             </div>
           </section>
+          </sc-if>
         </div>
       </div>
       </sc-if>
@@ -3434,12 +3514,22 @@ const DICT = {
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL and SUPABASE_ANON_KEY are missing in config.js. Without them there is no database and no mail. The steps are in SETUP.md.",
     "Code eingeben": "Enter code", "Artikel-ID oder EAN": "Item ID or EAN", "Öffnen": "Open",
     "Scan-Adresse": "Scan address", "Person verdeckt": "Person hidden", "Nur zum Ansehen": "View only",
+    "Eine Spalte pro Feld. In „Quantität 1–3\" die Namen aus den Einstellungen eintragen.": "One column per field. In Quantity 1–3 enter the names from the settings.",
+    "Bestellmenge eintragen": "Enter order quantity", "Alle Positionen nachfüllen": "Refill all positions",
+    "Nachfüllen": "Refill", "nachgefüllt": "refilled", "Bestellung abschließen": "Close order",
+    "Keine Menge eingetragen": "No quantity entered", "Menge und Quantität eintragen, dann nachfüllen.": "Enter amount and unit, then refill.",
+    "Bestand erhöht": "Stock increased", "Nachfüllung aus Bestellung": "Refill from order", "Abgeschlossen": "Closed",
+    "Nur beim Bearbeiten": "Only while editing", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
+    "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tap Edit above, then quantities can be assigned.",
+    "Kein Zugriff auf die Rechteverwaltung": "No access to rights administration",
+    "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Who holds which rights is visible and editable only to the owner and to anyone expressly given the right to change rights.",
     "Bestellung nicht gespeichert": "Order not saved",
     "Bitte supabase/schema.sql im SQL-Editor erneut ausführen.": "Please run supabase/schema.sql in the SQL editor again.",
     "Bestellungen": "Orders", "Offene Bestellungen": "Open orders", "In Bestellung": "Order placed",
     "Alle in Bestellung": "Order all", "Zurück in Bestand": "Back to stock", "Alles zurück in Bestand": "All back to stock",
     "Nichts in Bestellung": "Nothing on order", "Zur Bestellliste": "To the order list", "bestellt von ": "ordered by ",
-    "Ohne Zuordnung": "Unassigned", "früher gesetzt": "set earlier", "Nichts offen": "Nothing open",
+    "Ohne Zuordnung": "Unassigned", "früher gesetzt": "set earlier",
+    "Ohne Bestellmengen — erst über die Bestellliste in Bestellung setzen, dann lässt sich hier nachgefüllt werden.": "No order amounts — put it on order from the order list first, then it can be refilled here.", "Nichts offen": "Nothing open",
     "Kein Artikel unter Mindestbestand.": "No item below minimum.", "steht schon in Bestellung": "is already on order",
     "Bestand ": "Stock ", "Min ": "Min ", "am": "on the", "Samstag": "Saturday", "Sonntag": "Sunday",
     "Zurück zu den Produkten": "Back to products", "Bestellung": "Order",
@@ -4108,12 +4198,22 @@ const DICT = {
     "In config.js fehlen SUPABASE_URL und SUPABASE_ANON_KEY. Ohne sie gibt es keine Datenbank und keine Mail. Die Schritte stehen in SETUP.md.": "SUPABASE_URL och SUPABASE_ANON_KEY saknas i config.js. Utan dem finns ingen databas och inga mejl. Stegen står i SETUP.md.",
     "Code eingeben": "Ange kod", "Artikel-ID oder EAN": "Artikel-ID eller EAN", "Öffnen": "Öppna",
     "Scan-Adresse": "Skanningsadress", "Person verdeckt": "Person dold", "Nur zum Ansehen": "Endast visning",
+    "Eine Spalte pro Feld. In „Quantität 1–3\" die Namen aus den Einstellungen eintragen.": "En kolumn per fält. Ange namnen från inställningarna i Enhet 1–3.",
+    "Bestellmenge eintragen": "Ange beställningsantal", "Alle Positionen nachfüllen": "Fyll på alla poster",
+    "Nachfüllen": "Fyll på", "nachgefüllt": "påfylld", "Bestellung abschließen": "Avsluta beställningen",
+    "Keine Menge eingetragen": "Inget antal angivet", "Menge und Quantität eintragen, dann nachfüllen.": "Ange antal och enhet, fyll sedan på.",
+    "Bestand erhöht": "Lagret ökat", "Nachfüllung aus Bestellung": "Påfyllning från beställning", "Abgeschlossen": "Avslutad",
+    "Nur beim Bearbeiten": "Bara vid redigering", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Tilldela bara vid redigering eller via Excel-tabellen.",
+    "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tryck på Redigera ovan, sedan kan enheter tilldelas.",
+    "Kein Zugriff auf die Rechteverwaltung": "Ingen åtkomst till rättighetshanteringen",
+    "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Vem som har vilka rättigheter ser och ändrar bara ägaren och den som uttryckligen fått rätten att ändra rättigheter.",
     "Bestellung nicht gespeichert": "Beställningen sparades inte",
     "Bitte supabase/schema.sql im SQL-Editor erneut ausführen.": "Kör supabase/schema.sql i SQL-editorn igen.",
     "Bestellungen": "Beställningar", "Offene Bestellungen": "Öppna beställningar", "In Bestellung": "Lägg beställning",
     "Alle in Bestellung": "Beställ alla", "Zurück in Bestand": "Tillbaka i lager", "Alles zurück in Bestand": "Allt tillbaka i lager",
     "Nichts in Bestellung": "Inget beställt", "Zur Bestellliste": "Till beställningslistan", "bestellt von ": "beställd av ",
-    "Ohne Zuordnung": "Utan koppling", "früher gesetzt": "satt tidigare", "Nichts offen": "Inget öppet",
+    "Ohne Zuordnung": "Utan koppling", "früher gesetzt": "satt tidigare",
+    "Ohne Bestellmengen — erst über die Bestellliste in Bestellung setzen, dann lässt sich hier nachgefüllt werden.": "Inga beställningsantal — beställ först via beställningslistan, sedan kan den fyllas på här.", "Nichts offen": "Inget öppet",
     "Kein Artikel unter Mindestbestand.": "Ingen artikel under miniminivå.", "steht schon in Bestellung": "är redan beställd",
     "Bestand ": "Lager ", "Min ": "Min ", "am": "den", "Samstag": "Lördag", "Sonntag": "Söndag",
     "Zurück zu den Produkten": "Tillbaka till artiklarna", "Bestellung": "Beställning",
@@ -4487,7 +4587,7 @@ class Component extends DCLogic {
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true },
-      ask: null, fcDate: "", fcOn: false, showAll: {},
+      ask: null, fcDate: "", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
       inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
@@ -4866,6 +4966,11 @@ class Component extends DCLogic {
       mhd: ["mhd", "haltbarkeit", "haltbar bis", "ablaufdatum", "verfallsdatum"],
       preis: ["preis", "ek", "einzelpreis", "kosten", "netto", "brutto", "stückpreis"],
       quantitaet: ["quantität", "quantitaet", "einheit", "verpackung", "verpackungseinheit", "gebinde"],
+      // Drei Spalten für zugewiesene Quantitäten. Die Namen müssen zu den
+      // in den Einstellungen angelegten Quantitäten passen.
+      q1: ["quantität 1", "quantitaet 1", "quantität1", "einheit 1", "gebinde 1"],
+      q2: ["quantität 2", "quantitaet 2", "quantität2", "einheit 2", "gebinde 2"],
+      q3: ["quantität 3", "quantitaet 3", "quantität3", "einheit 3", "gebinde 3"],
       lieferant: ["lieferant", "händler", "haendler", "hersteller", "bezugsquelle"],
       verantwortlich: ["verantwortlich", "verantwortliche person", "zuständig", "zustaendig"],
       vertretung: ["stellvertretung", "vertretung", "vertreter", "stellvertreter"],
@@ -5192,29 +5297,42 @@ class Component extends DCLogic {
       : "= " + d.count + " " + d.ref + " (" + total + " " + basis + ")";
   }
 
-  // Aus den angehakten Namen eine Buchungsleiter bauen: die kleinste
-  // gewählte Quantität bekommt Faktor 1, alle größeren rechnen darauf.
-  // Quantitäten aus verschiedenen Ketten (etwa Sack und Kiste) stehen
-  // nebeneinander — ohne gemeinsamen Bezug bleibt jede bei Faktor 1.
+  // Aus den angehakten Namen eine Buchungsleiter bauen. Jede Quantität
+  // behält den Faktor, der sich aus ihrer Kette ergibt: Kasten = 12
+  // Flaschen, Palette = 24 Kasten = 288 Flaschen. Der Bestand steht immer
+  // in der kleinsten Einheit der Kette — deshalb darf hier NICHT auf die
+  // kleinste angehakte Einheit umgerechnet werden. Genau daran scheiterte
+  // das gemeinsame Buchen: war nur „Kasten" angehakt, bekam er Faktor 1
+  // und vier Flaschen plus ein Kasten ergaben fünf statt sechzehn.
   ladderFrom(names) {
     if (!names.length) return [];
-    const raw = names.map(n => ({ name: n, f: this.unitFactor(n), base: this.baseNameOf(n) }));
-    const min = Math.min.apply(null, raw.map(x => x.f));
-    const oneBase = raw.every(x => x.base === raw[0].base);
-    return raw
-      .map(x => ({ name: x.name, faktor: oneBase ? Math.max(1, Math.round(x.f / min)) : 1 }))
+    return names
+      .map(n => ({ name: n, faktor: Math.max(1, this.unitFactor(n)) }))
       .sort((a, b) => a.faktor - b.faktor);
   }
 
-  // Einheitenleiter eines Produkts. Die kleinste Einheit hat Faktor 1;
-  // größere Einheiten rechnen über ihren Faktor in sie um.
+  // Die Quantitäten dieses Produkts — genau die angehakten, jede mit
+  // ihrem Faktor in die kleinste Einheit der Kette. Es wird keine Einheit
+  // dazuerfunden: wer nur „Kasten" anhakt, bucht nur in Kästen.
   unitsFor(p) {
     if (!p) return [];
     const own = (this.state.units || {})[p.id];
-    const base = { name: (p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück"), faktor: 1 };
-    const list = (own && own.length) ? own.slice() : [base];
-    if (!list.some(u => Number(u.faktor) === 1)) list.unshift(base);
-    return list.sort((a, b) => Number(a.faktor) - Number(b.faktor));
+    if (own && own.length) {
+      return own.slice()
+        .map(u => ({ name: u.name, faktor: Math.max(1, Number(u.faktor) || 1) }))
+        .sort((a, b) => a.faktor - b.faktor);
+    }
+    return [{ name: (p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück"), faktor: 1 }];
+  }
+
+  // Der Name der kleinsten Einheit: in ihr steht der Bestand, in ihr wird
+  // gerechnet. Ist sie selbst nicht angehakt, kommt der Name aus der Kette.
+  baseUnitName(p) {
+    const list = this.unitsFor(p);
+    const one = list.find(u => Number(u.faktor) === 1);
+    if (one) return one.name;
+    if (list.length) return this.baseNameOf(list[0].name);
+    return (p && p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück");
   }
 
   parsePrice(v) {
@@ -5351,22 +5469,19 @@ class Component extends DCLogic {
       .some(x => String(x == null ? "" : x).toLowerCase().includes(v));
   }
 
-  // Bestand in Quantitäten ausgedrückt: aus 18 Flaschen werden
-  // „1 Kasten · 6 Flaschen". Gerechnet wird weiter in der kleinsten
-  // Einheit — die Aufteilung ist nur die Lesart für Menschen.
+  // Bestand in Quantitäten gelesen. 24 Flaschen bei angehaktem Kasten
+  // ergeben „2 Kasten · 24 Flaschen". Werden drei Flaschen entnommen,
+  // steht dort „2 Kasten · 21 Flaschen": die 21 stecken weiter in zwei
+  // Kästen, einer davon angebrochen — deshalb wird aufgerundet. Gerechnet
+  // wird unverändert in der kleinsten Einheit.
   splitUnits(p, n) {
     const list = this.unitsFor(p);
-    if (list.length < 2) return "";
-    const big = list.slice().sort((a, b) => Number(b.faktor) - Number(a.faktor));
-    let left = Math.max(0, Math.round(Number(n) || 0));
-    const parts = [];
-    big.forEach(u => {
-      const f = Number(u.faktor) || 1;
-      const k = Math.floor(left / f);
-      if (k > 0) { parts.push(k + " " + u.name); left -= k * f; }
-    });
-    if (!parts.length) return "0 " + (big[big.length - 1] || {}).name;
-    return parts.join(" · ");
+    const total = Math.max(0, Math.round(Number(n) || 0));
+    const bigger = list.filter(u => Number(u.faktor) > 1)
+      .sort((a, b) => Number(b.faktor) - Number(a.faktor));
+    if (!bigger.length) return "";
+    return bigger.map(u => Math.ceil(total / Number(u.faktor)) + " " + u.name)
+      .concat([total + " " + this.baseUnitName(p)]).join(" · ");
   }
 
   // Eine Buchung wirkt sofort auf alles, was von ihr abhängt: Bestand,
@@ -5468,9 +5583,23 @@ class Component extends DCLogic {
   // das Feld, verbunden mit dem Hinweis, was in der Datenbank fehlt.
   // Eine Importzeile für die Datenbank. Beide Importwege — der gewöhnliche
   // und der nach dem Konfliktfenster — schreiben dieselbe Form.
+  // Aus den Spalten „Quantität 1–3" die zugewiesene Leiter bauen. Nur
+  // Namen, die es in den Einstellungen gibt, werden übernommen — ein
+  // Tippfehler soll keine stille Quantität erfinden.
+  laddderFromRow(r) {
+    const known = this.unitDefs().map(d => d.name);
+    const names = [r.q1, r.q2, r.q3]
+      .map(x => String(x == null ? "" : x).trim())
+      .filter(Boolean)
+      .map(x => known.find(k => k.toLowerCase() === x.toLowerCase()))
+      .filter(Boolean);
+    return names.length ? this.ladderFrom(Array.from(new Set(names))) : null;
+  }
+
   importRows(list, meId) {
     return list.map(p => ({
       code: p.code,
+      einheiten: p.einheiten || [],
       name: p.name, ean: p.ean === "—" ? null : p.ean,
       ist: p.ist, min: p.min, bestellmenge: p.bestellmenge,
       ort: p.ort === "—" ? null : p.ort,
@@ -5649,13 +5778,135 @@ class Component extends DCLogic {
     document.addEventListener("visibilitychange", this.visL);
   }
 
+  // ── Bestellmengen ────────────────────────────────────────────
+  // Was bestellt wurde, steht als Paare aus Menge und Quantität am
+  // Produkt: „2 Kasten" und „6 Flaschen" nebeneinander. Gerechnet wird
+  // daraus eine Summe in der kleinsten Einheit.
+  amountsOf(pid) {
+    const list = (this.state.orderQty || {})[pid];
+    return (list && list.length) ? list : [{ qty: "", unit: "" }];
+  }
+
+  setAmount(pid, i, key, value) {
+    this.setState(prev => {
+      const list = ((prev.orderQty || {})[pid] || [{ qty: "", unit: "" }]).slice();
+      list[i] = Object.assign({}, list[i] || { qty: "", unit: "" }, { [key]: value });
+      return { orderQty: Object.assign({}, prev.orderQty, { [pid]: list }) };
+    });
+  }
+
+  addAmount(pid) {
+    this.setState(prev => {
+      const list = (prev.orderQty || {})[pid] || [{ qty: "", unit: "" }];
+      return { orderQty: Object.assign({}, prev.orderQty, { [pid]: list.concat({ qty: "", unit: "" }) }) };
+    });
+  }
+
+  // Summe in der kleinsten Einheit. Ohne gewählte Quantität gilt die
+  // kleinste — dann ist die Zahl schon die Summe.
+  amountTotal(p, rows) {
+    const ladder = this.unitsFor(p);
+    return (rows || []).reduce((sum, r) => {
+      const n = Math.max(0, this.toNum(r.qty));
+      if (!n) return sum;
+      const u = ladder.find(x => x.name === r.unit);
+      return sum + n * (u ? Number(u.faktor) || 1 : 1);
+    }, 0);
+  }
+
+  amountLabel(p, rows) {
+    const ladder = this.unitsFor(p);
+    const parts = (rows || []).filter(r => this.toNum(r.qty) > 0)
+      .map(r => {
+        // Ohne gewählte Quantität gilt die kleinste Einheit — und die heißt
+        // so, wie sie in der Leiter steht, nicht wie das Freitextfeld.
+        const u = ladder.find(x => x.name === r.unit);
+        return this.toNum(r.qty) + " × " + (u ? u.name : this.baseUnitName(p));
+      });
+    if (!parts.length) return "";
+    return parts.join(" + ") + " = " + this.amountTotal(p, rows) + " " + this.baseUnitName(p);
+  }
+
+  // Mengen einer laufenden Bestellung ändern — solange sie nicht
+  // nachgefüllt ist. Gespeichert wird gebündelt, nicht bei jedem Tastendruck.
+  setOrderAmount(orderId, pid, i, key, value) {
+    const orders = (this.state.orders || []).map(o => {
+      if (o.id !== orderId) return o;
+      const am = Object.assign({}, o.amounts || {});
+      const rows = (am[pid] || [{ qty: "", unit: "" }]).slice();
+      rows[i] = Object.assign({}, rows[i] || { qty: "", unit: "" }, { [key]: value });
+      am[pid] = rows;
+      return Object.assign({}, o, { amounts: am });
+    });
+    this.setState({ orders: orders });
+    clearTimeout(this.amT);
+    this.amT = setTimeout(() => {
+      if (this.api && this.api.setOrders) this.api.setOrders(this.state.orders).catch(() => {});
+    }, 900);
+  }
+
+  addOrderAmount(orderId, pid) {
+    const orders = (this.state.orders || []).map(o => {
+      if (o.id !== orderId) return o;
+      const am = Object.assign({}, o.amounts || {});
+      am[pid] = (am[pid] || [{ qty: "", unit: "" }]).concat({ qty: "", unit: "" });
+      return Object.assign({}, o, { amounts: am });
+    });
+    this.setState({ orders: orders });
+  }
+
+  // Lieferung eintragen: die Mengen gehen in den Bestand, die Buchung in
+  // den Verlauf, der Status wieder auf „Bestand ok". Wo nichts eingetragen
+  // ist, passiert nichts — die Felder dort bleiben offen.
+  refillOrder(orderId, ids, who) {
+    const o = (this.state.orders || []).find(x => x.id === orderId);
+    if (!o) return;
+    const done = [];
+    (ids || []).forEach(pid => {
+      if ((o.done || []).indexOf(pid) >= 0) return;
+      const p = this.state.products.find(x => x.id === pid);
+      if (!p) return;
+      const add = this.amountTotal(p, (o.amounts || {})[pid]);
+      if (add <= 0) return;
+      this.applyBooking(p, (Number(p.ist) || 0) + add, false, "+" + add, who);
+      this.bookRemote(p.id, add, this.tr("Nachfüllung aus Bestellung"));
+      done.push(pid);
+    });
+    if (!done.length) {
+      this.say(this.tr("Nachfüllen"), this.tr("Keine Menge eingetragen"),
+        this.tr("Menge und Quantität eintragen, dann nachfüllen."));
+      return;
+    }
+    const orders = (this.state.orders || []).map(x => x.id === orderId
+      ? Object.assign({}, x, { done: (x.done || []).concat(done) }) : x);
+    this.setState({ orders: orders });
+    if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
+    this.say(this.tr("Nachfüllen"), done.length + " × " + this.tr("Artikel"), this.tr("Bestand erhöht"));
+  }
+
+  closeOrder(orderId) {
+    const orders = (this.state.orders || []).filter(o => o.id !== orderId);
+    this.setState({ orders: orders });
+    if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
+    this.say(this.tr("Bestellung"), this.tr("Abgeschlossen"), orderId);
+  }
+
   // ── Bestellungen ─────────────────────────────────────────────
   // Eine Bestellung fasst zusammen, was in einem Zug bestellt wurde. Der
   // Status am Produkt bleibt die Wahrheit; die Liste gruppiert nur.
   putInOrder(ids, who) {
     const list = (ids || []).filter(Boolean);
     if (!list.length) { this.say(this.tr("Bestellung"), this.tr("Nichts offen"), this.tr("Kein Artikel unter Mindestbestand.")); return; }
-    const batch = { id: "B-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(), by: who || "", items: list };
+    // Was in der Bestellliste an Menge und Quantität eingetragen wurde,
+    // wandert mit in die Bestellung — dort wird später nachgefüllt.
+    const amounts = {};
+    list.forEach(id => {
+      const rows = (this.state.orderQty || {})[id];
+      const keep = (rows || []).filter(r => this.toNum(r.qty) > 0);
+      if (keep.length) amounts[id] = keep;
+    });
+    const batch = { id: "B-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(),
+      by: who || "", items: list, amounts: amounts, done: [] };
     const orders = (this.state.orders || []).concat([batch]);
     const products = this.state.products.map(p => list.indexOf(p.id) >= 0
       ? Object.assign({}, p, { status: "ordered", geaendert: who || p.geaendert }) : p);
@@ -6208,7 +6459,16 @@ class Component extends DCLogic {
         mayOrder: mine(p), locked: !mine(p),
         lockNote: this.tr("nur ") + p.verantwortlich,
         action: this.tr("In Bestellung"),
-        toggleOrdered: () => this.putInOrder([p.id], meLabel)
+        toggleOrdered: () => this.putInOrder([p.id], meLabel),
+        // Menge und Quantität der Bestellung — mehrere Zeilen je Produkt.
+        unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
+        amountRows: this.amountsOf(p.id).map((r, i) => ({
+          qty: String(r.qty || ""), unit: r.unit || "",
+          setQty: e => this.setAmount(p.id, i, "qty", e.target.value),
+          setUnit: e => this.setAmount(p.id, i, "unit", e.target.value)
+        })),
+        addAmount: () => this.addAmount(p.id),
+        amountNote: this.amountLabel(p, this.amountsOf(p.id))
       });
     });
 
@@ -6217,19 +6477,44 @@ class Component extends DCLogic {
     // Bündel — sie kommen in eine eigene Kachel, damit sie nicht verloren
     // gehen und sich zurücksetzen lassen.
     const stamp = t => { try { return new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }); } catch (e) { return "—"; } };
-    const orderItem = (p, oid) => ({
-      name: p.name,
-      note: this.tr("Bestand ") + p.ist + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
-      back: () => this.backToStock([p.id], oid)
-    });
+    const orderItem = (p, oid, o) => {
+      const rows = ((o && o.amounts) || {})[p.id] || [{ qty: "", unit: "" }];
+      const filled = ((o && o.done) || []).indexOf(p.id) >= 0;
+      return {
+        name: p.name,
+        note: this.tr("Bestand ") + p.ist + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
+        back: () => this.backToStock([p.id], oid),
+        // Nachgefüllte Positionen sind erledigt: die Felder werden
+        // ausgegraut, damit dieselbe Lieferung nicht zweimal zählt.
+        filled: filled, open: !filled && !!oid,
+        // Verwaiste Artikel gehören zu keiner Bestellung: dort gäbe es
+        // nichts zu speichern, also auch keine Mengenfelder.
+        orphan: !oid, hasAmounts: !!oid,
+        filledLabel: filled ? this.tr("nachgefüllt") : "",
+        amountNote: this.amountLabel(p, rows),
+        unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
+        amountRows: rows.map((r, i) => ({
+          qty: String(r.qty || ""), unit: r.unit || "", locked: filled,
+          setQty: e => this.setOrderAmount(oid, p.id, i, "qty", e.target.value),
+          setUnit: e => this.setOrderAmount(oid, p.id, i, "unit", e.target.value)
+        })),
+        addAmount: () => this.addOrderAmount(oid, p.id),
+        refill: () => this.refillOrder(oid, [p.id], meLabel)
+      };
+    };
     const orderCards = (st.orders || []).slice().reverse().map(o => {
       const items = (o.items || []).map(id => products.find(p => p.id === id)).filter(Boolean);
+      const openIds = items.filter(p => (o.done || []).indexOf(p.id) < 0).map(p => p.id);
       return {
         id: o.id, when: stamp(o.at),
         byLabel: o.by ? this.tr("bestellt von ") + o.by : "",
         countLabel: items.length + " × " + this.tr("Artikel"),
-        items: items.map(p => orderItem(p, o.id)),
-        backAll: () => this.backToStock(items.map(p => p.id), o.id)
+        items: items.map(p => orderItem(p, o.id, o)),
+        backAll: () => this.backToStock(items.map(p => p.id), o.id),
+        hasOpen: openIds.length > 0,
+        allFilled: openIds.length === 0,
+        refillAll: () => this.refillOrder(o.id, openIds, meLabel),
+        close: () => this.closeOrder(o.id)
       };
     }).filter(c => c.items.length);
     const orphans = ordered.filter(p => !(st.orders || []).some(o => (o.items || []).indexOf(p.id) >= 0));
@@ -6237,8 +6522,10 @@ class Component extends DCLogic {
       orderCards.push({
         id: this.tr("Ohne Zuordnung"), when: this.tr("früher gesetzt"), byLabel: "",
         countLabel: orphans.length + " × " + this.tr("Artikel"),
-        items: orphans.map(p => orderItem(p, null)),
-        backAll: () => this.backToStock(orphans.map(p => p.id), null)
+        items: orphans.map(p => orderItem(p, null, null)),
+        backAll: () => this.backToStock(orphans.map(p => p.id), null),
+        hasOpen: false, allFilled: false,
+        refillAll: () => {}, close: () => {}
       });
     }
 
@@ -6264,10 +6551,9 @@ class Component extends DCLogic {
         return {
           label: this.tr(label), on, pinned,
           pinNote: pinned ? this.tr("gesetzt") : "",
-          locked: st.role !== "owner",
+          locked: !this.may("rights"),
           toggle: () => {
-            // Ansehen darf jede berechtigte Person, ändern nur die inhabende.
-            if (st.role !== "owner") {
+            if (!this.may("rights")) {
               this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
                 this.tr("Profildaten und Rechte darf nur die inhabende Person ändern."));
               return;
@@ -6490,11 +6776,21 @@ class Component extends DCLogic {
       // verdeckt — die Bewegung selbst ist weiter sichtbar.
       mayWho: this.may("who"),
       movements: (st.movements || []).map(m => Object.assign({}, m, {
-        who: this.may("who") ? m.who : this.tr("Person verdeckt")
+        who: this.may("who") ? m.who : "",
+        // Ohne das Recht steht dort nur der Zeitpunkt — kein Platzhalter,
+        // der verrät, dass etwas verborgen wird.
+        whoLine: this.may("who") ? m.who + " · " + m.when : m.when
       })),
 
       // ── Einheiten (Quantitäten) ─────────────────────────────
-      hasUnitLadder: this.unitsFor(cur).length > 1,
+      // Auch eine einzige Quantität bekommt ihr Feld, sobald sie größer
+      // als die kleinste Einheit ist — sonst ließe sich der Kasten nicht
+      // buchen, in dem das Produkt tatsächlich steht.
+      hasUnitLadder: (() => {
+        const l = this.unitsFor(cur);
+        return l.length > 1 || (l[0] && Number(l[0].faktor) > 1);
+      })(),
+      baseUnitLabel: this.baseUnitName(cur),
       unitRows: this.unitsFor(cur).map(u => ({
         label: u.faktor === 1 ? u.name : u.name + " (× " + u.faktor + ")",
         qty: String((st.unitQty || {})[u.name] || ""),
@@ -6511,7 +6807,7 @@ class Component extends DCLogic {
         const list = this.unitsFor(cur);
         const parts = list.filter(u => (st.unitQty || {})[u.name])
           .map(u => (st.unitQty[u.name]) + " × " + u.name);
-        const base = list[0] ? list[0].name : this.tr("Stück");
+        const base = this.baseUnitName(cur);
         if (!parts.length) return this.tr("Menge oben eintragen oder hier nach Einheiten aufteilen.");
         return parts.join(" + ") + " = " + st.qty + " " + base;
       })(),
@@ -6528,11 +6824,20 @@ class Component extends DCLogic {
       noUnitDefs: this.unitDefs().length === 0,
 
       // Welche Gebinde gelten für dieses Produkt.
+      unitPickLocked: !st.editing,
       unitPick: this.unitDefs().map(d => {
         const on = (st.units[cur.id] || []).some(u => u.name === d.name);
         return {
           name: d.name, checked: on, relLabel: this.relLabel(d),
+          locked: !st.editing,
           toggle: () => {
+            // Zuweisen geht nur im Bearbeiten-Modus oder über die
+            // Excel-Tabelle — so verrutscht im Alltag nichts.
+            if (!st.editing) {
+              this.say(this.tr("Quantitäten"), this.tr("Nur beim Bearbeiten"),
+                this.tr("Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen."));
+              return;
+            }
             const names = this.unitDefs()
               .filter(x => x.name === d.name ? !on : (st.units[cur.id] || []).some(u => u.name === x.name))
               .map(x => x.name);
@@ -6841,7 +7146,11 @@ class Component extends DCLogic {
       },
 
       // ── Rollen verwalten ───────────────────────────────────
-      canManageRoles: st.role === "owner",
+      // Rechte sehen und ändern darf, wer das Recht dazu hat — die
+      // inhabende Person immer, andere nur mit ausdrücklicher Freigabe.
+      canManageRoles: this.may("rights"),
+      mayRights: this.may("rights"),
+      noRights: !this.may("rights"),
       roleCountLabel: roleDefs.length + " " + (roleDefs.length === 1 ? this.tr("Rolle") : this.tr("Rollen")),
       roleCards: roleDefs.map(rd => {
         const used = (st.members || []).filter(m => m.role === rd.key).length;
@@ -6947,7 +7256,9 @@ class Component extends DCLogic {
       qty: st.qty,
       inc: () => this.setState(s => ({ qty: s.qty + 1 })),
       dec: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
-      setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n }); },
+      // Wer die Gesamtmenge selbst eintippt, hebt die Aufteilung nach
+      // Quantitäten auf — sonst würde beides zusammengezählt.
+      setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n, unitQty: {} }); },
       withdraw: () => {
         // Mehr entnehmen als da ist, geht nicht: 1,5 Kisten geben keine
         // 2 Kisten her. Die Absage nennt, was tatsächlich vorhanden ist.
@@ -7182,18 +7493,19 @@ class Component extends DCLogic {
           when: fmt(e.date), name: p.name || e.productId,
           delta: (e.delta > 0 ? "+" : "−") + Math.abs(e.delta),
           color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
-          after: e.after, who: this.may("who") ? e.who : this.tr("Person verdeckt"), ort: p.ort || "—"
+          after: e.after, who: this.may("who") ? e.who : "", ort: p.ort || "—"
         };
       }),
       hTaken: taken, hAdded: added, hCount: hEntries.length, hTop,
       hChart: this.chart(agg),
       hChartLabel: hMatched.length === 1 ? hMatched[0].name : hMatched.length + " " + this.tr("Artikel zusammengefasst"),
       exportHistoryCsv: () => {
-        const rows = [[this.tr("Datum"), this.tr("Artikel"), this.tr("Lagerort"), this.tr("Vorgang"), this.tr("Menge"), this.tr("Bestand danach"), this.tr("Person")]];
+        const rows = [[this.tr("Datum"), this.tr("Artikel"), this.tr("Lagerort"), this.tr("Vorgang"), this.tr("Menge"), this.tr("Bestand danach")]
+          .concat(this.may("who") ? [this.tr("Person")] : [])];
         hEntries.slice().sort((a, b) => b.date - a.date).forEach(e => {
           const p = byId(e.productId) || {};
           rows.push([fmt(e.date), p.name || e.productId, p.ort || "", e.delta < 0 ? this.tr("Entnahme") : this.tr("Nachfüllung"),
-            e.delta, e.after, this.may("who") ? e.who : this.tr("Person verdeckt")]);
+            e.delta, e.after].concat(this.may("who") ? [e.who] : []));
         });
         this.download("bestandsverlauf.csv", rows);
         this.say("Export", this.tr("Bestandsverlauf exportiert"), hEntries.length + " " + this.tr("Buchungen") + " · bestandsverlauf.csv");
@@ -7385,7 +7697,8 @@ class Component extends DCLogic {
             kategorien: String(r.kategorien || "").split(/[,;]/).map(x => x.trim()).filter(Boolean),
             status: ist < min ? "low" : "ok", aktiv: true,
             verantwortlich: r.verantwortlich || meLabel, vertretung: r.vertretung || "—",
-            entnahme: "—", auffuell: "—", geaendert: meLabel, hist: [ist], bildUrl: ""
+            entnahme: "—", auffuell: "—", geaendert: meLabel, hist: [ist], bildUrl: "",
+            einheiten: this.laddderFromRow(r) || []
           });
         });
         if (clashes.length) {
@@ -7393,8 +7706,12 @@ class Component extends DCLogic {
           return;
         }
         const newPlaces = Array.from(new Set(fresh.map(p => p.ort).filter(o => o && o !== "—" && !places.includes(o))));
+        // Zugewiesene Quantitäten wandern in die Leiter der neuen Produkte.
+        const freshUnits = {};
+        fresh.forEach(p => { if ((p.einheiten || []).length) freshUnits[p.id] = p.einheiten; });
         this.setState(prev => ({
           products: fresh.concat(prev.products),
+          units: Object.assign({}, prev.units, freshUnits),
           placesOwn: (prev.placesOwn || []).concat(newPlaces),
           importDone: false, importParsed: [], importMap: [], importFile: ""
         }));
@@ -7535,7 +7852,9 @@ class Component extends DCLogic {
       downloadTemplate: () => {
         // Kopfzeile trägt alle Felder, inklusive der eigenen Merkmale.
         const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
-          this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"), this.tr("Lieferant"),
+          this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"),
+          this.tr("Quantität") + " 1", this.tr("Quantität") + " 2", this.tr("Quantität") + " 3",
+          this.tr("Lieferant"),
           this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
           .concat(st.attrs.map(a => a.name));
         const clean = v => (v == null || v === "—") ? "" : v;
@@ -7544,23 +7863,42 @@ class Component extends DCLogic {
         // wäre dann nur eine Zeile, die niemand haben will. Ist noch nichts
         // angelegt, zeigt genau eine Dummyzeile, wie es gemeint ist.
         if (activeProducts.length) {
-          activeProducts.forEach(p => rows.push([
-            p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
-            clean(p.preis), clean(p.quantitaet), clean(p.lieferant), clean(p.verantwortlich),
-            clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
-          ].concat(st.attrs.map(() => ""))));
+          activeProducts.forEach(p => {
+            // Die zugewiesenen Quantitäten stehen einzeln in den Spalten,
+            // kleinste zuerst — so lassen sie sich in Excel austauschen.
+            const own = (st.units[p.id] || []).slice()
+              .sort((a, b) => Number(a.faktor) - Number(b.faktor)).map(u => u.name);
+            rows.push([
+              p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
+              clean(p.preis), clean(p.quantitaet),
+              own[0] || "", own[1] || "", own[2] || "",
+              clean(p.lieferant), clean(p.verantwortlich),
+              clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
+            ].concat(st.attrs.map(() => "")));
+          });
         } else {
+          const known = this.unitDefs().map(d => d.name);
           rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
-            "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)", "Getränke Nord GmbH",
+            "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)",
+            known[0] || "Flasche", known[1] || "Kasten", "",
+            "Getränke Nord GmbH",
             "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
             .concat(st.attrs.map(() => "")));
+          // Damit in Excel nichts geraten werden muss: eine Zeile mit allen
+          // vorhandenen Quantitäten zum Abschreiben. Sie wird beim Import
+          // übersprungen, weil sie keinen Namen trägt.
+          if (known.length) {
+            rows.push([""].concat(new Array(8).fill(""))
+              .concat([known.join(" | "), known.join(" | "), known.join(" | ")])
+              .concat(new Array(5).fill("")).concat(st.attrs.map(() => "")));
+          }
         }
         const filled = activeProducts.length > 0;
         this.download(filled ? "stockcontrol-bestand.csv" : "stockcontrol-vorlage.csv", rows);
         this.say("Excel", filled ? this.tr("Vorlage mit Bestand") : this.tr("Leere Vorlage"),
           filled
             ? activeProducts.length + " " + (activeProducts.length === 1 ? this.tr("Produkt") : this.tr("Produkte")) + " " + this.tr("übernommen")
-            : this.tr("Eine Spalte pro Feld, inklusive eigener Merkmale."));
+            : this.tr("Eine Spalte pro Feld. In „Quantität 1–3\" die Namen aus den Einstellungen eintragen."));
       },
       npName: st.npName, npEan: st.npEan, npResp: st.npResp,
       npD1: st.npD1, npD2: st.npD2, npD3: st.npD3,
@@ -7721,7 +8059,7 @@ class Component extends DCLogic {
         this.remoteMember(picked.id, { name, email });
         this.say(this.tr("Profil"), this.tr("Übernommen"), name + " · " + email);
       },
-      cannotManage: st.role !== "owner",
+      cannotManage: !this.may("rights"),
       blockMemberLabel: picked.status === "blocked" ? this.tr("Entsperren") : this.tr("Zugang sperren"),
       setPickedName: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { name: v }) : m) })); this.remoteMember(picked.id, { name: v }); },
       setPickedEmail: e => { const v = e.target.value; this.setState(prev => ({ members: prev.members.map(m => m.id === prev.pickedUser ? Object.assign({}, m, { email: v }) : m) })); this.remoteMember(picked.id, { email: v }); },
@@ -7817,13 +8155,13 @@ class Component extends DCLogic {
       labelNote: LABEL_FORMATS[st.labelFormat].note,
 
       perms: permsFor(),
-      allowAll: () => st.role !== "owner" ? this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
+      allowAll: () => !this.may("rights") ? this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
           this.tr("Profildaten und Rechte darf nur die inhabende Person ändern.")) : this.setState(prev => {
         const next = Object.assign({}, prev.overrides); const o = {};
         PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next };
       }),
       denyAll: () => {
-        if (st.role !== "owner") {
+        if (!this.may("rights")) {
           this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
             this.tr("Profildaten und Rechte darf nur die inhabende Person ändern."));
           return;
