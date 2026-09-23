@@ -314,8 +314,11 @@
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
               <h4 style="margin: 0" data-i18n>Bestellliste</h4>
-              <span class="text-muted" style="font-size: 12px" data-i18n>Alles unter Mindestbestand, gesammelt für die nächste Bestellung</span>
+              <span data-i18n-keep class="tag tag-neutral">{{ orderListCount }}</span>
+              <span class="text-muted" style="font-size: 12px; flex: 1; min-width: 160px" data-i18n>Alles unter Mindestbestand und aus abgeschickten Events, gesammelt für die nächste Bestellung</span>
+              <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ toggleList }}"><span data-i18n-keep>{{ listToggleLabel }}</span></button>
             </div>
+            <sc-if value="{{ listOpen }}" hint-placeholder-val="{{ false }}">
             <div style="overflow-x: auto; max-width: 100%">
             <table class="table" style="min-width: 540px">
               <thead>
@@ -333,7 +336,7 @@
               <tbody>
                 <sc-for list="{{ orderList }}" as="row" hint-placeholder-count="4">
                   <tr>
-                    <td style="font-weight: 500">{{ row.name }}</td>
+                    <td style="font-weight: 500">{{ row.name }}<div data-i18n-keep style="font-size: 11px; font-weight: 400; color: var(--sc-ink-3)">{{ row.srcNote }}</div></td>
                     <td data-i18n-keep>{{ row.istLabel }}</td>
                     <td data-i18n-keep>{{ row.minLabel }}</td>
                     <td data-i18n-keep>{{ row.bmLabel }}</td>
@@ -374,6 +377,7 @@
               <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportOrderCsv }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
               <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
             </div>
+            </sc-if>
           </section>
 
           <section class="card blueprint">
@@ -460,6 +464,21 @@
       </div>
       </sc-if>
 
+      <sc-if value="{{ eanScanOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position: fixed; inset: 0; z-index: 1000; background: rgba(10,14,18,.72); display: grid; place-items: center; padding: var(--space-4)">
+          <div class="blueprint" style="width: 380px; max-width: 100%; padding: 14px; background: var(--color-bg); display: flex; flex-direction: column; gap: var(--space-3)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>EAN scannen</h4>
+            <div style="position: relative; aspect-ratio: 4 / 3; background: var(--color-accent-900); overflow: hidden">
+              <video ref="{{ eanVideoRef }}" playsinline autoplay muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"></video>
+              <div style="position: absolute; left: 10%; right: 10%; top: 32%; bottom: 32%; border: 2px solid rgba(255,255,255,.85)"></div>
+            </div>
+            <div data-i18n-keep style="font-size: 12.5px; line-height: 1.45; color: var(--sc-ink-2)">{{ eanScanHint }}</div>
+            <button class="btn btn-secondary btn-block" onClick="{{ closeEanScan }}"><span data-i18n>Abbrechen</span></button>
+          </div>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ onDetail }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Produktdetail" style="display: flex; flex-direction: column; gap: var(--space-4)">
         <div data-print-hide style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
@@ -469,6 +488,51 @@
           </button>
           <span style="font-size: 12.5px; color: var(--sc-ink-2)">{{ current.name }}</span>
         </div>
+      <sc-if value="{{ detailHistOn }}" hint-placeholder-val="{{ false }}">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0; margin-right: auto" data-i18n>Bestandsverlauf dieses Produkts</h4>
+            <span data-i18n-keep class="tag tag-neutral">{{ dhCountLabel }}</span>
+          </div>
+          <div style="font-size: 13px; color: var(--sc-ink-2)">{{ current.name }}</div>
+          <sc-if value="{{ dhHasRows }}" hint-placeholder-val="{{ true }}">
+            <div style="overflow-x: auto; max-width: 100%">
+              <table class="table" data-zebra style="min-width: 480px">
+                <thead>
+                  <tr>
+                    <th data-i18n>Datum</th>
+                    <th data-i18n>Vorgang</th>
+                    <th style="text-align: right" data-i18n>Menge</th>
+                    <th style="text-align: right" data-i18n>Bestand danach</th>
+                    <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
+                      <th data-i18n>Person</th>
+                    </sc-if>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ dhRows }}" as="r" hint-placeholder-count="6">
+                    <tr>
+                      <td style="white-space: nowrap">{{ r.when }}</td>
+                      <td>{{ r.kind }}</td>
+                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; color: {{ r.color }}">{{ r.delta }}</td>
+                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ r.after }}</td>
+                      <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
+                        <td class="text-muted">{{ r.who }}</td>
+                      </sc-if>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dhEmpty }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Für dieses Produkt gibt es noch keine Buchungen.</p>
+          </sc-if>
+          <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start; gap: 7px" onClick="{{ closeDetailHist }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg><span data-i18n>Zurück</span></button>
+        </section>
+      </sc-if>
+      <sc-if value="{{ detailMainOn }}" hint-placeholder-val="{{ true }}">
       <div data-detail>
         <section class="card blueprint" data-detail-main style="animation: sc-in .18s ease-out">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -505,11 +569,11 @@
                     <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2); margin-top: 2px">{{ stockSplit }}</div>
                   </sc-if>
                 </div>
-                <div>
+                <div style="border-left: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent); padding-left: var(--space-3)">
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Mindestbestand</div>
                   <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1; color: var(--sc-ink-2)">{{ minLabel }}</div>
                 </div>
-                <div>
+                <div style="border-left: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent); padding-left: var(--space-3)">
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Bestellmenge</div>
                   <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1; color: var(--sc-ink-2)">{{ orderLabel }}</div>
                 </div>
@@ -606,6 +670,12 @@
                     <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}">
                       <input class="input" type="{{ f.type }}" inputmode="{{ f.mode }}" value="{{ f.value }}" placeholder="{{ f.hint }}" onInput="{{ f.set }}">
                     </sc-if>
+                    <sc-if value="{{ f.isEan }}" hint-placeholder-val="{{ false }}">
+                      <div style="display: flex; gap: 6px">
+                        <input class="input" style="flex: 1; min-width: 0" inputmode="numeric" value="{{ f.value }}" placeholder="{{ f.hint }}" onInput="{{ f.set }}">
+                        <button class="btn btn-secondary" style="flex: none; gap: 6px; white-space: nowrap; padding-inline: 10px" onClick="{{ openEanScanEdit }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M8 7v10"></path><path d="M12 7v10"></path><path d="M17 7v10"></path></svg><span data-i18n>Scannen</span></button>
+                      </div>
+                    </sc-if>
                   </div>
                 </sc-for>
               </div>
@@ -658,39 +728,23 @@
 
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>Verantwortung</h4>
-            <p class="card-body" style="margin: 0" data-i18n>Den Bestellstatus dürfen nur die verantwortliche Person und ihre Stellvertretungen setzen.</p>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3)">
-              <div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Verantwortlich</div>
-                <div style="font-size: 14px">{{ current.verantwortlich }}</div>
-              </div>
-              <div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Stellvertretung</div>
-                <div style="font-size: 14px">{{ current.vertretung }}</div>
-              </div>
-            </div>
-            <button class="btn btn-ghost" style="padding: 0; justify-content: flex-start" onClick="{{ goHistoryForCurrent }}"><span data-i18n>Bestandsverlauf dieses Produkts ansehen</span></button>
-          </section>
-
-          <section class="card blueprint">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>QR-Code dieses Produkts</h4>
+            <h4 style="margin: 0" data-i18n>Informationen über das Produkt</h4>
             <p class="card-body" style="margin: 0" data-i18n>Nur dieses Produkt. Scan öffnet direkt diese Detailansicht.</p>
             <div style="display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap">
               <div style="flex: none; padding: 8px; background: #fff; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent)">{{ current.qr }}</div>
               <div style="display: flex; flex-direction: column; gap: 4px; min-width: 150px">
                 <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Artikelkennung</div>
                 <div style="font-family: ui-monospace, Menlo, monospace; font-size: 18px">{{ current.code }}</div>
-                <div style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Diese Kennung steht auf dem Etikett und ändert sich nie. Sie lässt sich beim Scannen auch von Hand eintippen.</div>
-                <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2); margin-top: 6px" data-i18n>Scan-Adresse</div>
-                <div style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; line-height: 1.45; word-break: break-all; color: var(--sc-ink-2)">{{ current.qrLink }}</div>
               </div>
             </div>
-            <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ printThisLabel }}"><span data-i18n>Etikett drucken</span></button>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ openDetailHist }}"><span data-i18n>Bestandsverlauf dieses Produkts ansehen</span></button>
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ printThisLabel }}"><span data-i18n>Etikett drucken</span></button>
+            </div>
           </section>
         </div>
       </div>
+      </sc-if>
         <div data-print-hide style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
           <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ goProducts }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
@@ -1046,7 +1100,9 @@
           <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
             <h4 style="margin: 0; margin-right: auto" data-i18n>Bestelllisten je Person</h4>
             <span data-i18n-keep class="tag tag-neutral">{{ plCountLabel }}</span>
+            <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ togglePl }}"><span data-i18n-keep>{{ plToggleLabel }}</span></button>
           </div>
+          <sc-if value="{{ plOpen }}" hint-placeholder-val="{{ false }}">
           <p class="card-body" style="margin: 0" data-i18n>Alles, was offen ist — aus der Bestellliste, aus Bestellungen und aus kommenden Events — landet zuerst bei der verantwortlichen Person. Einzelne Positionen lassen sich zu einer anderen Person verschieben.</p>
           <div style="display: flex; gap: 6px; flex-wrap: wrap">
             <sc-for list="{{ plPeople }}" as="pp" hint-placeholder-count="3">
@@ -1092,6 +1148,7 @@
           <sc-if value="{{ plEmpty }}" hint-placeholder-val="{{ false }}">
             <p data-i18n-keep style="margin: 0; font-size: 12.5px; color: var(--sc-ink-2)">{{ plEmptyNote }}</p>
           </sc-if>
+          </sc-if>
         </section>
 
         <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ true }}">
@@ -1110,8 +1167,10 @@
               <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
                 <h4 data-i18n-keep style="margin: 0; margin-right: auto">{{ o.id }}</h4>
                 <span data-i18n-keep class="tag tag-accent">{{ o.countLabel }}</span>
+                <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ o.toggle }}"><span data-i18n-keep>{{ o.toggleLabel }}</span></button>
               </div>
               <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ o.byLabel }}</div>
+              <sc-if value="{{ o.isOpen }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
                 <sc-if value="{{ o.hasOpen }}" hint-placeholder-val="{{ true }}">
                   <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.refillAll }}"><span data-i18n>Alle Positionen nachfüllen</span></button>
@@ -1155,6 +1214,7 @@
                   </div>
                 </sc-for>
               </div>
+              </sc-if>
             </section>
           </sc-for>
         </div>
@@ -1203,6 +1263,12 @@
               </tbody>
             </table>
           </div>
+          <sc-if value="{{ hasEvent }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; margin-top: var(--space-2)">
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ evSendOff }}" onClick="{{ sendEventOrder }}"><span data-i18n-keep>{{ evSendLabel }}</span></button>
+              <span data-i18n-keep style="flex: 1; min-width: 200px; font-size: 12px; line-height: 1.45; color: var(--sc-ink-2)">{{ evSendNote }}</span>
+            </div>
+          </sc-if>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
             <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportEventList }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
             <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
@@ -1336,7 +1402,7 @@
             <div class="field" style="grid-column: 1 / -1"><label data-i18n>Name</label><input class="input" value="{{ npName }}" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg" onInput="{{ setNpName }}">
               <div style="font-size: 11.5px; margin-top: 3px; color: {{ npNameColor }}">{{ npNameNote }}</div>
             </div>
-            <div class="field"><label data-i18n>EAN</label><input class="input" value="{{ npEan }}" placeholder="4001234567890" onInput="{{ setNpEan }}"></div>
+            <div class="field"><label data-i18n>EAN</label><div style="display: flex; gap: 6px"><input class="input" style="flex: 1; min-width: 0" inputmode="numeric" value="{{ npEan }}" placeholder="4001234567890" onInput="{{ setNpEan }}"><button class="btn btn-secondary" style="flex: none; gap: 6px; white-space: nowrap; padding-inline: 10px" onClick="{{ openEanScanNp }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M8 7v10"></path><path d="M12 7v10"></path><path d="M17 7v10"></path></svg><span data-i18n>Scannen</span></button></div></div>
             <div class="field">
               <label data-i18n>Verantwortliche Person</label>
               <select class="input" value="{{ npResp }}" onChange="{{ setNpResp }}">
@@ -3391,6 +3457,26 @@ const DICT = {
     "Verantwortliche + Stellvertretung im CC": "Responsible person + deputies in CC",
     "Verantwortliche und Stellvertretung": "Responsible person and deputies",
     "Verantwortung": "Responsibility",
+    "Informationen über das Produkt": "Product information",
+    "Bestandsverlauf dieses Produkts": "Stock history of this product",
+    "Für dieses Produkt gibt es noch keine Buchungen.": "There are no bookings for this product yet.",
+    "Zurück": "Back",
+    "EAN scannen": "Scan EAN",
+    "Scannen": "Scan",
+    "EAN gescannt": "EAN scanned",
+    "Eingetragen — zum Speichern noch bestätigen.": "Filled in — confirm to save.",
+    "Gelesen: ": "Read: ",
+    "Strichcode waagerecht in den Rahmen halten. Die Nummer wird automatisch eingetragen.": "Hold the barcode level inside the frame. The number is filled in automatically.",
+    "Öffnen": "Open",
+    "Schließen": "Close",
+    "Bestellung abschicken": "Send order",
+    "Bestellung abgeschickt": "Order sent",
+    "für Event: ": "for event: ",
+    "Nur Events in der Zukunft lassen sich bestellen.": "Only future events can be ordered.",
+    "Das Event liegt in der Vergangenheit — keine Bestellung mehr möglich.": "The event is in the past — no order possible anymore.",
+    "Die Fehlmengen stehen auf der Bestellliste und den Bestelllisten der Verantwortlichen.": "The shortfalls are on the order list and the order lists of the responsible people.",
+    "Setzt die Fehlmengen dieses Events auf die Bestellliste und die Bestelllisten der Verantwortlichen.": "Puts this event's shortfalls on the order list and the order lists of the responsible people.",
+    "Alles unter Mindestbestand und aus abgeschickten Events, gesammelt für die nächste Bestellung": "Everything below minimum stock and from sent events, gathered for the next order",
     "Verantwortung je Artikel": "Responsibility per item",
     "Verhältnis": "Ratio",
     "Vorbereitet": "Prepared",
@@ -4912,6 +4998,7 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.video = React.createRef();
+    this.eanVideo = React.createRef();
     const start = (props && props.startView) || "Anmeldung";
     this.state = {
       // Ohne Anmeldung startet die Seite immer auf der Anmeldemaske.
@@ -4979,6 +5066,7 @@ class Component extends DCLogic {
       editing: false, editDraft: null, confirmDelete: false,
       importErrors: [], importErrorsPending: [],
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true, min: true, bestellmenge: true },
+      eanScan: null, detailHistId: null, openCards: {},
       ask: null, fcDate: "", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
@@ -5462,6 +5550,40 @@ class Component extends DCLogic {
   // Android), sonst wird jsQR nachgeladen und Bild für Bild geprüft.
   // Beides braucht eine verschlüsselte Verbindung — auf GitHub Pages gegeben.
 
+  camVideo() {
+    const r = this.state.eanScan ? this.eanVideo : this.video;
+    return r && r.current;
+  }
+
+  // EAN beim Bearbeiten oder Anlegen mit der Kamera einlesen.
+  openEanScan(target) {
+    if (this.state.camState === "running") this.stopCamera();
+    this.setState({ eanScan: target, readRaw: "", camState: "idle", camErrorText: "" }, () => this.startCamera());
+  }
+
+  closeEanScan() {
+    this.stopCamera();
+    this.setState({ eanScan: null });
+  }
+
+  // Ein Event „abschicken": seine Fehlmengen kommen auf die Bestellliste und
+  // die Bestelllisten der Personen. Gemerkt wird das im __meta-Eintrag.
+  sendEventOrder(ev) {
+    if (!ev) return;
+    const d = this.isoDay(ev.datum), today = new Date().toISOString().slice(0, 10);
+    if (!d || d < today) {
+      this.say(this.tr("Event"), this.tr("Nicht möglich"), this.tr("Nur Events in der Zukunft lassen sich bestellen."));
+      return;
+    }
+    let orders = (this.state.orders || []).slice();
+    if (!orders.some(o => o.id === "__meta")) orders.push({ id: "__meta", items: [], assign: {} });
+    orders = orders.map(o => o.id === "__meta"
+      ? Object.assign({}, o, { sentEvents: (o.sentEvents || []).filter(x => x !== ev.id).concat(ev.id) }) : o);
+    this.setState({ orders: orders });
+    if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
+    this.say(this.tr("Event"), this.tr("Bestellung abgeschickt"), ev.name);
+  }
+
   async startCamera() {
     if (this.state.camState === "running") return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -5474,7 +5596,7 @@ class Component extends DCLogic {
         audio: false
       });
       this.stream = stream;
-      const v = this.video && this.video.current;
+      const v = this.camVideo();
       if (v) {
         v.srcObject = stream;
         v.setAttribute("playsinline", "");
@@ -5513,7 +5635,7 @@ class Component extends DCLogic {
     cancelAnimationFrame(this.rafId);
     clearTimeout(this.scanT);
     if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
-    const v = this.video && this.video.current;
+    const v = this.camVideo();
     if (v) v.srcObject = null;
     if (this.state.camState === "running") this.setState({ camState: "idle", torchOn: false });
   }
@@ -5569,7 +5691,7 @@ class Component extends DCLogic {
 
     const step = async () => {
       if (!this.scanning) return;
-      const vid = this.video && this.video.current;
+      const vid = this.camVideo();
       if (vid && vid.readyState >= 2 && vid.videoWidth) {
         this.frames = (this.frames || 0) + 1;
         // Nur gelegentlich in den Zustand schreiben — sonst zeichnet React
@@ -5621,6 +5743,18 @@ class Component extends DCLogic {
   // eine Adresse, die die Kennung hinten trägt — so drucken die Etiketten.
   onCode(raw) {
     const text = String(raw || "").trim();
+    if (this.state.eanScan) {
+      if (text) this.setState({ readRaw: text });
+      const ok = text && text.length <= 32 && !/^https?:/i.test(text) && !/[\/#\s]/.test(text);
+      if (!ok) { this.scanT = setTimeout(() => this.detectLoop(), 500); return; }
+      const target = this.state.eanScan;
+      if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
+      this.stopCamera();
+      if (target === "np") this.setState({ npEan: text, eanScan: null });
+      else this.setState(prev => ({ eanScan: null, editDraft: Object.assign({}, prev.editDraft, { ean: text }) }));
+      this.say(this.tr("EAN gescannt"), text, this.tr("Eingetragen — zum Speichern noch bestätigen."));
+      return;
+    }
     // Immer anzeigen, was gelesen wurde — auch wenn es zu keinem Produkt passt.
     if (text) this.setState({ readRaw: text, readAt: Date.now() });
     if (!text || text === this.lastCode) { this.scanT = setTimeout(() => this.detectLoop(), 400); return; }
@@ -7511,10 +7645,28 @@ class Component extends DCLogic {
     // noch einmal in der Bestellliste.
     const low = activeProducts.filter(p => p.status === "low");
     const ordered = activeProducts.filter(p => p.status === "ordered");
-    const orderList = low.map(p => {
+    // Abgeschickte Events in der Zukunft: ihre Fehlmengen gehören mit auf die Liste.
+    const sentEv = ((st.orders || []).find(o => o.id === "__meta") || {}).sentEvents || [];
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const evNeed = {}, evFor = {};
+    (st.events || []).forEach(e => {
+      const d = this.isoDay(e.datum);
+      if (sentEv.indexOf(e.id) < 0 || !d || d < todayIso) return;
+      (e.items || []).forEach(it => {
+        evNeed[it.id] = (evNeed[it.id] || 0) + (Number(it.qty) || 0);
+        evFor[it.id] = evFor[it.id] || [];
+        if (evFor[it.id].indexOf(e.name) < 0) evFor[it.id].push(e.name);
+      });
+    });
+    const evShort = p => Math.max(0, (evNeed[p.id] || 0) - (Number(p.ist) || 0));
+    const evExtra = activeProducts.filter(p => p.status === "ok" && evShort(p) > 0);
+    const orderList = low.concat(evExtra).map(p => {
       const s = this.statusOf(p);
+      const fromEvent = p.status !== "low";
       return Object.assign({}, p, {
-        statusLabel: s.label, tagClass: s.tag, istLabel: this.fmtStock(p, p.ist), minLabel: this.fmtStock(p, p.min), bmLabel: this.fmtStock(p, p.bestellmenge),
+        fromEvent: fromEvent,
+        srcNote: evFor[p.id] ? this.tr("für Event: ") + evFor[p.id].join(", ") : "",
+        statusLabel: s.label, tagClass: s.tag, istLabel: this.fmtStock(p, p.ist), minLabel: this.fmtStock(p, p.min), bmLabel: this.fmtStock(p, fromEvent ? evShort(p) : p.bestellmenge),
         mayOrder: mine(p), locked: !mine(p),
         lockNote: this.tr("nur ") + p.verantwortlich,
         action: this.tr("In Bestellung"),
@@ -7737,7 +7889,7 @@ class Component extends DCLogic {
       if (!p || !(amount > 0)) return;
       plAll.push({ key: key, p: p, amount: amount, src: src, owner: plAssign[key] || p.verantwortlich || "—" });
     };
-    orderList.forEach(p => pushPl("l:" + p.id, p, this.amountTotal(p, (st.orderQty || {})[p.id]) || Number(p.bestellmenge) || 0, this.tr("Bestellliste")));
+    orderList.filter(p => !p.fromEvent).forEach(p => pushPl("l:" + p.id, p, this.amountTotal(p, (st.orderQty || {})[p.id]) || Number(p.bestellmenge) || 0, this.tr("Bestellliste")));
     (st.orders || []).filter(o => o.id !== "__meta").forEach(o => (o.items || []).forEach(pid => {
       if ((o.done || []).indexOf(pid) >= 0) return;
       const p = products.find(x => x.id === pid);
@@ -7746,7 +7898,7 @@ class Component extends DCLogic {
     const plToday = new Date().toISOString().slice(0, 10);
     (st.events || []).forEach(e => {
       const d = this.isoDay(e.datum);
-      if (d && d < plToday) return;
+      if (sentEv.indexOf(e.id) < 0 || !d || d < plToday) return;
       mergeItems(e.items).forEach(it => {
         const p = products.find(x => x.id === it.id);
         pushPl("e:" + e.id + ":" + it.id, p, p ? Math.max(0, it.qty - (Number(p.ist) || 0)) : 0, this.tr("Event") + " " + e.name);
@@ -7756,6 +7908,12 @@ class Component extends DCLogic {
     const plNames = Array.from(new Set([meLabel].concat(plAll.map(x => x.owner)))).filter(plVisible);
     const plSel = plNames.indexOf(st.plPerson) >= 0 ? st.plPerson : meLabel;
     const plList = plAll.filter(x => x.owner === plSel);
+    const oc = st.openCards || {};
+    const tgl = k => () => this.setState(prev => ({ openCards: Object.assign({}, prev.openCards, { [k]: !(prev.openCards || {})[k] }) }));
+    const openLbl = k => oc[k] ? this.tr("Schließen") : this.tr("Öffnen");
+    const dhList = (st.log || []).filter(e => e.productId === cur.id).sort((a, b) => b.date - a.date);
+    const evSentNow = !!ev && sentEv.indexOf(ev.id) >= 0;
+    const evFuture = !!ev && !!this.isoDay(ev.datum) && this.isoDay(ev.datum) >= todayIso;
     const plMembers = (st.members || []).filter(m => ["removed", "gesperrt", "blocked"].indexOf(m.status) < 0).map(m => m.name);
 
     return {
@@ -7796,6 +7954,27 @@ class Component extends DCLogic {
       onHistory: st.screen === "history", navHistory: this.navStyle("history"),
       goHistory: () => this.go("history"),
       goHistoryForCurrent: () => this.setState({ screen: "history", hProduct: cur.id, menu: null, burgerOpen: false }),
+      detailHistOn: st.detailHistId === cur.id, detailMainOn: st.detailHistId !== cur.id,
+      openDetailHist: () => this.setState({ detailHistId: cur.id }),
+      closeDetailHist: () => this.setState({ detailHistId: null }),
+      dhHasRows: dhList.length > 0, dhEmpty: dhList.length === 0,
+      dhCountLabel: dhList.length + " " + this.tr("Buchungen"),
+      dhRows: dhList.map(e => ({
+        when: fmt(e.date), kind: e.delta < 0 ? this.tr("Entnahme") : this.tr("Nachfüllung"),
+        delta: (e.delta > 0 ? "+" : "−") + this.fmtStock(cur, Math.abs(e.delta)),
+        color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
+        after: this.fmtStock(cur, e.after), who: this.may("who") ? e.who : ""
+      })),
+      eanScanOpen: !!st.eanScan, eanVideoRef: this.eanVideo,
+      openEanScanEdit: () => this.openEanScan("edit"),
+      openEanScanNp: () => this.openEanScan("np"),
+      closeEanScan: () => this.closeEanScan(),
+      eanScanHint: st.camState === "error" ? st.camErrorText
+        : st.readRaw ? this.tr("Gelesen: ") + st.readRaw
+        : this.tr("Strichcode waagerecht in den Rahmen halten. Die Nummer wird automatisch eingetragen."),
+      listOpen: !!oc.list, toggleList: tgl("list"), listToggleLabel: openLbl("list"),
+      orderListCount: String(orderList.length),
+      plOpen: !!oc.pl, togglePl: tgl("pl"), plToggleLabel: openLbl("pl"),
       onTeam: st.screen === "team", onSettings: st.screen === "settings", onAdmin: st.screen === "admin",
       onHelp: st.screen === "help", navHelp: this.navStyle("help"), goHelp: () => this.go("help"),
 
@@ -7882,14 +8061,15 @@ class Component extends DCLogic {
         return base;
       })(),
       orderList,
-      hasLow: low.length > 0,
-      orderAllLabel: this.tr("Alle in Bestellung") + " (" + low.filter(mine).length + ")",
-      orderAll: () => this.putInOrder(low.filter(mine).map(p => p.id), meLabel),
+      hasLow: orderList.length > 0,
+      orderAllLabel: this.tr("Alle in Bestellung") + " (" + orderList.filter(mine).length + ")",
+      orderAll: () => this.putInOrder(orderList.filter(mine).map(p => p.id), meLabel),
 
       // ── Bestellungen ───────────────────────────────────────
       onOrders: st.screen === "orders", navOrders: this.navStyle("orders"),
       goOrders: () => this.go("orders"),
-      orderCards: orderCards,
+      orderCards: orderCards.map(c => Object.assign({}, c, {
+        isOpen: !!oc["o:" + c.id], toggle: tgl("o:" + c.id), toggleLabel: openLbl("o:" + c.id) })),
       plPeople: plNames.map(n => ({
         label: n + " · " + plAll.filter(x => x.owner === n).length,
         style: n === plSel ? "white-space: nowrap; border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-accent-800); font-weight: 600" : "white-space: nowrap",
@@ -8205,7 +8385,7 @@ class Component extends DCLogic {
         const sfx = sd ? " (" + sd + ")" : "";
         return [
           f("name", "Name", { span: "1 / -1" }),
-          f("ean", "EAN", { hint: "4001234567890" }),
+          f("ean", "EAN", { hint: "4001234567890", isText: false, isEan: true }),
           f("ist", "Istbestand", Object.assign({ label: this.tr("Istbestand") + sfx }, num)),
           ...(sF > 1 ? [f("istRest", "Istbestand", Object.assign({ label: this.tr("dazu einzeln") + " (" + this.baseNameOf(sd) + ")" }, num))] : []),
           f("min", "Mindestbestand", Object.assign({ label: this.tr("Mindestbestand") + sfx }, num)),
@@ -8526,6 +8706,12 @@ class Component extends DCLogic {
         pick: () => this.setState({ eventId: e.id })
       })),
       hasEvent: !!ev,
+      evSendOff: !evFuture || evSentNow,
+      evSendLabel: evSentNow ? this.tr("Bestellung abgeschickt") : this.tr("Bestellung abschicken"),
+      evSendNote: !evFuture ? this.tr("Das Event liegt in der Vergangenheit — keine Bestellung mehr möglich.")
+        : evSentNow ? this.tr("Die Fehlmengen stehen auf der Bestellliste und den Bestelllisten der Verantwortlichen.")
+        : this.tr("Setzt die Fehlmengen dieses Events auf die Bestellliste und die Bestelllisten der Verantwortlichen."),
+      sendEventOrder: () => this.sendEventOrder(ev),
       eventName: ev ? ev.name : "—", eventMeta: ev ? (ev.datum + " · " + ev.ort) : "",
       evRows: evRows,
       evMissingTotal: evRows.filter(r => r.fehlt > 0).length,
