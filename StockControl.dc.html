@@ -115,7 +115,8 @@
   @keyframes sc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   @media print {
     [data-print-hide] { display: none !important; }
-    [data-print-sheet] { position: fixed; inset: 0; margin: 0; padding: 0; background: #fff; }
+    [data-print-sheet] { position: absolute; top: 0; left: 0; right: 0; margin: 0; padding: 0; background: #fff; }
+    @page { margin: 10mm; }
   }
 </style>
 </helmet>
@@ -1040,6 +1041,59 @@
           <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ goDashboard }}"><span data-i18n>Zur Bestellliste</span></button>
         </section>
 
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0; margin-right: auto" data-i18n>Bestelllisten je Person</h4>
+            <span data-i18n-keep class="tag tag-neutral">{{ plCountLabel }}</span>
+          </div>
+          <p class="card-body" style="margin: 0" data-i18n>Alles, was offen ist — aus der Bestellliste, aus Bestellungen und aus kommenden Events — landet zuerst bei der verantwortlichen Person. Einzelne Positionen lassen sich zu einer anderen Person verschieben.</p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <sc-for list="{{ plPeople }}" as="pp" hint-placeholder-count="3">
+              <button class="btn btn-secondary" style="{{ pp.style }}" onClick="{{ pp.pick }}"><span data-i18n-keep>{{ pp.label }}</span></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ plHasRows }}" hint-placeholder-val="{{ false }}">
+            <div style="overflow-x: auto; max-width: 100%">
+              <table class="table" data-zebra style="min-width: 600px">
+                <thead>
+                  <tr>
+                    <th data-i18n>Artikel</th>
+                    <th style="text-align: right" data-i18n>Menge</th>
+                    <th data-i18n>Quelle</th>
+                    <th data-i18n>Lieferant</th>
+                    <th data-i18n>Verschieben zu</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ plRows }}" as="pr" hint-placeholder-count="3">
+                    <tr>
+                      <td style="font-weight: 500">{{ pr.name }}</td>
+                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap">{{ pr.amount }}</td>
+                      <td><span data-i18n-keep class="tag tag-neutral">{{ pr.src }}</span></td>
+                      <td class="text-muted">{{ pr.lieferant }}</td>
+                      <td>
+                        <select class="input" style="padding: 4px 7px; font-size: 12.5px; min-width: 150px" value="{{ pr.owner }}" disabled="{{ pr.locked }}" onChange="{{ pr.move }}">
+                          <sc-for list="{{ plMoveTo }}" as="mt" hint-placeholder-count="3">
+                            <option value="{{ mt }}">{{ mt }}</option>
+                          </sc-for>
+                        </select>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportPersonList }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
+              <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ plEmpty }}" hint-placeholder-val="{{ false }}">
+            <p data-i18n-keep style="margin: 0; font-size: 12.5px; color: var(--sc-ink-2)">{{ plEmptyNote }}</p>
+          </sc-if>
+        </section>
+
         <sc-if value="{{ noOrders }}" hint-placeholder-val="{{ true }}">
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -1440,67 +1494,104 @@
       <div data-screen-label="QR-Codes" style="display: flex; flex-direction: column; gap: var(--space-4)">
         <section class="card blueprint" data-print-hide>
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-3); align-items: end">
-            <div class="field"><label data-i18n>Text über dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Keller · Regal B2" onInput="{{ setQrTop }}"></div>
-            <div class="field"><label data-i18n>Text unter dem Code</label><input class="input" data-i18n-ph placeholder="z. B. Bei Entnahme scannen" onInput="{{ setQrBottom }}"></div>
-            <div class="field"><label data-i18n>Etikettformat</label>
-              <select class="input" value="{{ labelFormat }}" onChange="{{ setLabelFormat }}">
-                <option value="2x4">2 × 4 · 99 × 67 mm · 8 je Blatt</option>
-                <option value="3x8">3 × 8 · 70 × 36 mm · 24 je Blatt</option>
-                <option value="4x10">4 × 10 · 48 × 27 mm · 40 je Blatt</option>
-                <option value="5x13">5 × 13 · 38 × 21 mm · 65 je Blatt</option>
-                <option value="roll">Endlosrolle · 62 mm breit</option>
-              </select>
-              <div style="font-size: 11.5px; margin-top: 4px; color: var(--sc-ink-2)">{{ labelNote }}</div>
-            </div>
-            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-              <button class="btn btn-secondary" onClick="{{ selectAllQr }}">{{ selectAllLabel }}</button>
-              <button class="btn btn-primary" style="gap: 7px; font-weight: 600" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Drucken / PDF</span></button>
-            </div>
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0; margin-right: auto" data-i18n>Etiketten gestalten</h4>
+            <span data-i18n-keep class="tag tag-neutral">{{ qrCountLabel }}</span>
           </div>
-          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-3)">
-            <label class="radio" style="gap: 8px">
-              <input type="checkbox" checked="{{ showName }}" onChange="{{ toggleShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
-              <span data-i18n>Produktname auf dem Etikett</span>
-            </label>
-            <label class="radio" style="gap: 8px">
-              <input type="checkbox" checked="{{ showId }}" onChange="{{ toggleShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
-              <span data-i18n>Artikel-ID auf dem Etikett</span>
-            </label>
-          </div>
-
-          <div style="margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2)">
-            <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
-              <div class="field" style="flex: 1; min-width: 190px">
-                <label data-i18n>Artikel auswählen</label>
-                <input class="input" type="search" data-i18n-ph placeholder="Suchen nach Name, EAN, Lagerort …" onInput="{{ setQrQuery }}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4) var(--space-5); align-items: start">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Format</div>
+              <div class="field" style="margin: 0"><label data-i18n>Etikettformat</label>
+                <select class="input" value="{{ labelFormat }}" onChange="{{ setLabelFormat }}">
+                  <sc-for list="{{ labelFormats }}" as="lf" hint-placeholder-count="6">
+                    <option data-i18n-keep value="{{ lf.key }}">{{ lf.note }}</option>
+                  </sc-for>
+                </select>
               </div>
-              <div style="font-size: 12px; color: var(--sc-ink-2); padding-bottom: 10px">{{ qrCountLabel }}</div>
+              <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ showName }}" onChange="{{ toggleShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname auf dem Etikett</span></label>
+              <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ showId }}" onChange="{{ toggleShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID auf dem Etikett</span></label>
             </div>
-            <div style="max-height: 232px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); border-radius: var(--sc-radius); background: var(--sc-ground)">
-              <sc-for list="{{ qrPickList }}" as="q" hint-placeholder-count="7">
-                <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
-                  <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
-                  <span style="flex: 1; min-width: 0; font-size: 13px">{{ q.name }}</span>
-                  <span style="font-size: 11px; color: var(--sc-ink-3)">{{ q.meta }}</span>
-                </label>
-              </sc-for>
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Texte für alle Etiketten</div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Text über dem Code</label><input class="input" value="{{ qrTop }}" data-i18n-ph placeholder="z. B. Keller · Regal B2" onInput="{{ setQrTop }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qrFsTop }}" onChange="{{ setQrFsTop }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Text unter dem Code</label><input class="input" value="{{ qrBottom }}" data-i18n-ph placeholder="z. B. Bei Entnahme scannen" onInput="{{ setQrBottom }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qrFsBottom }}" onChange="{{ setQrFsBottom }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
             </div>
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Schriftgrößen</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2)">
+                <div class="field" style="margin: 0"><label data-i18n>Produktname</label><select class="input" style="width: 100%" value="{{ qrFsName }}" onChange="{{ setQrFsName }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div>
+                <div class="field" style="margin: 0"><label data-i18n>Artikel-ID</label><select class="input" style="width: 100%" value="{{ qrFsId }}" onChange="{{ setQrFsId }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div>
+              </div>
+              <p style="margin: 0; font-size: 12px; line-height: 1.45; color: var(--sc-ink-2)" data-i18n>Ein Etikett in der Vorschau anklicken, um es einzeln zu beschriften.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
+            <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ selectAllQr }}">{{ selectAllLabel }}</button>
+            <button class="btn btn-primary" style="gap: 7px; font-weight: 600; white-space: nowrap" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Drucken / PDF</span></button>
+            <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); margin-left: auto">{{ labelNote }}</span>
           </div>
         </section>
 
+        <section class="card blueprint" data-print-hide>
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); align-items: end">
+            <div class="field" style="margin: 0">
+              <label data-i18n>Artikel auswählen</label>
+              <input class="input" type="search" data-i18n-ph placeholder="Suchen nach Name, EAN, Lagerort …" onInput="{{ setQrQuery }}">
+            </div>
+            <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); padding-bottom: 10px">{{ qrCountLabel }}</div>
+          </div>
+          <div style="max-height: 232px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--sc-ground); display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))">
+            <sc-for list="{{ qrPickList }}" as="q" hint-placeholder-count="7">
+              <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
+                <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                <span style="flex: 1; min-width: 0; font-size: 13px">{{ q.name }}</span>
+                <span style="font-size: 11px; color: var(--sc-ink-3)">{{ q.meta }}</span>
+              </label>
+            </sc-for>
+          </div>
+        </section>
+
+        <sc-if value="{{ qrEditing }}" hint-placeholder-val="{{ false }}">
+          <section class="card blueprint" data-print-hide style="border-color: var(--color-accent)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Einzelnes Etikett</div>
+            <h4 style="margin: 0">{{ qeTitle }}</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-3) var(--space-5); align-items: end">
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Text über dem Code</label><input class="input" value="{{ qeTop }}" onInput="{{ setQeTop }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qeFsTop }}" onChange="{{ setQeFsTop }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Produktname</label><input class="input" value="{{ qeName }}" onInput="{{ setQeName }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qeFsName }}" onChange="{{ setQeFsName }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Text unter dem Code</label><input class="input" value="{{ qeBottom }}" onInput="{{ setQeBottom }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qeFsBottom }}" onChange="{{ setQeFsBottom }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end">
+                <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px">
+                  <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ qeShowName }}" onChange="{{ toggleQeShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname zeigen</span></label>
+                  <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ qeShowId }}" onChange="{{ toggleQeShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID zeigen</span></label>
+                </div>
+                <div class="field" style="margin: 0"><label data-i18n>ID-Größe</label><select class="input" style="width: 100%" value="{{ qeFsId }}" onChange="{{ setQeFsId }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div>
+              </div>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ qeDone }}"><span data-i18n>Fertig</span></button>
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ qeReset }}"><span data-i18n>Auf Vorgabe zurücksetzen</span></button>
+            </div>
+          </section>
+        </sc-if>
+
         <section data-print-sheet style="{{ labelSheetStyle }}">
           <sc-for list="{{ qrSheet }}" as="q" hint-placeholder-count="4">
-            <div style="{{ labelCellStyle }}">
-              <div style="font-size: 11px; text-align: center; min-height: 14px">{{ q.top }}</div>
+            <div style="{{ q.cellStyle }}" onClick="{{ q.pick }}">
+              <sc-if value="{{ q.hasTop }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: {{ q.fsTop }}px; text-align: center; line-height: 1.2; overflow-wrap: anywhere">{{ q.top }}</div>
+              </sc-if>
               {{ q.svg }}
               <sc-if value="{{ q.withName }}" hint-placeholder-val="{{ true }}">
-                <div style="font-family: var(--font-heading); font-size: 14px; text-align: center; line-height: 1.15">{{ q.name }}</div>
+                <div style="font-family: var(--font-heading); font-size: {{ q.fsName }}px; text-align: center; line-height: 1.15; overflow-wrap: anywhere">{{ q.name }}</div>
               </sc-if>
               <sc-if value="{{ q.withId }}" hint-placeholder-val="{{ true }}">
-                <div style="font-size: 10px; letter-spacing: 0.06em; text-align: center; color: #5d5d60">{{ q.id }}</div>
+                <div style="font-size: {{ q.fsId }}px; letter-spacing: 0.06em; text-align: center; color: #5d5d60">{{ q.id }}</div>
               </sc-if>
-              <div style="font-size: 11px; text-align: center; min-height: 14px">{{ q.bottom }}</div>
+              <sc-if value="{{ q.hasBottom }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size: {{ q.fsBottom }}px; text-align: center; line-height: 1.2; overflow-wrap: anywhere">{{ q.bottom }}</div>
+              </sc-if>
             </div>
           </sc-for>
         </section>
@@ -3620,6 +3711,34 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Fix it in product editing or with a new import.",
     "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
     "Standard": "default", "— keine —": "— none —",
+    "Etiketten gestalten": "Design labels",
+    "Format": "Format",
+    "Texte für alle Etiketten": "Texts for all labels",
+    "Schriftgrößen": "Font sizes",
+    "Größe": "Size",
+    "Produktname": "Product name",
+    "Artikel-ID": "Item ID",
+    "ID-Größe": "ID size",
+    "Ein Etikett in der Vorschau anklicken, um es einzeln zu beschriften.": "Click a label in the preview to customise it individually.",
+    "Einzelnes Etikett": "Single label",
+    "Produktname zeigen": "Show product name",
+    "Artikel-ID zeigen": "Show item ID",
+    "Fertig": "Done",
+    "Auf Vorgabe zurücksetzen": "Reset to defaults",
+    "A4 · 1 Code je Blatt": "A4 · 1 code per sheet",
+    "A5 · 2 je Blatt": "A5 · 2 per sheet",
+    "A6 · 4 je Blatt": "A6 · 4 per sheet",
+    "Bestelllisten je Person": "Order lists per person",
+    "Alles, was offen ist — aus der Bestellliste, aus Bestellungen und aus kommenden Events — landet zuerst bei der verantwortlichen Person. Einzelne Positionen lassen sich zu einer anderen Person verschieben.": "Everything open — from the order list, from orders and from upcoming events — goes to the responsible person first. Single items can be moved to another person.",
+    "Quelle": "Source",
+    "Verschieben zu": "Move to",
+    "Verschoben": "Moved",
+    "offene Positionen": "open items",
+    "Für diese Person ist gerade nichts offen.": "Nothing is open for this person right now.",
+    "Eigene Personenbestellliste für alle sichtbar": "Own personal order list visible to everyone",
+    "Nur die inhabende Person": "Owner only",
+    "Ob eine Personenbestellliste für alle sichtbar ist, legt die inhabende Person fest.": "The owner decides whether a personal order list is visible to everyone.",
+    "Bestellung": "Order",
     "Seite: Übersicht": "Page: Overview",
     "Seite: Produkte": "Page: Products",
     "Seite: Scannen": "Page: Scan",
@@ -4374,6 +4493,34 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Rätta det i artikelredigeringen eller med en ny import.",
     "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
     "Standard": "standard", "— keine —": "— ingen —",
+    "Etiketten gestalten": "Utforma etiketter",
+    "Format": "Format",
+    "Texte für alle Etiketten": "Texter för alla etiketter",
+    "Schriftgrößen": "Teckenstorlekar",
+    "Größe": "Storlek",
+    "Produktname": "Artikelnamn",
+    "Artikel-ID": "Artikel-ID",
+    "ID-Größe": "ID-storlek",
+    "Ein Etikett in der Vorschau anklicken, um es einzeln zu beschriften.": "Klicka på en etikett i förhandsvisningen för att anpassa den.",
+    "Einzelnes Etikett": "Enskild etikett",
+    "Produktname zeigen": "Visa artikelnamn",
+    "Artikel-ID zeigen": "Visa artikel-ID",
+    "Fertig": "Klar",
+    "Auf Vorgabe zurücksetzen": "Återställ till standard",
+    "A4 · 1 Code je Blatt": "A4 · 1 kod per ark",
+    "A5 · 2 je Blatt": "A5 · 2 per ark",
+    "A6 · 4 je Blatt": "A6 · 4 per ark",
+    "Bestelllisten je Person": "Beställningslistor per person",
+    "Alles, was offen ist — aus der Bestellliste, aus Bestellungen und aus kommenden Events — landet zuerst bei der verantwortlichen Person. Einzelne Positionen lassen sich zu einer anderen Person verschieben.": "Allt som är öppet — från beställningslistan, beställningar och kommande evenemang — hamnar först hos den ansvariga. Enskilda poster kan flyttas till en annan person.",
+    "Quelle": "Källa",
+    "Verschieben zu": "Flytta till",
+    "Verschoben": "Flyttad",
+    "offene Positionen": "öppna poster",
+    "Für diese Person ist gerade nichts offen.": "Inget är öppet för den här personen just nu.",
+    "Eigene Personenbestellliste für alle sichtbar": "Egen beställningslista synlig för alla",
+    "Nur die inhabende Person": "Endast ägaren",
+    "Ob eine Personenbestellliste für alle sichtbar ist, legt die inhabende Person fest.": "Ägaren bestämmer om en personlig beställningslista är synlig för alla.",
+    "Bestellung": "Beställning",
     "Seite: Übersicht": "Sida: Översikt",
     "Seite: Produkte": "Sida: Produkter",
     "Seite: Scannen": "Sida: Skanna",
@@ -4559,12 +4706,16 @@ const ATTR_TRIGGERS = {
 };
 
 // Etikettformate für den Druckbogen.
+// fs: Schriftgrößen in px für Text oben, Name, ID, Text unten.
 const LABEL_FORMATS = {
-  "2x4":  { cols: 2, gap: "8mm",   pad: "8mm",   qr: 150, note: "2 × 4 · 99 × 67 mm · 8 je Blatt" },
-  "3x8":  { cols: 3, gap: "4mm",   pad: "5mm",   qr: 120, note: "3 × 8 · 70 × 36 mm · 24 je Blatt" },
-  "4x10": { cols: 4, gap: "2.5mm", pad: "3.5mm", qr: 92,  note: "4 × 10 · 48 × 27 mm · 40 je Blatt" },
-  "5x13": { cols: 5, gap: "1.5mm", pad: "2.5mm", qr: 70,  note: "5 × 13 · 38 × 21 mm · 65 je Blatt" },
-  roll:   { cols: 1, gap: "3mm",   pad: "6mm",   qr: 132, note: "Endlosrolle · 62 mm breit · einspaltig" }
+  a4:     { cols: 1, gap: "0",     pad: "14mm",  qr: 520, fs: [30, 44, 22, 30], h: "270mm", page: true, note: "A4 · 1 Code je Blatt" },
+  a5:     { cols: 1, gap: "6mm",   pad: "10mm",  qr: 330, fs: [22, 30, 16, 22], h: "132mm", note: "A5 · 2 je Blatt" },
+  a6:     { cols: 2, gap: "6mm",   pad: "8mm",   qr: 230, fs: [16, 22, 13, 16], h: "132mm", note: "A6 · 4 je Blatt" },
+  "2x4":  { cols: 2, gap: "8mm",   pad: "8mm",   qr: 150, fs: [12, 16, 10, 12], h: "67mm",  note: "2 × 4 · 99 × 67 mm · 8 je Blatt" },
+  "3x8":  { cols: 3, gap: "4mm",   pad: "5mm",   qr: 120, fs: [11, 14, 10, 11], note: "3 × 8 · 70 × 36 mm · 24 je Blatt" },
+  "4x10": { cols: 4, gap: "2.5mm", pad: "3.5mm", qr: 92,  fs: [9, 11, 8, 9],    note: "4 × 10 · 48 × 27 mm · 40 je Blatt" },
+  "5x13": { cols: 5, gap: "1.5mm", pad: "2.5mm", qr: 70,  fs: [8, 9, 7, 8],     note: "5 × 13 · 38 × 21 mm · 65 je Blatt" },
+  roll:   { cols: 1, gap: "3mm",   pad: "6mm",   qr: 132, fs: [11, 14, 10, 11], note: "Endlosrolle · 62 mm breit · einspaltig" }
 };
 
 const ROLES = {
@@ -4607,6 +4758,7 @@ const PERM_LIST = [
   ["history", "Bewegungen und Entnahmehistorie sehen", ["owner","manager","reader"]],
   ["who", "Sehen, wer was entnommen hat", ["owner","manager"]],
   ["undo", "Bewegungen rückgängig machen", ["owner","manager"]],
+  ["list_public", "Eigene Personenbestellliste für alle sichtbar", []],
   ["profiles", "Profile des Teams ansehen", ["owner","manager"]],
   ["profileEdit", "Profildaten ändern", ["owner"]],
   ["export", "Excel-Datei erstellen", ["owner","manager","reader"]],
@@ -4793,6 +4945,8 @@ class Component extends DCLogic {
       qty: 1,
       query: "", place: "", statusFilter: "",
       mailMode: "now",
+      qrFs: {}, qrEdit: null, plPerson: "",
+      qrCustom: (() => { try { return JSON.parse(localStorage.getItem("sc-qr-custom") || "{}"); } catch (e) { return {}; } })(),
       qrTop: "", qrBottom: "", qrSize: "m", qrQuery: "", showName: true, showId: true,
       qrPicked: ["SC-1001", "SC-1002", "SC-1004", "SC-1006"],
       pickedUser: "u3",
@@ -5409,7 +5563,7 @@ class Component extends DCLogic {
     // wäre hier noch der alte Wert und die Erkennung würde nie anlaufen.
     if (!this.scanning) return;
     if (!this.detector && window.BarcodeDetector) {
-      try { this.detector = new window.BarcodeDetector({ formats: ["qr_code", "ean_13", "code_128"] }); }
+      try { this.detector = new window.BarcodeDetector({ formats: ["qr_code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39"] }); }
       catch (e) { this.detector = null; }
     }
 
@@ -5437,8 +5591,15 @@ class Component extends DCLogic {
           } else {
             const jsQR = await this.loadFallback();
             // "attemptBoth" erkennt auch hell-auf-dunkel gedruckte Codes.
-            const hit = jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: "attemptBoth" });
+            const img = ctx.getImageData(0, 0, w, h);
+            const hit = jsQR(img.data, w, h, { inversionAttempts: "attemptBoth" });
             if (hit && hit.data) return this.onCode(hit.data);
+            // Strichcode (EAN) auf jedem dritten Bild — das kostet mehr Rechenzeit.
+            if (this.frames % 3 === 0) {
+              this.loadZxing().catch(() => {});
+              const bc = this.decodeBarcode(img, w, h);
+              if (bc) return this.onCode(bc);
+            }
           }
         } catch (e) {
           // Bringt die eingebaute Erkennung dieses Format nicht, wird auf
@@ -6024,6 +6185,79 @@ class Component extends DCLogic {
     } });
   }
 
+  setQrCustom(pid, patch) {
+    if (!pid) return;
+    this.setState(prev => {
+      const all = Object.assign({}, prev.qrCustom || {});
+      if (patch === null) delete all[pid];
+      else all[pid] = Object.assign({}, all[pid] || {}, patch);
+      try { localStorage.setItem("sc-qr-custom", JSON.stringify(all)); } catch (e) {}
+      return { qrCustom: all };
+    });
+  }
+
+  // Recht einer anderen Person: persönliche Ausnahme, sonst ihre Rolle.
+  memberPerm(name, key) {
+    const m = (this.state.members || []).find(x => x.name === name);
+    if (!m) return false;
+    const ov = (this.state.overrides || {})[m.id] || {};
+    if (ov[key] !== undefined) return !!ov[key];
+    const rd = this.roleDefs().find(r => r.key === m.role);
+    return !!(rd && (rd.perms || []).indexOf(key) >= 0);
+  }
+
+  // Zuordnung einer offenen Position zu einer Personenbestellliste. Liegt
+  // als Merkeintrag bei den Bestellungen, damit jede berechtigte Person
+  // schreiben darf.
+  setAssign(key, name) {
+    let orders = (this.state.orders || []).slice();
+    let meta = orders.find(o => o.id === "__meta");
+    if (!meta) { meta = { id: "__meta", items: [], assign: {} }; orders.push(meta); }
+    const next = Object.assign({}, meta, { assign: Object.assign({}, meta.assign || {}, { [key]: name }) });
+    orders = orders.map(o => o.id === "__meta" ? next : o);
+    this.setState({ orders: orders });
+    if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
+  }
+
+  // Strichcodes (EAN, UPC, Code 128) für Browser ohne eingebaute Erkennung.
+  loadZxing() {
+    if (window.ZXing) return Promise.resolve(window.ZXing);
+    if (this.zxP) return this.zxP;
+    const urls = [
+      "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js",
+      "https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"
+    ];
+    const tryOne = i => new Promise((res, rej) => {
+      if (i >= urls.length) return rej(new Error("ZXing konnte nicht geladen werden"));
+      const el = document.createElement("script");
+      el.src = urls[i];
+      el.onload = () => window.ZXing ? res(window.ZXing) : tryOne(i + 1).then(res, rej);
+      el.onerror = () => tryOne(i + 1).then(res, rej);
+      document.head.appendChild(el);
+    });
+    this.zxP = tryOne(0).catch(e => { this.zxP = null; throw e; });
+    return this.zxP;
+  }
+
+  decodeBarcode(img, w, h) {
+    const Z = window.ZXing;
+    if (!Z) return null;
+    try {
+      if (!this.zxReader) {
+        const hints = new Map();
+        hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8,
+          Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E, Z.BarcodeFormat.CODE_128, Z.BarcodeFormat.CODE_39]);
+        hints.set(Z.DecodeHintType.TRY_HARDER, true);
+        this.zxReader = new Z.MultiFormatReader();
+        this.zxReader.setHints(hints);
+      }
+      const d = img.data, lum = new Uint8ClampedArray(w * h);
+      for (let i = 0, j = 0; j < lum.length; i += 4, j++) lum[j] = (d[i] * 77 + d[i + 1] * 150 + d[i + 2] * 29) >> 8;
+      const res = this.zxReader.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.RGBLuminanceSource(lum, w, h))));
+      return res ? res.getText() : null;
+    } catch (e) { return null; }
+  }
+
   parsePrice(v) {
     const n = parseFloat(String(v == null ? "" : v).replace(/[^0-9,.-]/g, "").replace(",", "."));
     return isNaN(n) ? null : n;
@@ -6454,10 +6688,14 @@ class Component extends DCLogic {
   findByCode(text) {
     const keys = this.codeParts(text);
     if (!keys.length) return null;
-    return this.state.products.find(p =>
-      keys.includes(this.norm(this.codeOf(p))) ||
-      keys.includes(this.norm(p.id)) ||
-      keys.includes(this.norm(p.ean))) || null;
+    // EAN-13 und UPC-A unterscheiden sich nur um führende Nullen.
+    const strip = x => String(x).replace(/^0+/, "");
+    const digits = keys.filter(k => /^[0-9]{6,}$/.test(k)).map(strip);
+    return this.state.products.find(p => {
+      const ean = this.norm(p.ean);
+      return keys.includes(this.norm(this.codeOf(p))) || keys.includes(this.norm(p.id)) ||
+        (ean && (keys.includes(ean) || (/^[0-9]+$/.test(ean) && digits.includes(strip(ean)))));
+    }) || null;
   }
 
   // Initialen: erster Buchstabe des ersten und des letzten Namensteils.
@@ -6718,7 +6956,7 @@ class Component extends DCLogic {
     const orders = (this.state.orders || [])
       .map(o => (orderId && o.id !== orderId) ? o
         : Object.assign({}, o, { items: (o.items || []).filter(x => list.indexOf(x) < 0) }))
-      .filter(o => (o.items || []).length);
+      .filter(o => o.id === "__meta" || (o.items || []).length);
     const products = this.state.products.map(p => list.indexOf(p.id) >= 0
       ? Object.assign({}, p, { status: (Number(p.ist) || 0) < (Number(p.min) || 0) ? "low" : "ok" }) : p);
     this.setState({ orders: orders, products: products });
@@ -7372,6 +7610,10 @@ class Component extends DCLogic {
                 this.tr("Profildaten und Rechte darf nur die inhabende Person ändern."));
               return;
             }
+            if (key === "list_public" && st.role !== "owner") {
+              this.say(this.tr("Rechte"), this.tr("Nur die inhabende Person"), this.tr("Ob eine Personenbestellliste für alle sichtbar ist, legt die inhabende Person fest."));
+              return;
+            }
             if (pinned) {
               this.say(this.tr("Rechte"), this.tr("Das geht nicht"),
                 this.tr("Mindestens eine aktive Person muss die Rechte verwalten können. Vergib die Rolle zuerst an jemand anderen."));
@@ -7388,11 +7630,26 @@ class Component extends DCLogic {
       });
     };
 
-    const qrPx = LABEL_FORMATS[st.labelFormat].qr;
-    const qrSheet = products.filter(p => st.qrPicked.includes(p.id)).map(p => ({
-      name: p.name, id: this.codeOf(p), top: st.qrTop, bottom: st.qrBottom, svg: this.qrEl(this.qrPayload(p), qrPx),
-      withName: st.showName, withId: st.showId
-    }));
+    const LF = LABEL_FORMATS[st.labelFormat] || LABEL_FORMATS["3x8"];
+    const qrPx = LF.qr;
+    const FSK = ["top", "name", "id", "bottom"];
+    const fsOf = (c, k) => Number(((c && c.fs) || {})[k] || (st.qrFs || {})[k] || LF.fs[FSK.indexOf(k)]);
+    // Jedes Etikett: Vorgaben für alle, überlagert von seinen eigenen Angaben.
+    const qrSheet = products.filter(p => st.qrPicked.includes(p.id)).map(p => {
+      const c = (st.qrCustom || {})[p.id] || {};
+      const top = c.top != null ? c.top : st.qrTop, bottom = c.bottom != null ? c.bottom : st.qrBottom;
+      const sel = st.qrEdit === p.id;
+      return {
+        name: c.name || p.name, id: this.codeOf(p), top: top, bottom: bottom, hasTop: !!top, hasBottom: !!bottom,
+        svg: this.qrEl(this.qrPayload(p), qrPx),
+        withName: c.showName != null ? c.showName : st.showName, withId: c.showId != null ? c.showId : st.showId,
+        fsTop: fsOf(c, "top"), fsName: fsOf(c, "name"), fsId: fsOf(c, "id"), fsBottom: fsOf(c, "bottom"),
+        cellStyle: "padding: " + LF.pad + "; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: "
+          + (LF.page ? "6mm" : "4px") + "; background: #fff; color: #1d1f20; break-inside: avoid; cursor: pointer; box-sizing: border-box; border: "
+          + (sel ? "2px solid var(--color-accent)" : "1px solid #c9c9cb") + (LF.h ? "; height: " + LF.h : "") + (LF.page ? "; break-after: page" : ""),
+        pick: () => this.setState({ qrEdit: sel ? null : p.id })
+      };
+    });
     const qq = st.qrQuery.toLowerCase();
 
     /* ── Bestandsverlauf: eigene Seite mit Filtern ───────────── */
@@ -7468,6 +7725,38 @@ class Component extends DCLogic {
     const sortMark = key => st.eventSort === key ? " ↓" : "";
 
     const setSel = (key) => (e) => this.setState({ [key]: e.target.value });
+
+    // ── Bestelllisten je Person ──────────────────────────────
+    // Offen ist: was in der Bestellliste steht, was bestellt und noch nicht
+    // nachgefüllt ist, und was kommenden Events fehlt. Zuerst bei der
+    // verantwortlichen Person, verschiebbar zu jeder anderen.
+    const plMeta = (st.orders || []).find(o => o.id === "__meta") || {};
+    const plAssign = plMeta.assign || {};
+    const plAll = [];
+    const pushPl = (key, p, amount, src) => {
+      if (!p || !(amount > 0)) return;
+      plAll.push({ key: key, p: p, amount: amount, src: src, owner: plAssign[key] || p.verantwortlich || "—" });
+    };
+    orderList.forEach(p => pushPl("l:" + p.id, p, this.amountTotal(p, (st.orderQty || {})[p.id]) || Number(p.bestellmenge) || 0, this.tr("Bestellliste")));
+    (st.orders || []).filter(o => o.id !== "__meta").forEach(o => (o.items || []).forEach(pid => {
+      if ((o.done || []).indexOf(pid) >= 0) return;
+      const p = products.find(x => x.id === pid);
+      pushPl("o:" + o.id + ":" + pid, p, p ? (this.amountTotal(p, (o.amounts || {})[pid]) || Number(p.bestellmenge) || 0) : 0, this.tr("Bestellung") + " " + o.id);
+    }));
+    const plToday = new Date().toISOString().slice(0, 10);
+    (st.events || []).forEach(e => {
+      const d = this.isoDay(e.datum);
+      if (d && d < plToday) return;
+      mergeItems(e.items).forEach(it => {
+        const p = products.find(x => x.id === it.id);
+        pushPl("e:" + e.id + ":" + it.id, p, p ? Math.max(0, it.qty - (Number(p.ist) || 0)) : 0, this.tr("Event") + " " + e.name);
+      });
+    });
+    const plVisible = n => n === meLabel || st.role === "owner" || this.memberPerm(n, "list_public");
+    const plNames = Array.from(new Set([meLabel].concat(plAll.map(x => x.owner)))).filter(plVisible);
+    const plSel = plNames.indexOf(st.plPerson) >= 0 ? st.plPerson : meLabel;
+    const plList = plAll.filter(x => x.owner === plSel);
+    const plMembers = (st.members || []).filter(m => ["removed", "gesperrt", "blocked"].indexOf(m.status) < 0).map(m => m.name);
 
     return {
       serviceName: name,
@@ -7601,6 +7890,26 @@ class Component extends DCLogic {
       onOrders: st.screen === "orders", navOrders: this.navStyle("orders"),
       goOrders: () => this.go("orders"),
       orderCards: orderCards,
+      plPeople: plNames.map(n => ({
+        label: n + " · " + plAll.filter(x => x.owner === n).length,
+        style: n === plSel ? "white-space: nowrap; border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-accent-800); font-weight: 600" : "white-space: nowrap",
+        pick: () => this.setState({ plPerson: n })
+      })),
+      plRows: plList.map(x => ({
+        name: x.p.name, amount: this.fmtStock(x.p, x.amount), src: x.src, lieferant: x.p.lieferant || "—", owner: x.owner,
+        locked: !(this.may("order") || x.owner === meLabel),
+        move: e => { const to = e.target.value; this.setAssign(x.key, to); this.say(this.tr("Bestellliste"), this.tr("Verschoben"), x.p.name + " → " + to); }
+      })),
+      plMoveTo: Array.from(new Set(plMembers.concat(plList.map(x => x.owner)))),
+      plHasRows: plList.length > 0, plEmpty: plList.length === 0,
+      plEmptyNote: this.tr("Für diese Person ist gerade nichts offen."),
+      plCountLabel: plAll.filter(x => plVisible(x.owner)).length + " " + this.tr("offene Positionen"),
+      exportPersonList: () => {
+        const rows = [[this.tr("Artikel"), "EAN", this.tr("Menge"), this.tr("Quelle"), this.tr("Lieferant"), this.tr("Lagerort")]]
+          .concat(plList.map(x => [x.p.name, x.p.ean === "—" ? "" : x.p.ean, this.fmtStock(x.p, x.amount), x.src, x.p.lieferant === "—" ? "" : (x.p.lieferant || ""), x.p.ort || ""]));
+        this.downloadBlob("bestellliste-" + plSel.replace(/[^A-Za-z0-9äöüÄÖÜß-]+/g, "_") + ".xlsx",
+          this.xlsxBuild([{ name: this.tr("Bestellliste").slice(0, 31), rows: rows, freeze: true, widths: [36, 16, 20, 26, 22, 22] }]));
+      },
       noOrders: orderCards.length === 0,
       ordersCountLabel: (() => {
         const n = orderCards.reduce((a, c) => a + c.items.length, 0);
@@ -8460,8 +8769,10 @@ class Component extends DCLogic {
       },
       printPage: () => {
         if (st.screen === "qr") {
-          this.setState({ qrPrinted: true });
+          this.setState({ qrPrinted: true, qrEdit: null });
           try { localStorage.setItem("sc-qr-printed", "1"); } catch (e) {}
+          setTimeout(() => window.print(), 80);
+          return;
         }
         window.print();
       },
@@ -9141,12 +9452,36 @@ class Component extends DCLogic {
 
       // ── Etikettformate ──────────────────────────────────────
       labelFormat: st.labelFormat,
-      setLabelFormat: e => this.setState({ labelFormat: e.target.value }),
-      labelSheetStyle: "display: grid; gap: " + LABEL_FORMATS[st.labelFormat].gap +
-        "; grid-template-columns: repeat(" + LABEL_FORMATS[st.labelFormat].cols + ", minmax(0, 1fr))",
-      labelCellStyle: "padding: " + LABEL_FORMATS[st.labelFormat].pad +
-        "; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fff; color: #1d1f20; break-inside: avoid; border: 1px solid #c9c9cb; border-radius: 6px",
-      labelNote: LABEL_FORMATS[st.labelFormat].note,
+      setLabelFormat: e => this.setState({ labelFormat: e.target.value, qrFs: {} }),
+      labelSheetStyle: "display: grid; gap: " + LF.gap + "; grid-template-columns: repeat(" + LF.cols + ", minmax(0, 1fr)); align-items: stretch",
+      labelNote: LF.note,
+      labelFormats: Object.keys(LABEL_FORMATS).map(k => ({ key: k, note: this.tr(LABEL_FORMATS[k].note) })),
+      fsOptions: [7, 8, 9, 10, 11, 12, 14, 16, 18, 20, 22, 24, 28, 30, 32, 36, 40, 44, 48, 56, 64, 72],
+      qrFsTop: String(fsOf(null, "top")), qrFsName: String(fsOf(null, "name")), qrFsId: String(fsOf(null, "id")), qrFsBottom: String(fsOf(null, "bottom")),
+      setQrFsTop: e => { const v = Number(e.target.value); this.setState(prev => ({ qrFs: Object.assign({}, prev.qrFs, { top: v }) })); },
+      setQrFsName: e => { const v = Number(e.target.value); this.setState(prev => ({ qrFs: Object.assign({}, prev.qrFs, { name: v }) })); },
+      setQrFsId: e => { const v = Number(e.target.value); this.setState(prev => ({ qrFs: Object.assign({}, prev.qrFs, { id: v }) })); },
+      setQrFsBottom: e => { const v = Number(e.target.value); this.setState(prev => ({ qrFs: Object.assign({}, prev.qrFs, { bottom: v }) })); },
+      qrTop: st.qrTop, qrBottom: st.qrBottom,
+      qrEditing: !!st.qrEdit && st.qrPicked.includes(st.qrEdit),
+      ...(() => {
+        const pid = st.qrEdit;
+        const p = products.find(x => x.id === pid);
+        const c = (st.qrCustom || {})[pid] || {};
+        const up = patch => this.setQrCustom(pid, patch);
+        const setF = k => e => { const v = Number(e.target.value); up({ fs: Object.assign({}, c.fs || {}, { [k]: v }) }); };
+        return {
+          qeTitle: p ? p.name : "",
+          qeTop: c.top != null ? c.top : st.qrTop, qeBottom: c.bottom != null ? c.bottom : st.qrBottom, qeName: c.name || (p ? p.name : ""),
+          setQeTop: e => up({ top: e.target.value }), setQeBottom: e => up({ bottom: e.target.value }), setQeName: e => up({ name: e.target.value }),
+          qeShowName: c.showName != null ? c.showName : st.showName, qeShowId: c.showId != null ? c.showId : st.showId,
+          toggleQeShowName: e => up({ showName: e.target.checked }), toggleQeShowId: e => up({ showId: e.target.checked }),
+          qeFsTop: String(fsOf(c, "top")), qeFsName: String(fsOf(c, "name")), qeFsId: String(fsOf(c, "id")), qeFsBottom: String(fsOf(c, "bottom")),
+          setQeFsTop: setF("top"), setQeFsName: setF("name"), setQeFsId: setF("id"), setQeFsBottom: setF("bottom"),
+          qeDone: () => this.setState({ qrEdit: null }),
+          qeReset: () => this.setQrCustom(pid, null)
+        };
+      })(),
 
       perms: permsFor(),
       rightsSaveOff: !this.may("rights") || !(st.rightsDirty || {})[picked.id],
