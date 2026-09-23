@@ -3616,6 +3616,20 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Fix it in product editing or with a new import.",
     "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
     "Standard": "default", "— keine —": "— none —",
+    "Seite: Übersicht": "Page: Overview",
+    "Seite: Produkte": "Page: Products",
+    "Seite: Scannen": "Page: Scan",
+    "Seite: Bestellungen": "Page: Orders",
+    "Seite: Events": "Page: Events",
+    "Seite: Bestandsverlauf": "Page: Stock history",
+    "Seite: Produktverwaltung": "Page: Product management",
+    "Seite: QR-Codes": "Page: QR codes",
+    "Seite: Team & Rechte": "Page: Team & rights",
+    "Seite: Einstellungen": "Page: Settings",
+    "Seite: Hilfe": "Page: Help",
+    "Kein Zugriff": "No access",
+    "Diese Seite ist für dich gesperrt.": "This page is locked for you.",
+    "Freigeben kann sie, wer das Recht „Rechte ändern\" hat.": "Anyone with the “Change rights” permission can unlock it.",
     "Event bearbeiten": "Edit event",
     "Name, Datum und mindestens ein Artikel sind nötig.": "Name, date and at least one item are required.",
     "Name und Datum fehlen": "Name and date missing",
@@ -4356,6 +4370,20 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Rätta det i artikelredigeringen eller med en ny import.",
     "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
     "Standard": "standard", "— keine —": "— ingen —",
+    "Seite: Übersicht": "Sida: Översikt",
+    "Seite: Produkte": "Sida: Produkter",
+    "Seite: Scannen": "Sida: Skanna",
+    "Seite: Bestellungen": "Sida: Beställningar",
+    "Seite: Events": "Sida: Evenemang",
+    "Seite: Bestandsverlauf": "Sida: Lagerhistorik",
+    "Seite: Produktverwaltung": "Sida: Artikelhantering",
+    "Seite: QR-Codes": "Sida: QR-koder",
+    "Seite: Team & Rechte": "Sida: Team & rättigheter",
+    "Seite: Einstellungen": "Sida: Inställningar",
+    "Seite: Hilfe": "Sida: Hjälp",
+    "Kein Zugriff": "Ingen åtkomst",
+    "Diese Seite ist für dich gesperrt.": "Den här sidan är spärrad för dig.",
+    "Freigeben kann sie, wer das Recht „Rechte ändern\" hat.": "Den som har rättigheten ”Ändra rättigheter” kan låsa upp den.",
     "Event bearbeiten": "Redigera evenemang",
     "Name, Datum und mindestens ein Artikel sind nötig.": "Namn, datum och minst en artikel krävs.",
     "Name und Datum fehlen": "Namn och datum saknas",
@@ -4543,7 +4571,23 @@ const ROLES = {
   super:   { de: "Betrieb", en: "Operator", sv: "Drift" }
 };
 
+const PAGE_PERMS = { dashboard: "page_dashboard", products: "page_products", detail: "page_products", scan: "page_scan",
+  orders: "page_orders", events: "page_events", history: "page_history", new: "page_new", import: "page_new",
+  qr: "page_qr", team: "page_team", settings: "page_settings", help: "page_help" };
+const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "history", "new", "qr", "team", "settings", "help"];
+
 const PERM_LIST = [
+  ["page_dashboard", "Seite: Übersicht", ["owner","manager","worker","reader"]],
+  ["page_products", "Seite: Produkte", ["owner","manager","worker","reader"]],
+  ["page_scan", "Seite: Scannen", ["owner","manager","worker"]],
+  ["page_orders", "Seite: Bestellungen", ["owner","manager","worker","reader"]],
+  ["page_events", "Seite: Events", ["owner","manager","worker","reader"]],
+  ["page_history", "Seite: Bestandsverlauf", ["owner","manager","reader"]],
+  ["page_new", "Seite: Produktverwaltung", ["owner","manager"]],
+  ["page_qr", "Seite: QR-Codes", ["owner","manager","worker"]],
+  ["page_team", "Seite: Team & Rechte", ["owner","manager","worker","reader"]],
+  ["page_settings", "Seite: Einstellungen", ["owner","manager","worker","reader"]],
+  ["page_help", "Seite: Hilfe", ["owner","manager","worker","reader"]],
   ["view", "Produkte ansehen", ["owner","manager","worker","reader"]],
   ["withdraw", "Entnahme buchen", ["owner","manager","worker"]],
   ["refill", "Nachfüllung buchen", ["owner","manager","worker"]],
@@ -6078,6 +6122,10 @@ class Component extends DCLogic {
     if (role === "owner") return PERM_LIST.map(p => p[0]);
     const rd = this.roleDefs().find(r => r.key === role);
     let list = rd ? rd.perms.slice() : [];
+    // Rollen, die vor den Seitenrechten gespeichert wurden, bekommen die Voreinstellung.
+    if (!list.some(k => /^page_/.test(k))) {
+      PERM_LIST.filter(p => /^page_/.test(p[0]) && p[2].includes(role)).forEach(p => list.push(p[0]));
+    }
     const ov = (this.state.overrides || {})[this.state.meId] || {};
     Object.keys(ov).forEach(k => {
       if (ov[k]) { if (list.indexOf(k) < 0) list.push(k); }
@@ -6837,6 +6885,15 @@ class Component extends DCLogic {
     if (this.mq) this.mq.removeEventListener("change", this.mqL);
   }
   componentDidUpdate() {
+    if (this.state.authed && !this.pageOk(this.state.screen) && this.state.screen !== this.firstPage()) {
+      const to = this.firstPage();
+      setTimeout(() => {
+        if (this.pageOk(this.state.screen)) return;
+        this.stopCamera();
+        this.setState({ screen: to, menu: null, burgerOpen: false });
+        this.say(this.tr("Kein Zugriff"), this.tr("Diese Seite ist für dich gesperrt."), this.tr("Freigeben kann sie, wer das Recht „Rechte ändern\" hat."));
+      }, 0);
+    }
     this.applyTheme();
     this.applyLang();
     this.localizeSlots();
@@ -6940,18 +6997,35 @@ class Component extends DCLogic {
     clearTimeout(this.toastT);
     this.toastT = setTimeout(() => this.setState({ toast: null }), 7000);
   }
+  // Seitenrechte: ohne das Recht ist die Seite im Menü verborgen und
+  // lässt sich auch über Umwege (Links, Scan, Adresse) nicht öffnen.
+  pageOk(screen) {
+    const key = PAGE_PERMS[screen];
+    return !key || this.may(key);
+  }
+  firstPage() {
+    return PAGE_ORDER.find(k => this.pageOk(k)) || "help";
+  }
+
   go(screen) {
     clearTimeout(this.menuT);
+    if (!this.pageOk(screen)) {
+      this.setState({ menu: null, burgerOpen: false });
+      this.say(this.tr("Kein Zugriff"), this.tr("Diese Seite ist für dich gesperrt."), this.tr("Freigeben kann sie, wer das Recht „Rechte ändern\" hat."));
+      return;
+    }
     if (screen !== "detail") this.setState({ editing: false, editDraft: null, confirmDelete: false });
     if (screen !== "scan") this.stopCamera();
     this.setState({ screen, menu: null, burgerOpen: false });
   }
   groupStyle(keys) {
+    if (!keys.some(k => this.pageOk(k))) return "display: none";
     const on = keys.includes(this.state.screen);
     return "border-color: transparent; background: " + (on ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent") +
       "; color: " + (on ? "var(--color-accent-700)" : "var(--color-text)") + "; font-size: 14px; gap: 6px";
   }
   navStyle(key) {
+    if (!this.pageOk(key)) return "display: none";
     const on = this.state.screen === key;
     return "justify-content: flex-start; border-color: " + (on ? "var(--color-accent)" : "transparent") +
       "; background: " + (on ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent") +
