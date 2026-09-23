@@ -553,11 +553,15 @@
               <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
             </div>
             <sc-if value="{{ hasUnitLadder }}" hint-placeholder-val="{{ false }}">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: var(--space-2)">
+              <div style="display: flex; flex-direction: column; gap: var(--space-2)">
                 <sc-for list="{{ unitRows }}" as="u" hint-placeholder-count="2">
-                  <div class="field" style="margin: 0">
-                    <label data-i18n-keep>{{ u.label }}</label>
-                    <input class="input" type="number" min="0" step="1" value="{{ u.qty }}" onInput="{{ u.set }}">
+                  <div style="display: flex; flex-direction: column; gap: 3px">
+                    <div data-i18n-keep style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)">{{ u.label }}</div>
+                    <div style="display: flex; align-items: center; gap: var(--space-2)">
+                      <button class="btn btn-secondary" style="width: 38px; height: 38px; font-size: 17px; flex: none; padding: 0" onClick="{{ u.dec }}">−</button>
+                      <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 60px; height: 38px; text-align: center; font-family: var(--font-heading); font-size: 19px" value="{{ u.qty }}" placeholder="0" onInput="{{ u.set }}">
+                      <button class="btn btn-secondary" style="width: 38px; height: 38px; font-size: 17px; flex: none; padding: 0" onClick="{{ u.inc }}">+</button>
+                    </div>
                   </div>
                 </sc-for>
               </div>
@@ -7625,7 +7629,9 @@ class Component extends DCLogic {
           set: e => {
             const v = Math.max(0, this.toNum(e.target.value));
             this.setState(prev => ({ unitQty: Object.assign({}, prev.unitQty, { [u.name]: v }) }));
-          }
+          },
+          inc: () => this.setState(prev => ({ unitQty: Object.assign({}, prev.unitQty, { [u.name]: ((prev.unitQty || {})[u.name] || 0) + 1 }) })),
+          dec: () => this.setState(prev => ({ unitQty: Object.assign({}, prev.unitQty, { [u.name]: Math.max(0, ((prev.unitQty || {})[u.name] || 0) - 1) }) }))
         })),
       unitSumNote: (() => {
         const std = this.stdUnit(cur);
