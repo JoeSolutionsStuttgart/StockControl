@@ -3585,8 +3585,11 @@ const DICT = {
     "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
     "Standard": "default", "— keine —": "— none —",
     "dazu einzeln": "plus single", "Istbestand einzeln": "Stock single",
+    "ist keine Zahl ab 0 — als 0 übernommen": "is not a number from 0 — imported as 0",
+    "ergibt keine ganze Einzelmenge — gerundet auf ": "does not give a whole single amount — rounded to ",
+    "ist keine ganze Zahl ab 0 — nicht übernommen": "is not a whole number from 0 — not imported",
     "Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben": "Enter stock, minimum and order quantity in this quantity",
-    "einzelne im Feld „dazu einzeln\"": "single ones in the field “plus single”",
+    "einzelne im Feld „dazu einzeln“": "single ones in the field “plus single”",
     "Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert": "Single stock without a larger default quantity — added to stock",
     "Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ": "Single stock is a full pack or more — added anyway: ",
     "Kein Zugriff auf die Rechteverwaltung": "No access to rights administration",
@@ -4293,8 +4296,11 @@ const DICT = {
     "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
     "Standard": "standard", "— keine —": "— ingen —",
     "dazu einzeln": "plus styck", "Istbestand einzeln": "Lager styck",
+    "ist keine Zahl ab 0 — als 0 übernommen": "är inget tal från 0 — importerat som 0",
+    "ergibt keine ganze Einzelmenge — gerundet auf ": "ger ingen hel styckmängd — avrundat till ",
+    "ist keine ganze Zahl ab 0 — nicht übernommen": "är inget heltal från 0 — inte importerat",
     "Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben": "Ange lager, minimum och beställningsantal i denna kvantitet",
-    "einzelne im Feld „dazu einzeln\"": "enstaka i fältet ”plus styck”",
+    "einzelne im Feld „dazu einzeln“": "enstaka i fältet ”plus styck”",
     "Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert": "Styck utan större standardkvantitet — lagt till lagret",
     "Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ": "Styck är en hel förpackning eller mer — lagt till ändå: ",
     "Kein Zugriff auf die Rechteverwaltung": "Ingen åtkomst till rättighetshanteringen",
@@ -4679,7 +4685,7 @@ class Component extends DCLogic {
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
       importErrors: [], importErrorsPending: [],
-      clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true },
+      clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true, min: true, bestellmenge: true },
       ask: null, fcDate: "", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
@@ -4852,7 +4858,26 @@ class Component extends DCLogic {
         if (Array.isArray(r.einheiten) && r.einheiten.length) units[r.id] = r.einheiten;
         if (Array.isArray(r.preis_hist) && r.preis_hist.length) priceHist[r.id] = r.preis_hist;
       });
-      const movements = d.movements.map(mv => {
+      // Buchungsprotokoll für den Bestandsverlauf. Fehlt „Bestand danach",
+      // wird er vom heutigen Bestand aus rückwärts gerechnet.
+      const log = [];
+      const byProd = {};
+      d.movements.forEach(mv => { (byProd[mv.product_id] = byProd[mv.product_id] || []).push(mv); });
+      Object.keys(byProd).forEach(pid => {
+        const pr = d.products.find(x => x.id === pid);
+        let run = pr ? Number(pr.ist) || 0 : 0;
+        byProd[pid].slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(mv => {
+          const after = mv.bestand_neu != null ? Number(mv.bestand_neu) : run;
+          log.push({ productId: pid, delta: Number(mv.delta) || 0, after, date: new Date(mv.created_at), who: nameOf(mv.profile_id) });
+          run = after - (Number(mv.delta) || 0);
+        });
+      });
+      log.sort((a, b) => b.date - a.date);
+      products.forEach(p => {
+        const l = log.filter(e => e.productId === p.id).slice().reverse();
+        if (l.length) p.hist = [l[0].after - l[0].delta].concat(l.map(e => e.after)).slice(-24);
+      });
+      const movements = d.movements.slice(0, 50).map(mv => {
         const p = d.products.find(x => x.id === mv.product_id) || {};
         return { name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
       }).slice(0, 6);
@@ -4862,7 +4887,7 @@ class Component extends DCLogic {
       }));
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
-        units, priceHist,
+        units, priceHist, log,
         // Gespeicherte Feinrechte aus der Datenbank; ungespeicherte Änderungen bleiben stehen.
         overrides: Object.assign({}, ...members.map(m => ({ [m.id]: m.permissions || {} })),
           ...Object.keys(prev.rightsDirty || {}).map(k => ({ [k]: (prev.overrides || {})[k] || {} }))),
@@ -5469,13 +5494,32 @@ class Component extends DCLogic {
       .reduce((s, u) => s + Number(u.faktor) * ((st.unitQty || {})[u.name] || 0), 0);
   }
 
+  // Menge in der kleinsten Einheit → Zahl in der Standardquantität. Geht
+  // es nicht glatt auf, bleibt der Bruch stehen (10 Flaschen = 0,833333
+  // Kasten), damit beim Wiedereinlesen exakt dieselbe Menge herauskommt.
+  numStd(n, F, comma) {
+    const v = (Number(n) || 0) / (F || 1);
+    if (Number.isInteger(v)) return v;
+    const t = String(+v.toFixed(6));
+    return comma ? t.replace(".", ",") : t;
+  }
+
+  // Zahl mit Komma oder Punkt lesen. „1.000" gilt als Tausender.
+  parseDec(v) {
+    let t = String(v == null ? "" : v).trim().replace(/[\s']/g, "");
+    if (!t) return 0;
+    if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
+    t = t.replace(",", ".");
+    return /^\d+(\.\d+)?$/.test(t) ? Number(t) : NaN;
+  }
+
   unitNote(names, std) {
     if (!this.unitDefs().length) return this.tr("Es gibt noch keine Quantitäten. Unter Einstellungen → Quantitäten lassen sich Flasche, Kiste oder Palette anlegen.");
     if (!names.length) return this.tr("Mindestens eine Quantität anhaken.");
     if (!std) return this.tr("Standardquantität wählen.");
     const f = this.unitFactor(std), base = this.baseNameOf(std);
     return this.tr("Gebucht und angezeigt wird in ") + std + (f > 1 ? " (= " + f + " " + base + ")" : "") + ". "
-      + this.tr("Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben") + (f > 1 ? " — " + this.tr("einzelne im Feld „dazu einzeln\"") + " (" + base + ")" : "") + ".";
+      + this.tr("Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben") + (f > 1 ? " — " + this.tr("einzelne im Feld „dazu einzeln“") + " (" + base + ")" : "") + ".";
   }
 
   draftUnits(p) {
@@ -5701,7 +5745,8 @@ class Component extends DCLogic {
         geaendert: who
       }) : p),
       movements: [{ name: cur.name, delta: deltaLabel, who: who, when: this.tr("gerade eben") }]
-        .concat(prev.movements).slice(0, 8)
+        .concat(prev.movements).slice(0, 8),
+      log: [{ productId: cur.id, delta: next - (Number(cur.ist) || 0), after: next, date: now, who: who }].concat(prev.log || [])
     }));
   }
 
@@ -5822,26 +5867,32 @@ class Component extends DCLogic {
       errs.push(this.tr("Standardquantität fehlt — vorläufig gesetzt: ") + std);
     }
     if (!names.length && known.length) errs.push(this.tr("Keine Quantität zugewiesen"));
+    // Istbestand, Mindestbestand und Bestellmenge stehen in der
+    // Standardquantität; „Istbestand einzeln" kommt in der kleinsten dazu.
+    const F = std ? Math.max(1, this.unitFactor(std)) : 1;
     const nums = {};
-    [["ist", "Istbestand"], ["istRest", "Istbestand einzeln"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"]].forEach(([k, label]) => {
+    [["ist", "Istbestand"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"]].forEach(([k, label]) => {
       const v = String(r[k] == null ? "" : r[k]).trim();
-      const clean = v.replace(/[.\s']/g, "");
-      if (!v) { nums[k] = 0; return; }
-      if (!/^\d+$/.test(clean)) {
+      const n = this.parseDec(v);
+      if (isNaN(n)) {
         nums[k] = 0;
-        errs.push(this.tr(label) + ": „" + v + "“ " + this.tr("ist keine ganze Zahl ab 0 — als 0 übernommen"));
+        errs.push(this.tr(label) + ": „" + v + "“ " + this.tr("ist keine Zahl ab 0 — als 0 übernommen"));
         return;
       }
-      nums[k] = parseInt(clean, 10);
-      if (nums[k] > 1000000) errs.push(this.tr(label) + ": " + nums[k] + " " + this.tr("wirkt unplausibel hoch — bitte prüfen"));
+      const base = n * F;
+      nums[k] = Math.round(base);
+      if (Math.abs(base - nums[k]) > 0.01) errs.push(this.tr(label) + ": " + v + " " + this.tr("ergibt keine ganze Einzelmenge — gerundet auf ") + nums[k]);
+      if (n > 1000000) errs.push(this.tr(label) + ": " + v + " " + this.tr("wirkt unplausibel hoch — bitte prüfen"));
     });
-    // Die Zahlen stehen in der Standardquantität, einzelne kommen dazu.
-    const F = std ? Math.max(1, this.unitFactor(std)) : 1;
-    if (F === 1 && nums.istRest) errs.push(this.tr("Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert"));
-    if (F > 1 && nums.istRest >= F) errs.push(this.tr("Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ") + nums.istRest);
-    nums.ist = nums.ist * F + (nums.istRest || 0);
-    nums.min = nums.min * F;
-    nums.bestellmenge = nums.bestellmenge * F;
+    {
+      const v = String(r.istRest == null ? "" : r.istRest).trim();
+      const n = this.parseDec(v);
+      if (v && (isNaN(n) || !Number.isInteger(n))) errs.push(this.tr("Istbestand einzeln") + ": „" + v + "“ " + this.tr("ist keine ganze Zahl ab 0 — nicht übernommen"));
+      else if (n) {
+        if (F > 1 && n >= F) errs.push(this.tr("Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ") + n);
+        nums.ist += n;
+      }
+    }
     let preis = r.preis || "—";
     if (r.preis && this.parsePrice(r.preis) == null) { preis = "—"; errs.push(this.tr("Preis nicht lesbar: ") + r.preis); }
     // Datum immer als JJJJ-MM-TT weitergeben — die Datenbank liest
@@ -6875,10 +6926,11 @@ class Component extends DCLogic {
       (!st.hResp || p.verantwortlich === st.hResp) &&
       (!st.hSupplier || p.lieferant === st.hSupplier);
     const days = parseInt(st.hRange, 10) || 0;
-    const cutoff = days ? new Date(2026, 8, 16 - 0).getTime() - days * 86400000 : 0;
+    const nowT = Date.now();
+    const cutoff = days ? nowT - days * 86400000 : 0;
     const fmt = d => d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 
-    const hEntries = st.log.filter(e => matchProduct(byId(e.productId)) && (!cutoff || e.date.getTime() >= cutoff));
+    const hEntries = (st.log || []).filter(e => matchProduct(byId(e.productId)) && (!cutoff || e.date.getTime() >= cutoff));
     const hMatched = products.filter(matchProduct);
     const taken = hEntries.filter(e => e.delta < 0).reduce((s, e) => s + Math.abs(e.delta), 0);
     const added = hEntries.filter(e => e.delta > 0).reduce((s, e) => s + e.delta, 0);
@@ -6887,14 +6939,25 @@ class Component extends DCLogic {
     hEntries.forEach(e => { totals[e.productId] = (totals[e.productId] || 0) + Math.abs(e.delta); });
     const topMax = Math.max(1, ...Object.values(totals));
     const hTop = Object.keys(totals).sort((a, b) => totals[b] - totals[a]).slice(0, 5).map(id => ({
-      name: (byId(id) || {}).name || id, total: totals[id],
+      name: (byId(id) || {}).name || id, total: byId(id) ? this.fmtStock(byId(id), totals[id]) : totals[id],
       width: Math.round((totals[id] / topMax) * 100) + "%"
     }));
 
-    const steps = 7;
+    // Bestand im Zeitverlauf: zu jedem Stichtag der Stand nach der letzten
+    // Buchung davor — vor der ersten Buchung der Stand vor ihr.
+    const steps = 12;
+    const startT = cutoff || Math.min(nowT - 30 * 86400000, ...(st.log || []).map(e => e.date.getTime()));
     const agg = [];
     for (let i = 0; i < steps; i++) {
-      agg.push(hMatched.reduce((s, p) => s + ((p.hist && p.hist[i] !== undefined) ? p.hist[i] : p.ist), 0));
+      const t = startT + (nowT - startT) * (i / (steps - 1));
+      agg.push(hMatched.reduce((sum, p) => {
+        const l = (st.log || []).filter(e => e.productId === p.id);
+        if (!l.length) return sum + (Number(p.ist) || 0);
+        const before = l.filter(e => e.date.getTime() <= t).sort((x, y) => y.date - x.date)[0];
+        if (before) return sum + before.after;
+        const first = l.slice().sort((x, y) => x.date - y.date)[0];
+        return sum + (first.after - first.delta);
+      }, 0));
     }
 
     const ev = st.events.find(e => e.id === st.eventId) || st.events[0];
@@ -7328,7 +7391,7 @@ class Component extends DCLogic {
           options: [],
           set: e => this.setState(prev => ({ editDraft: Object.assign({}, prev.editDraft, { [k]: e.target.value }) }))
         }, opts || {});
-        const num = { type: "number", mode: "numeric" };
+        const num = { type: "number", mode: "decimal" };
         const people = (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name }));
         const sd = d.std || "";
         const sF = sd ? Math.max(1, this.unitFactor(sd)) : 1;
@@ -7387,7 +7450,7 @@ class Component extends DCLogic {
             const du = this.draftUnits(cur);
             const F = du.std ? Math.max(1, this.unitFactor(du.std)) : 1;
             return { ist: Math.floor(cur.ist / F), istRest: (cur.ist % F) || "",
-              min: Math.ceil(cur.min / F), bestellmenge: Math.ceil(cur.bestellmenge / F) };
+              min: this.numStd(cur.min, F), bestellmenge: this.numStd(cur.bestellmenge, F) };
           })(),
           ort: cur.ort, quantitaet: cur.quantitaet === "—" ? "" : cur.quantitaet,
           preis: cur.preis === "—" ? "" : cur.preis, mhd: cur.mhd === "—" ? "" : cur.mhd,
@@ -7407,11 +7470,11 @@ class Component extends DCLogic {
         const name = String(d.name || "").trim();
         if (!name) return;
         const F = d.std ? Math.max(1, this.unitFactor(d.std)) : 1;
-        const ist = this.toNum(d.ist) * F + (F > 1 ? this.toNum(d.istRest) : 0), min = this.toNum(d.min) * F;
+        const ist = this.toNum(d.ist) * F + (F > 1 ? this.toNum(d.istRest) : 0), min = Math.round((this.parseDec(d.min) || 0) * F);
         const ladder = this.ladderFrom(d.units || [], d.std || "");
         const patch = {
           name, ean: String(d.ean || "").trim() || "—",
-          ist, min, bestellmenge: this.toNum(d.bestellmenge) * F,
+          ist, min, bestellmenge: Math.round((this.parseDec(d.bestellmenge) || 0) * F),
           ort: String(d.ort || "").trim() || cur.ort,
           quantitaet: d.std || (cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : "—"),
           preis: String(d.preis || "").trim() || "—",
@@ -7810,12 +7873,14 @@ class Component extends DCLogic {
         const p = byId(e.productId) || {};
         return {
           when: fmt(e.date), name: p.name || e.productId,
-          delta: (e.delta > 0 ? "+" : "−") + Math.abs(e.delta),
+          delta: (e.delta > 0 ? "+" : "−") + (p.id ? this.fmtStock(p, Math.abs(e.delta)) : Math.abs(e.delta)),
           color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
-          after: e.after, who: this.may("who") ? e.who : "", ort: p.ort || "—"
+          after: p.id ? this.fmtStock(p, e.after) : e.after, who: this.may("who") ? e.who : "", ort: p.ort || "—"
         };
       }),
-      hTaken: taken, hAdded: added, hCount: hEntries.length, hTop,
+      hTaken: hMatched.length === 1 ? this.fmtStock(hMatched[0], taken) : taken,
+      hAdded: hMatched.length === 1 ? this.fmtStock(hMatched[0], added) : added,
+      hCount: hEntries.length, hTop,
       hChart: this.chart(agg),
       hChartLabel: hMatched.length === 1 ? hMatched[0].name : hMatched.length + " " + this.tr("Artikel zusammengefasst"),
       exportHistoryCsv: () => {
@@ -7993,11 +8058,11 @@ class Component extends DCLogic {
           if (old) {
             const neu = {
               ort: placeOf(r.ort), ean: r.ean || "—", preis: r.preis || "—",
-              ist: String(chk.nums.ist), units: chk.names.length ? this.unitsText(chk.ladder) : "—",
+              ist: String(chk.nums.ist), min: String(chk.nums.min), bestellmenge: String(chk.nums.bestellmenge), units: chk.names.length ? this.unitsText(chk.ladder) : "—",
               person: [r.verantwortlich || "", r.vertretung || ""].filter(Boolean).join(" · ") || "—"
             };
             const alt = {
-              ort: old.ort, ean: old.ean, preis: old.preis, ist: String(old.ist), units: this.unitsText((st.units || {})[old.id]),
+              ort: old.ort, ean: old.ean, preis: old.preis, ist: String(old.ist), min: String(old.min), bestellmenge: String(old.bestellmenge), units: this.unitsText((st.units || {})[old.id]),
               person: [old.verantwortlich, old.vertretung === "—" ? "" : old.vertretung].filter(Boolean).join(" · ") || "—"
             };
             const diff = Object.keys(neu).filter(f =>
@@ -8094,7 +8159,7 @@ class Component extends DCLogic {
       clashCats: [
         ["ort", "Lagerort"], ["ean", "EAN"],
         ["person", "Verantwortliche und stellvertretende Person"],
-        ["preis", "Preis"], ["ist", "Istbestand"], ["units", "Quantitäten"]
+        ["preis", "Preis"], ["ist", "Istbestand"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"], ["units", "Quantitäten"]
       ].map(([k, label]) => {
         const n = (st.clashRows || []).filter(c => c.diff.indexOf(k) >= 0).length;
         return {
@@ -8108,15 +8173,15 @@ class Component extends DCLogic {
       }),
       clashList: (st.clashRows || []).slice(0, 12).map(c => ({
         name: c.name,
-        detail: c.diff.map(f => this.tr({ ort: "Lagerort", ean: "EAN", person: "Person", preis: "Preis", ist: "Istbestand", units: "Quantitäten" }[f])
+        detail: c.diff.map(f => this.tr({ ort: "Lagerort", ean: "EAN", person: "Person", preis: "Preis", ist: "Istbestand", min: "Mindestbestand", bestellmenge: "Bestellmenge", units: "Quantitäten" }[f])
           + ": " + c.alt[f] + " → " + c.neu[f]).join(" · ")
       })),
       clashMoreNote: (st.clashRows || []).length > 12
         ? ((st.clashRows || []).length - 12) + " " + this.tr("weitere werden gleich behandelt.") : "",
-      clashAllOn: ["ort", "ean", "person", "preis", "ist", "units"].every(k => st.clashPick[k]),
-      setClashAll: on => this.setState({ clashPick: { ort: on, ean: on, person: on, preis: on, ist: on, units: on } }),
-      clashSelectAll: () => this.setState({ clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true } }),
-      clashSelectNone: () => this.setState({ clashPick: { ort: false, ean: false, person: false, preis: false, ist: false, units: false } }),
+      clashAllOn: ["ort", "ean", "person", "preis", "ist", "units", "min", "bestellmenge"].every(k => st.clashPick[k]),
+      setClashAll: on => this.setState({ clashPick: { ort: on, ean: on, person: on, preis: on, ist: on, units: on, min: on, bestellmenge: on } }),
+      clashSelectAll: () => this.setState({ clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true, min: true, bestellmenge: true } }),
+      clashSelectNone: () => this.setState({ clashPick: { ort: false, ean: false, person: false, preis: false, ist: false, units: false, min: false, bestellmenge: false } }),
       clashCancel: () => this.setState({ clashRows: [], clashFresh: [], importErrorsPending: [] }),
       clashApply: () => {
         const pick = st.clashPick;
@@ -8126,7 +8191,7 @@ class Component extends DCLogic {
           const patch = {};
           c.diff.forEach(f => {
             if (!pick[f]) return;
-            if (f === "ist") patch.ist = c.chk.nums.ist;
+            if (f === "ist" || f === "min" || f === "bestellmenge") patch[f] = c.chk.nums[f];
             else if (f === "units") { patch.einheiten = c.chk.ladder; if (c.chk.std) patch.quantitaet = c.chk.std; }
             else if (f === "person") {
               patch.verantwortlich = c.row.verantwortlich || undefined;
@@ -8169,6 +8234,8 @@ class Component extends DCLogic {
             if (x.patch.ort !== undefined) db.ort = x.patch.ort;
             if (x.patch.ean !== undefined) db.ean = x.patch.ean === "—" ? null : x.patch.ean;
             if (x.patch.ist !== undefined) db.ist = x.patch.ist;
+            if (x.patch.min !== undefined) db.min = x.patch.min;
+            if (x.patch.bestellmenge !== undefined) db.bestellmenge = x.patch.bestellmenge;
             if (x.patch.preis !== undefined) db.preis = this.parsePrice(x.patch.preis);
             if (x.patch.verantwortlich !== undefined) db.verantwortlich = this.personId(x.patch.verantwortlich);
             if (x.patch.vertretung !== undefined) db.vertreter = this.personIds(x.patch.vertretung);
@@ -8209,10 +8276,10 @@ class Component extends DCLogic {
             rows.push([
               p.name, clean(p.ean),
               ...(() => { const s0 = this.stdUnit(p); const F = s0 ? Math.max(1, Number(s0.faktor) || 1) : 1;
-                return [Math.floor(p.ist / F), F > 1 ? (p.ist % F) || "" : "", Math.ceil(p.min / F), Math.ceil(p.bestellmenge / F)]; })(),
+                return [Math.floor(p.ist / F), F > 1 ? (p.ist % F) || "" : "", this.numStd(p.min, F, true), this.numStd(p.bestellmenge, F, true)]; })(),
               clean(p.ort), clean(p.mhd), clean(p.preis),
               own[0] || "", own[1] || "", own[2] || "",
-              ((st.units[p.id] || []).find(u => u.std) || {}).name || "",
+              (this.stdUnit(p) || {}).name || "",
               clean(p.lieferant), clean(p.verantwortlich),
               clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
             ].concat(st.attrs.map(() => "")));
@@ -8308,8 +8375,8 @@ class Component extends DCLogic {
         }
         const ladder = this.ladderFrom(st.npUnits || [], st.npStd || "");
         const F = st.npStd ? Math.max(1, this.unitFactor(st.npStd)) : 1;
-        const ist = this.toNum(st.npIst) * F + (F > 1 ? this.toNum(st.npIstRest) : 0), min = this.toNum(st.npMin) * F;
-        const bm = this.toNum(st.npOrder) * F;
+        const ist = this.toNum(st.npIst) * F + (F > 1 ? this.toNum(st.npIstRest) : 0), min = Math.round((this.parseDec(st.npMin) || 0) * F);
+        const bm = Math.round((this.parseDec(st.npOrder) || 0) * F);
         const id = this.nextCode();
         const row = {
           id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: bm,
