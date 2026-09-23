@@ -2924,6 +2924,31 @@
   </div>
 </sc-if>
 
+<sc-if value="{{ impErrOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; inset: 0; z-index: 61; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
+    <div class="blueprint elev-lg" style="width: min(640px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: var(--space-4); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-3); animation: sc-in .18s ease-out">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="card-kicker" data-i18n>Import</div>
+      <h3 style="font-family: var(--font-heading); font-size: 23px; margin: 0" data-i18n>Fehler beim Import</h3>
+      <p data-i18n-keep style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)">{{ impErrIntro }}</p>
+      <div style="display: flex; flex-direction: column">
+        <sc-for list="{{ impErrList }}" as="ie" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 3px; padding: 9px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+            <div data-i18n-keep style="font-size: 13.5px; font-weight: 600">{{ ie.name }}</div>
+            <sc-for list="{{ ie.errs }}" as="er" hint-placeholder-count="1">
+              <div data-i18n-keep style="font-size: 12.5px; line-height: 1.45; color: var(--color-accent-800)">{{ er }}</div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <div style="position: sticky; bottom: calc(var(--space-4) * -1); z-index: 1; display: flex; flex: none; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-3) 0 var(--space-4); background: var(--sc-card)">
+        <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ impErrClose }}"><span data-i18n>Verstanden</span></button>
+        <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ impErrDownload }}"><span data-i18n>Fehlerliste herunterladen</span></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide style="position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 50; width: min(370px, calc(100vw - 32px)); animation: sc-in .2s ease-out">
     <div class="blueprint elev-lg" style="padding: var(--space-4); background: var(--sc-card)">
@@ -3545,6 +3570,18 @@ const DICT = {
     "Rechte speichern": "Save rights", "Rechte gespeichert": "Rights saved", "Rechte nicht gespeichert": "Rights not saved",
     "Nicht gespeicherte Änderungen": "Unsaved changes", "Alle Rechte sind gespeichert.": "All rights are saved.",
     "Nur in dieser Sitzung — ohne Datenbank.": "This session only — no database.",
+    "Quantität unbekannt: ": "Unknown quantity: ", "Standardquantität unbekannt: ": "Unknown default quantity: ",
+    "Standardquantität fehlt — vorläufig gesetzt: ": "Default quantity missing — set for now: ", "Keine Quantität zugewiesen": "No quantity assigned",
+    "ist keine ganze Zahl ab 0 — als 0 übernommen": "is not a whole number from 0 — imported as 0",
+    "wirkt unplausibel hoch — bitte prüfen": "looks implausibly high — please check",
+    "Preis nicht lesbar: ": "Price not readable: ", "MHD nicht lesbar: ": "Best-before not readable: ",
+    "Verantwortliche Person nicht im Team: ": "Responsible person not in team: ", "Stellvertretung nicht im Team: ": "Deputy not in team: ",
+    "Mehr als 3 Stellvertretungen — nur die ersten 3 übernommen": "More than 3 deputies — only the first 3 imported",
+    "Zeile wurde nicht so übernommen, wie sie in der Datei steht.": "row was not imported exactly as in the file.",
+    "Zeilen wurden nicht so übernommen, wie sie in der Datei stehen.": "rows were not imported exactly as in the file.",
+    "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Fix it in product editing or with a new import.",
+    "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
+    "Standard": "default", "— keine —": "— none —",
     "Kein Zugriff auf die Rechteverwaltung": "No access to rights administration",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Who holds which rights is visible and editable only to the owner and to anyone expressly given the right to change rights.",
     "Bestellung nicht gespeichert": "Order not saved",
@@ -4236,6 +4273,18 @@ const DICT = {
     "Rechte speichern": "Spara rättigheter", "Rechte gespeichert": "Rättigheter sparade", "Rechte nicht gespeichert": "Rättigheterna sparades inte",
     "Nicht gespeicherte Änderungen": "Osparade ändringar", "Alle Rechte sind gespeichert.": "Alla rättigheter är sparade.",
     "Nur in dieser Sitzung — ohne Datenbank.": "Bara i denna session — utan databas.",
+    "Quantität unbekannt: ": "Okänd kvantitet: ", "Standardquantität unbekannt: ": "Okänd standardkvantitet: ",
+    "Standardquantität fehlt — vorläufig gesetzt: ": "Standardkvantitet saknas — tillfälligt satt: ", "Keine Quantität zugewiesen": "Ingen kvantitet tilldelad",
+    "ist keine ganze Zahl ab 0 — als 0 übernommen": "är inget heltal från 0 — importerat som 0",
+    "wirkt unplausibel hoch — bitte prüfen": "verkar orimligt högt — kontrollera",
+    "Preis nicht lesbar: ": "Priset kan inte läsas: ", "MHD nicht lesbar: ": "Bäst före kan inte läsas: ",
+    "Verantwortliche Person nicht im Team: ": "Ansvarig person finns inte i teamet: ", "Stellvertretung nicht im Team: ": "Ersättare finns inte i teamet: ",
+    "Mehr als 3 Stellvertretungen — nur die ersten 3 übernommen": "Fler än 3 ersättare — bara de första 3 importerade",
+    "Zeile wurde nicht so übernommen, wie sie in der Datei steht.": "rad importerades inte exakt som i filen.",
+    "Zeilen wurden nicht so übernommen, wie sie in der Datei stehen.": "rader importerades inte exakt som i filen.",
+    "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Rätta det i artikelredigeringen eller med en ny import.",
+    "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
+    "Standard": "standard", "— keine —": "— ingen —",
     "Kein Zugriff auf die Rechteverwaltung": "Ingen åtkomst till rättighetshanteringen",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Vem som har vilka rättigheter ser och ändrar bara ägaren och den som uttryckligen fått rätten att ändra rättigheter.",
     "Bestellung nicht gespeichert": "Beställningen sparades inte",
@@ -4617,7 +4666,8 @@ class Component extends DCLogic {
       camState: "idle", camErrorText: "", torchOn: false, facing: "environment",
       hasTorch: false, hasSwitch: false, pasteText: "", importMap: [], tplMode: "empty",
       editing: false, editDraft: null, confirmDelete: false,
-      clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true },
+      importErrors: [], importErrorsPending: [],
+      clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true },
       ask: null, fcDate: "", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
@@ -5005,6 +5055,7 @@ class Component extends DCLogic {
       q1: ["quantität 1", "quantitaet 1", "quantität1", "einheit 1", "gebinde 1"],
       q2: ["quantität 2", "quantitaet 2", "quantität2", "einheit 2", "gebinde 2"],
       q3: ["quantität 3", "quantitaet 3", "quantität3", "einheit 3", "gebinde 3"],
+      std: ["standardquantität", "standardquantitaet", "standard-quantität", "standardeinheit", "standard", "standardgebinde", "default quantity", "standardkvantitet"],
       lieferant: ["lieferant", "händler", "haendler", "hersteller", "bezugsquelle"],
       verantwortlich: ["verantwortlich", "verantwortliche person", "zuständig", "zustaendig"],
       vertretung: ["stellvertretung", "vertretung", "vertreter", "stellvertreter"],
@@ -5016,7 +5067,7 @@ class Component extends DCLogic {
     const head = lines[0];
     const sep = (head.split(";").length > head.split(",").length) ? ";"
       : (head.split("\t").length > head.split(",").length ? "\t" : ",");
-    const cols = this.splitCsvLine(head, sep).map(c => c.toLowerCase().replace(/[*:]/g, "").trim());
+    const cols = this.splitCsvLine(head, sep).map(c => c.toLowerCase().replace(/[*:]/g, "").replace(/\s+/g, " ").trim());
     const idx = {};
     Object.keys(MAP).forEach(field => {
       const i = cols.findIndex(c => MAP[field].includes(c));
@@ -5042,7 +5093,8 @@ class Component extends DCLogic {
     const LABEL = {
       name: "Name", ean: "EAN", ist: "Istbestand", min: "Mindestbestand",
       bestellmenge: "Bestellmenge", ort: "Lagerort", mhd: "MHD", preis: "Preis",
-      quantitaet: "Quantität", lieferant: "Lieferant",
+      quantitaet: "Quantität", q1: "Quantität 1", q2: "Quantität 2", q3: "Quantität 3",
+      std: "Standardquantität", lieferant: "Lieferant",
       verantwortlich: "Verantwortliche Person", vertretung: "Stellvertretung",
       kategorien: "Kategorien", link: "Link zum Produkt"
     };
@@ -5729,6 +5781,76 @@ class Component extends DCLogic {
     return names.length ? this.ladderFrom(Array.from(new Set(names))) : null;
   }
 
+  // Eine Importzeile prüfen und bereinigen. Was nicht passt, wird nicht
+  // still verworfen, sondern als Fehler gemeldet — mit dem, was statt
+  // dessen übernommen wurde.
+  importCheck(r) {
+    const errs = [];
+    const known = this.unitDefs().map(d => d.name);
+    const find = x => known.find(k => k.toLowerCase() === String(x).trim().toLowerCase());
+    let raw = [r.q1, r.q2, r.q3].map(x => String(x == null ? "" : x).trim()).filter(Boolean);
+    if (!raw.length && r.quantitaet && find(r.quantitaet)) raw = [r.quantitaet];
+    const names = [];
+    raw.forEach(x => {
+      const k = find(x);
+      if (k) { if (names.indexOf(k) < 0) names.push(k); }
+      else errs.push(this.tr("Quantität unbekannt: ") + x);
+    });
+    let std = "";
+    const stdRaw = String(r.std == null ? "" : r.std).trim();
+    if (stdRaw) {
+      const k = find(stdRaw);
+      if (!k) errs.push(this.tr("Standardquantität unbekannt: ") + stdRaw);
+      else { std = k; if (names.indexOf(k) < 0) names.push(k); }
+    }
+    if (!std && names.length === 1) std = names[0];
+    if (!std && names.length > 1) {
+      std = this.ladderFrom(names)[0].name;
+      errs.push(this.tr("Standardquantität fehlt — vorläufig gesetzt: ") + std);
+    }
+    if (!names.length && known.length) errs.push(this.tr("Keine Quantität zugewiesen"));
+    const nums = {};
+    [["ist", "Istbestand"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"]].forEach(([k, label]) => {
+      const v = String(r[k] == null ? "" : r[k]).trim();
+      const clean = v.replace(/[.\s']/g, "");
+      if (!v) { nums[k] = 0; return; }
+      if (!/^\d+$/.test(clean)) {
+        nums[k] = 0;
+        errs.push(this.tr(label) + ": „" + v + "“ " + this.tr("ist keine ganze Zahl ab 0 — als 0 übernommen"));
+        return;
+      }
+      nums[k] = parseInt(clean, 10);
+      if (nums[k] > 1000000) errs.push(this.tr(label) + ": " + nums[k] + " " + this.tr("wirkt unplausibel hoch — bitte prüfen"));
+    });
+    let preis = r.preis || "—";
+    if (r.preis && this.parsePrice(r.preis) == null) { preis = "—"; errs.push(this.tr("Preis nicht lesbar: ") + r.preis); }
+    // Datum immer als JJJJ-MM-TT weitergeben — die Datenbank liest
+    // „30.04.2027" sonst als Monat 30 und lehnt die ganze Liste ab.
+    let mhd = "—";
+    if (r.mhd) {
+      const t = String(r.mhd).trim();
+      const short = /^(\d{1,2})\.(\d{1,2})\.(\d{2})$/.exec(t);
+      const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t);
+      const iso = this.isoDay(t) || (short ? "20" + short[3] + "-" + ("0" + short[2]).slice(-2) + "-" + ("0" + short[1]).slice(-2) : "")
+        || (us ? us[3] + "-" + ("0" + us[1]).slice(-2) + "-" + ("0" + us[2]).slice(-2) : "");
+      if (iso && !isNaN(new Date(iso).getTime())) mhd = iso;
+      else errs.push(this.tr("MHD nicht lesbar: ") + r.mhd);
+    }
+    if (r.verantwortlich && !this.personId(r.verantwortlich))
+      errs.push(this.tr("Verantwortliche Person nicht im Team: ") + r.verantwortlich);
+    const deps = String(r.vertretung || "").split(/[,;]/).map(x => x.trim()).filter(Boolean);
+    deps.forEach(x => { if (!this.personId(x)) errs.push(this.tr("Stellvertretung nicht im Team: ") + x); });
+    if (deps.length > 3) errs.push(this.tr("Mehr als 3 Stellvertretungen — nur die ersten 3 übernommen"));
+    return { names, std, ladder: this.ladderFrom(names, std), errs, nums, preis, mhd };
+  }
+
+  unitsText(list) {
+    const l = (list || []).slice().sort((a, b) => a.faktor - b.faktor);
+    if (!l.length) return "—";
+    const std = l.find(u => u.std);
+    return l.map(u => u.name).join(" / ") + (std ? " (" + this.tr("Standard") + ": " + std.name + ")" : "");
+  }
+
   importRows(list, meId) {
     return list.map(p => ({
       code: p.code,
@@ -5738,7 +5860,7 @@ class Component extends DCLogic {
       ort: p.ort === "—" ? null : p.ort,
       quantitaet: p.quantitaet === "—" ? null : p.quantitaet,
       lieferant: p.lieferant === "—" ? null : p.lieferant,
-      mhd: p.mhd === "—" ? null : p.mhd, preis: this.parsePrice(p.preis),
+      mhd: p.mhd === "—" ? null : (this.isoDay(p.mhd) || null), preis: this.parsePrice(p.preis),
       verantwortlich: this.personId(p.verantwortlich) || meId,
       vertreter: this.personIds(p.vertretung),
       link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
@@ -6934,7 +7056,7 @@ class Component extends DCLogic {
       // Menge über dem Bestand liegt.
       stockMain: this.fmtStock(cur, cur.ist),
       stockSplit: "= " + cur.ist + " " + this.baseUnitName(cur),
-      hasStockSplit: (() => { const s = this.stdUnit(cur); return !!s && Number(s.faktor) > 1; })(),
+      hasStockSplit: (() => { const s = this.stdUnit(cur); return !!s && Number(s.faktor) > 1 && cur.ist % Number(s.faktor) !== 0; })(),
       overStock: this.bookTotal(cur) > cur.ist,
       overStockNote: this.tr("Vorhanden sind nur ") + this.fmtStock(cur, cur.ist)
         + " — " + this.tr("so viel lässt sich nicht entnehmen."),
@@ -7166,6 +7288,7 @@ class Component extends DCLogic {
           set: e => this.setState(prev => ({ editDraft: Object.assign({}, prev.editDraft, { [k]: e.target.value }) }))
         }, opts || {});
         const num = { type: "number", mode: "numeric" };
+        const people = (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name }));
         return [
           f("name", "Name", { span: "1 / -1" }),
           f("ean", "EAN", { hint: "4001234567890" }),
@@ -7179,7 +7302,9 @@ class Component extends DCLogic {
           f("lieferant", "Lieferant"),
           f("verantwortlich", "Verantwortlich", { isSelect: true, isText: false,
             options: (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name })) }),
-          f("vertretung", "Stellvertretung", { hint: "mit Komma trennen" }),
+          ...["d1", "d2", "d3"].map((k, i) => f(k, "Stellvertretung " + (i + 1), { isSelect: true, isText: false,
+            options: [{ value: "", label: "— keine —" }].concat(people)
+              .concat(d[k] && !people.some(o => o.value === d[k]) ? [{ value: d[k], label: d[k] }] : []) })),
           f("kategorien", "Kategorien", { span: "1 / -1", hint: "mit Komma trennen" }),
           f("link", "Link zum Produkt", { span: "1 / -1", hint: "https://" }),
           f("aktiv", "Aktiv", { isSelect: true, isText: false, options: [
@@ -7218,6 +7343,10 @@ class Component extends DCLogic {
           preis: cur.preis === "—" ? "" : cur.preis, mhd: cur.mhd === "—" ? "" : cur.mhd,
           lieferant: cur.lieferant === "—" ? "" : cur.lieferant,
           verantwortlich: cur.verantwortlich, vertretung: cur.vertretung === "—" ? "" : cur.vertretung,
+          ...(() => {
+            const v = cur.vertretung === "—" ? [] : String(cur.vertretung || "").split(/[,;]/).map(x => x.trim()).filter(Boolean);
+            return { d1: v[0] || "", d2: v[1] || "", d3: v[2] || "" };
+          })(),
           kategorien: (cur.kategorien || []).join(", "), link: cur.link || "",
           aktiv: cur.aktiv === false ? "nein" : "ja"
         })
@@ -7238,7 +7367,7 @@ class Component extends DCLogic {
           mhd: String(d.mhd || "").trim() || "—",
           lieferant: String(d.lieferant || "").trim() || "—",
           verantwortlich: String(d.verantwortlich || "").trim() || cur.verantwortlich,
-          vertretung: String(d.vertretung || "").trim() || "—",
+          vertretung: Array.from(new Set([d.d1, d.d2, d.d3].filter(Boolean))).join(", ") || "—",
           kategorien: String(d.kategorien || "").split(",").map(x => x.trim()).filter(Boolean),
           link: String(d.link || "").trim(),
           aktiv: d.aktiv !== "nein",
@@ -7799,11 +7928,13 @@ class Component extends DCLogic {
         if (!this.withinLimit("importRows", 0, parsed.length)) return;
         if (!this.withinLimit("products", products.length, parsed.length)) return;
         const taken = new Set(products.map(p => key(p.name, p.ort, p.quantitaet)));
-        const fresh = [], clashes = [];
+        const fresh = [], clashes = [], importErrors = [];
         let skipped = 0;
         parsed.forEach(r => {
-          const k = key(r.name, placeOf(r.ort), r.quantitaet);
           if (!r.name.trim()) { skipped++; return; }
+          const chk = this.importCheck(r);
+          if (chk.errs.length) importErrors.push({ name: r.name.trim(), errs: chk.errs });
+          const k = key(r.name, placeOf(r.ort), chk.std || r.quantitaet);
           // Gleicher Name wie ein vorhandenes Produkt: keine stille
           // Übernahme und kein stilles Überspringen — die Unterschiede
           // kommen in den Hinweis, entschieden wird darin.
@@ -7811,37 +7942,37 @@ class Component extends DCLogic {
           if (old) {
             const neu = {
               ort: placeOf(r.ort), ean: r.ean || "—", preis: r.preis || "—",
-              ist: String(this.toNum(r.ist)),
+              ist: String(chk.nums.ist), units: chk.names.length ? this.unitsText(chk.ladder) : "—",
               person: [r.verantwortlich || "", r.vertretung || ""].filter(Boolean).join(" · ") || "—"
             };
             const alt = {
-              ort: old.ort, ean: old.ean, preis: old.preis, ist: String(old.ist),
+              ort: old.ort, ean: old.ean, preis: old.preis, ist: String(old.ist), units: this.unitsText((st.units || {})[old.id]),
               person: [old.verantwortlich, old.vertretung === "—" ? "" : old.vertretung].filter(Boolean).join(" · ") || "—"
             };
             const diff = Object.keys(neu).filter(f =>
-              String(r[f === "person" ? "verantwortlich" : f] || "").trim() !== "" || f === "person"
+              f === "units" ? chk.names.length > 0 : (String(r[f === "person" ? "verantwortlich" : f] || "").trim() !== "" || f === "person")
             ).filter(f => neu[f] !== "—" && neu[f] !== alt[f]);
-            if (diff.length) { clashes.push({ id: old.id, name: old.name, alt, neu, diff, row: r }); return; }
+            if (diff.length) { clashes.push({ id: old.id, name: old.name, alt, neu, diff, row: r, chk }); return; }
             skipped++; return;
           }
           if (taken.has(k)) { skipped++; return; }
           taken.add(k);
-          const ist = this.toNum(r.ist), min = this.toNum(r.min);
+          const ist = chk.nums.ist, min = chk.nums.min;
           const code = this.nextCode(fresh.length);
           fresh.push({
             id: code, code,
-            name: r.name.trim(), ean: r.ean || "—", ist, min, bestellmenge: this.toNum(r.bestellmenge),
-            ort: placeOf(r.ort), mhd: r.mhd || "—", preis: r.preis || "—",
-            quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "",
+            name: r.name.trim(), ean: r.ean || "—", ist, min, bestellmenge: chk.nums.bestellmenge,
+            ort: placeOf(r.ort), mhd: chk.mhd, preis: chk.preis,
+            quantitaet: chk.std || r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "",
             kategorien: String(r.kategorien || "").split(/[,;]/).map(x => x.trim()).filter(Boolean),
             status: ist < min ? "low" : "ok", aktiv: true,
             verantwortlich: r.verantwortlich || meLabel, vertretung: r.vertretung || "—",
             entnahme: "—", auffuell: "—", geaendert: meLabel, hist: [ist], bildUrl: "",
-            einheiten: this.laddderFromRow(r) || []
+            einheiten: chk.ladder
           });
         });
         if (clashes.length) {
-          this.setState({ clashRows: clashes, clashFresh: fresh });
+          this.setState({ clashRows: clashes, clashFresh: fresh, importErrorsPending: importErrors });
           return;
         }
         const newPlaces = Array.from(new Set(fresh.map(p => p.ort).filter(o => o && o !== "—" && !places.includes(o))));
@@ -7852,7 +7983,8 @@ class Component extends DCLogic {
           products: fresh.concat(prev.products),
           units: Object.assign({}, prev.units, freshUnits),
           placesOwn: (prev.placesOwn || []).concat(newPlaces),
-          importDone: false, importParsed: [], importMap: [], importFile: ""
+          importDone: false, importParsed: [], importMap: [], importFile: "",
+          importErrors: importErrors
         }));
         // Mit Datenbank: die Zeilen wandern sofort nach Supabase und werden
         // danach frisch geladen. Ohne diesen Schritt wären sie nach einem
@@ -7888,6 +8020,16 @@ class Component extends DCLogic {
       askCancel: () => this.setState({ ask: null }),
 
       // ── Hinweisfenster bei Namensgleichheit ────────────────
+      impErrOpen: (st.importErrors || []).length > 0 && !(st.clashRows || []).length,
+      impErrIntro: (() => {
+        const n = (st.importErrors || []).length;
+        return n + " " + (n === 1 ? this.tr("Zeile wurde nicht so übernommen, wie sie in der Datei steht.") : this.tr("Zeilen wurden nicht so übernommen, wie sie in der Datei stehen."))
+          + " " + this.tr("Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.");
+      })(),
+      impErrList: (st.importErrors || []).map(e => ({ name: e.name, errs: e.errs })),
+      impErrClose: () => this.setState({ importErrors: [] }),
+      impErrDownload: () => this.download("stockcontrol-importfehler.csv",
+        [[this.tr("Name"), this.tr("Fehler")]].concat([].concat(...(st.importErrors || []).map(e => e.errs.map(x => [e.name, x]))))),
       clashOpen: (st.clashRows || []).length > 0,
       clashCount: (st.clashRows || []).length,
       clashIntro: (st.clashRows || []).length === 1
@@ -7901,7 +8043,7 @@ class Component extends DCLogic {
       clashCats: [
         ["ort", "Lagerort"], ["ean", "EAN"],
         ["person", "Verantwortliche und stellvertretende Person"],
-        ["preis", "Preis"], ["ist", "Istbestand"]
+        ["preis", "Preis"], ["ist", "Istbestand"], ["units", "Quantitäten"]
       ].map(([k, label]) => {
         const n = (st.clashRows || []).filter(c => c.diff.indexOf(k) >= 0).length;
         return {
@@ -7915,16 +8057,16 @@ class Component extends DCLogic {
       }),
       clashList: (st.clashRows || []).slice(0, 12).map(c => ({
         name: c.name,
-        detail: c.diff.map(f => this.tr({ ort: "Lagerort", ean: "EAN", person: "Person", preis: "Preis", ist: "Istbestand" }[f])
+        detail: c.diff.map(f => this.tr({ ort: "Lagerort", ean: "EAN", person: "Person", preis: "Preis", ist: "Istbestand", units: "Quantitäten" }[f])
           + ": " + c.alt[f] + " → " + c.neu[f]).join(" · ")
       })),
       clashMoreNote: (st.clashRows || []).length > 12
         ? ((st.clashRows || []).length - 12) + " " + this.tr("weitere werden gleich behandelt.") : "",
-      clashAllOn: ["ort", "ean", "person", "preis", "ist"].every(k => st.clashPick[k]),
-      setClashAll: on => this.setState({ clashPick: { ort: on, ean: on, person: on, preis: on, ist: on } }),
-      clashSelectAll: () => this.setState({ clashPick: { ort: true, ean: true, person: true, preis: true, ist: true } }),
-      clashSelectNone: () => this.setState({ clashPick: { ort: false, ean: false, person: false, preis: false, ist: false } }),
-      clashCancel: () => this.setState({ clashRows: [], clashFresh: [] }),
+      clashAllOn: ["ort", "ean", "person", "preis", "ist", "units"].every(k => st.clashPick[k]),
+      setClashAll: on => this.setState({ clashPick: { ort: on, ean: on, person: on, preis: on, ist: on, units: on } }),
+      clashSelectAll: () => this.setState({ clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true } }),
+      clashSelectNone: () => this.setState({ clashPick: { ort: false, ean: false, person: false, preis: false, ist: false, units: false } }),
+      clashCancel: () => this.setState({ clashRows: [], clashFresh: [], importErrorsPending: [] }),
       clashApply: () => {
         const pick = st.clashPick;
         const rows = st.clashRows || [];
@@ -7933,7 +8075,8 @@ class Component extends DCLogic {
           const patch = {};
           c.diff.forEach(f => {
             if (!pick[f]) return;
-            if (f === "ist") patch.ist = this.toNum(c.row.ist);
+            if (f === "ist") patch.ist = c.chk.nums.ist;
+            else if (f === "units") { patch.einheiten = c.chk.ladder; if (c.chk.std) patch.quantitaet = c.chk.std; }
             else if (f === "person") {
               patch.verantwortlich = c.row.verantwortlich || undefined;
               patch.vertretung = c.row.vertretung || undefined;
@@ -7956,6 +8099,10 @@ class Component extends DCLogic {
             return merged;
           }),
           placesOwn: (prev.placesOwn || []).concat(newPlaces),
+          units: Object.assign({}, prev.units,
+            ...fresh.filter(p => (p.einheiten || []).length).map(p => ({ [p.id]: p.einheiten })),
+            ...patches.filter(x => x.patch.einheiten).map(x => ({ [x.id]: x.patch.einheiten }))),
+          importErrors: prev.importErrorsPending || [], importErrorsPending: [],
           clashRows: [], clashFresh: [],
           importDone: false, importParsed: [], importMap: [], importFile: ""
         }));
@@ -7974,6 +8121,7 @@ class Component extends DCLogic {
             if (x.patch.preis !== undefined) db.preis = this.parsePrice(x.patch.preis);
             if (x.patch.verantwortlich !== undefined) db.verantwortlich = this.personId(x.patch.verantwortlich);
             if (x.patch.vertretung !== undefined) db.vertreter = this.personIds(x.patch.vertretung);
+            if (x.patch.einheiten !== undefined) { db.einheiten = x.patch.einheiten; if (x.patch.quantitaet) db.quantitaet = x.patch.quantitaet; }
             if (Object.keys(db).length) jobs.push(this.api.updateProduct(x.id, db));
           });
           Promise.all(jobs)
@@ -7992,7 +8140,7 @@ class Component extends DCLogic {
         // Kopfzeile trägt alle Felder, inklusive der eigenen Merkmale.
         const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
           this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"),
-          this.tr("Quantität") + " 1", this.tr("Quantität") + " 2", this.tr("Quantität") + " 3",
+          this.tr("Quantität") + " 1", this.tr("Quantität") + " 2", this.tr("Quantität") + " 3", this.tr("Standardquantität"),
           this.tr("Lieferant"),
           this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
           .concat(st.attrs.map(a => a.name));
@@ -8011,6 +8159,7 @@ class Component extends DCLogic {
               p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
               clean(p.preis), clean(p.quantitaet),
               own[0] || "", own[1] || "", own[2] || "",
+              ((st.units[p.id] || []).find(u => u.std) || {}).name || "",
               clean(p.lieferant), clean(p.verantwortlich),
               clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
             ].concat(st.attrs.map(() => "")));
@@ -8019,7 +8168,7 @@ class Component extends DCLogic {
           const known = this.unitDefs().map(d => d.name);
           rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
             "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)",
-            known[0] || "Flasche", known[1] || "Kasten", "",
+            known[0] || "Flasche", known[1] || "Kasten", "", known[1] || "Kasten",
             "Getränke Nord GmbH",
             "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
             .concat(st.attrs.map(() => "")));
@@ -8028,7 +8177,7 @@ class Component extends DCLogic {
           // übersprungen, weil sie keinen Namen trägt.
           if (known.length) {
             rows.push([""].concat(new Array(8).fill(""))
-              .concat([known.join(" | "), known.join(" | "), known.join(" | ")])
+              .concat([known.join(" | "), known.join(" | "), known.join(" | "), known.join(" | ")])
               .concat(new Array(5).fill("")).concat(st.attrs.map(() => "")));
           }
         }
