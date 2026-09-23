@@ -880,6 +880,9 @@
                         <th data-i18n>Person</th>
                       </sc-if>
                       <th data-i18n>Lagerort</th>
+                      <sc-if value="{{ mayUndo }}" hint-placeholder-val="{{ false }}">
+                        <th></th>
+                      </sc-if>
                     </tr>
                   </thead>
                   <tbody>
@@ -893,6 +896,9 @@
                           <td class="text-muted">{{ r.who }}</td>
                         </sc-if>
                         <td class="text-muted">{{ r.ort }}</td>
+                        <sc-if value="{{ mayUndo }}" hint-placeholder-val="{{ false }}">
+                          <td style="text-align: right"><button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ r.undo }}"><span data-i18n>Rückgängig</span></button></td>
+                        </sc-if>
                       </tr>
                     </sc-for>
                   </tbody>
@@ -1102,7 +1108,13 @@
         <section class="card">
           <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
             <h4 style="margin: 0">{{ eventName }}</h4>
-            <span class="text-muted" style="font-size: 12px">{{ eventMeta }}</span>
+            <span class="text-muted" style="font-size: 12px; margin-right: auto">{{ eventMeta }}</span>
+            <sc-if value="{{ hasEvent }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 6px">
+                <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ editEvent }}"><span data-i18n>Bearbeiten</span></button>
+                <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap; color: var(--color-accent-700)" onClick="{{ deleteEvent }}"><span data-i18n>Löschen</span></button>
+              </div>
+            </sc-if>
           </div>
           <div class="card-meta">{{ evPosTotal }} <span data-i18n>Positionen</span> · {{ evMissingTotal }} <span data-i18n>davon nachzubestellen</span></div>
           <div style="overflow-x: auto; max-width: 100%">
@@ -1122,9 +1134,9 @@
                 <sc-for list="{{ evRows }}" as="r" hint-placeholder-count="4">
                   <tr style="{{ r.rowStyle }}">
                     <td style="font-weight: 500">{{ r.name }}<div style="font-size: 11px; color: var(--sc-ink-3)">{{ r.id }} {{ r.offLabel }}</div></td>
-                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.benoetigt }}</td>
-                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.bestand }}</td>
-                    <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 500">{{ r.fehlt }}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.needLabel }}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums">{{ r.stockLabel }}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums; font-weight: 500">{{ r.missLabel }}</td>
                     <td class="text-muted">{{ r.lieferant }}</td>
                     <td class="text-muted">{{ r.ort }}</td>
                     <td><span class="{{ r.tagClass }}">{{ r.statusLabel }}</span></td>
@@ -1201,7 +1213,7 @@
           </section>
 
           <section class="card">
-            <h4 style="margin: 0" data-i18n>Neues Event planen</h4>
+            <h4 data-i18n-keep style="margin: 0">{{ evFormTitle }}</h4>
             <p class="card-body" style="margin: 0" data-i18n>Artikel und Mengen eintragen — auch deaktivierte. Beim Anlegen entsteht automatisch die Bedarfs- und Bestellliste mit den Fehlmengen.</p>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3)">
               <div class="field"><label data-i18n>Name des Events</label><input class="input" value="{{ evName }}" onChange="{{ setEvName }}" data-i18n-ph placeholder="z. B. Sommerfest"></div>
@@ -1247,7 +1259,11 @@
                 </sc-for>
               </div>
             </sc-if>
-            <button class="btn btn-primary btn-block" style="height: 44px" onClick="{{ createEvent }}"><span data-i18n>Event anlegen und Bedarfsliste erstellen</span></button>
+            <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ evFormNote }}</div>
+            <button class="btn btn-primary btn-block" style="height: 44px" disabled="{{ evSaveOff }}" onClick="{{ createEvent }}"><span data-i18n-keep>{{ evSaveLabel }}</span></button>
+            <sc-if value="{{ evEditing }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary btn-block" onClick="{{ cancelEvEdit }}"><span data-i18n>Abbrechen</span></button>
+            </sc-if>
           </section>
         </div>
       </div>
@@ -1390,9 +1406,9 @@
               </svg>
             </div>
             <div style="font-family: var(--font-heading); font-size: 21px; line-height: 1.15" data-i18n>Ausgefüllte Liste hier hochladen</div>
-            <div style="font-size: 13px; margin-top: 4px; color: var(--sc-ink-2)" data-i18n>Datei hierher ziehen oder klicken · .csv bis 5 MB</div>
+            <div style="font-size: 13px; margin-top: 4px; color: var(--sc-ink-2)" data-i18n>Datei hierher ziehen oder klicken · .xlsx oder .csv bis 5 MB</div>
             <span class="btn btn-primary" style="margin-top: var(--space-4); white-space: nowrap; pointer-events: none"><span data-i18n>Datei auswählen</span></span>
-            <input type="file" accept=".csv,.txt,text/csv" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
+            <input type="file" accept=".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange="{{ pickImportFile }}" style="position: absolute; width: 1px; height: 1px; opacity: 0">
           </label>
           <sc-if value="{{ hasImportFile }}" hint-placeholder-val="{{ false }}">
             <div style="font-size: 13px; color: var(--color-accent-700)">{{ importFileNote }}</div>
@@ -1729,6 +1745,7 @@
                 <span data-i18n-keep style="font-size: 13px; margin-right: auto">{{ ud.name }}</span>
                 <span data-i18n-keep class="tag tag-neutral">{{ ud.relLabel }}</span>
                 <span class="tag tag-neutral">{{ ud.usedLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ ud.edit }}"><span data-i18n>Bearbeiten</span></button>
                 <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ ud.remove }}"><span data-i18n>Löschen</span></button>
               </div>
             </sc-for>
@@ -1747,10 +1764,15 @@
                 </sc-for>
               </select>
             </div>
-            <div class="field" style="margin: 0"><label data-i18n>Enthält wie viele</label><input class="input" inputmode="numeric" value="{{ newUnitFactor }}" disabled="{{ factorOff }}" onInput="{{ setNewUnitFactor }}"></div>
+            <sc-if value="{{ hasUnitRef }}" hint-placeholder-val="{{ false }}">
+              <div class="field" style="margin: 0"><label data-i18n>Enthält wie viele</label><input class="input" inputmode="numeric" value="{{ newUnitFactor }}" onInput="{{ setNewUnitFactor }}"></div>
+            </sc-if>
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
-            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addUnitDisabled }}" onClick="{{ addUnit }}"><span data-i18n>Quantität anlegen</span></button>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addUnitDisabled }}" onClick="{{ addUnit }}"><span data-i18n-keep>{{ unitSaveLabel }}</span></button>
+            <sc-if value="{{ unitEditing }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ cancelUnitEdit }}"><span data-i18n>Abbrechen</span></button>
+            </sc-if>
             <span data-i18n-keep style="font-size: 12.5px; color: {{ unitNoteColor }}">{{ unitFactorNote }}</span>
           </div>
           <p style="margin: 0; font-size: 12px; color: var(--sc-ink-2)" data-i18n>„Kiste, Verhältnis zu Flasche, 12" ergibt 1 Kiste = 12 Flaschen. Eine Palette mit 32 Kisten wird auf die Kiste bezogen, nicht auf die Flasche — die Kette rechnet sich von selbst durch. Gebinde ohne Bezug bleiben eigenständig.</p>
@@ -2876,6 +2898,16 @@
           <div style="font-size: 12px; color: var(--sc-ink-2)">{{ askMoreNote }}</div>
         </div>
       </sc-if>
+      <sc-if value="{{ askHasChoice }}" hint-placeholder-val="{{ false }}">
+        <div class="field" style="margin: 0">
+          <label data-i18n-keep>{{ askChoiceLabel }}</label>
+          <select class="input" value="{{ askChoice }}" onChange="{{ setAskChoice }}">
+            <sc-for list="{{ askChoices }}" as="ac" hint-placeholder-count="3">
+              <option data-i18n-keep value="{{ ac.value }}">{{ ac.label }}</option>
+            </sc-for>
+          </select>
+        </div>
+      </sc-if>
       <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
         <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ askConfirm }}">{{ askConfirmLabel }}</button>
         <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ askCancel }}"><span data-i18n>Abbrechen</span></button>
@@ -3584,6 +3616,35 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Fix it in product editing or with a new import.",
     "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
     "Standard": "default", "— keine —": "— none —",
+    "Event bearbeiten": "Edit event",
+    "Name, Datum und mindestens ein Artikel sind nötig.": "Name, date and at least one item are required.",
+    "Name und Datum fehlen": "Name and date missing",
+    "Ein Event braucht einen Namen und ein Datum.": "An event needs a name and a date.",
+    "Event löschen": "Delete event",
+    "Das Event und seine Bedarfsliste werden entfernt. Bestände und Buchungen bleiben unberührt.": "The event and its requirement list are removed. Stock and bookings stay untouched.",
+    "Rückgängig": "Undo",
+    "Bewegungen rückgängig machen": "Undo movements",
+    "Buchung rückgängig machen": "Undo booking",
+    "Die Buchung wird durch eine Gegenbuchung aufgehoben und verschwindet aus Verlauf und Auswertungen.": "The booking is cancelled by a counter-booking and disappears from history and analytics.",
+    "Geht nicht": "Not possible",
+    "Der Bestand würde unter 0 fallen.": "Stock would drop below 0.",
+    "Die Buchung wird noch gespeichert — gleich noch einmal versuchen.": "The booking is still being saved — try again in a moment.",
+    "Rückgängig gemacht": "Undone",
+    "Geändert": "Changed",
+    "Produkte angepasst": "products updated",
+    "Ersetzen durch": "Replace with",
+    "— keine, nur entfernen —": "— none, just remove —",
+    "Wähle, durch welche Quantität sie in Produkten ersetzt wird. Quantitäten, die sich darauf beziehen, zeigen dann auf die Ersatzquantität.": "Choose which quantity replaces it in products. Quantities that refer to it then point to the replacement.",
+    "Lagerorte": "Locations",
+    "Personen": "People",
+    "Person": "Person",
+    "Bitte einen Wert aus der Liste wählen.": "Please choose a value from the list.",
+    "Lagerort, Quantitäten und Personen sind Auswahllisten.": "Location, quantities and people are drop-down lists.",
+    "Keine gültige Excel-Datei": "Not a valid Excel file",
+    "Dieser Browser kann Excel-Dateien nicht entpacken — bitte als CSV speichern.": "This browser cannot unpack Excel files — please save as CSV.",
+    "Keine Tabelle in der Datei gefunden": "No sheet found in the file",
+    "Datei hierher ziehen oder klicken · .xlsx oder .csv bis 5 MB": "Drag a file here or click · .xlsx or .csv up to 5 MB",
+    "Änderungen speichern": "Save changes",
     "dazu einzeln": "plus single", "Istbestand einzeln": "Stock single",
     "ist keine Zahl ab 0 — als 0 übernommen": "is not a number from 0 — imported as 0",
     "ergibt keine ganze Einzelmenge — gerundet auf ": "does not give a whole single amount — rounded to ",
@@ -4295,6 +4356,35 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Rätta det i artikelredigeringen eller med en ny import.",
     "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
     "Standard": "standard", "— keine —": "— ingen —",
+    "Event bearbeiten": "Redigera evenemang",
+    "Name, Datum und mindestens ein Artikel sind nötig.": "Namn, datum och minst en artikel krävs.",
+    "Name und Datum fehlen": "Namn och datum saknas",
+    "Ein Event braucht einen Namen und ein Datum.": "Ett evenemang behöver ett namn och ett datum.",
+    "Event löschen": "Ta bort evenemang",
+    "Das Event und seine Bedarfsliste werden entfernt. Bestände und Buchungen bleiben unberührt.": "Evenemanget och dess behovslista tas bort. Lager och bokningar påverkas inte.",
+    "Rückgängig": "Ångra",
+    "Bewegungen rückgängig machen": "Ångra rörelser",
+    "Buchung rückgängig machen": "Ångra bokning",
+    "Die Buchung wird durch eine Gegenbuchung aufgehoben und verschwindet aus Verlauf und Auswertungen.": "Bokningen hävs med en motbokning och försvinner ur historik och analyser.",
+    "Geht nicht": "Går inte",
+    "Der Bestand würde unter 0 fallen.": "Lagret skulle bli under 0.",
+    "Die Buchung wird noch gespeichert — gleich noch einmal versuchen.": "Bokningen sparas fortfarande — försök igen strax.",
+    "Rückgängig gemacht": "Ångrad",
+    "Geändert": "Ändrad",
+    "Produkte angepasst": "artiklar uppdaterade",
+    "Ersetzen durch": "Ersätt med",
+    "— keine, nur entfernen —": "— ingen, bara ta bort —",
+    "Wähle, durch welche Quantität sie in Produkten ersetzt wird. Quantitäten, die sich darauf beziehen, zeigen dann auf die Ersatzquantität.": "Välj vilken kvantitet som ersätter den i artiklar. Kvantiteter som hänvisar till den pekar då på ersättningen.",
+    "Lagerorte": "Lagerplatser",
+    "Personen": "Personer",
+    "Person": "Person",
+    "Bitte einen Wert aus der Liste wählen.": "Välj ett värde ur listan.",
+    "Lagerort, Quantitäten und Personen sind Auswahllisten.": "Lagerplats, kvantiteter och personer är listrutor.",
+    "Keine gültige Excel-Datei": "Ingen giltig Excel-fil",
+    "Dieser Browser kann Excel-Dateien nicht entpacken — bitte als CSV speichern.": "Webbläsaren kan inte packa upp Excel-filer — spara som CSV.",
+    "Keine Tabelle in der Datei gefunden": "Inget blad hittades i filen",
+    "Datei hierher ziehen oder klicken · .xlsx oder .csv bis 5 MB": "Dra hit en fil eller klicka · .xlsx eller .csv upp till 5 MB",
+    "Änderungen speichern": "Spara ändringar",
     "dazu einzeln": "plus styck", "Istbestand einzeln": "Lager styck",
     "ist keine Zahl ab 0 — als 0 übernommen": "är inget tal från 0 — importerat som 0",
     "ergibt keine ganze Einzelmenge — gerundet auf ": "ger ingen hel styckmängd — avrundat till ",
@@ -4468,6 +4558,7 @@ const PERM_LIST = [
   ["rights", "Rechte ändern", ["owner"]],
   ["history", "Bewegungen und Entnahmehistorie sehen", ["owner","manager","reader"]],
   ["who", "Sehen, wer was entnommen hat", ["owner","manager"]],
+  ["undo", "Bewegungen rückgängig machen", ["owner","manager"]],
   ["profiles", "Profile des Teams ansehen", ["owner","manager"]],
   ["profileEdit", "Profildaten ändern", ["owner"]],
   ["export", "Excel-Datei erstellen", ["owner","manager","reader"]],
@@ -4639,7 +4730,7 @@ class Component extends DCLogic {
         items: [{ id: "SC-1001", qty: 24 }, { id: "SC-1002", qty: 4 }, { id: "SC-1007", qty: 6 }, { id: "SC-1009", qty: 3 }] }],
       eventId: "E-1", eventSort: "fehlt",
       evName: "", evDate: "", evPlace: "", evItems: [], evPick: "SC-1001", evQty: 1,
-      evSearch: "", evUnit: "",
+      evSearch: "", evUnit: "", evEditId: null, unitEdit: null, askChoice: "",
       members: MEMBERS.map(m => Object.assign({}, m)),
       companies: COMPANIES.map(c => Object.assign({}, c)),
       movements: [
@@ -4720,7 +4811,7 @@ class Component extends DCLogic {
         const d = new Date(today);
         d.setDate(d.getDate() - (p.hist.length - i) * 9 - (pi % 4));
         out.push({
-          productId: p.id, delta, after: p.hist[i], date: d,
+          id: "S-" + p.id + "-" + i, productId: p.id, delta, after: p.hist[i], date: d,
           who: people[(pi + i) % people.length]
         });
       }
@@ -4868,16 +4959,19 @@ class Component extends DCLogic {
         let run = pr ? Number(pr.ist) || 0 : 0;
         byProd[pid].slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(mv => {
           const after = mv.bestand_neu != null ? Number(mv.bestand_neu) : run;
-          log.push({ productId: pid, delta: Number(mv.delta) || 0, after, date: new Date(mv.created_at), who: nameOf(mv.profile_id) });
+          log.push({ id: mv.id, note: mv.note || "", productId: pid, delta: Number(mv.delta) || 0, after, date: new Date(mv.created_at), who: nameOf(mv.profile_id) });
           run = after - (Number(mv.delta) || 0);
         });
       });
       log.sort((a, b) => b.date - a.date);
+      // Rückgängig gemachte Buchungen und ihre Gegenbuchung zählen nicht mit.
+      const reverted = new Set(log.filter(e => /^Storno:/.test(e.note)).map(e => e.note.slice(7)));
+      const logClean = log.filter(e => !/^Storno:/.test(e.note) && !reverted.has(e.id));
       products.forEach(p => {
-        const l = log.filter(e => e.productId === p.id).slice().reverse();
+        const l = logClean.filter(e => e.productId === p.id).slice().reverse();
         if (l.length) p.hist = [l[0].after - l[0].delta].concat(l.map(e => e.after)).slice(-24);
       });
-      const movements = d.movements.slice(0, 50).map(mv => {
+      const movements = d.movements.filter(mv => !/^Storno:/.test(mv.note || "") && !reverted.has(mv.id)).slice(0, 50).map(mv => {
         const p = d.products.find(x => x.id === mv.product_id) || {};
         return { name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
       }).slice(0, 6);
@@ -4887,7 +4981,7 @@ class Component extends DCLogic {
       }));
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
-        units, priceHist, log,
+        units, priceHist, log: logClean,
         // Gespeicherte Feinrechte aus der Datenbank; ungespeicherte Änderungen bleiben stehen.
         overrides: Object.assign({}, ...members.map(m => ({ [m.id]: m.permissions || {} })),
           ...Object.keys(prev.rightsDirty || {}).map(k => ({ [k]: (prev.overrides || {})[k] || {} }))),
@@ -5097,6 +5191,9 @@ class Component extends DCLogic {
       lieferant: ["lieferant", "händler", "haendler", "hersteller", "bezugsquelle"],
       verantwortlich: ["verantwortlich", "verantwortliche person", "zuständig", "zustaendig"],
       vertretung: ["stellvertretung", "vertretung", "vertreter", "stellvertreter"],
+      vertretung1: ["stellvertretung 1", "stellvertretung1", "vertretung 1"],
+      vertretung2: ["stellvertretung 2", "stellvertretung2", "vertretung 2"],
+      vertretung3: ["stellvertretung 3", "stellvertretung3", "vertretung 3"],
       kategorien: ["kategorien", "kategorie", "gruppe", "warengruppe", "bereich"],
       link: ["link", "url", "bestellseite", "webseite", "shop"]
     };
@@ -5120,6 +5217,10 @@ class Component extends DCLogic {
       const f = this.splitCsvLine(lines[i], sep);
       const row = {};
       Object.keys(idx).forEach(k => { row[k] = (f[idx[k]] || "").trim(); });
+      if (["vertretung1", "vertretung2", "vertretung3"].some(k => idx[k] !== undefined)) {
+        row.vertretung = [row.vertretung, row.vertretung1, row.vertretung2, row.vertretung3].filter(Boolean).join(", ");
+        delete row.vertretung1; delete row.vertretung2; delete row.vertretung3;
+      }
       // Eine Zeile ohne Namen oder mit nur einem gefüllten Feld ist eine
       // Zwischenüberschrift (z. B. eine Kategorie) und kein Produkt.
       const filled = f.filter(v => v !== "").length;
@@ -5134,6 +5235,7 @@ class Component extends DCLogic {
       quantitaet: "Quantität", q1: "Quantität 1", q2: "Quantität 2", q3: "Quantität 3",
       std: "Standardquantität", lieferant: "Lieferant",
       verantwortlich: "Verantwortliche Person", vertretung: "Stellvertretung",
+      vertretung1: "Stellvertretung 1", vertretung2: "Stellvertretung 2", vertretung3: "Stellvertretung 3",
       kategorien: "Kategorien", link: "Link zum Produkt"
     };
     const raw = this.splitCsvLine(head, sep);
@@ -5367,10 +5469,10 @@ class Component extends DCLogic {
       if (!p) return null;
       const stock = Number(p.ist) || 0, n = need[id], rest = stock - n;
       return {
-        name: p.name, id: this.codeOf(p), need: n, stock: stock, restNum: rest,
-        rest: (rest > 0 ? "+" : "") + rest,
+        name: p.name, id: this.codeOf(p), need: this.fmtStock(p, n), stock: this.fmtStock(p, stock), restNum: rest,
+        rest: (rest > 0 ? "+" : rest < 0 ? "−" : "") + this.fmtStock(p, Math.abs(rest)),
         note: rest < 0
-          ? this.tr("fehlt: ") + Math.abs(rest)
+          ? this.tr("fehlt: ") + this.fmtStock(p, Math.abs(rest))
           : (rest <= (Number(p.min) || 0) ? this.tr("danach unter Mindestbestand") : p.ort),
         color: rest < 0 ? "var(--color-accent-900)" : "inherit"
       };
@@ -5577,6 +5679,295 @@ class Component extends DCLogic {
       .catch(err => this.say("Supabase", this.tr("Rechte nicht gespeichert"), String((err && err.message) || err)));
   }
 
+  // ── Excel (.xlsx) ohne Bibliothek ──────────────────────────────
+  // Schreiben: unkomprimiertes ZIP mit zwei Blättern — Produkte und eine
+  // Liste der erlaubten Werte, auf die die Auswahllisten zeigen.
+  // Lesen: ZIP-Verzeichnis auswerten, Einträge mit DecompressionStream
+  // entpacken und die erste Tabelle in Zeilen zerlegen.
+  crc32(bytes) {
+    let t = this.crcT;
+    if (!t) {
+      t = this.crcT = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; }
+    }
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) c = t[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+    return (c ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  zipStore(files) {
+    const enc = new TextEncoder();
+    const parts = [], central = [];
+    let offset = 0;
+    files.forEach(f => {
+      const name = enc.encode(f.name), data = enc.encode(f.data), crc = this.crc32(data);
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true);
+      h.setUint16(12, 0x21, true); h.setUint32(14, crc, true);
+      h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true);
+      parts.push(new Uint8Array(h.buffer), name, data);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+      c.setUint16(14, 0x21, true); c.setUint32(16, crc, true);
+      c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true);
+      c.setUint32(42, offset, true);
+      central.push(new Uint8Array(c.buffer), name);
+      offset += 30 + name.length + data.length;
+    });
+    const size = central.reduce((a, x) => a + x.length, 0);
+    const e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+    e.setUint32(12, size, true); e.setUint32(16, offset, true);
+    return new Blob(parts.concat(central, [new Uint8Array(e.buffer)]),
+      { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  }
+
+  colName(i) {
+    let out = ""; i++;
+    while (i > 0) { const m = (i - 1) % 26; out = String.fromCharCode(65 + m) + out; i = Math.floor((i - 1) / 26); }
+    return out;
+  }
+
+  xmlEsc(v) {
+    return String(v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  xlsxBuild(sheets) {
+    const X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    const NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+    const R = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    const sheetXml = sh => {
+      const rows = sh.rows.map((r, ri) => '<row r="' + (ri + 1) + '">' + r.map((v, ci) => {
+        if (v === "" || v == null) return "";
+        const ref = this.colName(ci) + (ri + 1);
+        if (typeof v === "number" && isFinite(v)) return '<c r="' + ref + '"><v>' + v + '</v></c>';
+        return '<c r="' + ref + '" t="inlineStr"' + (ri === 0 ? ' s="1"' : '') + '><is><t xml:space="preserve">' + this.xmlEsc(v) + '</t></is></c>';
+      }).join("") + '</row>').join("");
+      const cols = (sh.widths || []).length ? '<cols>' + sh.widths.map((w, i) =>
+        '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>').join("") + '</cols>' : "";
+      const dv = (sh.validations || []).length ? '<dataValidations count="' + sh.validations.length + '">' + sh.validations.map(v =>
+        '<dataValidation type="list" allowBlank="1" showErrorMessage="1" errorStyle="stop" errorTitle="' + this.xmlEsc(v.title || "")
+        + '" error="' + this.xmlEsc(v.error || "") + '" sqref="' + v.sqref + '"><formula1>' + this.xmlEsc(v.formula) + '</formula1></dataValidation>').join("")
+        + '</dataValidations>' : "";
+      return X + '<worksheet xmlns="' + NS + '"><sheetViews><sheetView workbookViewId="0">'
+        + (sh.freeze ? '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>' : '')
+        + '</sheetView></sheetViews>' + cols + '<sheetData>' + rows + '</sheetData>' + dv + '</worksheet>';
+    };
+    const files = [
+      { name: "[Content_Types].xml", data: X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+        + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+        + '<Default Extension="xml" ContentType="application/xml"/>'
+        + '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        + '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+        + sheets.map((_, i) => '<Override PartName="/xl/worksheets/sheet' + (i + 1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join("")
+        + '</Types>' },
+      { name: "_rels/.rels", data: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + '<Relationship Id="rId1" Type="' + R + '/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { name: "xl/workbook.xml", data: X + '<workbook xmlns="' + NS + '" xmlns:r="' + R + '"><sheets>'
+        + sheets.map((sh, i) => '<sheet name="' + this.xmlEsc(sh.name) + '" sheetId="' + (i + 1) + '" r:id="rId' + (i + 1) + '"/>').join("")
+        + '</sheets></workbook>' },
+      { name: "xl/_rels/workbook.xml.rels", data: X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+        + sheets.map((_, i) => '<Relationship Id="rId' + (i + 1) + '" Type="' + R + '/worksheet" Target="worksheets/sheet' + (i + 1) + '.xml"/>').join("")
+        + '<Relationship Id="rId' + (sheets.length + 1) + '" Type="' + R + '/styles" Target="styles.xml"/></Relationships>' },
+      { name: "xl/styles.xml", data: X + '<styleSheet xmlns="' + NS + '"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font>'
+        + '<font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill>'
+        + '<fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
+        + '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+        + '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
+        + '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>' }
+    ].concat(sheets.map((sh, i) => ({ name: "xl/worksheets/sheet" + (i + 1) + ".xml", data: sheetXml(sh) })));
+    return this.zipStore(files);
+  }
+
+  async xlsxRows(buf) {
+    const u8 = new Uint8Array(buf), dv = new DataView(buf);
+    let eocd = -1;
+    for (let i = u8.length - 22; i >= Math.max(0, u8.length - 70000); i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error(this.tr("Keine gültige Excel-Datei"));
+    const count = dv.getUint16(eocd + 10, true);
+    let p = dv.getUint32(eocd + 16, true);
+    const dec = new TextDecoder();
+    const entries = {};
+    for (let i = 0; i < count; i++) {
+      const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+      const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+      const off = dv.getUint32(p + 42, true);
+      entries[dec.decode(u8.subarray(p + 46, p + 46 + nlen))] = { method, csize, off };
+      p += 46 + nlen + xlen + clen;
+    }
+    const read = async name => {
+      const e = entries[name];
+      if (!e) return null;
+      const start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+      const data = u8.subarray(start, start + e.csize);
+      if (e.method === 0) return dec.decode(data);
+      if (typeof DecompressionStream === "undefined")
+        throw new Error(this.tr("Dieser Browser kann Excel-Dateien nicht entpacken — bitte als CSV speichern."));
+      const ds = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return await new Response(ds).text();
+    };
+    const parse = t => new DOMParser().parseFromString(t || "<x/>", "application/xml");
+    const wb = parse(await read("xl/workbook.xml"));
+    const rels = parse(await read("xl/_rels/workbook.xml.rels"));
+    const first = wb.getElementsByTagName("sheet")[0];
+    const rid = first ? (first.getAttribute("r:id")
+      || first.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id")) : "";
+    let target = "worksheets/sheet1.xml";
+    Array.from(rels.getElementsByTagName("Relationship")).forEach(r => { if (r.getAttribute("Id") === rid) target = r.getAttribute("Target"); });
+    target = target.replace(/^\/?xl\//, "").replace(/^\//, "");
+    const sheetTxt = await read("xl/" + target);
+    if (!sheetTxt) throw new Error(this.tr("Keine Tabelle in der Datei gefunden"));
+    const ssTxt = await read("xl/sharedStrings.xml");
+    const shared = ssTxt ? Array.from(parse(ssTxt).getElementsByTagName("si")).map(si =>
+      Array.from(si.getElementsByTagName("t")).filter(t => !t.parentNode || t.parentNode.nodeName !== "rPh").map(t => t.textContent).join("")) : [];
+    const out = [];
+    Array.from(parse(sheetTxt).getElementsByTagName("row")).forEach(row => {
+      const cells = [];
+      Array.from(row.getElementsByTagName("c")).forEach(c => {
+        const ref = c.getAttribute("r") || "";
+        const col = ref.replace(/[0-9]/g, "").split("").reduce((a, ch) => a * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+        const t = c.getAttribute("t");
+        const v = c.getElementsByTagName("v")[0];
+        let val = "";
+        if (t === "s") val = shared[Number(v ? v.textContent : -1)] || "";
+        else if (t === "inlineStr") val = Array.from(c.getElementsByTagName("t")).map(x => x.textContent).join("");
+        else if (t === "b") val = v && v.textContent === "1" ? "ja" : "nein";
+        else val = v ? v.textContent : "";
+        cells[col >= 0 ? col : cells.length] = val;
+      });
+      const ri = Number(row.getAttribute("r")) - 1;
+      out[isNaN(ri) ? out.length : ri] = Array.from(cells, x => x == null ? "" : x);
+    });
+    return Array.from(out, r => r || []);
+  }
+
+  rowsToCsv(rows) {
+    const esc = v => {
+      const t = String(v == null ? "" : v).replace(/[\r\n]+/g, " ");
+      return /[";]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    return rows.map(r => r.map(esc).join(";")).join("\n");
+  }
+
+  downloadBlob(name, blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+
+  // ── Quantitäten ändern ─────────────────────────────────────────
+  // Führt die Kette von „name" aus bis zum Ende. Trifft sie „target",
+  // entstünde ein Kreis.
+  unitChainHits(name, target, defs) {
+    const list = defs || this.unitDefs();
+    let cur = name, guard = 0;
+    while (cur && guard++ < 12) {
+      if (cur === target) return true;
+      const d = list.find(x => x.name === cur);
+      cur = d ? d.ref : "";
+    }
+    return false;
+  }
+
+  // Neue Aufstellung übernehmen: umbenannte oder ersetzte Quantitäten
+  // wandern in alle Produkte, jeder Faktor wird neu durchgerechnet.
+  // rename: { alt: neu } — neu "" heißt: ersatzlos entfernt.
+  applyUnitDefs(next, rename) {
+    const has = k => Object.prototype.hasOwnProperty.call(rename, k);
+    const fac = (name, depth) => {
+      const d = next.find(x => x.name === name);
+      if (!d || !d.ref || (depth || 0) > 8) return 1;
+      return Number(d.count || 1) * fac(d.ref, (depth || 0) + 1);
+    };
+    const st = this.state;
+    const units = Object.assign({}, st.units);
+    const changed = [];
+    const norm = l => JSON.stringify((l || []).map(u => Object.assign({ name: u.name, faktor: Number(u.faktor) }, u.std ? { std: true } : {})));
+    const products = st.products.map(p => {
+      const own = units[p.id] || [];
+      const q0 = p.quantitaet;
+      const q = has(q0) ? (rename[q0] || "—") : q0;
+      if (!own.length) {
+        if (q === q0) return p;
+        changed.push({ id: p.id, einheiten: [], quantitaet: q });
+        return Object.assign({}, p, { quantitaet: q });
+      }
+      let stdName = (own.find(u => u.std) || {}).name || "";
+      if (has(stdName)) stdName = rename[stdName] || "";
+      const names = [];
+      own.forEach(u => {
+        const nn = has(u.name) ? rename[u.name] : u.name;
+        if (nn && names.indexOf(nn) < 0 && next.some(d => d.name === nn)) names.push(nn);
+      });
+      const list = names.map(n => Object.assign({ name: n, faktor: Math.max(1, fac(n)) }, n === stdName ? { std: true } : {}))
+        .sort((a, b) => a.faktor - b.faktor);
+      units[p.id] = list;
+      if (norm(list) === norm(own) && q === q0) return p;
+      changed.push({ id: p.id, einheiten: list, quantitaet: q });
+      return Object.assign({}, p, { quantitaet: q });
+    });
+    this.setState({ unitDefs: next, units: units, products: products, unitQty: {} });
+    this.remote(api => Promise.all([api.saveSettings({ units: next })].concat(changed.map(c =>
+      api.updateProduct(c.id, { einheiten: c.einheiten, quantitaet: c.quantitaet === "—" ? null : c.quantitaet })))));
+    return changed.length;
+  }
+
+  saveUnitEdit() {
+    const st = this.state, old = st.unitEdit;
+    const name = String(st.newUnitName || "").trim(), raw = String(st.newUnitFactor || "").trim();
+    if (!old || !name) return;
+    const def = st.newUnitRef ? { name: name, ref: st.newUnitRef, count: Number(raw) } : { name: name, ref: "", count: 1 };
+    const next = this.unitDefs().map(d => d.name === old ? def : (d.ref === old ? Object.assign({}, d, { ref: name }) : d));
+    const ren = {};
+    if (old !== name) ren[old] = name;
+    const n = this.applyUnitDefs(next, ren);
+    this.setState({ unitEdit: null, newUnitName: "", newUnitFactor: "12", newUnitRef: "" });
+    this.say(this.tr("Quantität"), this.tr("Geändert"), name + (n ? " · " + n + " " + this.tr("Produkte angepasst") : ""));
+  }
+
+  // ── Buchung rückgängig ─────────────────────────────────────────
+  // Eine Gegenbuchung mit Verweis auf das Original. Beide fallen danach
+  // aus Verlauf und Auswertungen heraus; der Bestand stimmt wieder.
+  undoMove(e) {
+    const p = this.state.products.find(x => x.id === e.productId);
+    this.setState({ ask: null });
+    if (!p) return;
+    const next = (Number(p.ist) || 0) - (Number(e.delta) || 0);
+    if (next < 0) {
+      this.say(this.tr("Rückgängig"), this.tr("Geht nicht"), this.tr("Der Bestand würde unter 0 fallen."));
+      return;
+    }
+    if (this.state.live && !this.isDbId(e.id)) {
+      this.say(this.tr("Rückgängig"), this.tr("Geht nicht"), this.tr("Die Buchung wird noch gespeichert — gleich noch einmal versuchen."));
+      return;
+    }
+    this.setState(prev => ({
+      log: (prev.log || []).filter(x => x !== e && (!e.id || x.id !== e.id)),
+      products: prev.products.map(x => x.id === p.id ? Object.assign({}, x, {
+        ist: next, status: next < x.min ? (x.status === "ordered" ? "ordered" : "low") : "ok",
+        hist: (x.hist || []).concat(next).slice(-24)
+      }) : x)
+    }));
+    this.bookRemote(p.id, -(Number(e.delta) || 0), "Storno:" + e.id);
+    this.say(this.tr("Rückgängig"), this.tr("Rückgängig gemacht"), p.name + " · " + this.tr("Neuer Bestand: ") + this.fmtStock(p, next));
+  }
+
+  askUndo(e) {
+    const p = this.state.products.find(x => x.id === e.productId);
+    if (!p) return;
+    this.setState({ ask: {
+      kicker: this.tr("Rückgängig"), title: this.tr("Buchung rückgängig machen"),
+      text: p.name + " · " + (e.delta > 0 ? "+" : "−") + this.fmtStock(p, Math.abs(e.delta)) + ". "
+        + this.tr("Die Buchung wird durch eine Gegenbuchung aufgehoben und verschwindet aus Verlauf und Auswertungen."),
+      confirmLabel: this.tr("Rückgängig"),
+      onOk: () => this.undoMove(e)
+    } });
+  }
+
   parsePrice(v) {
     const n = parseFloat(String(v == null ? "" : v).replace(/[^0-9,.-]/g, "").replace(",", "."));
     return isNaN(n) ? null : n;
@@ -5746,7 +6137,7 @@ class Component extends DCLogic {
       }) : p),
       movements: [{ name: cur.name, delta: deltaLabel, who: who, when: this.tr("gerade eben") }]
         .concat(prev.movements).slice(0, 8),
-      log: [{ productId: cur.id, delta: next - (Number(cur.ist) || 0), after: next, date: now, who: who }].concat(prev.log || [])
+      log: [{ id: "L-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), productId: cur.id, delta: next - (Number(cur.ist) || 0), after: next, date: now, who: who }].concat(prev.log || [])
     }));
   }
 
@@ -5900,9 +6291,10 @@ class Component extends DCLogic {
     let mhd = "—";
     if (r.mhd) {
       const t = String(r.mhd).trim();
+      const serial = /^\d{5}(\.\d+)?$/.test(t) ? new Date(Math.round((Number(t) - 25569) * 86400000)).toISOString().slice(0, 10) : "";
       const short = /^(\d{1,2})\.(\d{1,2})\.(\d{2})$/.exec(t);
       const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t);
-      const iso = this.isoDay(t) || (short ? "20" + short[3] + "-" + ("0" + short[2]).slice(-2) + "-" + ("0" + short[1]).slice(-2) : "")
+      const iso = serial || this.isoDay(t) || (short ? "20" + short[3] + "-" + ("0" + short[2]).slice(-2) + "-" + ("0" + short[1]).slice(-2) : "")
         || (us ? us[3] + "-" + ("0" + us[1]).slice(-2) + "-" + ("0" + us[2]).slice(-2) : "");
       if (iso && !isNaN(new Date(iso).getTime())) mhd = iso;
       else errs.push(this.tr("MHD nicht lesbar: ") + r.mhd);
@@ -6967,6 +7359,7 @@ class Component extends DCLogic {
       const fehlt = Math.max(0, it.qty - p.ist);
       return { id: p.id, name: p.name, lieferant: p.lieferant, ort: p.ort, preis: p.preis,
         benoetigt: it.qty, bestand: p.ist, fehlt: fehlt,
+        needLabel: this.fmtStock(p, it.qty), stockLabel: this.fmtStock(p, p.ist), missLabel: fehlt > 0 ? this.fmtStock(p, fehlt) : "—",
         tagClass: fehlt > 0 ? "tag tag-outline" : "tag tag-neutral",
         statusLabel: fehlt > 0 ? this.tr("nachbestellen") : this.tr("vorhanden"),
         rowStyle: p.aktiv === false ? "opacity: .55" : "",
@@ -6978,7 +7371,14 @@ class Component extends DCLogic {
       if (st.eventSort === "ort") return a.ort.localeCompare(b.ort) || a.name.localeCompare(b.name);
       return b.fehlt - a.fehlt || a.name.localeCompare(b.name);
     });
-    const evRows = ev ? sortRows(ev.items.map(evRow).filter(Boolean)) : [];
+    // Gleiche Produkte stehen einmal da, egal in welcher Quantität sie
+    // eingetragen wurden — gerechnet wird in der kleinsten Einheit.
+    const mergeItems = items => {
+      const m = {};
+      (items || []).forEach(it => { m[it.id] = (m[it.id] || 0) + (Number(it.qty) || 0); });
+      return Object.keys(m).map(id => ({ id: id, qty: m[id] }));
+    };
+    const evRows = ev ? sortRows(mergeItems(ev.items).map(evRow).filter(Boolean)) : [];
     const sortMark = key => st.eventSort === key ? " ↓" : "";
 
     const setSel = (key) => (e) => this.setState({ [key]: e.target.value });
@@ -7122,7 +7522,7 @@ class Component extends DCLogic {
       })(),
       // Ohne das Recht „Sehen, wer was entnommen hat" bleibt die Person
       // verdeckt — die Bewegung selbst ist weiter sichtbar.
-      mayWho: this.may("who"),
+      mayWho: this.may("who"), mayUndo: this.may("undo"),
       movements: (st.movements || []).map(m => Object.assign({}, m, {
         who: this.may("who") ? m.who : "",
         // Ohne das Recht steht dort nur der Zeitpunkt — kein Platzhalter,
@@ -7206,28 +7606,33 @@ class Component extends DCLogic {
         const used = viaUnits.length + viaProducts.length;
         const rows = viaProducts.map(p => ({ name: p.name, detail: p.ort }))
           .concat(viaUnits.map(u => ({ name: u.name, detail: this.tr("bezieht sich darauf") })));
-        const drop = () => {
-          // Bezüge anderer Quantitäten würden ins Leere zeigen: sie werden
-          // eigenständig, statt eine kaputte Kette zu hinterlassen.
-          const next = this.unitDefs()
-            .filter(x => x.name !== d.name)
-            .map(x => x.ref === d.name ? { name: x.name } : x);
-          this.setState({ unitDefs: next, ask: null });
-          this.remote(api => api.saveSettings({ units: next }));
-          this.say(this.tr("Quantität"), this.tr("Gelöscht"), d.name);
+        const drop = (repl) => {
+          // Mit Ersatz: Produkte und Bezüge wandern auf die Ersatzquantität.
+          // Ohne Ersatz werden Bezüge eigenständig, statt ins Leere zu zeigen.
+          const r = repl && repl !== d.name ? repl : "";
+          const next = this.unitDefs().filter(x => x.name !== d.name).map(x => x.ref === d.name
+            ? (r && x.name !== r ? Object.assign({}, x, { ref: r }) : { name: x.name, ref: "", count: 1 }) : x);
+          this.setState({ ask: null, unitEdit: st.unitEdit === d.name ? null : st.unitEdit });
+          const n = this.applyUnitDefs(next, { [d.name]: r });
+          this.say(this.tr("Quantität"), this.tr("Gelöscht"), d.name + (r ? " → " + r : "") + (n ? " · " + n + " " + this.tr("Produkte angepasst") : ""));
         };
+        const others = this.unitDefs().filter(x => x.name !== d.name);
+        const same = others.find(x => this.unitFactor(x.name) === this.unitFactor(d.name));
         return {
           name: d.name, relLabel: this.relLabel(d),
           usedLabel: used === 0 ? this.tr("frei") : used + " ×",
           locked: false,
+          edit: () => this.setState({ unitEdit: d.name, newUnitName: d.name, newUnitRef: d.ref || "", newUnitFactor: String(d.ref ? (d.count || 12) : 12) }),
           remove: () => {
-            if (!used) { drop(); return; }
-            this.setState({ ask: {
+            if (!used) { drop(""); return; }
+            this.setState({ askChoice: same ? same.name : "", ask: {
               kicker: this.tr("Quantität löschen"),
               title: d.name + " " + this.tr("wird verwendet"),
               text: this.tr("Diese Quantität ist im Einsatz: ") + used + " "
                 + (used === 1 ? this.tr("Stelle") : this.tr("Stellen")) + ". "
-                + this.tr("Wird sie gelöscht, verlieren diese Produkte ihre Umrechnung — die gebuchten Mengen bleiben stehen. Quantitäten, die sich darauf beziehen, werden eigenständig."),
+                + this.tr("Wähle, durch welche Quantität sie in Produkten ersetzt wird. Quantitäten, die sich darauf beziehen, zeigen dann auf die Ersatzquantität."),
+              choiceLabel: this.tr("Ersetzen durch"),
+              choices: [{ value: "", label: this.tr("— keine, nur entfernen —") }].concat(others.map(x => ({ value: x.name, label: x.name + " · " + this.relLabel(x) }))),
               listTitle: this.tr("Betroffen"),
               list: rows.slice(0, 8),
               moreNote: rows.length > 8 ? "+ " + (rows.length - 8) + " " + this.tr("weitere") : "",
@@ -7237,7 +7642,11 @@ class Component extends DCLogic {
           }
         };
       })).list,
-      unitDefNames: this.unitDefs().map(d => d.name),
+      unitDefNames: this.unitDefs().filter(d => !st.unitEdit || !this.unitChainHits(d.name, st.unitEdit)).map(d => d.name),
+      hasUnitRef: !!st.newUnitRef,
+      unitEditing: !!st.unitEdit,
+      unitSaveLabel: st.unitEdit ? this.tr("Änderungen speichern") : this.tr("Quantität anlegen"),
+      cancelUnitEdit: () => this.setState({ unitEdit: null, newUnitName: "", newUnitFactor: "12", newUnitRef: "" }),
       standaloneLabel: this.tr("eigenständig — ohne Bezug"),
       newUnitName: st.newUnitName, newUnitFactor: st.newUnitFactor, newUnitRef: st.newUnitRef,
       setNewUnitName: e => this.setState({ newUnitName: e.target.value }),
@@ -7248,7 +7657,7 @@ class Component extends DCLogic {
         const name = String(st.newUnitName || "").trim();
         const raw = String(st.newUnitFactor || "").trim();
         if (!name) return this.tr("Zuerst einen Namen eintragen.");
-        if (this.unitDefs().some(d => d.name.toLowerCase() === name.toLowerCase())) return this.tr("Diese Quantität gibt es schon.");
+        if (this.unitDefs().some(d => d.name !== st.unitEdit && d.name.toLowerCase() === name.toLowerCase())) return this.tr("Diese Quantität gibt es schon.");
         if (!st.newUnitRef) return name + " · " + this.tr("steht für sich, ohne Umrechnung.");
         if (!/^[0-9]+$/.test(raw) || Number(raw) < 2) return this.tr("Die Anzahl muss eine ganze Zahl ab 2 sein.");
         const total = Number(raw) * this.unitFactor(st.newUnitRef);
@@ -7259,7 +7668,7 @@ class Component extends DCLogic {
       unitNoteColor: (() => {
         const name = String(st.newUnitName || "").trim();
         const raw = String(st.newUnitFactor || "").trim();
-        const dup = this.unitDefs().some(d => d.name.toLowerCase() === name.toLowerCase());
+        const dup = this.unitDefs().some(d => d.name !== st.unitEdit && d.name.toLowerCase() === name.toLowerCase());
         const okFactor = !st.newUnitRef || (/^[0-9]+$/.test(raw) && Number(raw) >= 2);
         return (name && !dup && okFactor) ? "var(--sc-ink-2)" : "var(--color-accent-700)";
       })(),
@@ -7267,14 +7676,15 @@ class Component extends DCLogic {
         const name = String(st.newUnitName || "").trim();
         const raw = String(st.newUnitFactor || "").trim();
         if (!name) return true;
-        if (this.unitDefs().some(d => d.name.toLowerCase() === name.toLowerCase())) return true;
+        if (this.unitDefs().some(d => d.name !== st.unitEdit && d.name.toLowerCase() === name.toLowerCase())) return true;
         if (st.newUnitRef && (!/^[0-9]+$/.test(raw) || Number(raw) < 2)) return true;
         return false;
       })(),
       addUnit: () => {
+        if (st.unitEdit) { this.saveUnitEdit(); return; }
         const name = String(st.newUnitName || "").trim();
         const raw = String(st.newUnitFactor || "").trim();
-        if (!name || this.unitDefs().some(d => d.name.toLowerCase() === name.toLowerCase())) return;
+        if (!name || this.unitDefs().some(d => d.name !== st.unitEdit && d.name.toLowerCase() === name.toLowerCase())) return;
         const def = st.newUnitRef
           ? { name, ref: st.newUnitRef, count: Number(raw) }
           : { name, ref: "", count: 1 };
@@ -7714,7 +8124,7 @@ class Component extends DCLogic {
       onEvents: st.screen === "events",
       navEvents: this.navStyle("events"), goEvents: () => this.go("events"),
       events: st.events.map(e => ({
-        id: e.id, name: e.name, meta: e.datum + " · " + e.ort, count: e.items.length + " " + this.tr("Positionen"),
+        id: e.id, name: e.name, meta: e.datum + " · " + e.ort, count: new Set(e.items.map(i => i.id)).size + " " + this.tr("Positionen"),
         style: e.id === st.eventId ? "border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 12%, transparent)" : "",
         pick: () => this.setState({ eventId: e.id })
       })),
@@ -7776,7 +8186,7 @@ class Component extends DCLogic {
         // dahinter die Menge in der kleinsten Einheit.
         return {
           name: p.name,
-          qty: it.unitName && it.unitQty ? it.unitQty + " " + it.unitName : it.qty,
+          qty: it.unitName && it.unitQty ? it.unitQty + " " + it.unitName : (p.id ? this.fmtStock(p, it.qty) : it.qty),
           sub: it.unitName && it.unitQty ? "= " + it.qty : "",
           remove: () => this.setState(prev => ({ evItems: prev.evItems.filter((_, j) => j !== i) }))
         };
@@ -7800,15 +8210,62 @@ class Component extends DCLogic {
           evQty: 1
         };
       }),
+      evEditing: !!st.evEditId,
+      evFormTitle: st.evEditId ? this.tr("Event bearbeiten") : this.tr("Neues Event planen"),
+      evSaveLabel: st.evEditId ? this.tr("Änderungen speichern") : this.tr("Event anlegen und Bedarfsliste erstellen"),
+      evSaveOff: !String(st.evName || "").trim() || !st.evDate || !st.evItems.length,
+      evFormNote: (!String(st.evName || "").trim() || !st.evDate || !st.evItems.length)
+        ? this.tr("Name, Datum und mindestens ein Artikel sind nötig.") : "",
+      editEvent: () => {
+        if (!ev) return;
+        this.setState({ evEditId: ev.id, evName: ev.name, evDate: this.isoDay(ev.datum) || "",
+          evPlace: ev.ort === "—" ? "" : ev.ort, evItems: (ev.items || []).map(i => Object.assign({}, i)) });
+      },
+      cancelEvEdit: () => this.setState({ evEditId: null, evName: "", evDate: "", evPlace: "", evItems: [] }),
+      deleteEvent: () => {
+        if (!ev) return;
+        const id = ev.id, nm = ev.name;
+        this.setState({ ask: {
+          kicker: this.tr("Event löschen"), title: nm,
+          text: this.tr("Das Event und seine Bedarfsliste werden entfernt. Bestände und Buchungen bleiben unberührt."),
+          confirmLabel: this.tr("Löschen"),
+          onOk: () => {
+            this.setState(prev => ({
+              ask: null, events: prev.events.filter(e => e.id !== id),
+              eventId: (prev.events.find(e => e.id !== id) || {}).id || null,
+              evEditId: prev.evEditId === id ? null : prev.evEditId
+            }));
+            if (this.isDbId(id)) this.remote(api => api.deleteEvent(id));
+            this.say(this.tr("Event"), this.tr("Gelöscht"), nm);
+          }
+        } });
+      },
       createEvent: () => {
+        const name = String(st.evName || "").trim();
+        if (!name || !st.evDate) {
+          this.say(this.tr("Event"), this.tr("Name und Datum fehlen"), this.tr("Ein Event braucht einen Namen und ein Datum."));
+          return;
+        }
         if (!st.evItems.length) { this.say(this.tr("Event"), this.tr("Noch keine Artikel"), this.tr("Erst Artikel und Mengen hinzufügen.")); return; }
-        this.remote(api => api.createEvent({ name: st.evName, datum: st.evDate || null, ort: st.evPlace, items: st.evItems }));
-        const id = "E-" + (st.events.length + 1);
+        // In der Datenbank steht jedes Produkt einmal je Event.
+        const payload = { name: name, datum: st.evDate, ort: st.evPlace || "", items: mergeItems(st.evItems) };
+        if (st.evEditId) {
+          const eid = st.evEditId;
+          this.setState(prev => ({
+            events: prev.events.map(e => e.id === eid ? Object.assign({}, e, { name: name, datum: prev.evDate, ort: prev.evPlace || "—", items: prev.evItems }) : e),
+            eventId: eid, evEditId: null, evName: "", evDate: "", evPlace: "", evItems: []
+          }));
+          if (this.isDbId(eid)) this.remote(api => api.updateEvent(Object.assign({ id: eid }, payload)));
+          this.say(this.tr("Event"), this.tr("Gespeichert"), name);
+          return;
+        }
+        this.remote(api => api.createEvent(payload));
+        const id = "E-" + Date.now().toString(36);
         this.setState(prev => ({
-          events: prev.events.concat({ id: id, name: prev.evName || this.tr("Neues Event"), datum: prev.evDate || "—", ort: prev.evPlace || "—", items: prev.evItems }),
+          events: prev.events.concat({ id: id, name: name, datum: prev.evDate, ort: prev.evPlace || "—", items: prev.evItems }),
           eventId: id, evName: "", evDate: "", evPlace: "", evItems: []
         }));
-        this.say(this.tr("Event"), this.tr("Bedarfsliste erstellt"), st.evItems.length + " " + this.tr("Positionen") + " · " + this.tr("Fehlmengen berechnet"));
+        this.say(this.tr("Event"), this.tr("Bedarfsliste erstellt"), mergeItems(st.evItems).length + " " + this.tr("Positionen") + " · " + this.tr("Fehlmengen berechnet"));
       },
       exportEventList: () => this.say("Export", this.tr("Bedarfsliste exportiert"), (ev ? ev.name : "") + " · Excel (.xlsx)"),
 
@@ -7875,7 +8332,8 @@ class Component extends DCLogic {
           when: fmt(e.date), name: p.name || e.productId,
           delta: (e.delta > 0 ? "+" : "−") + (p.id ? this.fmtStock(p, Math.abs(e.delta)) : Math.abs(e.delta)),
           color: e.delta > 0 ? "var(--color-text)" : "var(--color-accent-700)",
-          after: p.id ? this.fmtStock(p, e.after) : e.after, who: this.may("who") ? e.who : "", ort: p.ort || "—"
+          after: p.id ? this.fmtStock(p, e.after) : e.after, who: this.may("who") ? e.who : "", ort: p.ort || "—",
+          undo: () => this.askUndo(e)
         };
       }),
       hTaken: hMatched.length === 1 ? this.fmtStock(hMatched[0], taken) : taken,
@@ -8016,13 +8474,16 @@ class Component extends DCLogic {
         if (!file) return;
         const mb = file.size / (1024 * 1024);
         if (!this.withinLimit("uploadMb", 0, Math.ceil(mb))) return;
-        if (/\.(xlsx|xls)$/i.test(file.name)) {
+        if (/\.xls$/i.test(file.name)) {
           this.setState({ importDone: false, importFile: file.name, importParsed: [] });
           this.say("Import", this.tr("Diese Datei kann der Browser nicht lesen"),
             this.tr("In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und die CSV-Datei wählen."));
           return;
         }
-        file.text().then(text => {
+        const readText = /\.xlsx$/i.test(file.name)
+          ? file.arrayBuffer().then(b => this.xlsxRows(b)).then(r => this.rowsToCsv(r))
+          : file.text();
+        readText.then(text => {
           const out = this.parseImport(text);
           if (!out.rows.length) {
             this.setState({ importDone: false, importFile: file.name, importParsed: [], importMap: [] });
@@ -8132,7 +8593,12 @@ class Component extends DCLogic {
       askList: st.ask ? (st.ask.list || []) : [],
       askMoreNote: st.ask ? (st.ask.moreNote || "") : "",
       askConfirmLabel: st.ask ? (st.ask.confirmLabel || this.tr("Löschen")) : "",
-      askConfirm: () => { const a = st.ask; if (a && a.onOk) a.onOk(); else this.setState({ ask: null }); },
+      askConfirm: () => { const a = st.ask; if (a && a.onOk) a.onOk(st.askChoice); else this.setState({ ask: null }); },
+      askHasChoice: !!(st.ask && (st.ask.choices || []).length),
+      askChoiceLabel: st.ask ? (st.ask.choiceLabel || "") : "",
+      askChoices: st.ask ? (st.ask.choices || []) : [],
+      askChoice: st.askChoice || "",
+      setAskChoice: e => this.setState({ askChoice: e.target.value }),
       askCancel: () => this.setState({ ask: null }),
 
       // ── Hinweisfenster bei Namensgleichheit ────────────────
@@ -8255,58 +8721,63 @@ class Component extends DCLogic {
       },
 
       downloadTemplate: () => {
-        // Kopfzeile trägt alle Felder, inklusive der eigenen Merkmale.
-        const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Istbestand einzeln"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
-          this.tr("Lagerort"), "MHD", this.tr("Preis"),
-          this.tr("Quantität") + " 1", this.tr("Quantität") + " 2", this.tr("Quantität") + " 3", this.tr("Standardquantität"),
-          this.tr("Lieferant"),
-          this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
-          .concat(st.attrs.map(a => a.name));
+        const T = k => this.tr(k);
+        const head = [T("Name"), "EAN", T("Istbestand"), T("Istbestand einzeln"), T("Mindestbestand"), T("Bestellmenge"),
+          T("Lagerort"), "MHD", T("Preis"),
+          T("Quantität") + " 1", T("Quantität") + " 2", T("Quantität") + " 3", T("Standardquantität"),
+          T("Lieferant"), T("Verantwortlich"), T("Stellvertretung") + " 1", T("Stellvertretung") + " 2", T("Stellvertretung") + " 3",
+          T("Kategorien"), T("Link zum Produkt")].concat(st.attrs.map(a => a.name));
         const clean = v => (v == null || v === "—") ? "" : v;
         const rows = [head];
-        // Sind Produkte angelegt, kommen sie alle mit — eine Beispielzeile
-        // wäre dann nur eine Zeile, die niemand haben will. Ist noch nichts
-        // angelegt, zeigt genau eine Dummyzeile, wie es gemeint ist.
         if (activeProducts.length) {
           activeProducts.forEach(p => {
-            // Die zugewiesenen Quantitäten stehen einzeln in den Spalten,
-            // kleinste zuerst — so lassen sie sich in Excel austauschen.
-            const own = (st.units[p.id] || []).slice()
-              .sort((a, b) => Number(a.faktor) - Number(b.faktor)).map(u => u.name);
-            rows.push([
-              p.name, clean(p.ean),
-              ...(() => { const s0 = this.stdUnit(p); const F = s0 ? Math.max(1, Number(s0.faktor) || 1) : 1;
-                return [Math.floor(p.ist / F), F > 1 ? (p.ist % F) || "" : "", this.numStd(p.min, F, true), this.numStd(p.bestellmenge, F, true)]; })(),
-              clean(p.ort), clean(p.mhd), clean(p.preis),
-              own[0] || "", own[1] || "", own[2] || "",
-              (this.stdUnit(p) || {}).name || "",
-              clean(p.lieferant), clean(p.verantwortlich),
-              clean(p.vertretung), (p.kategorien || []).join(", "), p.link || ""
-            ].concat(st.attrs.map(() => "")));
+            const own = (st.units[p.id] || []).slice().sort((a, b) => Number(a.faktor) - Number(b.faktor)).map(u => u.name);
+            const s0 = this.stdUnit(p);
+            const F = s0 ? Math.max(1, Number(s0.faktor) || 1) : 1;
+            const deps = String(clean(p.vertretung)).split(/[,;]/).map(x => x.trim()).filter(Boolean);
+            rows.push([p.name, clean(p.ean), Math.floor(p.ist / F), F > 1 ? ((p.ist % F) || "") : "",
+              Number(this.numStd(p.min, F)), Number(this.numStd(p.bestellmenge, F)),
+              clean(p.ort), clean(p.mhd), clean(p.preis), own[0] || "", own[1] || "", own[2] || "", (s0 || {}).name || "",
+              clean(p.lieferant), clean(p.verantwortlich), deps[0] || "", deps[1] || "", deps[2] || "",
+              (p.kategorien || []).join(", "), p.link || ""].concat(st.attrs.map(() => "")));
           });
         } else {
           const known = this.unitDefs().map(d => d.name);
+          const ppl = (st.members || []).map(m => m.name);
           rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 8, 4, 3, 5,
-            "Keller · Regal B2", "30.04.2027", "8,49 €",
-            known[0] || "Flasche", known[1] || "Kasten", "", known[1] || "Kasten",
-            "Getränke Nord GmbH",
-            "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
-            .concat(st.attrs.map(() => "")));
-          // Damit in Excel nichts geraten werden muss: eine Zeile mit allen
-          // vorhandenen Quantitäten zum Abschreiben. Sie wird beim Import
-          // übersprungen, weil sie keinen Namen trägt.
-          if (known.length) {
-            rows.push([""].concat(new Array(8).fill(""))
-              .concat([known.join(" | "), known.join(" | "), known.join(" | "), known.join(" | ")])
-              .concat(new Array(5).fill("")).concat(st.attrs.map(() => "")));
-          }
+            places[0] || "", "30.04.2027", "8,49 €", known[0] || "", known[1] || "", "", known[1] || known[0] || "",
+            "Getränke Nord GmbH", ppl[0] || "", ppl[1] || "", "", "", "Getränke, Küche", "https://"].concat(st.attrs.map(() => "")));
         }
+        // Zweites Blatt: die erlaubten Werte. Die Auswahllisten zeigen darauf,
+        // Excel lässt dann nur diese Werte zu.
+        const lists = [
+          places.filter(x => x && x !== "—"),
+          this.unitDefs().map(d => d.name),
+          (st.members || []).filter(m => m.status !== "gesperrt" && m.status !== "removed" && m.status !== "blocked").map(m => m.name)
+        ];
+        const listRows = [[T("Lagerorte"), T("Quantitäten"), T("Personen")]];
+        const maxLen = Math.max(0, ...lists.map(l => l.length));
+        for (let i = 0; i < maxLen; i++) listRows.push(lists.map(l => l[i] || ""));
+        const N = 1000;
+        const dv = [];
+        const add = (cols, col, l, title) => {
+          if (!l.length) return;
+          dv.push({ sqref: cols.map(c => c + "2:" + c + N).join(" "), formula: "Listen!$" + col + "$2:$" + col + "$" + (l.length + 1),
+            title: title, error: T("Bitte einen Wert aus der Liste wählen.") });
+        };
+        add(["G"], "A", lists[0], T("Lagerort"));
+        add(["J", "K", "L", "M"], "B", lists[1], T("Quantität"));
+        add(["O", "P", "Q", "R"], "C", lists[2], T("Person"));
+        const blob = this.xlsxBuild([
+          { name: T("Produkte").slice(0, 31), rows: rows, freeze: true, validations: dv,
+            widths: [34, 15, 11, 11, 13, 12, 22, 12, 10, 13, 13, 13, 16, 20, 18, 18, 18, 18, 22, 26] },
+          { name: "Listen", rows: listRows, widths: [26, 18, 22] }
+        ]);
         const filled = activeProducts.length > 0;
-        this.download(filled ? "stockcontrol-bestand.csv" : "stockcontrol-vorlage.csv", rows);
-        this.say("Excel", filled ? this.tr("Vorlage mit Bestand") : this.tr("Leere Vorlage"),
-          filled
-            ? activeProducts.length + " " + (activeProducts.length === 1 ? this.tr("Produkt") : this.tr("Produkte")) + " " + this.tr("übernommen")
-            : this.tr("Eine Spalte pro Feld. In „Quantität 1–3\" die Namen aus den Einstellungen eintragen."));
+        this.downloadBlob(filled ? "stockcontrol-bestand.xlsx" : "stockcontrol-vorlage.xlsx", blob);
+        this.say("Excel", filled ? T("Vorlage mit Bestand") : T("Leere Vorlage"),
+          (filled ? activeProducts.length + " " + (activeProducts.length === 1 ? T("Produkt") : T("Produkte")) + " " + T("übernommen") + " · " : "")
+          + T("Lagerort, Quantitäten und Personen sind Auswahllisten."));
       },
       npName: st.npName, npEan: st.npEan, npResp: st.npResp,
       npD1: st.npD1, npD2: st.npD2, npD3: st.npD3,

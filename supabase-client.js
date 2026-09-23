@@ -148,7 +148,7 @@ export async function loadAll() {
     sb.from("products").select("*").order("aktiv", { ascending: false }).order("name"),
     sb.from("profiles").select("id, name, email, role, status, permissions"),
     sb.from("events").select("*, event_items(product_id, qty)").order("datum"),
-    sb.from("movements").select("*").order("created_at", { ascending: false }).limit(50),
+    sb.from("movements").select("*").order("created_at", { ascending: false }).limit(5000),
     sb.from("settings").select("*").maybeSingle()
   ]);
   return {
@@ -278,6 +278,24 @@ export async function createEvent({ name, datum, ort, items }) {
     ok(await sb.from("event_items").insert(items.map(i => ({ event_id: ev.id, product_id: i.id, qty: i.qty }))));
   }
   return ev;
+}
+
+// Event ändern: Kopfdaten aktualisieren, Positionen komplett ersetzen.
+export async function updateEvent({ id, name, datum, ort, items }) {
+  const sb = await client();
+  ok(await sb.from("events").update({ name, datum, ort }).eq("id", id).select());
+  ok(await sb.from("event_items").delete().eq("event_id", id).select());
+  if (items && items.length) {
+    ok(await sb.from("event_items").insert(items.map(i => ({ event_id: id, product_id: i.id, qty: i.qty }))));
+  }
+  return true;
+}
+
+export async function deleteEvent(id) {
+  const sb = await client();
+  const { error } = await sb.from("events").delete().eq("id", id);
+  if (error) throw error;
+  return true;
 }
 
 /* ── Einstellungen ──────────────────────────────────────── */
