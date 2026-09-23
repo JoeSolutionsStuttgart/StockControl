@@ -334,8 +334,8 @@
                   <tr>
                     <td style="font-weight: 500">{{ row.name }}</td>
                     <td data-i18n-keep>{{ row.istLabel }}</td>
-                    <td>{{ row.min }}</td>
-                    <td>{{ row.bestellmenge }}</td>
+                    <td data-i18n-keep>{{ row.minLabel }}</td>
+                    <td data-i18n-keep>{{ row.bmLabel }}</td>
                     <td class="text-muted">{{ row.lieferant }}</td>
                     <td>
                       <div style="display: flex; flex-direction: column; gap: 4px; min-width: 190px">
@@ -443,7 +443,7 @@
                     <div style="font-size: 11px; color: var(--sc-ink-3)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
                   </td>
                   <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ p.istLabel }}</td>
-                  <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.min }}</td>
+                  <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.minLabel }}</td>
                   <td><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
                   <td class="text-muted">{{ p.ort }}</td>
                   <td style="text-align: right"><span style="color: var(--color-accent); font-size: 12px" data-i18n>Details</span></td>
@@ -506,11 +506,11 @@
                 </div>
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Mindestbestand</div>
-                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--sc-ink-2)">{{ current.min }}</div>
+                  <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1; color: var(--sc-ink-2)">{{ minLabel }}</div>
                 </div>
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Bestellmenge</div>
-                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; color: var(--sc-ink-2)">{{ current.bestellmenge }}</div>
+                  <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1; color: var(--sc-ink-2)">{{ orderLabel }}</div>
                 </div>
               </div>
             </div>
@@ -1055,14 +1055,13 @@
                 <sc-if value="{{ o.allFilled }}" hint-placeholder-val="{{ false }}">
                   <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.close }}"><span data-i18n>Bestellung abschließen</span></button>
                 </sc-if>
-                <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ o.backAll }}"><span data-i18n>Alles zurück in Bestand</span></button>
               </div>
               <div style="display: flex; flex-direction: column; gap: 2px">
                 <sc-for list="{{ o.items }}" as="oi" hint-placeholder-count="3">
                   <div style="display: flex; flex-direction: column; gap: 5px; padding: 8px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
                     <div style="display: flex; align-items: center; gap: var(--space-2)">
                       <div style="flex: 1; min-width: 0">
-                        <div style="font-size: 13.5px; font-weight: 500">{{ oi.name }}</div>
+                        <div style="font-size: 13.5px; font-weight: 500; color: {{ oi.nameColor }}">{{ oi.name }}</div>
                         <div data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.note }}</div>
                       </div>
                       <sc-if value="{{ oi.filled }}" hint-placeholder-val="{{ false }}">
@@ -1085,7 +1084,7 @@
                     </sc-if>
                     <sc-if value="{{ oi.open }}" hint-placeholder-val="{{ true }}">
                       <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
-                        <button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button>
+                        <button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" disabled="{{ oi.refillOff }}" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button>
                         <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.amountNote }}</span>
                       </div>
                     </sc-if>
@@ -1302,6 +1301,9 @@
             <div style="grid-column: 1 / -1; font-size: 12px; color: var(--sc-ink-2); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
             <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
             <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" min="0" step="1" value="{{ npIst }}" onInput="{{ setNpIst }}"></div>
+            <sc-if value="{{ npHasRest }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label data-i18n-keep>{{ npRestLabel }}</label><input class="input" type="number" min="0" step="1" value="{{ npIstRest }}" onInput="{{ setNpIstRest }}"></div>
+            </sc-if>
             <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" min="0" step="1" value="{{ npOrder }}" onInput="{{ setNpOrder }}"></div>
             <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
                 <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
@@ -3582,6 +3584,11 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Fix it in product editing or with a new import.",
     "Fehler beim Import": "Import errors", "Verstanden": "Got it", "Fehlerliste herunterladen": "Download error list", "Fehler": "Error",
     "Standard": "default", "— keine —": "— none —",
+    "dazu einzeln": "plus single", "Istbestand einzeln": "Stock single",
+    "Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben": "Enter stock, minimum and order quantity in this quantity",
+    "einzelne im Feld „dazu einzeln\"": "single ones in the field “plus single”",
+    "Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert": "Single stock without a larger default quantity — added to stock",
+    "Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ": "Single stock is a full pack or more — added anyway: ",
     "Kein Zugriff auf die Rechteverwaltung": "No access to rights administration",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Who holds which rights is visible and editable only to the owner and to anyone expressly given the right to change rights.",
     "Bestellung nicht gespeichert": "Order not saved",
@@ -4285,6 +4292,11 @@ const DICT = {
     "Korrigieren lässt sich das in der Produktbearbeitung oder mit einem neuen Import.": "Rätta det i artikelredigeringen eller med en ny import.",
     "Fehler beim Import": "Fel vid import", "Verstanden": "Uppfattat", "Fehlerliste herunterladen": "Ladda ner fellista", "Fehler": "Fel",
     "Standard": "standard", "— keine —": "— ingen —",
+    "dazu einzeln": "plus styck", "Istbestand einzeln": "Lager styck",
+    "Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben": "Ange lager, minimum och beställningsantal i denna kvantitet",
+    "einzelne im Feld „dazu einzeln\"": "enstaka i fältet ”plus styck”",
+    "Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert": "Styck utan större standardkvantitet — lagt till lagret",
+    "Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ": "Styck är en hel förpackning eller mer — lagt till ändå: ",
     "Kein Zugriff auf die Rechteverwaltung": "Ingen åtkomst till rättighetshanteringen",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Vem som har vilka rättigheter ser och ändrar bara ägaren och den som uttryckligen fått rätten att ändra rättigheter.",
     "Bestellung nicht gespeichert": "Beställningen sparades inte",
@@ -4656,7 +4668,7 @@ class Component extends DCLogic {
         "Lager Nord · Palette 7", "Werkstatt · Schublade 12"],
       newPlace: "", draftFor: null, draftName: "", draftEmail: "",
       npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
-      npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "",
+      npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "", npIstRest: "",
       npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: "",
       mailTime: "07:30", mailDay: "1", importParsed: [],
       units: {}, unitQty: {}, newUnitName: "", newUnitFactor: "12", newUnitRef: "",
@@ -5044,6 +5056,7 @@ class Component extends DCLogic {
       name: ["name", "artikelname", "artikel", "bezeichnung", "produkt", "produktname", "titel"],
       ean: ["ean", "artikelnummer", "artikel-nr", "artikelnr", "nummer", "sku", "barcode", "gtin"],
       ist: ["istbestand", "ist", "bestand", "menge", "anzahl", "stück", "stueck"],
+      istRest: ["istbestand einzeln", "dazu einzeln", "einzeln", "einzelmenge", "istbestand einzelmenge", "rest"],
       min: ["mindestbestand", "min", "minimum", "meldebestand", "mindest"],
       bestellmenge: ["bestellmenge", "bestellen", "nachbestellmenge", "nachbestellung"],
       ort: ["lagerort", "ort", "lagerplatz", "platz", "regal", "standort", "lager"],
@@ -5091,7 +5104,7 @@ class Component extends DCLogic {
     // Zuordnung mitgeben, damit die Prüftabelle die echte Datei zeigt
     // und nicht eine erfundene Beispielliste.
     const LABEL = {
-      name: "Name", ean: "EAN", ist: "Istbestand", min: "Mindestbestand",
+      name: "Name", ean: "EAN", ist: "Istbestand", istRest: "Istbestand einzeln", min: "Mindestbestand",
       bestellmenge: "Bestellmenge", ort: "Lagerort", mhd: "MHD", preis: "Preis",
       quantitaet: "Quantität", q1: "Quantität 1", q2: "Quantität 2", q3: "Quantität 3",
       std: "Standardquantität", lieferant: "Lieferant",
@@ -5462,7 +5475,7 @@ class Component extends DCLogic {
     if (!std) return this.tr("Standardquantität wählen.");
     const f = this.unitFactor(std), base = this.baseNameOf(std);
     return this.tr("Gebucht und angezeigt wird in ") + std + (f > 1 ? " (= " + f + " " + base + ")" : "") + ". "
-      + this.tr("Bestände und Mindestmengen zählen in der kleinsten Einheit") + " (" + base + ").";
+      + this.tr("Istbestand, Mindestbestand und Bestellmenge in dieser Quantität angeben") + (f > 1 ? " — " + this.tr("einzelne im Feld „dazu einzeln\"") + " (" + base + ")" : "") + ".";
   }
 
   draftUnits(p) {
@@ -5810,7 +5823,7 @@ class Component extends DCLogic {
     }
     if (!names.length && known.length) errs.push(this.tr("Keine Quantität zugewiesen"));
     const nums = {};
-    [["ist", "Istbestand"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"]].forEach(([k, label]) => {
+    [["ist", "Istbestand"], ["istRest", "Istbestand einzeln"], ["min", "Mindestbestand"], ["bestellmenge", "Bestellmenge"]].forEach(([k, label]) => {
       const v = String(r[k] == null ? "" : r[k]).trim();
       const clean = v.replace(/[.\s']/g, "");
       if (!v) { nums[k] = 0; return; }
@@ -5822,6 +5835,13 @@ class Component extends DCLogic {
       nums[k] = parseInt(clean, 10);
       if (nums[k] > 1000000) errs.push(this.tr(label) + ": " + nums[k] + " " + this.tr("wirkt unplausibel hoch — bitte prüfen"));
     });
+    // Die Zahlen stehen in der Standardquantität, einzelne kommen dazu.
+    const F = std ? Math.max(1, this.unitFactor(std)) : 1;
+    if (F === 1 && nums.istRest) errs.push(this.tr("Istbestand einzeln ohne größere Standardquantität — zum Istbestand addiert"));
+    if (F > 1 && nums.istRest >= F) errs.push(this.tr("Istbestand einzeln ist ein volles Gebinde oder mehr — trotzdem addiert: ") + nums.istRest);
+    nums.ist = nums.ist * F + (nums.istRest || 0);
+    nums.min = nums.min * F;
+    nums.bestellmenge = nums.bestellmenge * F;
     let preis = r.preis || "—";
     if (r.preis && this.parsePrice(r.preis) == null) { preis = "—"; errs.push(this.tr("Preis nicht lesbar: ") + r.preis); }
     // Datum immer als JJJJ-MM-TT weitergeben — die Datenbank liest
@@ -6113,16 +6133,32 @@ class Component extends DCLogic {
   // Lieferung eintragen: die Mengen gehen in den Bestand, die Buchung in
   // den Verlauf, der Status wieder auf „Bestand ok". Wo nichts eingetragen
   // ist, passiert nichts — die Felder dort bleiben offen.
+  // Fingerabdruck der Mengen einer Position — daran erkennt die Bestellung,
+  // ob nach dem Nachfüllen etwas geändert wurde.
+  amountSig(rows) {
+    return (rows || []).filter(r => this.toNum(r.qty) > 0)
+      .map(r => (r.unit || "") + ":" + this.toNum(r.qty)).sort().join("|");
+  }
+
+  // Nachfüllbar ist, was eine Menge trägt und noch nicht nachgefüllt wurde
+  // — oder seit dem letzten Nachfüllen geändert wurde.
+  refillReady(o, p) {
+    if (!o || !p) return false;
+    const rows = (o.amounts || {})[p.id];
+    if (this.amountTotal(p, rows) <= 0) return false;
+    if ((o.done || []).indexOf(p.id) < 0) return true;
+    return ((o.snap || {})[p.id] || "") !== this.amountSig(rows);
+  }
+
   refillOrder(orderId, ids, who) {
     const o = (this.state.orders || []).find(x => x.id === orderId);
     if (!o) return;
-    const done = [];
+    const done = [], snap = {};
     (ids || []).forEach(pid => {
-      if ((o.done || []).indexOf(pid) >= 0) return;
       const p = this.state.products.find(x => x.id === pid);
-      if (!p) return;
+      if (!p || !this.refillReady(o, p)) return;
       const add = this.amountTotal(p, (o.amounts || {})[pid]);
-      if (add <= 0) return;
+      snap[pid] = this.amountSig((o.amounts || {})[pid]);
       this.applyBooking(p, (Number(p.ist) || 0) + add, false, "+" + add, who);
       this.bookRemote(p.id, add, this.tr("Nachfüllung aus Bestellung"));
       done.push(pid);
@@ -6133,7 +6169,8 @@ class Component extends DCLogic {
       return;
     }
     const orders = (this.state.orders || []).map(x => x.id === orderId
-      ? Object.assign({}, x, { done: (x.done || []).concat(done) }) : x);
+      ? Object.assign({}, x, { done: Array.from(new Set((x.done || []).concat(done))),
+          snap: Object.assign({}, x.snap || {}, snap) }) : x);
     this.setState({ orders: orders });
     if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
     this.say(this.tr("Nachfüllen"), done.length + " × " + this.tr("Artikel"), this.tr("Bestand erhöht"));
@@ -6692,7 +6729,7 @@ class Component extends DCLogic {
         statusLabel: off ? this.tr("Deaktiviert") : s.label,
         tagClass: off ? "tag tag-outline" : s.tag,
         rowStyle: off ? "opacity: .45" : "",
-        kategorien: p.kategorien, istLabel: this.fmtStock(p, p.ist),
+        kategorien: p.kategorien, istLabel: this.fmtStock(p, p.ist), minLabel: this.fmtStock(p, p.min), bmLabel: this.fmtStock(p, p.bestellmenge),
         open: () => this.setState({ currentId: p.id, screen: "detail", qty: 1 })
       });
     };
@@ -6710,7 +6747,7 @@ class Component extends DCLogic {
     const orderList = low.map(p => {
       const s = this.statusOf(p);
       return Object.assign({}, p, {
-        statusLabel: s.label, tagClass: s.tag, istLabel: this.fmtStock(p, p.ist),
+        statusLabel: s.label, tagClass: s.tag, istLabel: this.fmtStock(p, p.ist), minLabel: this.fmtStock(p, p.min), bmLabel: this.fmtStock(p, p.bestellmenge),
         mayOrder: mine(p), locked: !mine(p),
         lockNote: this.tr("nur ") + p.verantwortlich,
         action: this.tr("In Bestellung"),
@@ -6730,20 +6767,25 @@ class Component extends DCLogic {
     const orderItem = (p, oid, o) => {
       const rows = ((o && o.amounts) || {})[p.id] || [{ qty: "", unit: "" }];
       const filled = ((o && o.done) || []).indexOf(p.id) >= 0;
+      const ready = this.refillReady(o, p);
       return {
         name: p.name,
-        note: this.tr("Bestand ") + this.fmtStock(p, p.ist) + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
+        // Nachgefüllt: nur der Name wird grau. Die Felder bleiben offen —
+        // erst eine geänderte Menge lässt sich erneut nachfüllen.
+        nameColor: filled ? "var(--sc-ink-3)" : "var(--color-text)",
+        refillOff: !ready,
+        note: this.tr("Bestand ") + this.fmtStock(p, p.ist) + " · " + this.tr("Min ") + this.fmtStock(p, p.min) + " · " + (p.lieferant || "—"),
         back: () => this.backToStock([p.id], oid),
         // Nachgefüllte Positionen sind erledigt: die Felder werden
         // ausgegraut, damit dieselbe Lieferung nicht zweimal zählt.
-        filled: filled, open: !filled && !!oid,
+        filled: filled, open: !!oid,
         // Verwaiste Artikel gehören zu keiner Bestellung: dort gäbe es
         // nichts zu speichern, also auch keine Mengenfelder.
         orphan: !oid, hasAmounts: !!oid,
         filledLabel: filled ? this.tr("nachgefüllt") : "",
         amountNote: this.amountLabel(p, rows),
         unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
-        amountFields: this.amountFieldsFor(p, rows, (u, v) => this.setOrderAmountU(oid, p, u, v), filled),
+        amountFields: this.amountFieldsFor(p, rows, (u, v) => this.setOrderAmountU(oid, p, u, v), false),
         refill: () => this.refillOrder(oid, [p.id], meLabel)
       };
     };
@@ -6755,10 +6797,9 @@ class Component extends DCLogic {
         byLabel: o.by ? this.tr("bestellt von ") + o.by : "",
         countLabel: items.length + " × " + this.tr("Artikel"),
         items: items.map(p => orderItem(p, o.id, o)),
-        backAll: () => this.backToStock(items.map(p => p.id), o.id),
-        hasOpen: openIds.length > 0,
+        hasOpen: items.some(p => this.refillReady(o, p)),
         allFilled: openIds.length === 0,
-        refillAll: () => this.refillOrder(o.id, openIds, meLabel),
+        refillAll: () => this.refillOrder(o.id, items.map(p => p.id), meLabel),
         close: () => this.closeOrder(o.id)
       };
     }).filter(c => c.items.length);
@@ -6768,7 +6809,6 @@ class Component extends DCLogic {
         id: this.tr("Ohne Zuordnung"), when: this.tr("früher gesetzt"), byLabel: "",
         countLabel: orphans.length + " × " + this.tr("Artikel"),
         items: orphans.map(p => orderItem(p, null, null)),
-        backAll: () => this.backToStock(orphans.map(p => p.id), null),
         hasOpen: false, allFilled: false,
         refillAll: () => {}, close: () => {}
       });
@@ -7055,6 +7095,7 @@ class Component extends DCLogic {
       // Bestand als Quantitäten gelesen, plus Warnung, wenn die eingetippte
       // Menge über dem Bestand liegt.
       stockMain: this.fmtStock(cur, cur.ist),
+      minLabel: this.fmtStock(cur, cur.min), orderLabel: this.fmtStock(cur, cur.bestellmenge),
       stockSplit: "= " + cur.ist + " " + this.baseUnitName(cur),
       hasStockSplit: (() => { const s = this.stdUnit(cur); return !!s && Number(s.faktor) > 1 && cur.ist % Number(s.faktor) !== 0; })(),
       overStock: this.bookTotal(cur) > cur.ist,
@@ -7289,12 +7330,16 @@ class Component extends DCLogic {
         }, opts || {});
         const num = { type: "number", mode: "numeric" };
         const people = (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name }));
+        const sd = d.std || "";
+        const sF = sd ? Math.max(1, this.unitFactor(sd)) : 1;
+        const sfx = sd ? " (" + sd + ")" : "";
         return [
           f("name", "Name", { span: "1 / -1" }),
           f("ean", "EAN", { hint: "4001234567890" }),
-          f("ist", "Istbestand", num),
-          f("min", "Mindestbestand", num),
-          f("bestellmenge", "Bestellmenge", num),
+          f("ist", "Istbestand", Object.assign({ label: this.tr("Istbestand") + sfx }, num)),
+          ...(sF > 1 ? [f("istRest", "Istbestand", Object.assign({ label: this.tr("dazu einzeln") + " (" + this.baseNameOf(sd) + ")" }, num))] : []),
+          f("min", "Mindestbestand", Object.assign({ label: this.tr("Mindestbestand") + sfx }, num)),
+          f("bestellmenge", "Bestellmenge", Object.assign({ label: this.tr("Bestellmenge") + sfx }, num)),
           f("ort", "Lagerort", { isSelect: true, isText: false,
             options: places.map(p => ({ value: p, label: p })) }),
           f("preis", "Preis", { hint: "8,49 €" }),
@@ -7338,7 +7383,12 @@ class Component extends DCLogic {
         confirmDelete: false, editing: true,
         editDraft: Object.assign(this.draftUnits(cur), {
           name: cur.name, ean: cur.ean === "—" ? "" : cur.ean,
-          ist: cur.ist, min: cur.min, bestellmenge: cur.bestellmenge,
+          ...(() => {
+            const du = this.draftUnits(cur);
+            const F = du.std ? Math.max(1, this.unitFactor(du.std)) : 1;
+            return { ist: Math.floor(cur.ist / F), istRest: (cur.ist % F) || "",
+              min: Math.ceil(cur.min / F), bestellmenge: Math.ceil(cur.bestellmenge / F) };
+          })(),
           ort: cur.ort, quantitaet: cur.quantitaet === "—" ? "" : cur.quantitaet,
           preis: cur.preis === "—" ? "" : cur.preis, mhd: cur.mhd === "—" ? "" : cur.mhd,
           lieferant: cur.lieferant === "—" ? "" : cur.lieferant,
@@ -7356,11 +7406,12 @@ class Component extends DCLogic {
         const d = st.editDraft || {};
         const name = String(d.name || "").trim();
         if (!name) return;
-        const ist = this.toNum(d.ist), min = this.toNum(d.min);
+        const F = d.std ? Math.max(1, this.unitFactor(d.std)) : 1;
+        const ist = this.toNum(d.ist) * F + (F > 1 ? this.toNum(d.istRest) : 0), min = this.toNum(d.min) * F;
         const ladder = this.ladderFrom(d.units || [], d.std || "");
         const patch = {
           name, ean: String(d.ean || "").trim() || "—",
-          ist, min, bestellmenge: this.toNum(d.bestellmenge),
+          ist, min, bestellmenge: this.toNum(d.bestellmenge) * F,
           ort: String(d.ort || "").trim() || cur.ort,
           quantitaet: d.std || (cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : "—"),
           preis: String(d.preis || "").trim() || "—",
@@ -8138,8 +8189,8 @@ class Component extends DCLogic {
 
       downloadTemplate: () => {
         // Kopfzeile trägt alle Felder, inklusive der eigenen Merkmale.
-        const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
-          this.tr("Lagerort"), "MHD", this.tr("Preis"), this.tr("Quantität"),
+        const head = [this.tr("Name"), "EAN", this.tr("Istbestand"), this.tr("Istbestand einzeln"), this.tr("Mindestbestand"), this.tr("Bestellmenge"),
+          this.tr("Lagerort"), "MHD", this.tr("Preis"),
           this.tr("Quantität") + " 1", this.tr("Quantität") + " 2", this.tr("Quantität") + " 3", this.tr("Standardquantität"),
           this.tr("Lieferant"),
           this.tr("Verantwortlich"), this.tr("Stellvertretung"), this.tr("Kategorien"), this.tr("Link zum Produkt")]
@@ -8156,8 +8207,10 @@ class Component extends DCLogic {
             const own = (st.units[p.id] || []).slice()
               .sort((a, b) => Number(a.faktor) - Number(b.faktor)).map(u => u.name);
             rows.push([
-              p.name, clean(p.ean), p.ist, p.min, p.bestellmenge, clean(p.ort), clean(p.mhd),
-              clean(p.preis), clean(p.quantitaet),
+              p.name, clean(p.ean),
+              ...(() => { const s0 = this.stdUnit(p); const F = s0 ? Math.max(1, Number(s0.faktor) || 1) : 1;
+                return [Math.floor(p.ist / F), F > 1 ? (p.ist % F) || "" : "", Math.ceil(p.min / F), Math.ceil(p.bestellmenge / F)]; })(),
+              clean(p.ort), clean(p.mhd), clean(p.preis),
               own[0] || "", own[1] || "", own[2] || "",
               ((st.units[p.id] || []).find(u => u.std) || {}).name || "",
               clean(p.lieferant), clean(p.verantwortlich),
@@ -8166,8 +8219,8 @@ class Component extends DCLogic {
           });
         } else {
           const known = this.unitDefs().map(d => d.name);
-          rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 24, 10, 20,
-            "Keller · Regal B2", "30.04.2027", "8,49 €", "Kasten (12 Flaschen)",
+          rows.push(["Mineralwasser still, Kasten 12 × 0,75 l", "4001234567890", 8, 4, 3, 5,
+            "Keller · Regal B2", "30.04.2027", "8,49 €",
             known[0] || "Flasche", known[1] || "Kasten", "", known[1] || "Kasten",
             "Getränke Nord GmbH",
             "Marie Kohl", "Timo Brand, Anke Reuß", "Getränke, Küche", "https://"]
@@ -8201,6 +8254,10 @@ class Component extends DCLogic {
       setNpD3: e => this.setState({ npD3: e.target.value }),
       setNpMin: e => this.setState({ npMin: e.target.value }),
       setNpIst: e => this.setState({ npIst: e.target.value }),
+      npIstRest: st.npIstRest || "",
+      setNpIstRest: e => this.setState({ npIstRest: e.target.value }),
+      npHasRest: !!st.npStd && this.unitFactor(st.npStd) > 1,
+      npRestLabel: st.npStd ? this.tr("dazu einzeln") + " (" + this.baseNameOf(st.npStd) + ")" : "",
       setNpOrder: e => this.setState({ npOrder: e.target.value }),
       setNpQty: e => this.setState({ npQty: e.target.value }),
       npUnitPick: this.unitDefs().map(d => {
@@ -8250,10 +8307,12 @@ class Component extends DCLogic {
           return;
         }
         const ladder = this.ladderFrom(st.npUnits || [], st.npStd || "");
-        const ist = this.toNum(st.npIst), min = this.toNum(st.npMin);
+        const F = st.npStd ? Math.max(1, this.unitFactor(st.npStd)) : 1;
+        const ist = this.toNum(st.npIst) * F + (F > 1 ? this.toNum(st.npIstRest) : 0), min = this.toNum(st.npMin) * F;
+        const bm = this.toNum(st.npOrder) * F;
         const id = this.nextCode();
         const row = {
-          id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
+          id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: bm,
           ort: placeOf(st.npPlace), mhd: st.npMhd || "—", preis: st.npPrice || "—",
           quantitaet: st.npStd || st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
           kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
@@ -8266,7 +8325,7 @@ class Component extends DCLogic {
           products: [row].concat(prev.products), currentId: id, screen: "detail", qty: 1,
           units: Object.assign({}, prev.units, { [id]: ladder }), unitQty: {},
           npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
-          npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "",
+          npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "", npIstRest: "",
           npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: ""
         }));
         // Nach dem Anlegen neu laden: erst dann trägt das Produkt seine
@@ -8274,7 +8333,7 @@ class Component extends DCLogic {
         if (st.live && this.api) {
           const payload = {
             code: id,
-            name, ean: st.npEan || null, ist, min, bestellmenge: this.toNum(st.npOrder),
+            name, ean: st.npEan || null, ist, min, bestellmenge: bm,
             ort: row.ort, preis: this.parsePrice(st.npPrice), mhd: st.npMhd || null,
             quantitaet: st.npStd || st.npQty || null, einheiten: ladder, lieferant: st.npSupplier || null,
             link: st.npLink || null, kategorien: row.kategorien, status: row.status,
