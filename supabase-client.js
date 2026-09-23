@@ -146,7 +146,7 @@ export async function loadAll() {
   const sb = await client();
   const [products, members, events, movements, settings] = await Promise.all([
     sb.from("products").select("*").order("aktiv", { ascending: false }).order("name"),
-    sb.from("profiles").select("id, name, email, role, status"),
+    sb.from("profiles").select("id, name, email, role, status, permissions"),
     sb.from("events").select("*, event_items(product_id, qty)").order("datum"),
     sb.from("movements").select("*").order("created_at", { ascending: false }).limit(50),
     sb.from("settings").select("*").maybeSingle()

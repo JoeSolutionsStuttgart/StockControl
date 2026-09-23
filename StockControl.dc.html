@@ -333,25 +333,21 @@
                 <sc-for list="{{ orderList }}" as="row" hint-placeholder-count="4">
                   <tr>
                     <td style="font-weight: 500">{{ row.name }}</td>
-                    <td>{{ row.ist }}</td>
+                    <td data-i18n-keep>{{ row.istLabel }}</td>
                     <td>{{ row.min }}</td>
                     <td>{{ row.bestellmenge }}</td>
                     <td class="text-muted">{{ row.lieferant }}</td>
                     <td>
                       <div style="display: flex; flex-direction: column; gap: 4px; min-width: 190px">
-                        <sc-for list="{{ row.amountRows }}" as="ar" hint-placeholder-count="1">
-                          <div style="display: flex; gap: 4px">
-                            <input class="input" type="number" min="0" step="1" style="width: 68px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.qty }}" onInput="{{ ar.setQty }}">
-                            <select class="input" style="flex: 1; min-width: 88px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.unit }}" onChange="{{ ar.setUnit }}">
-                              <option value="" data-i18n>kleinste Einheit</option>
-                              <sc-for list="{{ row.unitOptions }}" as="uo" hint-placeholder-count="2">
-                                <option data-i18n-keep value="{{ uo.name }}">{{ uo.label }}</option>
-                              </sc-for>
-                            </select>
-                          </div>
-                        </sc-for>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 4px 6px">
+                          <sc-for list="{{ row.amountFields }}" as="af" hint-placeholder-count="2">
+                            <label style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                              <span data-i18n-keep style="font-size: 10.5px; color: var(--sc-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ af.name }}</span>
+                              <input class="input" type="number" min="0" step="1" inputmode="numeric" style="width: 100%; padding: 3px 6px; font-size: 12.5px" value="{{ af.qty }}" disabled="{{ af.locked }}" onInput="{{ af.set }}">
+                            </label>
+                          </sc-for>
+                        </div>
                         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
-                          <button class="btn btn-ghost" style="padding: 1px 7px; font-size: 12px" onClick="{{ row.addAmount }}">+</button>
                           <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ row.amountNote }}</span>
                         </div>
                       </div>
@@ -446,7 +442,7 @@
                     {{ p.name }}
                     <div style="font-size: 11px; color: var(--sc-ink-3)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
                   </td>
-                  <td style="text-align: right; font-variant-numeric: tabular-nums">{{ p.ist }}</td>
+                  <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ p.istLabel }}</td>
                   <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.min }}</td>
                   <td><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
                   <td class="text-muted">{{ p.ort }}</td>
@@ -503,7 +499,7 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4)">
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Istbestand</div>
-                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1">{{ current.ist }}</div>
+                  <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1">{{ stockMain }}</div>
                   <sc-if value="{{ hasStockSplit }}" hint-placeholder-val="{{ false }}">
                     <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2); margin-top: 2px">{{ stockSplit }}</div>
                   </sc-if>
@@ -608,6 +604,31 @@
                   </div>
                 </sc-for>
               </div>
+              <div style="display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
+                <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); margin-right: auto" data-i18n>Quantitäten</div>
+                  <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ goUnitSettings }}"><span data-i18n>Quantitäten verwalten</span></button>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                  <sc-for list="{{ editUnitPick }}" as="up" hint-placeholder-count="3">
+                    <label style="display: flex; align-items: center; gap: 7px; padding: 5px 9px; cursor: pointer; font-size: 13px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)">
+                      <input type="checkbox" checked="{{ up.checked }}" onChange="{{ up.toggle }}" style="width: 15px; height: 15px; accent-color: var(--color-accent); flex: none">
+                      <span data-i18n-keep>{{ up.name }}</span>
+                      <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ up.relLabel }}</span>
+                    </label>
+                  </sc-for>
+                </div>
+                <div class="field" style="margin: 0; max-width: 280px">
+                  <label data-i18n>Standardquantität</label>
+                  <select class="input" value="{{ editStd }}" onChange="{{ setEditStd }}">
+                    <option value="">— bitte wählen —</option>
+                    <sc-for list="{{ editStdOptions }}" as="so" hint-placeholder-count="2">
+                      <option data-i18n-keep value="{{ so.name }}">{{ so.name }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div data-i18n-keep style="font-size: 12px; line-height: 1.45; color: var(--sc-ink-2)">{{ editUnitNote }}</div>
+              </div>
               <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
                 <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ editSaveDisabled }}" onClick="{{ saveEdit }}"><span data-i18n>Änderungen übernehmen</span></button>
                 <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ cancelEdit }}"><span data-i18n>Abbrechen</span></button>
@@ -629,35 +650,6 @@
               <p style="margin: 0; font-size: 12px; color: var(--sc-ink-2)" data-i18n>Wer den Verlauf behalten will, schaltet das Produkt stattdessen auf „nicht aktiv" — es verschwindet dann aus allen Listen, bleibt aber auffindbar.</p>
             </section>
           </sc-if>
-
-          <section class="card blueprint">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
-              <h4 style="margin: 0; margin-right: auto" data-i18n>Quantitäten</h4>
-              <span class="tag tag-neutral">{{ unitCountLabel }}</span>
-            </div>
-            <p class="card-body" style="margin: 0" data-i18n>In welchen Gebinden wird dieses Produkt bewegt? Angehakte Quantitäten bekommen oben ein eigenes Buchungsfeld. Angelegt und ins Verhältnis gesetzt werden sie in den Einstellungen.</p>
-            <sc-if value="{{ unitPickLocked }}" hint-placeholder-val="{{ true }}">
-              <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; font-size: 12.5px; color: var(--color-accent-700)">
-                <span data-i18n>Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.</span>
-                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ startEdit }}"><span data-i18n>Bearbeiten</span></button>
-              </div>
-            </sc-if>
-
-            <div style="display: flex; flex-direction: column; gap: 2px">
-              <sc-for list="{{ unitPick }}" as="up" hint-placeholder-count="3">
-                <label style="display: flex; align-items: center; gap: var(--space-3); padding: 7px 2px; cursor: pointer; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                  <input type="checkbox" checked="{{ up.checked }}" onChange="{{ up.toggle }}" disabled="{{ up.locked }}" style="width: 17px; height: 17px; accent-color: var(--color-accent); flex: none">
-                  <span data-i18n-keep style="font-size: 13.5px; margin-right: auto">{{ up.name }}</span>
-                  <span data-i18n-keep class="tag tag-neutral">{{ up.relLabel }}</span>
-                </label>
-              </sc-for>
-            </div>
-            <sc-if value="{{ noUnitDefs }}" hint-placeholder-val="{{ false }}">
-              <p style="margin: 0; font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Es gibt noch keine Quantitäten. Unter Einstellungen → Quantitäten lassen sich Flasche, Kiste oder Palette anlegen.</p>
-            </sc-if>
-            <button class="btn btn-secondary" style="white-space: nowrap; align-self: flex-start" onClick="{{ goUnitSettings }}"><span data-i18n>Quantitäten verwalten</span></button>
-          </section>
 
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -1079,24 +1071,20 @@
                       <button class="btn btn-ghost" style="padding: 3px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.back }}"><span data-i18n>Zurück in Bestand</span></button>
                     </div>
                     <sc-if value="{{ oi.hasAmounts }}" hint-placeholder-val="{{ true }}">
-                    <sc-for list="{{ oi.amountRows }}" as="ar" hint-placeholder-count="1">
-                      <div style="display: flex; gap: 5px">
-                        <input class="input" type="number" min="0" step="1" style="width: 74px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.qty }}" disabled="{{ ar.locked }}" onInput="{{ ar.setQty }}">
-                        <select class="input" style="flex: 1; min-width: 96px; padding: 4px 7px; font-size: 12.5px" value="{{ ar.unit }}" disabled="{{ ar.locked }}" onChange="{{ ar.setUnit }}">
-                          <option value="" data-i18n>kleinste Einheit</option>
-                          <sc-for list="{{ oi.unitOptions }}" as="uo" hint-placeholder-count="2">
-                            <option data-i18n-keep value="{{ uo.name }}">{{ uo.label }}</option>
-                          </sc-for>
-                        </select>
-                      </div>
-                    </sc-for>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 4px 6px">
+                      <sc-for list="{{ oi.amountFields }}" as="af" hint-placeholder-count="2">
+                        <label style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                          <span data-i18n-keep style="font-size: 10.5px; color: var(--sc-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ af.name }}</span>
+                          <input class="input" type="number" min="0" step="1" inputmode="numeric" style="width: 100%; padding: 3px 6px; font-size: 12.5px" value="{{ af.qty }}" disabled="{{ af.locked }}" onInput="{{ af.set }}">
+                        </label>
+                      </sc-for>
+                    </div>
                     </sc-if>
                     <sc-if value="{{ oi.orphan }}" hint-placeholder-val="{{ false }}">
                       <div style="font-size: 11.5px; color: var(--sc-ink-3)" data-i18n>Ohne Bestellmengen — erst über die Bestellliste in Bestellung setzen, dann lässt sich hier nachgefüllt werden.</div>
                     </sc-if>
                     <sc-if value="{{ oi.open }}" hint-placeholder-val="{{ true }}">
                       <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
-                        <button class="btn btn-ghost" style="padding: 1px 7px; font-size: 12px" onClick="{{ oi.addAmount }}">+</button>
                         <button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button>
                         <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.amountNote }}</span>
                       </div>
@@ -1315,7 +1303,32 @@
             <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
             <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" min="0" step="1" value="{{ npIst }}" onInput="{{ setNpIst }}"></div>
             <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" min="0" step="1" value="{{ npOrder }}" onInput="{{ setNpOrder }}"></div>
-            <div class="field"><label data-i18n>Quantität</label><input class="input" value="{{ npQty }}" data-i18n-ph placeholder="Einzelflasche, Kasten …" onInput="{{ setNpQty }}"></div>
+            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
+                <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+                  <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); margin-right: auto" data-i18n>Quantitäten</div>
+                  <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ goUnitSettings }}"><span data-i18n>Quantitäten verwalten</span></button>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                  <sc-for list="{{ npUnitPick }}" as="up" hint-placeholder-count="3">
+                    <label style="display: flex; align-items: center; gap: 7px; padding: 5px 9px; cursor: pointer; font-size: 13px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)">
+                      <input type="checkbox" checked="{{ up.checked }}" onChange="{{ up.toggle }}" style="width: 15px; height: 15px; accent-color: var(--color-accent); flex: none">
+                      <span data-i18n-keep>{{ up.name }}</span>
+                      <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ up.relLabel }}</span>
+                    </label>
+                  </sc-for>
+                </div>
+                <div class="field" style="margin: 0; max-width: 280px">
+                  <label data-i18n>Standardquantität</label>
+                  <select class="input" value="{{ npStd }}" onChange="{{ setNpStd }}">
+                    <option value="">— bitte wählen —</option>
+                    <sc-for list="{{ npStdOptions }}" as="so" hint-placeholder-count="2">
+                      <option data-i18n-keep value="{{ so.name }}">{{ so.name }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div data-i18n-keep style="font-size: 12px; line-height: 1.45; color: var(--sc-ink-2)">{{ npUnitNote }}</div>
+              </div>
+
             <div class="field"><label data-i18n>Lagerort</label>
               <select class="input" value="{{ npPlace }}" onChange="{{ setNpPlace }}">
                 <option value="">— bitte wählen —</option>
@@ -1613,6 +1626,10 @@
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
               <button class="btn btn-secondary" onClick="{{ allowAll }}" disabled="{{ cannotManage }}"><span data-i18n>Alles erlauben</span></button>
               <button class="btn btn-secondary" onClick="{{ denyAll }}" disabled="{{ cannotManage }}"><span data-i18n>Alles sperren</span></button>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ rightsSaveOff }}" onClick="{{ saveRights }}"><span data-i18n>Rechte speichern</span></button>
+              <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ rightsNote }}</span>
             </div>
           </section>
           </sc-if>
@@ -3521,6 +3538,13 @@ const DICT = {
     "Bestand erhöht": "Stock increased", "Nachfüllung aus Bestellung": "Refill from order", "Abgeschlossen": "Closed",
     "Nur beim Bearbeiten": "Only while editing", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tap Edit above, then quantities can be assigned.",
+    "Standardquantität": "Default quantity", "Standardquantität wählen.": "Choose a default quantity.", "Standardquantität fehlt.": "Default quantity missing.",
+    "Mindestens eine Quantität anhaken.": "Tick at least one quantity.", "Gebucht und angezeigt wird in ": "Booked and shown in ",
+    "Bestände und Mindestmengen zählen in der kleinsten Einheit": "Stock and minimums count in the smallest unit",
+    "Menge eintragen, dann buchen.": "Enter a quantity, then book.", "Buchung": "Booking",
+    "Rechte speichern": "Save rights", "Rechte gespeichert": "Rights saved", "Rechte nicht gespeichert": "Rights not saved",
+    "Nicht gespeicherte Änderungen": "Unsaved changes", "Alle Rechte sind gespeichert.": "All rights are saved.",
+    "Nur in dieser Sitzung — ohne Datenbank.": "This session only — no database.",
     "Kein Zugriff auf die Rechteverwaltung": "No access to rights administration",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Who holds which rights is visible and editable only to the owner and to anyone expressly given the right to change rights.",
     "Bestellung nicht gespeichert": "Order not saved",
@@ -4205,6 +4229,13 @@ const DICT = {
     "Bestand erhöht": "Lagret ökat", "Nachfüllung aus Bestellung": "Påfyllning från beställning", "Abgeschlossen": "Avslutad",
     "Nur beim Bearbeiten": "Bara vid redigering", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Tilldela bara vid redigering eller via Excel-tabellen.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tryck på Redigera ovan, sedan kan enheter tilldelas.",
+    "Standardquantität": "Standardkvantitet", "Standardquantität wählen.": "Välj en standardkvantitet.", "Standardquantität fehlt.": "Standardkvantitet saknas.",
+    "Mindestens eine Quantität anhaken.": "Markera minst en kvantitet.", "Gebucht und angezeigt wird in ": "Bokas och visas i ",
+    "Bestände und Mindestmengen zählen in der kleinsten Einheit": "Lager och minimum räknas i minsta enheten",
+    "Menge eintragen, dann buchen.": "Ange ett antal och boka.", "Buchung": "Bokning",
+    "Rechte speichern": "Spara rättigheter", "Rechte gespeichert": "Rättigheter sparade", "Rechte nicht gespeichert": "Rättigheterna sparades inte",
+    "Nicht gespeicherte Änderungen": "Osparade ändringar", "Alle Rechte sind gespeichert.": "Alla rättigheter är sparade.",
+    "Nur in dieser Sitzung — ohne Datenbank.": "Bara i denna session — utan databas.",
     "Kein Zugriff auf die Rechteverwaltung": "Ingen åtkomst till rättighetshanteringen",
     "Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern\" ausdrücklich bekommen hat.": "Vem som har vilka rättigheter ser och ändrar bara ägaren och den som uttryckligen fått rätten att ändra rättigheter.",
     "Bestellung nicht gespeichert": "Beställningen sparades inte",
@@ -4559,7 +4590,7 @@ class Component extends DCLogic {
       qrTop: "", qrBottom: "", qrSize: "m", qrQuery: "", showName: true, showId: true,
       qrPicked: ["SC-1001", "SC-1002", "SC-1004", "SC-1006"],
       pickedUser: "u3",
-      overrides: {},
+      overrides: {}, rightsDirty: {},
       pw: "", pw2: "",
       regPw: "", regPw2: "", regBot: false,
       loginFails: 0,
@@ -4576,7 +4607,7 @@ class Component extends DCLogic {
         "Lager Nord · Palette 7", "Werkstatt · Schublade 12"],
       newPlace: "", draftFor: null, draftName: "", draftEmail: "",
       npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
-      npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "",
+      npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "",
       npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: "",
       mailTime: "07:30", mailDay: "1", importParsed: [],
       units: {}, unitQty: {}, newUnitName: "", newUnitFactor: "12", newUnitRef: "",
@@ -4723,7 +4754,7 @@ class Component extends DCLogic {
       if (isAdmin) {
         companies = await api.loadCompanies().catch(() => null);
       }
-      const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status }));
+      const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status, permissions: m.permissions || {} }));
       const nameOf = id => (members.find(m => m.id === id) || {}).name || "—";
       const when = t => t ? new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "—";
       // Produkte ohne dauerhafte Kennung bekommen eine, und zwar sofort
@@ -4770,6 +4801,9 @@ class Component extends DCLogic {
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
         units, priceHist,
+        // Gespeicherte Feinrechte aus der Datenbank; ungespeicherte Änderungen bleiben stehen.
+        overrides: Object.assign({}, ...members.map(m => ({ [m.id]: m.permissions || {} })),
+          ...Object.keys(prev.rightsDirty || {}).map(k => ({ [k]: (prev.overrides || {})[k] || {} }))),
         roleDefs: (d.settings && Array.isArray(d.settings.roles) && d.settings.roles.length)
           ? d.settings.roles : null,
         unitDefs: (d.settings && Array.isArray(d.settings.units) && d.settings.units.length)
@@ -5304,10 +5338,10 @@ class Component extends DCLogic {
   // kleinste angehakte Einheit umgerechnet werden. Genau daran scheiterte
   // das gemeinsame Buchen: war nur „Kasten" angehakt, bekam er Faktor 1
   // und vier Flaschen plus ein Kasten ergaben fünf statt sechzehn.
-  ladderFrom(names) {
+  ladderFrom(names, std) {
     if (!names.length) return [];
     return names
-      .map(n => ({ name: n, faktor: Math.max(1, this.unitFactor(n)) }))
+      .map(n => Object.assign({ name: n, faktor: Math.max(1, this.unitFactor(n)) }, n === std ? { std: true } : {}))
       .sort((a, b) => a.faktor - b.faktor);
   }
 
@@ -5319,7 +5353,7 @@ class Component extends DCLogic {
     const own = (this.state.units || {})[p.id];
     if (own && own.length) {
       return own.slice()
-        .map(u => ({ name: u.name, faktor: Math.max(1, Number(u.faktor) || 1) }))
+        .map(u => ({ name: u.name, faktor: Math.max(1, Number(u.faktor) || 1), std: !!u.std }))
         .sort((a, b) => a.faktor - b.faktor);
     }
     return [{ name: (p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück"), faktor: 1 }];
@@ -5333,6 +5367,105 @@ class Component extends DCLogic {
     if (one) return one.name;
     if (list.length) return this.baseNameOf(list[0].name);
     return (p && p.quantitaet && p.quantitaet !== "—") ? p.quantitaet : this.tr("Stück");
+  }
+
+  // Die Standardquantität: in ihr wird gebucht und der Bestand gezeigt.
+  // Ohne Festlegung (ältere Produkte) gilt die kleinste Einheit.
+  stdUnit(p) {
+    const list = this.unitsFor(p);
+    return list.find(u => u.std) || list.find(u => Number(u.faktor) === 1) || list[0];
+  }
+
+  // Bestand in der Standardquantität: volle Gebinde, der Rest in den
+  // kleineren Quantitäten. Größere werden nicht gezeigt, sondern auf die
+  // Standardquantität heruntergerechnet.
+  fmtStock(p, n) {
+    const total = Math.max(0, Math.round(Number(n) || 0));
+    const std = this.stdUnit(p);
+    const F = std ? Number(std.faktor) || 1 : 1;
+    const base = this.baseUnitName(p);
+    if (!std || F === 1) return total + " " + (std ? std.name : base);
+    const whole = Math.floor(total / F);
+    let rest = total - whole * F;
+    const parts = [whole + " " + std.name];
+    this.unitsFor(p).filter(u => Number(u.faktor) < F).sort((a, b) => b.faktor - a.faktor)
+      .forEach(u => { const c = Math.floor(rest / u.faktor); if (c > 0) { parts.push(c + " " + u.name); rest -= c * u.faktor; } });
+    if (rest > 0) parts.push(rest + " " + base);
+    return parts.join(" · ");
+  }
+
+  // Gebuchte Menge in der kleinsten Einheit: das Hauptfeld zählt in der
+  // Standardquantität, die Felder darunter in den übrigen Quantitäten.
+  bookTotal(p) {
+    const st = this.state;
+    const std = this.stdUnit(p);
+    const main = Math.max(0, Number(st.qty) || 0) * (std ? Number(std.faktor) || 1 : 1);
+    return main + this.unitsFor(p).filter(u => !std || u.name !== std.name)
+      .reduce((s, u) => s + Number(u.faktor) * ((st.unitQty || {})[u.name] || 0), 0);
+  }
+
+  unitNote(names, std) {
+    if (!this.unitDefs().length) return this.tr("Es gibt noch keine Quantitäten. Unter Einstellungen → Quantitäten lassen sich Flasche, Kiste oder Palette anlegen.");
+    if (!names.length) return this.tr("Mindestens eine Quantität anhaken.");
+    if (!std) return this.tr("Standardquantität wählen.");
+    const f = this.unitFactor(std), base = this.baseNameOf(std);
+    return this.tr("Gebucht und angezeigt wird in ") + std + (f > 1 ? " (= " + f + " " + base + ")" : "") + ". "
+      + this.tr("Bestände und Mindestmengen zählen in der kleinsten Einheit") + " (" + base + ").";
+  }
+
+  draftUnits(p) {
+    const own = (this.state.units || {})[p.id] || [];
+    const flagged = own.find(u => u.std);
+    return { units: own.map(u => u.name), std: flagged ? flagged.name : (own.length === 1 ? own[0].name : "") };
+  }
+
+  // Ein Feld je Quantität des Produkts, größte zuerst. Alte Zeilen ohne
+  // Quantität zählen zur kleinsten Einheit.
+  amountFieldsFor(p, rows, onSet, locked) {
+    return this.unitsFor(p).slice().sort((a, b) => b.faktor - a.faktor).map(u => {
+      const v = (rows || []).filter(r => r.unit === u.name || (!r.unit && Number(u.faktor) === 1))
+        .reduce((s, r) => s + this.toNum(r.qty), 0);
+      return { name: u.name, qty: v ? String(v) : "", locked: !!locked, set: e => onSet(u.name, e.target.value) };
+    });
+  }
+
+  withAmount(p, rows, unit, value) {
+    const isBase = this.unitsFor(p).some(u => u.name === unit && Number(u.faktor) === 1);
+    return (rows || []).filter(r => !(r.unit === unit || (isBase && !r.unit))).concat({ qty: value, unit: unit });
+  }
+
+  setAmountU(p, unit, value) {
+    this.setState(prev => ({ orderQty: Object.assign({}, prev.orderQty,
+      { [p.id]: this.withAmount(p, (prev.orderQty || {})[p.id], unit, value) }) }));
+  }
+
+  setOrderAmountU(orderId, p, unit, value) {
+    const orders = (this.state.orders || []).map(o => {
+      if (o.id !== orderId) return o;
+      const am = Object.assign({}, o.amounts || {});
+      am[p.id] = this.withAmount(p, am[p.id], unit, value);
+      return Object.assign({}, o, { amounts: am });
+    });
+    this.setState({ orders: orders });
+    clearTimeout(this.amT);
+    this.amT = setTimeout(() => {
+      if (this.api && this.api.setOrders) this.api.setOrders(this.state.orders).catch(() => {});
+    }, 900);
+  }
+
+  // Feinrechte gehen erst mit „Rechte speichern" in die Datenbank.
+  saveRights(u) {
+    if (!u || !u.id) return;
+    const perms = (this.state.overrides || {})[u.id] || {};
+    const done = () => this.setState(prev => { const d = Object.assign({}, prev.rightsDirty); delete d[u.id]; return { rightsDirty: d }; });
+    if (!this.state.live || !this.api || !this.api.savePermissions || !this.isDbId(u.id)) {
+      done();
+      this.say(this.tr("Rechte"), this.tr("Rechte gespeichert"), u.name + " · " + this.tr("Nur in dieser Sitzung — ohne Datenbank."));
+      return;
+    }
+    this.api.savePermissions(u.id, perms)
+      .then(() => { done(); this.say(this.tr("Rechte"), this.tr("Rechte gespeichert"), u.name); })
+      .catch(err => this.say("Supabase", this.tr("Rechte nicht gespeichert"), String((err && err.message) || err)));
   }
 
   parsePrice(v) {
@@ -6423,7 +6556,7 @@ class Component extends DCLogic {
     const dupKey = () => {
       const n = (st.npName || "").trim();
       if (!n) return null;
-      const k = key(n, placeOf(st.npPlace), st.npQty);
+      const k = key(n, placeOf(st.npPlace), st.npStd || st.npQty);
       return st.products.some(p => key(p.name, p.ort, p.quantitaet) === k) ? k : null;
     };
     const mine = p => p.verantwortlich === meLabel || String(p.vertretung || "").includes(meLabel);
@@ -6437,7 +6570,7 @@ class Component extends DCLogic {
         statusLabel: off ? this.tr("Deaktiviert") : s.label,
         tagClass: off ? "tag tag-outline" : s.tag,
         rowStyle: off ? "opacity: .45" : "",
-        kategorien: p.kategorien,
+        kategorien: p.kategorien, istLabel: this.fmtStock(p, p.ist),
         open: () => this.setState({ currentId: p.id, screen: "detail", qty: 1 })
       });
     };
@@ -6455,19 +6588,14 @@ class Component extends DCLogic {
     const orderList = low.map(p => {
       const s = this.statusOf(p);
       return Object.assign({}, p, {
-        statusLabel: s.label, tagClass: s.tag,
+        statusLabel: s.label, tagClass: s.tag, istLabel: this.fmtStock(p, p.ist),
         mayOrder: mine(p), locked: !mine(p),
         lockNote: this.tr("nur ") + p.verantwortlich,
         action: this.tr("In Bestellung"),
         toggleOrdered: () => this.putInOrder([p.id], meLabel),
         // Menge und Quantität der Bestellung — mehrere Zeilen je Produkt.
         unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
-        amountRows: this.amountsOf(p.id).map((r, i) => ({
-          qty: String(r.qty || ""), unit: r.unit || "",
-          setQty: e => this.setAmount(p.id, i, "qty", e.target.value),
-          setUnit: e => this.setAmount(p.id, i, "unit", e.target.value)
-        })),
-        addAmount: () => this.addAmount(p.id),
+        amountFields: this.amountFieldsFor(p, (st.orderQty || {})[p.id], (u, v) => this.setAmountU(p, u, v), false),
         amountNote: this.amountLabel(p, this.amountsOf(p.id))
       });
     });
@@ -6482,7 +6610,7 @@ class Component extends DCLogic {
       const filled = ((o && o.done) || []).indexOf(p.id) >= 0;
       return {
         name: p.name,
-        note: this.tr("Bestand ") + p.ist + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
+        note: this.tr("Bestand ") + this.fmtStock(p, p.ist) + " · " + this.tr("Min ") + p.min + " · " + (p.lieferant || "—"),
         back: () => this.backToStock([p.id], oid),
         // Nachgefüllte Positionen sind erledigt: die Felder werden
         // ausgegraut, damit dieselbe Lieferung nicht zweimal zählt.
@@ -6493,12 +6621,7 @@ class Component extends DCLogic {
         filledLabel: filled ? this.tr("nachgefüllt") : "",
         amountNote: this.amountLabel(p, rows),
         unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
-        amountRows: rows.map((r, i) => ({
-          qty: String(r.qty || ""), unit: r.unit || "", locked: filled,
-          setQty: e => this.setOrderAmount(oid, p.id, i, "qty", e.target.value),
-          setUnit: e => this.setOrderAmount(oid, p.id, i, "unit", e.target.value)
-        })),
-        addAmount: () => this.addOrderAmount(oid, p.id),
+        amountFields: this.amountFieldsFor(p, rows, (u, v) => this.setOrderAmountU(oid, p, u, v), filled),
         refill: () => this.refillOrder(oid, [p.id], meLabel)
       };
     };
@@ -6567,7 +6690,7 @@ class Component extends DCLogic {
             const next = Object.assign({}, prev.overrides);
             next[u.id] = Object.assign({}, next[u.id] || {});
             next[u.id][key] = !on;
-            return { overrides: next };
+            return { overrides: next, rightsDirty: Object.assign({}, prev.rightsDirty, { [u.id]: true }) };
             });
           }
         };
@@ -6786,39 +6909,34 @@ class Component extends DCLogic {
       // Auch eine einzige Quantität bekommt ihr Feld, sobald sie größer
       // als die kleinste Einheit ist — sonst ließe sich der Kasten nicht
       // buchen, in dem das Produkt tatsächlich steht.
-      hasUnitLadder: (() => {
-        const l = this.unitsFor(cur);
-        return l.length > 1 || (l[0] && Number(l[0].faktor) > 1);
-      })(),
-      baseUnitLabel: this.baseUnitName(cur),
-      unitRows: this.unitsFor(cur).map(u => ({
-        label: u.faktor === 1 ? u.name : u.name + " (× " + u.faktor + ")",
-        qty: String((st.unitQty || {})[u.name] || ""),
-        set: e => {
-          const v = Math.max(0, this.toNum(e.target.value));
-          this.setState(prev => {
-            const next = Object.assign({}, prev.unitQty, { [u.name]: v });
-            const total = this.unitsFor(cur).reduce((sum, x) => sum + Number(x.faktor) * (next[x.name] || 0), 0);
-            return { unitQty: next, qty: Math.max(1, total) };
-          });
-        }
-      })),
+      hasUnitLadder: this.unitsFor(cur).length > 1,
+      baseUnitLabel: (() => { const s = this.stdUnit(cur); return s ? s.name : this.baseUnitName(cur); })(),
+      unitRows: this.unitsFor(cur).filter(u => { const s = this.stdUnit(cur); return !s || u.name !== s.name; })
+        .sort((a, b) => b.faktor - a.faktor).map(u => ({
+          label: u.faktor === 1 ? u.name : u.name + " (× " + u.faktor + ")",
+          qty: String((st.unitQty || {})[u.name] || ""),
+          set: e => {
+            const v = Math.max(0, this.toNum(e.target.value));
+            this.setState(prev => ({ unitQty: Object.assign({}, prev.unitQty, { [u.name]: v }) }));
+          }
+        })),
       unitSumNote: (() => {
-        const list = this.unitsFor(cur);
-        const parts = list.filter(u => (st.unitQty || {})[u.name])
-          .map(u => (st.unitQty[u.name]) + " × " + u.name);
-        const base = this.baseUnitName(cur);
-        if (!parts.length) return this.tr("Menge oben eintragen oder hier nach Einheiten aufteilen.");
-        return parts.join(" + ") + " = " + st.qty + " " + base;
+        const std = this.stdUnit(cur);
+        const parts = [];
+        if (st.qty > 0 && std) parts.push(st.qty + " × " + std.name);
+        this.unitsFor(cur).filter(u => (!std || u.name !== std.name) && (st.unitQty || {})[u.name])
+          .forEach(u => parts.push(st.unitQty[u.name] + " × " + u.name));
+        if (!parts.length) return this.tr("Keine Menge eingetragen");
+        return parts.join(" + ") + " = " + this.bookTotal(cur) + " " + this.baseUnitName(cur);
       })(),
       unitCountLabel: (() => { const n = this.unitsFor(cur).length; return n + " " + (n === 1 ? this.tr("Größe") : this.tr("Größen")); })(),
       // Bestand als Quantitäten gelesen, plus Warnung, wenn die eingetippte
       // Menge über dem Bestand liegt.
-      stockSplit: this.splitUnits(cur, cur.ist),
-      hasStockSplit: !!this.splitUnits(cur, cur.ist),
-      overStock: st.qty > cur.ist,
-      overStockNote: this.tr("Vorhanden sind nur ") + cur.ist
-        + (this.splitUnits(cur, cur.ist) ? " (" + this.splitUnits(cur, cur.ist) + ")" : "")
+      stockMain: this.fmtStock(cur, cur.ist),
+      stockSplit: "= " + cur.ist + " " + this.baseUnitName(cur),
+      hasStockSplit: (() => { const s = this.stdUnit(cur); return !!s && Number(s.faktor) > 1; })(),
+      overStock: this.bookTotal(cur) > cur.ist,
+      overStockNote: this.tr("Vorhanden sind nur ") + this.fmtStock(cur, cur.ist)
         + " — " + this.tr("so viel lässt sich nicht entnehmen."),
       goUnitSettings: () => this.go("settings"),
       noUnitDefs: this.unitDefs().length === 0,
@@ -7056,7 +7174,6 @@ class Component extends DCLogic {
           f("bestellmenge", "Bestellmenge", num),
           f("ort", "Lagerort", { isSelect: true, isText: false,
             options: places.map(p => ({ value: p, label: p })) }),
-          f("quantitaet", "Quantität", { hint: "Kasten (12 Flaschen)" }),
           f("preis", "Preis", { hint: "8,49 €" }),
           f("mhd", "MHD", { hint: "30.04.2027" }),
           f("lieferant", "Lieferant"),
@@ -7070,15 +7187,31 @@ class Component extends DCLogic {
             { value: "nein", label: this.tr("nein — aus Listen ausgeblendet") }] })
         ];
       })(),
-      editSaveDisabled: !st.editDraft || !String((st.editDraft || {}).name || "").trim(),
+      editUnitPick: this.unitDefs().map(d => {
+        const on = ((st.editDraft && st.editDraft.units) || []).indexOf(d.name) >= 0;
+        return { name: d.name, checked: on, relLabel: this.relLabel(d),
+          toggle: () => this.setState(prev => {
+            const c = (prev.editDraft && prev.editDraft.units) || [];
+            const nx = on ? c.filter(x => x !== d.name) : c.concat(d.name);
+            let std = nx.indexOf(prev.editDraft.std) >= 0 ? prev.editDraft.std : "";
+            if (!std && nx.length === 1) std = nx[0];
+            return { editDraft: Object.assign({}, prev.editDraft, { units: nx, std: std }) };
+          }) };
+      }),
+      editStd: (st.editDraft && st.editDraft.std) || "",
+      editStdOptions: this.ladderFrom((st.editDraft && st.editDraft.units) || []).map(u => ({ name: u.name })),
+      setEditStd: e => { const v = e.target.value; this.setState(prev => ({ editDraft: Object.assign({}, prev.editDraft, { std: v }) })); },
+      editUnitNote: this.unitNote((st.editDraft && st.editDraft.units) || [], (st.editDraft && st.editDraft.std) || ""),
+      editSaveDisabled: !st.editDraft || !String((st.editDraft || {}).name || "").trim()
+        || (this.unitDefs().length > 0 && !(st.editDraft || {}).std),
       editNote: !st.editDraft ? "" : (!String(st.editDraft.name || "").trim()
         ? this.tr("Ohne Namen wird nicht gespeichert.")
-        : this.tr("Alle Felder sind änderbar.")),
+        : (this.unitDefs().length && !st.editDraft.std ? this.tr("Standardquantität fehlt.") : this.tr("Alle Felder sind änderbar."))),
       editNoteColor: (st.editDraft && !String(st.editDraft.name || "").trim())
         ? "var(--color-accent-700)" : "var(--sc-ink-2)",
       startEdit: () => this.setState({
         confirmDelete: false, editing: true,
-        editDraft: {
+        editDraft: Object.assign(this.draftUnits(cur), {
           name: cur.name, ean: cur.ean === "—" ? "" : cur.ean,
           ist: cur.ist, min: cur.min, bestellmenge: cur.bestellmenge,
           ort: cur.ort, quantitaet: cur.quantitaet === "—" ? "" : cur.quantitaet,
@@ -7087,7 +7220,7 @@ class Component extends DCLogic {
           verantwortlich: cur.verantwortlich, vertretung: cur.vertretung === "—" ? "" : cur.vertretung,
           kategorien: (cur.kategorien || []).join(", "), link: cur.link || "",
           aktiv: cur.aktiv === false ? "nein" : "ja"
-        }
+        })
       }),
       cancelEdit: () => this.setState({ editing: false, editDraft: null }),
       saveEdit: () => {
@@ -7095,11 +7228,12 @@ class Component extends DCLogic {
         const name = String(d.name || "").trim();
         if (!name) return;
         const ist = this.toNum(d.ist), min = this.toNum(d.min);
+        const ladder = this.ladderFrom(d.units || [], d.std || "");
         const patch = {
           name, ean: String(d.ean || "").trim() || "—",
           ist, min, bestellmenge: this.toNum(d.bestellmenge),
           ort: String(d.ort || "").trim() || cur.ort,
-          quantitaet: String(d.quantitaet || "").trim() || "—",
+          quantitaet: d.std || (cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : "—"),
           preis: String(d.preis || "").trim() || "—",
           mhd: String(d.mhd || "").trim() || "—",
           lieferant: String(d.lieferant || "").trim() || "—",
@@ -7113,12 +7247,13 @@ class Component extends DCLogic {
         };
         this.setState(prev => ({
           products: prev.products.map(p => p.id === cur.id ? Object.assign({}, p, patch) : p),
+          units: Object.assign({}, prev.units, { [cur.id]: ladder }), unitQty: {}, qty: 1,
           editing: false, editDraft: null
         }));
         this.remote(api => api.updateProduct(cur.id, {
           name: patch.name, ean: patch.ean === "—" ? null : patch.ean,
           ist: patch.ist, min: patch.min, bestellmenge: patch.bestellmenge,
-          ort: patch.ort, quantitaet: patch.quantitaet === "—" ? null : patch.quantitaet,
+          ort: patch.ort, quantitaet: patch.quantitaet === "—" ? null : patch.quantitaet, einheiten: ladder,
           lieferant: patch.lieferant === "—" ? null : patch.lieferant,
           link: patch.link || null, kategorien: patch.kategorien,
           aktiv: patch.aktiv, status: patch.status,
@@ -7255,24 +7390,26 @@ class Component extends DCLogic {
       }),
       qty: st.qty,
       inc: () => this.setState(s => ({ qty: s.qty + 1 })),
-      dec: () => this.setState(s => ({ qty: Math.max(1, s.qty - 1) })),
-      // Wer die Gesamtmenge selbst eintippt, hebt die Aufteilung nach
-      // Quantitäten auf — sonst würde beides zusammengezählt.
-      setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n, unitQty: {} }); },
+      dec: () => this.setState(s => ({ qty: Math.max(0, s.qty - 1) })),
+      // Das Hauptfeld zählt in der Standardquantität; die Felder darunter
+      // (andere Quantitäten) kommen hinzu.
+      setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n }); },
       withdraw: () => {
         // Mehr entnehmen als da ist, geht nicht: 1,5 Kisten geben keine
         // 2 Kisten her. Die Absage nennt, was tatsächlich vorhanden ist.
-        if (st.qty > cur.ist) {
-          const have = this.splitUnits(cur, cur.ist);
+        const n = this.bookTotal(cur);
+        if (n <= 0) { this.say(this.tr("Buchung"), this.tr("Keine Menge eingetragen"), this.tr("Menge eintragen, dann buchen.")); return; }
+        if (n > cur.ist) {
+          const have = this.fmtStock(cur, cur.ist);
           this.say(this.tr("Nicht genug Bestand"),
-            this.tr("Vorhanden: ") + cur.ist + (have ? " · " + have : ""),
+            this.tr("Vorhanden: ") + have,
             this.tr("Die Entnahme wurde nicht gebucht."));
           return;
         }
-        const next = Math.max(0, cur.ist - st.qty);
+        const next = Math.max(0, cur.ist - n);
         const under = next < cur.min;
-        this.applyBooking(cur, next, under, "−" + st.qty, meLabel);
-        this.bookRemote(cur.id, -st.qty, "Entnahme");
+        this.applyBooking(cur, next, under, "−" + n, meLabel);
+        this.bookRemote(cur.id, -n, "Entnahme");
         if (under && st.mailMode === "now" && !this.withinLimit("mailsPerDay", st.mailsToday)) {
           // Tagesgrenze erreicht: Buchung bleibt, die Mail wandert in die
           // Bestellliste statt sie zu verschicken.
@@ -7284,14 +7421,16 @@ class Component extends DCLogic {
         } else if (under) {
           this.say(this.tr("Bestellliste"), this.tr("Artikel vermerkt"), this.tr("Sammelmail: ") + (mailLabels[st.mailMode][lang] || mailLabels[st.mailMode].de));
         } else {
-          this.say(this.tr("Entnahme"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next);
+          this.say(this.tr("Entnahme"), this.fmtStock(cur, n) + " · " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + this.fmtStock(cur, next));
         }
       },
       refill: () => {
-        const next = cur.ist + st.qty;
-        this.applyBooking(cur, next, false, "+" + st.qty, meLabel);
-        this.bookRemote(cur.id, st.qty, "Nachfüllung");
-        this.say(this.tr("Nachfüllung"), st.qty + " × " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + next + " · " + this.tr("Status zurückgesetzt"));
+        const n = this.bookTotal(cur);
+        if (n <= 0) { this.say(this.tr("Buchung"), this.tr("Keine Menge eingetragen"), this.tr("Menge eintragen, dann buchen.")); return; }
+        const next = cur.ist + n;
+        this.applyBooking(cur, next, false, "+" + n, meLabel);
+        this.bookRemote(cur.id, n, "Nachfüllung");
+        this.say(this.tr("Nachfüllung"), this.fmtStock(cur, n) + " · " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + this.fmtStock(cur, next) + " · " + this.tr("Status zurückgesetzt"));
       },
       hasPhoto: !!st.photoUrl, noPhoto: !st.photoUrl,
       // Als Element statt src-Hole: ein unaufgelöstes {{ }} in src würde der
@@ -7915,6 +8054,21 @@ class Component extends DCLogic {
       setNpIst: e => this.setState({ npIst: e.target.value }),
       setNpOrder: e => this.setState({ npOrder: e.target.value }),
       setNpQty: e => this.setState({ npQty: e.target.value }),
+      npUnitPick: this.unitDefs().map(d => {
+        const on = (st.npUnits || []).indexOf(d.name) >= 0;
+        return { name: d.name, checked: on, relLabel: this.relLabel(d),
+          toggle: () => this.setState(prev => {
+            const c = prev.npUnits || [];
+            const nx = on ? c.filter(x => x !== d.name) : c.concat(d.name);
+            let std = nx.indexOf(prev.npStd) >= 0 ? prev.npStd : "";
+            if (!std && nx.length === 1) std = nx[0];
+            return { npUnits: nx, npStd: std };
+          }) };
+      }),
+      npStd: st.npStd || "",
+      npStdOptions: this.ladderFrom(st.npUnits || []).map(u => ({ name: u.name })),
+      setNpStd: e => this.setState({ npStd: e.target.value }),
+      npUnitNote: this.unitNote(st.npUnits || [], st.npStd || ""),
       setNpPlace: e => this.setState({ npPlace: e.target.value }),
       setNpMhd: e => this.setState({ npMhd: e.target.value }),
       setNpPrice: e => this.setState({ npPrice: e.target.value }),
@@ -7929,7 +8083,7 @@ class Component extends DCLogic {
         return this.tr("Name ist frei.");
       })(),
       npNameColor: dupKey() ? "var(--color-accent-700)" : "var(--sc-ink-2)",
-      npDisabled: !(st.npName || "").trim() || !!dupKey(),
+      npDisabled: !(st.npName || "").trim() || !!dupKey() || (this.unitDefs().length > 0 && !st.npStd),
       createProduct: () => {
         const name = (st.npName || "").trim();
         if (dupKey()) {
@@ -7942,12 +8096,17 @@ class Component extends DCLogic {
           return;
         }
         if (!this.withinLimit("products", products.length)) return;
+        if (this.unitDefs().length && !st.npStd) {
+          this.say(this.tr("Produkt"), this.tr("Standardquantität fehlt."), this.tr("Standardquantität wählen."));
+          return;
+        }
+        const ladder = this.ladderFrom(st.npUnits || [], st.npStd || "");
         const ist = this.toNum(st.npIst), min = this.toNum(st.npMin);
         const id = this.nextCode();
         const row = {
           id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: this.toNum(st.npOrder),
           ort: placeOf(st.npPlace), mhd: st.npMhd || "—", preis: st.npPrice || "—",
-          quantitaet: st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
+          quantitaet: st.npStd || st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
           kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
           status: ist < min ? "low" : "ok", aktiv: true,
           verantwortlich: st.npResp || meLabel,
@@ -7956,8 +8115,9 @@ class Component extends DCLogic {
         };
         this.setState(prev => ({
           products: [row].concat(prev.products), currentId: id, screen: "detail", qty: 1,
+          units: Object.assign({}, prev.units, { [id]: ladder }), unitQty: {},
           npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
-          npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "",
+          npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "",
           npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: ""
         }));
         // Nach dem Anlegen neu laden: erst dann trägt das Produkt seine
@@ -7967,7 +8127,7 @@ class Component extends DCLogic {
             code: id,
             name, ean: st.npEan || null, ist, min, bestellmenge: this.toNum(st.npOrder),
             ort: row.ort, preis: this.parsePrice(st.npPrice), mhd: st.npMhd || null,
-            quantitaet: st.npQty || null, lieferant: st.npSupplier || null,
+            quantitaet: st.npStd || st.npQty || null, einheiten: ladder, lieferant: st.npSupplier || null,
             link: st.npLink || null, kategorien: row.kategorien, status: row.status,
             verantwortlich: this.personId(st.npResp) || st.meId,
             vertreter: this.personIds([st.npD1, st.npD2, st.npD3].join(","))
@@ -8155,10 +8315,13 @@ class Component extends DCLogic {
       labelNote: LABEL_FORMATS[st.labelFormat].note,
 
       perms: permsFor(),
+      rightsSaveOff: !this.may("rights") || !(st.rightsDirty || {})[picked.id],
+      rightsNote: (st.rightsDirty || {})[picked.id] ? this.tr("Nicht gespeicherte Änderungen") : this.tr("Alle Rechte sind gespeichert."),
+      saveRights: () => this.saveRights(picked),
       allowAll: () => !this.may("rights") ? this.say(this.tr("Rechte"), this.tr("Nur zum Ansehen"),
           this.tr("Profildaten und Rechte darf nur die inhabende Person ändern.")) : this.setState(prev => {
         const next = Object.assign({}, prev.overrides); const o = {};
-        PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next };
+        PERM_LIST.forEach(([k]) => o[k] = true); next[prev.pickedUser] = o; return { overrides: next, rightsDirty: Object.assign({}, prev.rightsDirty, { [prev.pickedUser]: true }) };
       }),
       denyAll: () => {
         if (!this.may("rights")) {
@@ -8169,7 +8332,7 @@ class Component extends DCLogic {
         if (this.lastOwnerBlocked(picked)) return;
         this.setState(prev => {
           const next = Object.assign({}, prev.overrides); const o = {};
-          PERM_LIST.forEach(([k]) => o[k] = false); next[prev.pickedUser] = o; return { overrides: next };
+          PERM_LIST.forEach(([k]) => o[k] = false); next[prev.pickedUser] = o; return { overrides: next, rightsDirty: Object.assign({}, prev.rightsDirty, { [prev.pickedUser]: true }) };
         });
       },
       setInvite: e => this.setState({ inviteEmail: e.target.value }),
