@@ -144,16 +144,22 @@ export async function myProfile() {
 
 export async function loadAll() {
   const sb = await client();
-  const [products, members, events, movements, settings] = await Promise.all([
+  const [products, members0, events, movements, settings, departments] = await Promise.all([
     sb.from("products").select("*").order("aktiv", { ascending: false }).order("name"),
-    sb.from("profiles").select("id, name, email, role, status, permissions"),
+    sb.from("profiles").select("id, name, email, role, status, permissions, departments"),
     sb.from("events").select("*, event_items(product_id, qty)").order("datum"),
     sb.from("movements").select("*").order("created_at", { ascending: false }).limit(5000),
-    sb.from("settings").select("*").maybeSingle()
+    sb.from("settings").select("*").maybeSingle(),
+    sb.from("departments").select("id, name, created_at").order("created_at")
   ]);
+  // Solange schema.sql die Abteilungen noch nicht kennt: ohne sie weiter.
+  const members = members0.error
+    ? await sb.from("profiles").select("id, name, email, role, status, permissions")
+    : members0;
   return {
     products: ok(products), members: ok(members), events: ok(events),
-    movements: ok(movements), settings: settings.data || null
+    movements: ok(movements), settings: settings.data || null,
+    departments: departments.error ? [] : (departments.data || [])
   };
 }
 
@@ -192,9 +198,11 @@ export async function importProducts(rows) {
 // den Bestand fort, setzt den Status und legt bei Unterschreitung die
 // Benachrichtigung an. So kann keine Buchung am Protokoll vorbeigehen.
 
-export async function bookMovement({ productId, delta, note }) {
+export async function bookMovement({ productId, delta, note, mhd }) {
   const sb = await client();
-  return ok(await sb.from("movements").insert({ product_id: productId, delta, note }).select().single());
+  const row = { product_id: productId, delta, note };
+  if (mhd) row.mhd = mhd;
+  return ok(await sb.from("movements").insert(row).select().single());
 }
 
 export async function movementsFor(productId) {
@@ -466,4 +474,18 @@ export async function sendOrderListNow() {
   const { data, error } = await sb.rpc("sc_send_order_list_now");
   if (error) throw error;
   return data;
+}
+
+/* ── Abteilungen (nur die inhabende Person) ────────────────── */
+
+export async function createDepartment(name) {
+  const sb = await client();
+  return ok(await sb.from("departments").insert({ name }).select().single());
+}
+
+export async function deleteDepartment(id) {
+  const sb = await client();
+  const { error } = await sb.from("departments").delete().eq("id", id);
+  if (error) throw error;
+  return true;
 }
