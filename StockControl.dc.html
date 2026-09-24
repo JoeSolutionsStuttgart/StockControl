@@ -545,7 +545,7 @@
               <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
             </sc-if>
             <sc-if value="{{ current.hasLink }}" hint-placeholder-val="{{ false }}">
-              <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" target="_blank" rel="noopener noreferrer" style="font-size: 14px">{{ current.linkLabel }}</a></div>
+              <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Link zum Produkt</div><a href="{{ current.link }}" target="_blank" rel="noopener noreferrer" style="font-size: 14px">{{ current.linkLabel }}</a></div>
             </sc-if>
           </div>
 
@@ -5383,7 +5383,7 @@ class Component extends DCLogic {
       const products = d.products.map(r => ({
         id: r.id, code: r.code || r.id, name: r.name, ean: r.ean || "—", ist: r.ist, min: r.min, bestellmenge: r.bestellmenge,
         ort: r.ort || "—", mhd: r.mhd || "—", preis: r.preis != null ? Number(r.preis).toFixed(2).replace(".", ",") + " €" : "—",
-        quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", status: r.status, bildKey: r.bild_url || "",
+        quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "", status: r.status, bildKey: r.bild_url || "",
         verantwortlich: nameOf(r.verantwortlich), vertretung: (r.vertreter || []).map(nameOf).join(", ") || "—",
         kategorien: r.kategorien || [], entnahme: when(r.entnahme_am), auffuell: when(r.auffuell_am),
         geaendert: nameOf(r.geaendert_von), aktiv: r.aktiv !== false, hist: [r.ist]
@@ -5458,7 +5458,8 @@ class Component extends DCLogic {
         mailTime: d.settings && d.settings.mail_time ? String(d.settings.mail_time).slice(0, 5) : prev.mailTime,
         mailDay: d.settings && d.settings.mail_day != null ? String(d.settings.mail_day) : prev.mailDay,
         mailWeekday: d.settings && d.settings.mail_weekday != null ? String(d.settings.mail_weekday) : prev.mailWeekday,
-        orders: d.settings && d.settings.orders ? d.settings.orders : prev.orders
+        orders: d.settings && d.settings.orders ? d.settings.orders : prev.orders,
+        attrs: d.settings && Array.isArray(d.settings.attrs) ? d.settings.attrs : prev.attrs
       }));
     } catch (e) {
       this.say("Supabase", this.tr("Laden fehlgeschlagen"), String((e && e.message) || e));
@@ -7467,6 +7468,8 @@ class Component extends DCLogic {
     window.addEventListener("hashchange", this.hashL);
     try {
       this.setState({
+        ...(localStorage.getItem("sc-pref-theme") ? { theme: localStorage.getItem("sc-pref-theme") } : {}),
+        ...(localStorage.getItem("sc-pref-lang") ? { lang: localStorage.getItem("sc-pref-lang") } : {}),
         onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
         qrPrinted: localStorage.getItem("sc-qr-printed") === "1",
         mailChecked: localStorage.getItem("sc-mail-checked") === "1"
@@ -7554,6 +7557,12 @@ class Component extends DCLogic {
       const line = root.querySelector(".sub");
       if (line && line.innerHTML !== sub) line.innerHTML = sub;
     });
+  }
+
+  // Darstellung und Sprache gehören zur Person am Gerät, nicht zur Firma.
+  setPref(key, value) {
+    this.setState({ [key]: value });
+    try { localStorage.setItem("sc-pref-" + key, value); } catch (e) {}
   }
 
   applyTheme() {
@@ -8312,8 +8321,8 @@ class Component extends DCLogic {
       },
 
       segLight: this.segStyle(st.theme === "Hell"), segDark: this.segStyle(st.theme === "Dunkel"), segSystem: this.segStyle(st.theme === "System"),
-      setLight: () => this.setState({ theme: "Hell" }), setDark: () => this.setState({ theme: "Dunkel" }), setSystem: () => this.setState({ theme: "System" }),
-      setLang: setSel("lang"), setRole: setSel("role"),
+      setLight: () => this.setPref("theme", "Hell"), setDark: () => this.setPref("theme", "Dunkel"), setSystem: () => this.setPref("theme", "System"),
+      setLang: e => this.setPref("lang", e.target.value), setRole: setSel("role"),
 
       kpiTotal: activeProducts.length, kpiLocations: places.length,
       kpiLow: activeProducts.filter(p => p.status === "low").length,
@@ -8924,7 +8933,7 @@ class Component extends DCLogic {
       photoUrl: st.photoUrl,
       current: Object.assign({}, cur, {
         statusLabel: this.statusOf(cur).label, tagClass: this.statusOf(cur).tag,
-        linkLabel: this.tr("Beim Lieferanten öffnen"),
+        linkLabel: String(cur.link || "").replace(/^https?:\/\//i, "").replace(/\/$/, "").slice(0, 60) || this.tr("Beim Lieferanten öffnen"),
         link: this.linkUrl(cur.link), hasLink: !!this.linkUrl(cur.link),
         qr: this.qrEl(this.qrPayload(cur), 110),
         code: this.codeOf(cur),
@@ -9952,7 +9961,7 @@ class Component extends DCLogic {
         typeLabel: ATTR_TYPES[a.type] ? (ATTR_TYPES[a.type][lang] || ATTR_TYPES[a.type].de) : a.type,
         triggerLabel: a.trigger ? (ATTR_TRIGGERS[a.trigger][lang] || ATTR_TRIGGERS[a.trigger].de) : this.tr("keine Regel"),
         triggerClass: a.trigger ? "tag tag-accent" : "tag tag-outline",
-        remove: () => this.setState(prev => ({ attrs: prev.attrs.filter(x => x.id !== a.id) }))
+        remove: () => { const next = st.attrs.filter(x => x.id !== a.id); this.setState({ attrs: next }); this.remote(api => api.saveSettings({ attrs: next })); }
       }))).list,
       attrName: st.attrName, attrType: st.attrType, attrTrigger: st.attrTrigger,
       setAttrName: e => this.setState({ attrName: e.target.value }),
@@ -9962,10 +9971,9 @@ class Component extends DCLogic {
       addAttr: () => {
         const name = st.attrName.trim();
         if (!name) return;
-        this.setState(prev => ({
-          attrs: prev.attrs.concat({ id: "a" + Date.now(), name, type: prev.attrType, trigger: prev.attrTrigger }),
-          attrName: "", attrTrigger: ""
-        }));
+        const next = st.attrs.concat({ id: "a" + Date.now(), name, type: st.attrType, trigger: st.attrTrigger });
+        this.setState({ attrs: next, attrName: "", attrTrigger: "" });
+        this.remote(api => api.saveSettings({ attrs: next }));
         this.say(this.tr("Merkmal"), name, st.attrTrigger
           ? this.tr("Regel aktiv: ") + (ATTR_TRIGGERS[st.attrTrigger][lang] || ATTR_TRIGGERS[st.attrTrigger].de)
           : this.tr("Feld steht ab jetzt in jedem Produkt."));
