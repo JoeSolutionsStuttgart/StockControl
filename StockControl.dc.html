@@ -416,7 +416,7 @@
         <div style="position: fixed; inset: 0; z-index: 1000; background: rgba(10,14,18,.72); display: grid; place-items: center; padding: var(--space-4)">
           <div class="blueprint" style="width: 380px; max-width: 100%; padding: 14px; background: var(--color-bg); display: flex; flex-direction: column; gap: var(--space-3)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>EAN scannen</h4>
+            <h4 style="margin: 0" data-i18n-keep>{{ eanScanTitle }}</h4>
             <div style="position: relative; aspect-ratio: 4 / 3; background: var(--color-accent-900); overflow: hidden">
               <video ref="{{ eanVideoRef }}" playsinline autoplay muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"></video>
               <div style="position: absolute; left: 10%; right: 10%; top: 32%; bottom: 32%; border: 2px solid rgba(255,255,255,.85)"></div>
@@ -1322,8 +1322,9 @@
             </div>
             <div style="display: flex; flex-direction: column; gap: 6px">
               <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Produkt</div>
-              <div style="position: relative">
-                <input class="input" type="search" style="width: 100%; font-size: 16px; min-height: 44px" value="{{ memoQuery }}" placeholder="Produkt suchen …" onInput="{{ setMemoQuery }}" onFocus="{{ memoPickFocus }}">
+              <div style="position: relative; display: flex; gap: 6px">
+                <button class="btn btn-secondary" style="order: 2; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center" aria-label="Produkt scannen" title="QR-Code oder EAN scannen" onClick="{{ memoScan }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="4" height="4"></rect><path d="M14 7v4"></path><path d="M17 7v4"></path><path d="M7 14h10"></path><path d="M7 17h10"></path></svg></button>
+                <input class="input" type="search" style="flex: 1; min-width: 0; font-size: 16px; min-height: 44px" value="{{ memoQuery }}" placeholder="Produkt suchen …" onInput="{{ setMemoQuery }}" onFocus="{{ memoPickFocus }}">
                 <sc-if value="{{ memoPickOpen }}" hint-placeholder-val="{{ false }}">
                   <div class="elev-md" style="position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 30; background: var(--sc-card); border: 1px solid var(--color-divider); max-height: 320px; overflow-y: auto; display: flex; flex-direction: column">
                     <sc-for list="{{ memoMatches }}" as="mm" hint-placeholder-count="5">
@@ -1355,10 +1356,21 @@
             </sc-if>
             <div style="display: flex; flex-direction: column">
               <sc-for list="{{ memoEditRows }}" as="er" hint-placeholder-count="2">
-                <div style="display: flex; align-items: center; gap: var(--space-2); padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                  <div style="flex: 1; min-width: 0">
-                    <div style="font-size: 14.5px">{{ er.name }}</div>
-                    <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ er.amount }}</div>
+                <div style="display: flex; align-items: flex-start; gap: var(--space-2); padding: 10px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                    <div style="font-size: 14.5px; font-weight: 500">{{ er.name }}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2)">
+                      <sc-for list="{{ er.units }}" as="eu" hint-placeholder-count="1">
+                        <div style="display: flex; flex-direction: column; gap: 2px">
+                          <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-2)">{{ eu.name }}</span>
+                          <div style="display: flex; align-items: center">
+                            <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 18px" aria-label="weniger" onClick="{{ eu.dec }}">−</button>
+                            <input class="input" type="number" min="0" step="1" inputmode="numeric" style="width: 58px; height: 40px; text-align: center; font-size: 16px; padding: 0 4px" value="{{ eu.value }}" onInput="{{ eu.set }}">
+                            <button class="btn btn-secondary" style="width: 40px; height: 40px; padding: 0; justify-content: center; font-size: 18px" aria-label="mehr" onClick="{{ eu.inc }}">+</button>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
                   </div>
                   <button class="btn btn-ghost btn-icon" style="width: 44px; height: 44px; flex: none" aria-label="Entfernen" onClick="{{ er.remove }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
                 </div>
@@ -2246,48 +2258,66 @@
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
-          <p class="card-body" style="margin: 0" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC.</p>
-          <div style="display: flex; flex-direction: column; gap: var(--space-2)">
-            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmNow }}" onChange="{{ setDmNow }}"><span class="dot"></span><span data-i18n>Sofort bei jeder Unterschreitung</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmDay }}" onChange="{{ setDmDay }}"><span class="dot"></span><span data-i18n>Einmal am Tag, gesammelt</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmWeek }}" onChange="{{ setDmWeek }}"><span class="dot"></span><span data-i18n>Einmal in der Woche</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmMonth }}" onChange="{{ setDmMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
+          <div class="blueprint" style="padding: var(--space-3)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Aktuell gespeichert</div>
+            <div style="font-size: 14px; font-weight: 600">{{ mailModeLabel }}</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC. Gesammelte Mails enthalten die ganze Bestellliste.</div>
           </div>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-2)">
-            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="{{ dmTime }}" onInput="{{ setDmTime }}"></div>
-            <div class="field"><label data-i18n>Wochentag</label>
-              <select class="input" value="{{ dmWeekday }}" onChange="{{ setDmWeekday }}">
-                <sc-for list="{{ mailWeekdays }}" as="wd" hint-placeholder-count="7">
-                  <option data-i18n-keep value="{{ wd.value }}">{{ wd.label }}</option>
-                </sc-for>
-              </select>
+
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>1 · Wann wird gemailt?</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: 10px 12px; border: 1px solid {{ dmNowOBorder }}; background: {{ dmNowOBg }}">
+              <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmNow }}" onChange="{{ setDmNow }}"><span class="dot"></span><span data-i18n>Sofort bei jeder Unterschreitung</span></label>
             </div>
-            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" value="{{ dmDayOfMonth }}" onInput="{{ setDmDayOfMonth }}"></div>
-          </div>
-          <div class="field" style="margin-top: var(--space-2)">
-            <label data-i18n>Wer bekommt die Mail?</label>
-            <div>
-              <div class="seg">
-                <label class="seg-opt" style="{{ dmCcOnStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOn }}"><span data-i18n>Verantwortliche + Stellvertretung im CC</span></label>
-                <label class="seg-opt" style="{{ dmCcOffStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: 10px 12px; border: 1px solid {{ dmDayOBorder }}; background: {{ dmDayOBg }}">
+              <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmDay }}" onChange="{{ setDmDay }}"><span class="dot"></span><span data-i18n>Einmal am Tag, gesammelt</span></label>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; padding-left: 26px"><div class="field" style="margin: 0; flex: 1; min-width: 120px; opacity: {{ dmDayOOp }}"><label data-i18n>Uhrzeit</label><input class="input" type="time" disabled="{{ dmDayOOff }}" value="{{ dmTime }}" onInput="{{ setDmTime }}"></div></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: 10px 12px; border: 1px solid {{ dmWeekOBorder }}; background: {{ dmWeekOBg }}">
+              <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmWeek }}" onChange="{{ setDmWeek }}"><span class="dot"></span><span data-i18n>Einmal in der Woche</span></label>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; padding-left: 26px">
+                <div class="field" style="margin: 0; flex: 1; min-width: 140px; opacity: {{ dmWeekOOp }}"><label data-i18n>Wochentag</label>
+                  <select class="input" disabled="{{ dmWeekOOff }}" value="{{ dmWeekday }}" onChange="{{ setDmWeekday }}">
+                    <sc-for list="{{ mailWeekdays }}" as="wd" hint-placeholder-count="7">
+                      <option data-i18n-keep value="{{ wd.value }}">{{ wd.label }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div class="field" style="margin: 0; flex: 1; min-width: 120px; opacity: {{ dmWeekOOp }}"><label data-i18n>Uhrzeit</label><input class="input" type="time" disabled="{{ dmWeekOOff }}" value="{{ dmTime }}" onInput="{{ setDmTime }}"></div>
               </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: 10px 12px; border: 1px solid {{ dmMonthOBorder }}; background: {{ dmMonthOBg }}">
+              <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmMonth }}" onChange="{{ setDmMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; padding-left: 26px">
+                <div class="field" style="margin: 0; flex: 1; min-width: 120px; opacity: {{ dmMonthOOp }}"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" disabled="{{ dmMonthOOff }}" value="{{ dmDayOfMonth }}" onInput="{{ setDmDayOfMonth }}"></div>
+                <div class="field" style="margin: 0; flex: 1; min-width: 120px; opacity: {{ dmMonthOOp }}"><label data-i18n>Uhrzeit</label><input class="input" type="time" disabled="{{ dmMonthOOff }}" value="{{ dmTime }}" onInput="{{ setDmTime }}"></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>2 · Wer bekommt die Mail?</div>
+          <div>
+            <div class="seg">
+              <label class="seg-opt" style="{{ dmCcOnStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOn }}"><span data-i18n>Verantwortliche + Stellvertretung im CC</span></label>
+              <label class="seg-opt" style="{{ dmCcOffStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
             </div>
             <div style="font-size: 12px; color: var(--sc-ink-2); margin-top: 6px" data-i18n>Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.</div>
           </div>
-          <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; margin-top: var(--space-2)">
-            <button class="btn btn-primary" disabled="{{ dmSaveOff }}" onClick="{{ saveMailDraft }}"><span data-i18n>Speichern</span></button>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border: 2px solid {{ dmBarBorder }}; background: {{ dmBarBg }}">
             <sc-if value="{{ dmDirty }}" hint-placeholder-val="{{ false }}">
-              <button class="btn btn-ghost" onClick="{{ discardMailDraft }}"><span data-i18n>Verwerfen</span></button>
-              <span style="font-size: 12.5px; color: var(--color-accent-800)" data-i18n>Nicht gespeichert — ohne „Speichern" wird nichts übernommen.</span>
+              <div style="font-size: 13.5px; font-weight: 600; color: var(--color-accent-900)" data-i18n>Ungespeicherte Änderungen — erst mit „Speichern" werden sie übernommen.</div>
             </sc-if>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-primary" style="flex: 1; min-width: 180px; min-height: 48px; font-size: 16px; font-weight: 700; letter-spacing: 0.02em" disabled="{{ dmSaveOff }}" onClick="{{ saveMailDraft }}"><span data-i18n-keep>{{ dmSaveLabel }}</span></button>
+              <sc-if value="{{ dmDirty }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-secondary" style="min-height: 48px" onClick="{{ discardMailDraft }}"><span data-i18n>Verwerfen</span></button>
+              </sc-if>
+            </div>
           </div>
-          <div class="blueprint" style="padding: var(--space-3); margin-top: var(--space-2)">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div class="card-kicker" data-i18n>Aktuell aktiv</div>
-            <div style="font-size: 14px">{{ mailModeLabel }}</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>Bei gesammelten Mails entsteht automatisch eine Bestellliste mit allen Produktinfos.</div>
-          </div>
-          <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+
+          <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; padding-top: var(--space-2); border-top: 1px solid var(--color-divider)">
             <button class="btn btn-secondary" disabled="{{ orderMailOff }}" onClick="{{ sendOrderListNow }}"><span data-i18n>Bestellliste jetzt mailen</span></button>
             <span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Schickt sofort alles unter Mindestbestand an Inhaber und Lagerleitung — unabhängig vom Zeitplan.</span>
           </div>
@@ -3721,6 +3751,12 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
+    "Aktuell gespeichert": "Currently saved", "1 · Wann wird gemailt?": "1 · When to mail?", "2 · Wer bekommt die Mail?": "2 · Who gets the mail?",
+    "Änderungen speichern": "Save changes", "Alles gespeichert": "All saved",
+    "Ungespeicherte Änderungen — erst mit „Speichern\" werden sie übernommen.": "Unsaved changes — they only apply after “Save”.",
+    "Produkt scannen": "Scan product", "Jetzt die Menge eintragen.": "Now enter the amount.",
+    "kein passendes Produkt, weiter suchen …": "no matching product, still looking …",
+    "QR-Code vom Etikett oder EAN-Strichcode in den Rahmen halten. Das Produkt wird nur ausgewählt.": "Hold the label QR code or EAN barcode in the frame. The product is only selected.",
     "Merkzettel": "Notes", "Meine Merkzettel": "My notes", "Neuer Merkzettel": "New note", "Seite: Merkzettel": "Page: Notes",
     "Merkzettel bearbeiten": "Edit note", "Name des Merkzettels": "Note name", "Produkt": "Product",
     "Kein Produkt gefunden.": "No product found.", "Zum Merkzettel hinzufügen": "Add to note", "Noch keine Positionen.": "No items yet.",
@@ -6016,7 +6052,7 @@ class Component extends DCLogic {
           const ctx = this.canvas.getContext("2d", { willReadFrequently: true });
           ctx.drawImage(vid, 0, 0, w, h);
 
-          if (this.state.eanScan) {
+          if (this.state.eanScan && this.state.eanScan !== "memo") {
             const code = await this.readEan(ctx, w, h);
             if (code) return this.onCode(code);
             this.rafId = requestAnimationFrame(step);
@@ -6058,6 +6094,17 @@ class Component extends DCLogic {
   // eine Adresse, die die Kennung hinten trägt — so drucken die Etiketten.
   onCode(raw) {
     const text = String(raw || "").trim();
+    // Scanner im Merkzettel: Produkt nur auswählen, keine Produktseite öffnen.
+    if (this.state.eanScan === "memo") {
+      if (text) this.setState({ readRaw: text });
+      const hit = text && !this.foreignCode(text) ? this.findByCode(text) : null;
+      if (!hit || hit.aktiv === false) { this.scanT = setTimeout(() => this.detectLoop(), 500); return; }
+      if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
+      this.stopCamera();
+      this.setState({ eanScan: null, memoPickId: hit.id, memoQuery: hit.name, memoPickOpen: false, memoQty: {} });
+      this.say(this.tr("Gescannt"), hit.name, this.tr("Jetzt die Menge eintragen."));
+      return;
+    }
     if (this.state.eanScan) {
       if (text) this.setState({ readRaw: text });
       const ok = this.validGtin(text);
@@ -8477,7 +8524,10 @@ class Component extends DCLogic {
       openEanScanEdit: () => this.openEanScan("edit"),
       openEanScanNp: () => this.openEanScan("np"),
       closeEanScan: () => this.closeEanScan(),
+      eanScanTitle: st.eanScan === "memo" ? this.tr("Produkt scannen") : this.tr("EAN scannen"),
       eanScanHint: st.camState === "error" ? st.camErrorText
+        : st.eanScan === "memo" && st.readRaw ? this.tr("Gelesen: ") + st.readRaw + " — " + this.tr("kein passendes Produkt, weiter suchen …")
+        : st.eanScan === "memo" ? this.tr("QR-Code vom Etikett oder EAN-Strichcode in den Rahmen halten. Das Produkt wird nur ausgewählt.")
         : st.readRaw ? this.tr("Gelesen: ") + st.readRaw
         : this.tr("Strichcode waagerecht und ruhig in den Rahmen halten. Übernommen wird nur eine gültige EAN mit stimmender Prüfziffer."),
       listOpen: !!oc.list, toggleList: tgl("list"), listToggleLabel: openLbl("list"),
@@ -9258,7 +9308,7 @@ class Component extends DCLogic {
         const memos = st.memos || [];
         const mo = st.memoOpen || {};
         const prodOf = id => (st.products || []).find(p => p.id === id);
-        const ed = st.memoEdit;
+        let ed = st.memoEdit;
         const pp = prodOf(st.memoPickId);
         const stop = e => { if (e && e.stopPropagation) e.stopPropagation(); };
         const matches = st.memoPickOpen
@@ -9275,6 +9325,7 @@ class Component extends DCLogic {
           memoQuery: st.memoQuery,
           setMemoQuery: e => this.setState({ memoQuery: e.target.value, memoPickOpen: true, memoPickId: "" }),
           memoPickFocus: () => this.setState({ memoPickOpen: true }),
+          memoScan: () => { this.setState({ memoPickOpen: false }); this.openEanScan("memo"); },
           memoPickOpen: !!st.memoPickOpen,
           memoMatches: matches.map(p => ({
             name: p.name, meta: this.codeOf(p) + " · " + (p.ort || "—") + " · " + this.tr("Bestand ") + this.fmtStock(p, p.ist),
@@ -9301,16 +9352,34 @@ class Component extends DCLogic {
           },
           memoEditRows: ed ? ed.items.map(it => {
             const p = prodOf(it.productId) || { name: "?", id: it.productId };
+            const setPart = (unit, val, undo) => {
+              const cur = st.memoEdit;
+              const items = cur.items.map(x => x.key !== it.key ? x
+                : Object.assign({}, x, { parts: Object.assign({}, x.parts, { [unit]: Math.max(0, Math.round(Number(val) || 0)) }) }));
+              const next = Object.assign({}, cur, { items: items });
+              if (undo) this.memoDraft(next, this.tr("Menge geändert: ") + p.name);
+              else this.setState({ memoEdit: next });
+            };
             return {
               name: p.name, amount: this.memoAmount(p, it.parts),
+              units: this.unitsFor(p).slice().sort((a, b) => b.faktor - a.faktor).map(u => {
+                const v = Number((it.parts || {})[u.name]) || 0;
+                return {
+                  name: u.name, value: String(v),
+                  dec: () => setPart(u.name, v - 1, true), inc: () => setPart(u.name, v + 1, true),
+                  set: e => setPart(u.name, e.target.value, false)
+                };
+              }),
               remove: () => this.memoDraft(Object.assign({}, st.memoEdit, { items: st.memoEdit.items.filter(x => x.key !== it.key) }), this.tr("Position entfernt: ") + p.name)
             };
           }) : [],
           memoEditEmpty: !ed || ed.items.length === 0,
-          memoSaveOff: !ed || ed.items.length === 0,
+          memoSaveOff: !ed || ed.items.length === 0 || ed.items.every(i => this.memoTotal(prodOf(i.productId), i.parts) <= 0),
           memoCancelEdit: () => this.setState({ memoEdit: null, memoPickId: "", memoQuery: "", memoPickOpen: false, memoQty: {} }),
           memoSaveEdit: () => {
             if (!ed || !ed.items.length) return;
+            ed = Object.assign({}, ed, { items: ed.items.filter(i => this.memoTotal(prodOf(i.productId), i.parts) > 0) });
+            if (!ed.items.length) return;
             const name = String(ed.name || "").trim() || this.tr("Merkzettel") + " " + new Date().toLocaleDateString("de-DE");
             const id = ed.id || "m" + Date.now().toString(36);
             const keys = ed.items.map(i => i.key);
@@ -9366,6 +9435,17 @@ class Component extends DCLogic {
           dmCcOnStyle: this.segStyle(!!dm.cc), dmCcOffStyle: this.segStyle(!dm.cc),
           setDmCcOn: () => set({ cc: true }), setDmCcOff: () => set({ cc: false }),
           dmDirty: dirty, dmSaveOff: !dirty,
+          dmSaveLabel: dirty ? this.tr("Änderungen speichern") : this.tr("Alles gespeichert"),
+          dmBarBorder: dirty ? "var(--color-accent)" : "var(--color-divider)",
+          dmBarBg: dirty ? "color-mix(in srgb, var(--color-accent) 14%, transparent)" : "transparent",
+          ...["now", "day", "week", "month"].reduce((o, k) => {
+            const K = "dm" + k.charAt(0).toUpperCase() + k.slice(1) + "O", on = dm.mode === k;
+            o[K + "Border"] = on ? "var(--color-accent)" : "var(--color-divider)";
+            o[K + "Bg"] = on ? "color-mix(in srgb, var(--color-accent) 8%, transparent)" : "transparent";
+            o[K + "Op"] = on ? "1" : ".45";
+            o[K + "Off"] = !on;
+            return o;
+          }, {}),
           discardMailDraft: () => this.setState({ mailDraft: null }),
           saveMailDraft: () => {
             if (!dirty) return;
