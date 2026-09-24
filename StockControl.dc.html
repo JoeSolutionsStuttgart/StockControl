@@ -1021,6 +1021,35 @@
             <button class="btn btn-secondary" style="align-self: flex-start; font-size: 12.5px; padding: 4px 11px; white-space: nowrap; flex: none; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ toggleRevenueMore }}"><span data-i18n-keep>{{ revenueMoreLabel }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m6 9 6 6 6-6"></path></svg></button>
           </sc-if>
 
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
+            <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Bestandswert im Zeitverlauf</div>
+            <sc-if value="{{ pvHasMarks }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-secondary" style="font-size: 12.5px; padding: 4px 11px; white-space: nowrap" onClick="{{ togglePriceMarks }}"><span data-i18n-keep>{{ priceMarksLabel }}</span></button>
+            </sc-if>
+          </div>
+          <div style="font-size: 12px; color: var(--sc-ink-2)">{{ pvNote }}</div>
+          <sc-if value="{{ hasPvChart }}" hint-placeholder-val="{{ true }}">
+            <div class="blueprint" style="padding: var(--space-3)">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              {{ pvChart }}
+              <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 11.5px; margin-top: 4px">
+                <span style="display: inline-flex; align-items: center; gap: 6px"><i style="width: 14px; height: 2px; background: var(--color-accent-700); display: inline-block"></i><span data-i18n>Bestandswert</span></span>
+                <sc-if value="{{ pvHasMin }}" hint-placeholder-val="{{ false }}">
+                  <span style="display: inline-flex; align-items: center; gap: 6px"><i style="width: 14px; height: 0; border-top: 1.5px dashed var(--color-text); display: inline-block"></i><span data-i18n>Mindestbestand</span></span>
+                </sc-if>
+                <sc-if value="{{ pvHasMarks }}" hint-placeholder-val="{{ false }}">
+                  <span style="display: inline-flex; align-items: center; gap: 6px"><i style="width: 8px; height: 8px; transform: rotate(45deg); border: 1.5px solid var(--color-accent-700); display: inline-block; box-sizing: border-box"></i><span data-i18n>Preisänderung — anklicken</span></span>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ pvHasSel }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; font-size: 12.5px; padding: 6px 10px; border: 1px solid var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent)">
+              <span style="flex: 1; min-width: 180px; font-variant-numeric: tabular-nums">{{ pvSelLabel }}</span>
+              <button class="btn btn-secondary" style="font-size: 12px; padding: 2px 9px; white-space: nowrap; flex: none" onClick="{{ clearPvSel }}"><span data-i18n>Markierung lösen</span></button>
+            </div>
+          </sc-if>
+
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: var(--sc-ink-2)" data-i18n>Preisänderungen</div>
           <sc-if value="{{ hasPriceChart }}" hint-placeholder-val="{{ false }}">
             <div class="blueprint" style="padding: var(--space-3)">
@@ -1039,7 +1068,7 @@
             </thead>
             <tbody>
               <sc-for list="{{ priceRows }}" as="pr" hint-placeholder-count="4">
-                <tr>
+                <tr style="{{ pr.rowStyle }}" onClick="{{ pr.pick }}">
                   <td style="white-space: nowrap">{{ pr.datum }}</td>
                   <td>{{ pr.name }}</td>
                   <td align="right" style="font-variant-numeric: tabular-nums">{{ pr.preis }}</td>
@@ -4360,6 +4389,10 @@ const DICT = {
     "Nachfüllen": "Refill", "nachgefüllt": "refilled", "Bestellung abschließen": "Close order",
     "Keine Menge eingetragen": "No quantity entered", "Menge und Quantität eintragen, dann nachfüllen.": "Enter amount and unit, then refill.",
     "Bestand erhöht": "Stock increased", "Nachfüllung aus Bestellung": "Refill from order", "Abgeschlossen": "Closed",
+    "Bestandswert im Zeitverlauf": "Stock value over time", "Bestandswert": "Stock value", "Preisänderung — anklicken": "Price change — click",
+    "Markierung lösen": "Clear marker", "Markierungen ausblenden": "Hide markers", "Preisänderungen markieren": "Mark price changes",
+    "Bestand × gültiger Preis · letzte ": "Stock × valid price · last ", " Tage": " days", "jetzt ": "now ",
+    "Bestandswert an dem Tag: ": "Stock value that day: ", "Menge in ": "Quantity in ", "in der kleinsten Einheit": "in the smallest unit",
     "Nur beim Bearbeiten": "Only while editing", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tap Edit above, then quantities can be assigned.",
     "Standardquantität": "Default quantity", "Standardquantität wählen.": "Choose a default quantity.", "Standardquantität fehlt.": "Default quantity missing.",
@@ -5142,6 +5175,10 @@ const DICT = {
     "Nachfüllen": "Fyll på", "nachgefüllt": "påfylld", "Bestellung abschließen": "Avsluta beställningen",
     "Keine Menge eingetragen": "Inget antal angivet", "Menge und Quantität eintragen, dann nachfüllen.": "Ange antal och enhet, fyll sedan på.",
     "Bestand erhöht": "Lagret ökat", "Nachfüllung aus Bestellung": "Påfyllning från beställning", "Abgeschlossen": "Avslutad",
+    "Bestandswert im Zeitverlauf": "Lagervärde över tid", "Bestandswert": "Lagervärde", "Preisänderung — anklicken": "Prisändring — klicka",
+    "Markierung lösen": "Ta bort markering", "Markierungen ausblenden": "Dölj markeringar", "Preisänderungen markieren": "Markera prisändringar",
+    "Bestand × gültiger Preis · letzte ": "Lager × gällande pris · senaste ", " Tage": " dagar", "jetzt ": "nu ",
+    "Bestandswert an dem Tag: ": "Lagervärde den dagen: ", "Menge in ": "Antal i ", "in der kleinsten Einheit": "i minsta enheten",
     "Nur beim Bearbeiten": "Bara vid redigering", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Tilldela bara vid redigering eller via Excel-tabellen.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tryck på Redigera ovan, sedan kan enheter tilldelas.",
     "Standardquantität": "Standardkvantitet", "Standardquantität wählen.": "Välj en standardkvantitet.", "Standardquantität fehlt.": "Standardkvantitet saknas.",
@@ -7764,7 +7801,7 @@ class Component extends DCLogic {
       const keep = (rows || []).filter(r => this.toNum(r.qty) > 0);
       const p = this.state.products.find(x => x.id === id);
       if (keep.length) amounts[id] = keep;
-      else if (p && Number(p.bestellmenge) > 0) amounts[id] = [{ qty: String(p.bestellmenge), unit: "" }];
+      else if (p && Number(p.bestellmenge) > 0) amounts[id] = this.splitStd(p, p.bestellmenge);
     });
     const batch = { id: "B-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(),
       by: who || "", items: list, amounts: amounts, done: [] };
@@ -8407,6 +8444,104 @@ class Component extends DCLogic {
     ]);
   }
 
+  // Menge (kleinste Einheit) → Felder: zuerst die Standardquantität, nur
+  // der Rest, der darin nicht aufgeht, in die kleineren Quantitäten.
+  splitStd(p, n) {
+    let rest = Math.max(0, Math.round(Number(n) || 0));
+    const units = this.unitsFor(p).slice().sort((a, b) => b.faktor - a.faktor);
+    const std = this.stdUnit(p);
+    const F = std ? Number(std.faktor) || 1 : 1;
+    const rows = [];
+    const add = (name, c) => { const r = rows.find(x => x.unit === name); if (r) r.qty = String(Number(r.qty) + c); else rows.push({ qty: String(c), unit: name }); };
+    if (std) { const c = Math.floor(rest / F); if (c > 0) { add(std.name, c); rest -= c * F; } }
+    units.filter(u => Number(u.faktor) < F).forEach(u => {
+      const c = Math.floor(rest / u.faktor); if (c > 0) { add(u.name, c); rest -= c * u.faktor; }
+    });
+    if (rest > 0) {
+      const small = units[units.length - 1];
+      if (small) add(small.name, Math.ceil(rest / (Number(small.faktor) || 1)));
+      else rows.push({ qty: String(rest), unit: "" });
+    }
+    return rows;
+  }
+
+  // Bestand eines Produkts zu einem Zeitpunkt aus seinen Buchungen.
+  stockAt(p, t, list) {
+    if (!list || !list.length) return Number(p.ist) || 0;
+    let before = null, first = null;
+    list.forEach(e => {
+      if (e.date.getTime() <= t && (!before || e.date > before.date)) before = e;
+      if (!first || e.date < first.date) first = e;
+    });
+    return before ? before.after : first.after - first.delta;
+  }
+  logByProduct(log) {
+    const m = {};
+    (log || []).forEach(e => { (m[e.productId] = m[e.productId] || []).push(e); });
+    return m;
+  }
+
+  niceTicks(hi, n) {
+    if (!(hi > 0)) hi = 1;
+    const raw = hi / (n || 4);
+    const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    const step = [1, 2, 2.5, 5, 10].map(x => x * mag).find(s => s >= raw) || raw;
+    const out = [];
+    for (let v = 0; v <= Math.ceil(hi / step) * step + step / 2; v += step) out.push(+v.toFixed(6));
+    return out;
+  }
+
+  // Linienchart mit Achsen: Zahlen links, Datum unten. Optional eine
+  // gestrichelte Mindestlinie und anklickbare Tagesmarken.
+  axisChartEl(o) {
+    const R = React.createElement;
+    const ts = o.ts || [], vals = o.vals || [], n = ts.length;
+    if (n < 2) return null;
+    const hi = Math.max.apply(null, vals.concat(o.minVals || [], [0]));
+    const ticks = this.niceTicks(hi * 1.05, 4);
+    const top = ticks[ticks.length - 1] || 1;
+    const t0 = ts[0], t1 = ts[n - 1];
+    const X = t => 100 * (t - t0) / ((t1 - t0) || 1);
+    const Y = v => 100 * (1 - (Number(v) || 0) / top);
+    const line = arr => arr.map((v, i) => X(ts[i]).toFixed(2) + "," + Y(v).toFixed(2)).join(" ");
+    const fmtD = t => new Date(t).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit" });
+    const lbl = { position: "absolute", fontSize: "11px", color: "var(--sc-ink-2)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", lineHeight: 1 };
+    const yl = ticks.map(v => o.yFmt ? o.yFmt(v) : String(v));
+    const yw = Math.max.apply(null, yl.map(s => s.length)) * 6.4 + 4;
+    const H = (o.height || 200) + "px";
+    const axis = "1px solid color-mix(in srgb, var(--color-text) 35%, transparent)";
+    const sv = ticks.map((v, i) => R("line", { key: "g" + i, x1: 0, x2: 100, y1: Y(v), y2: Y(v),
+      stroke: "color-mix(in srgb, var(--color-text) 12%, transparent)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" }));
+    const pts = line(vals);
+    sv.push(R("polygon", { key: "a", points: "0,100 " + pts + " 100,100", fill: "color-mix(in srgb, var(--color-accent) 16%, transparent)" }));
+    sv.push(R("polyline", { key: "l", points: pts, fill: "none", stroke: "var(--color-accent-700)", strokeWidth: 1.8, strokeLinejoin: "round", vectorEffect: "non-scaling-stroke" }));
+    if (o.minVals) sv.push(R("polyline", { key: "m", points: line(o.minVals), fill: "none", stroke: "var(--color-text)", strokeWidth: 1.2, strokeDasharray: "5 4", vectorEffect: "non-scaling-stroke" }));
+    const plot = [R("svg", { key: "s", viewBox: "0 0 100 100", preserveAspectRatio: "none",
+      style: { position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" } }, sv)];
+    (o.marks || []).filter(m => m.t >= t0 && m.t <= t1).forEach(m => {
+      const on = o.activeMark === m.key;
+      plot.push(R("div", { key: "k" + m.key, title: m.label, onClick: () => o.onMark && o.onMark(on ? null : m.key),
+        style: { position: "absolute", top: 0, bottom: 0, left: X(m.t) + "%", width: "18px", transform: "translateX(-50%)",
+          cursor: "pointer", display: "flex", justifyContent: "center", zIndex: on ? 2 : 1 } }, [
+        R("i", { key: "l", style: { width: 0, height: "100%", borderLeft: on ? "2px solid var(--color-accent-700)" : "1px dashed color-mix(in srgb, var(--color-text) 50%, transparent)" } }),
+        R("i", { key: "d", style: { position: "absolute", top: "-5px", width: "9px", height: "9px", transform: "rotate(45deg)",
+          background: on ? "var(--color-accent-700)" : "var(--color-bg)", border: "1.5px solid var(--color-accent-700)", boxSizing: "border-box" } })
+      ]));
+    });
+    const xn = 5, xl = [];
+    for (let i = 0; i < xn; i++) {
+      xl.push(R("span", { key: "x" + i, style: Object.assign({}, lbl, { top: "7px", left: (100 * i / (xn - 1)) + "%",
+        transform: i === 0 ? "none" : (i === xn - 1 ? "translateX(-100%)" : "translateX(-50%)") }) }, fmtD(t0 + (t1 - t0) * i / (xn - 1))));
+    }
+    return R("div", { style: { display: "grid", gridTemplateColumns: yw + "px minmax(0, 1fr)", columnGap: "8px", paddingTop: "6px" } }, [
+      R("div", { key: "y", style: { position: "relative", height: H } },
+        ticks.map((v, i) => R("span", { key: i, style: Object.assign({}, lbl, { right: 0, top: Y(v) + "%", transform: "translateY(-50%)" }) }, yl[i]))),
+      R("div", { key: "p", style: { position: "relative", height: H, borderLeft: axis, borderBottom: axis } }, plot),
+      R("div", { key: "e" }),
+      R("div", { key: "x", style: { position: "relative", height: "22px" } }, xl)
+    ]);
+  }
+
   // Preisverlauf als Stufenkurve: ein Preis gilt bis zur nächsten Änderung,
   // deshalb Stufen und keine schrägen Verbindungen. Bis zu vier Produkte
   // liegen übereinander, mehr wäre nicht mehr lesbar.
@@ -8583,6 +8718,32 @@ class Component extends DCLogic {
         sum: sales.reduce((a, x) => a + x.menge * (this.priceAt(p, x.datum) || 0), 0)
       };
     });
+    // Bestandswert: Bestand zum Zeitpunkt × an dem Tag gültiger Preis.
+    const pv = (() => {
+      const now = Date.now(), t0 = now - revDays * 864e5, lb = this.logByProduct(st.log);
+      const marks = [];
+      revBase.forEach(p => {
+        const h = ((st.priceHist || {})[p.id] || []).slice().sort((a, b) => String(a.datum).localeCompare(String(b.datum)));
+        h.forEach((e, i) => {
+          if (i === 0) return;
+          const t = new Date(String(e.datum) + "T12:00:00").getTime();
+          if (isNaN(t) || t < t0 || t > now) return;
+          marks.push({ key: p.id + "|" + e.datum, t, p, datum: String(e.datum), from: Number(h[i - 1].preis) || 0, to: Number(e.preis) || 0,
+            label: String(e.datum).split("-").reverse().join(".") + " · " + p.name + ": " + this.money(h[i - 1].preis) + " → " + this.money(e.preis) });
+        });
+      });
+      const ts = [];
+      for (let i = 0; i < 40; i++) ts.push(t0 + (now - t0) * i / 39);
+      marks.forEach(m => { ts.push(m.t - 1); ts.push(m.t); });
+      ts.sort((a, b) => a - b);
+      const valAt = t => revBase.reduce((s, p) => s + this.stockAt(p, t, lb[p.id]) * (this.priceAt(p, this.dayStr(t)) || 0), 0);
+      const one = revBase.length === 1 ? revBase[0] : null;
+      return { ts, marks, one, valAt,
+        vals: ts.map(valAt),
+        minVals: one ? ts.map(t => (Number(one.min) || 0) * (this.priceAt(one, this.dayStr(t)) || 0)) : null };
+    })();
+    const pvOn = st.priceMarks !== false;
+    const pvSel = pvOn ? pv.marks.find(m => m.key === st.priceMarkSel) : null;
     const dupKey = () => {
       const n = (st.npName || "").trim();
       if (!n) return null;
@@ -8807,18 +8968,15 @@ class Component extends DCLogic {
     // Buchung davor — vor der ersten Buchung der Stand vor ihr.
     const steps = 12;
     const startT = cutoff || Math.min(nowT - 30 * 86400000, ...(st.log || []).map(e => e.date.getTime()));
-    const agg = [];
+    const agg = [], aggT = [], logBy = this.logByProduct(st.log);
     for (let i = 0; i < steps; i++) {
       const t = startT + (nowT - startT) * (i / (steps - 1));
-      agg.push(hMatched.reduce((sum, p) => {
-        const l = (st.log || []).filter(e => e.productId === p.id);
-        if (!l.length) return sum + (Number(p.ist) || 0);
-        const before = l.filter(e => e.date.getTime() <= t).sort((x, y) => y.date - x.date)[0];
-        if (before) return sum + before.after;
-        const first = l.slice().sort((x, y) => x.date - y.date)[0];
-        return sum + (first.after - first.delta);
-      }, 0));
+      aggT.push(t);
+      agg.push(hMatched.reduce((sum, p) => sum + this.stockAt(p, t, logBy[p.id]), 0));
     }
+    const hOne = hMatched.length === 1 ? hMatched[0] : null;
+    const hStd = hOne ? this.stdUnit(hOne) : null;
+    const hF = hStd ? Math.max(1, Number(hStd.faktor) || 1) : 1;
 
     const ev = st.events.find(e => e.id === st.eventId) || st.events[0];
     const evRow = (it) => {
@@ -9061,7 +9219,7 @@ class Component extends DCLogic {
         const ids = orderList.filter(mine).map(p => p.id);
         this.setState(prev => {
           const q = Object.assign({}, prev.orderQty || {});
-          ids.forEach(id => { const p = prev.products.find(x => x.id === id); if (p && Number(p.bestellmenge) > 0) q[id] = [{ qty: String(p.bestellmenge), unit: "" }]; });
+          ids.forEach(id => { const p = prev.products.find(x => x.id === id); if (p && Number(p.bestellmenge) > 0) q[id] = this.splitStd(p, p.bestellmenge); });
           return { orderQty: q };
         }, () => this.putInOrder(ids, meLabel));
       },
@@ -9357,6 +9515,19 @@ class Component extends DCLogic {
         price: this.money(this.priceAt(r.p, this.dayStr(Date.now())) || 0),
         sum: this.money(r.sum)
       }))).list,
+      pvChart: this.axisChartEl({ ts: pv.ts, vals: pv.vals, minVals: pv.minVals, height: 200,
+        yFmt: v => v.toLocaleString("de-DE", { maximumFractionDigits: v < 10 ? 2 : 0 }) + " €",
+        marks: pvOn ? pv.marks : [], activeMark: pvSel ? pvSel.key : null,
+        onMark: k => this.setState({ priceMarkSel: k }) }),
+      hasPvChart: pv.ts.length > 1 && revBase.length > 0,
+      pvHasMin: !!pv.minVals,
+      pvNote: this.tr("Bestand × gültiger Preis · letzte ") + revDays + this.tr(" Tage") + " · " + this.tr("jetzt ") + this.money(pv.vals[pv.vals.length - 1] || 0),
+      pvHasMarks: pv.marks.length > 0,
+      priceMarksLabel: pvOn ? this.tr("Markierungen ausblenden") + " (" + pv.marks.length + ")" : this.tr("Preisänderungen markieren") + " (" + pv.marks.length + ")",
+      togglePriceMarks: () => this.setState(prev => ({ priceMarks: prev.priceMarks === false, priceMarkSel: null })),
+      pvHasSel: !!pvSel,
+      pvSelLabel: pvSel ? pvSel.label + " · " + this.tr("Bestandswert an dem Tag: ") + this.money(pv.valAt(pvSel.t)) : "",
+      clearPvSel: () => this.setState({ priceMarkSel: null }),
       priceChart: this.priceChartEl(revSel.map(r => r.p)),
       hasPriceChart: !!this.priceChartEl(revSel.map(r => r.p)),
       priceRows: this.capped("prices", (() => {
@@ -9366,7 +9537,10 @@ class Component extends DCLogic {
           h.forEach((e, i) => {
             const prev = i > 0 ? h[i - 1].preis : null;
             const d = prev == null ? null : e.preis - prev;
+            const mk = r.p.id + "|" + e.datum, isSel = pvSel && pvSel.key === mk;
             out.push({
+              pick: d == null ? () => {} : () => this.setState(prev => ({ priceMarks: true, priceMarkSel: prev.priceMarkSel === mk ? null : mk })),
+              rowStyle: d == null ? "" : "cursor: pointer" + (isSel ? "; background: color-mix(in srgb, var(--color-accent) 18%, transparent)" : ""),
               datum: e.datum.split("-").reverse().join("."), name: r.p.name,
               preis: this.money(e.preis),
               delta: d == null ? this.tr("erster Preis") : (d > 0 ? "+" : "") + this.money(d),
@@ -10327,8 +10501,10 @@ class Component extends DCLogic {
       hTaken: hMatched.length === 1 ? this.fmtStock(hMatched[0], taken) : taken,
       hAdded: hMatched.length === 1 ? this.fmtStock(hMatched[0], added) : added,
       hCount: hEntries.length, hTop,
-      hChart: this.chart(agg),
-      hChartLabel: hMatched.length === 1 ? hMatched[0].name : hMatched.length + " " + this.tr("Artikel zusammengefasst"),
+      hChart: this.axisChartEl({ ts: aggT, vals: agg.map(v => v / hF), height: 180,
+        yFmt: v => (+v.toFixed(2)).toLocaleString("de-DE") }),
+      hChartLabel: hOne ? hOne.name + " · " + this.tr("Menge in ") + (hStd ? hStd.name : this.baseUnitName(hOne))
+        : hMatched.length + " " + this.tr("Artikel zusammengefasst") + " · " + this.tr("in der kleinsten Einheit"),
       exportHistoryCsv: () => {
         const rows = [[this.tr("Datum"), this.tr("Artikel"), this.tr("Lagerort"), this.tr("Vorgang"), this.tr("Menge"), this.tr("Bestand danach")]
           .concat(this.may("who") ? [this.tr("Person")] : [])];
