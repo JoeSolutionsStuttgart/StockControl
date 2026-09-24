@@ -1080,7 +1080,7 @@
                   <th data-i18n>Min</th>
                   <th data-i18n>Bestellmenge</th>
                   <th data-i18n>Lieferant</th>
-                  <th data-i18n>Bestellmenge eintragen</th>
+                  <th data-i18n>Bestellte Menge</th>
                   <th data-i18n>Status</th>
                   <th></th>
                 </tr>
@@ -1138,14 +1138,14 @@
             <h4 style="margin: 0" data-i18n>Offene Bestellungen</h4>
             <span data-i18n-keep class="tag tag-neutral">{{ ordersCountLabel }}</span>
           </div>
-          <p class="card-body" style="margin: 0" data-i18n>Alle Produkte mit dem Status „in Bestellung". Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.</p>
+          <p class="card-body" style="margin: 0" data-i18n>Alle Produkte mit dem Status „in Bestellung". Menge bei Bedarf anpassen. „Zurück in Bestand" bucht sie ein: reicht der Bestand danach noch nicht bis zum Mindestbestand, kommt das Produkt zurück in die Bestellliste, sonst ist es wieder „Bestand ok".</p>
           <sc-if value="{{ hasOrderedRows }}" hint-placeholder-val="{{ false }}">
             <div style="overflow-x: auto; max-width: 100%">
               <table class="table" data-zebra style="min-width: 520px">
                 <thead>
                   <tr>
                     <th data-i18n>Artikel</th>
-                    <th style="text-align: right" data-i18n>Bestellmenge</th>
+                    <th data-i18n>Bestellte Menge</th>
                     <th data-i18n>Lieferant</th>
                     <th></th>
                   </tr>
@@ -1158,7 +1158,19 @@
                         <sc-if value="{{ od.noLink }}" hint-placeholder-val="{{ true }}"><span>{{ od.name }}</span></sc-if>
                         <div data-i18n-keep style="font-size: 11px; font-weight: 400; color: var(--sc-ink-3)">{{ od.code }} · {{ od.ort }}</div>
                       </td>
-                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap">{{ od.bm }}</td>
+                      <td>
+                        <div style="display: flex; flex-direction: column; gap: 4px; min-width: 170px">
+                          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 4px 6px">
+                            <sc-for list="{{ od.fields }}" as="of" hint-placeholder-count="2">
+                              <label style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+                                <span data-i18n-keep style="font-size: 10.5px; color: var(--sc-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ of.name }}</span>
+                                <input class="input" type="number" min="0" step="1" inputmode="numeric" style="width: 100%; padding: 3px 6px; font-size: 12.5px" value="{{ of.qty }}" disabled="{{ of.locked }}" onInput="{{ of.set }}">
+                              </label>
+                            </sc-for>
+                          </div>
+                          <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ od.note }}</span>
+                        </div>
+                      </td>
                       <td class="text-muted">{{ od.lieferant }}</td>
                       <td style="text-align: right"><button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button></td>
                     </tr>
@@ -2001,7 +2013,7 @@
             </div>
             <div class="hr"></div>
             <h5 style="margin: 0" data-i18n>Team einladen</h5>
-            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden.</p>
+            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden</p>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
               <div class="field" style="flex: 1; min-width: 190px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setInvite }}"></div>
               <div class="field" style="width: 172px"><label data-i18n>Rolle</label><select class="input"><option>Mitarbeitende Person</option><option>Lagerleitung</option><option>Lesezugriff</option></select></div>
@@ -2014,7 +2026,7 @@
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
               <div class="card-kicker" data-i18n>Profil und Feinrechte</div>
               <h4 style="margin: 0" data-i18n>Kein Zugriff auf die Rechteverwaltung</h4>
-              <p class="card-body" style="margin: 0" data-i18n>Wer welche Rechte hat, sehen und ändern können nur die inhabende Person und wer das Recht „Rechte ändern" ausdrücklich bekommen hat.</p>
+              <p class="card-body" style="margin: 0" data-i18n>Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern" ausdrücklich bekommen hat.</p>
             </section>
           </sc-if>
 
@@ -3232,7 +3244,7 @@
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com.</div>
         </div>
       </sc-if>
 
@@ -3751,6 +3763,10 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
+    "Bestellte Menge": "Ordered quantity", "Wareneingang": "Goods received", "danach: ": "then: ",
+    "Bestellte Menge eintragen, dann zurück in Bestand buchen.": "Enter the ordered quantity, then book back to stock.",
+    "Bestand ok — aus beiden Listen entfernt.": "Stock ok — removed from both lists.",
+    "Noch unter Mindestbestand — zurück in der Bestellliste.": "Still below minimum — back on the order list.",
     "Aktuell gespeichert": "Currently saved", "1 · Wann wird gemailt?": "1 · When to mail?", "2 · Wer bekommt die Mail?": "2 · Who gets the mail?",
     "Änderungen speichern": "Save changes", "Alles gespeichert": "All saved",
     "Ungespeicherte Änderungen — erst mit „Speichern\" werden sie übernommen.": "Unsaved changes — they only apply after “Save”.",
@@ -4062,7 +4078,7 @@ const DICT = {
     "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
     "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Role", "Feinrechte": "Fine-grained rights", "Team einladen": "Invite someone",
-    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "The invitation is valid for 3 hours. If it expires you can invite again.",
+    "Die Einladung gilt 3 Stunden": "The invitation is valid for 3 hours. If it expires you can invite again.",
     "E-Mail-Adresse": "Email address", "Einladung senden": "Send invitation",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "The role sets the default. Individual rights can be allowed or blocked here.",
     "Alles erlauben": "Allow everything", "Alles sperren": "Block everything",
@@ -4844,7 +4860,7 @@ const DICT = {
     "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
     "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Roll", "Feinrechte": "Detaljrättigheter", "Team einladen": "Bjud in någon",
-    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
+    "Die Einladung gilt 3 Stunden": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
     "E-Mail-Adresse": "E-postadress", "Einladung senden": "Skicka inbjudan",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "Rollen sätter standarden. Enskilda rättigheter kan tillåtas eller blockeras här.",
     "Alles erlauben": "Tillåt allt", "Alles sperren": "Blockera allt",
@@ -7508,7 +7524,9 @@ class Component extends DCLogic {
     list.forEach(id => {
       const rows = (this.state.orderQty || {})[id];
       const keep = (rows || []).filter(r => this.toNum(r.qty) > 0);
+      const p = this.state.products.find(x => x.id === id);
       if (keep.length) amounts[id] = keep;
+      else if (p && Number(p.bestellmenge) > 0) amounts[id] = [{ qty: String(p.bestellmenge), unit: "" }];
     });
     const batch = { id: "B-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(),
       by: who || "", items: list, amounts: amounts, done: [] };
@@ -7520,6 +7538,40 @@ class Component extends DCLogic {
       .concat([api.setOrders(orders).catch(() => this.say("Supabase", this.tr("Bestellung nicht gespeichert"),
         this.tr("Bitte supabase/schema.sql im SQL-Editor erneut ausführen.")))])));
     this.say(this.tr("Bestellung"), list.length + " × " + this.tr("Artikel"), this.tr("Status: ist bestellt"));
+  }
+
+  // Ware ist da: bestellte Menge einbuchen, Produkt aus der Bestellung
+  // nehmen und den Status aus dem neuen Bestand ableiten.
+  receiveOrdered(pid, who) {
+    const p = this.state.products.find(x => x.id === pid);
+    if (!p) return;
+    const o = (this.state.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(pid) >= 0).slice(-1)[0];
+    const rows = o ? (o.amounts || {})[pid] : (this.state.orderQty || {})[pid];
+    const add = this.amountTotal(p, rows);
+    if (add <= 0) {
+      this.say(this.tr("Wareneingang"), this.tr("Keine Menge eingetragen"), this.tr("Bestellte Menge eintragen, dann zurück in Bestand buchen."));
+      return;
+    }
+    const next = (Number(p.ist) || 0) + add;
+    const status = next < (Number(p.min) || 0) ? "low" : "ok";
+    this.applyBooking(p, next, false, "+" + add, who);
+    const orders = (this.state.orders || [])
+      .map(x => (x.items || []).indexOf(pid) < 0 ? x : Object.assign({}, x, {
+        items: x.items.filter(i => i !== pid),
+        amounts: (() => { const a = Object.assign({}, x.amounts || {}); delete a[pid]; return a; })()
+      }))
+      .filter(x => x.id === "__meta" || (x.items || []).length);
+    this.setState(prev => ({
+      orders: orders,
+      orderQty: (() => { const q = Object.assign({}, prev.orderQty || {}); delete q[pid]; return q; })(),
+      products: prev.products.map(x => x.id === pid ? Object.assign({}, x, { status: status }) : x)
+    }));
+    this.remote(api => api.bookMovement({ productId: pid, delta: add, note: this.tr("Wareneingang aus Bestellung") })
+      .then(() => api.updateProduct(pid, { status: status }))
+      .then(() => api.setOrders(orders)));
+    this.say(this.tr("Wareneingang"), p.name + " · +" + this.fmtStock(p, add),
+      status === "ok" ? this.tr("Bestand ok — aus beiden Listen entfernt.")
+        : this.tr("Noch unter Mindestbestand — zurück in der Bestellliste."));
   }
 
   backToStock(ids, orderId) {
@@ -8670,10 +8722,20 @@ class Component extends DCLogic {
         return {
           hasOrderedRows: ordered.length > 0, noOrderedRows: ordered.length === 0,
           orderedRows: ordered.map(p => ({
+            ...(() => {
+              const o = (st.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(p.id) >= 0).slice(-1)[0];
+              const rows = o ? (o.amounts || {})[p.id] : (st.orderQty || {})[p.id];
+              const onSet = o ? (u, v) => this.setOrderAmountU(o.id, p, u, v) : (u, v) => this.setAmountU(p, u, v);
+              const add = this.amountTotal(p, rows);
+              return {
+                fields: this.amountFieldsFor(p, rows, onSet, !this.may("order")),
+                note: add > 0 ? this.tr("danach: ") + this.fmtStock(p, (Number(p.ist) || 0) + add) + " · " + this.tr("Min ") + this.fmtStock(p, p.min) : this.tr("Keine Menge eingetragen")
+              };
+            })(),
             name: p.name, code: this.codeOf(p), ort: p.ort || "—",
             link: lnk(p), hasLink: !!lnk(p), noLink: !lnk(p),
             bm: this.fmtStock(p, p.bestellmenge), lieferant: p.lieferant || "—",
-            backOff: !this.may("order"), back: () => this.backToStock([p.id], null)
+            backOff: !this.may("order"), back: () => this.receiveOrdered(p.id, meLabel)
           }))
         };
       })(),
@@ -9462,7 +9524,9 @@ class Component extends DCLogic {
             this.setState({ mailMode: dm.mode, mailTime: dm.time, mailWeekday: dm.weekday, mailDay: dm.day, ccDeputies: !!dm.cc, mailDraft: null });
             this.remote(api => api.saveSettings({
               mail_mode: dm.mode, mail_time: dm.time || "07:30", mail_weekday: this.toNum(dm.weekday),
-              mail_day: this.toNum(dm.day), cc_deputies: !!dm.cc
+              mail_day: this.toNum(dm.day), cc_deputies: !!dm.cc,
+              // Ab jetzt zählen: die nächste Mail kommt zum nächsten geplanten Zeitpunkt.
+              last_digest_at: new Date().toISOString()
             }));
             this.say(this.tr("Benachrichtigung"), this.tr("Gespeichert"), "");
           },
