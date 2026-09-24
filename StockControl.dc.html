@@ -99,6 +99,7 @@
   [data-detail-main] { grid-column: 1; grid-row: 1 / span 2; }
   [data-detail-book] { grid-column: 2; grid-row: 1; }
   [data-detail-side] { grid-column: 2; grid-row: 2; }
+  @media (max-width: 1180px) { [data-xl-only] { display: none !important; } }
   @media (max-width: 900px) {
     [data-topnav] { display: none !important; }
     [data-burger] { display: inline-flex !important; }
@@ -141,7 +142,7 @@
         <div data-brandword style="font-family: var(--font-heading); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; white-space: nowrap">{{ serviceName }}</div>
       </div>
 
-      <nav data-topnav style="display: flex; align-items: center; gap: 2px">
+      <nav data-topnav style="display: flex; align-items: center; gap: 2px; flex: none">
         <div style="position: relative" onMouseEnter="{{ hoverLager }}" onMouseLeave="{{ closeMenu }}">
           <button class="btn" style="{{ grpLager }}" onClick="{{ toggleLager }}"><span data-i18n>Lager</span><span style="font-size: 10px; opacity: .7">▾</span></button>
           <sc-if value="{{ menuLager }}" hint-placeholder-val="{{ false }}">
@@ -184,9 +185,9 @@
         </div>
       </nav>
 
-      <div style="margin-left: auto; display: flex; align-items: center; gap: var(--space-2)">
+      <div style="margin-left: auto; display: flex; align-items: center; gap: var(--space-2); flex: none; flex-wrap: nowrap">
         <sc-if value="{{ deptSwitchOn }}" hint-placeholder-val="{{ false }}">
-          <select class="input" style="flex: none; max-width: 170px; padding: 6px 8px; font-size: 13px; font-weight: 600; border-color: var(--color-accent)" value="{{ activeDept }}" onChange="{{ setActiveDept }}" aria-label="Abteilung" title="Abteilung wechseln">
+          <select class="input" style="flex: none; width: auto; max-width: 170px; height: 40px; padding: 0 8px; font-size: 13px; font-weight: 600; border-color: var(--color-accent)" value="{{ activeDept }}" onChange="{{ setActiveDept }}" aria-label="Abteilung" title="Abteilung wechseln">
             <option value="all" data-i18n>Ganze Firma</option>
             <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
               <option value="{{ dp.id }}">{{ dp.name }}</option>
@@ -196,15 +197,18 @@
         <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
         </button>
-        <select data-langsel class="input" style="width: 78px; flex: none; padding-inline: 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
+        <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goHelp }}" aria-label="Hilfe" title="Hilfe">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.9"></path><path d="M12 17h.01"></path></svg>
+        </button>
+        <select data-langsel class="input" style="width: 68px; height: 40px; flex: none; padding: 0 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
           <option value="de">DE</option>
           <option value="en">EN</option>
           <option value="sv">SV</option>
         </select>
         <div style="position: relative" onMouseEnter="{{ hoverUser }}" onMouseLeave="{{ closeMenu }}">
-          <button class="btn btn-secondary" style="gap: 8px" onClick="{{ toggleUser }}">
+          <button class="btn btn-secondary" style="gap: 8px; white-space: nowrap; flex: none; height: 40px" onClick="{{ toggleUser }}">
             <span style="width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 18%, transparent); color: var(--color-accent-700); display: grid; place-items: center; font-size: 10px; font-weight: 500">{{ meInitials }}</span>
-            <span data-wide-only>{{ meName }}</span>
+            <span data-xl-only style="max-width: 140px; overflow: hidden; text-overflow: ellipsis">{{ meName }}</span>
             <span style="font-size: 10px; opacity: .7">▾</span>
           </button>
           <sc-if value="{{ menuUser }}" hint-placeholder-val="{{ false }}">
@@ -1051,12 +1055,6 @@
           </sc-if>
 
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; margin-top: var(--space-2); color: var(--sc-ink-2)" data-i18n>Preisänderungen</div>
-          <sc-if value="{{ hasPriceChart }}" hint-placeholder-val="{{ false }}">
-            <div class="blueprint" style="padding: var(--space-3)">
-              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-              {{ priceChart }}
-            </div>
-          </sc-if>
           <table class="table" style="margin: 0">
             <thead>
               <tr>
@@ -1605,8 +1603,8 @@
             </div>
           </sc-if>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
-            <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportEventList }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
-            <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
+            <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportEventList }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
+            <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
           </div>
         </section>
 
@@ -1617,9 +1615,9 @@
             <p class="card-body" style="margin: 0" data-i18n>Was kommende Events brauchen, zusammengerechnet und gegen den heutigen Bestand gestellt. Vergangene Events zählen nicht mit.</p>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Events</div>
-              <div class="seg">
-                <label class="seg-opt" style="{{ fcScopeAllStyle }}"><input type="radio" name="sc-fc-scope" onChange="{{ setFcScopeAll }}"><span data-i18n>Alle kommenden</span></label>
-                <label class="seg-opt" style="{{ fcScopeRangeStyle }}"><input type="radio" name="sc-fc-scope" onChange="{{ setFcScopeRange }}"><span data-i18n>Bestimmter Zeitraum</span></label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px">
+                <label style="position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 40px; padding: 8px 12px; border: 1px solid var(--color-accent); border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1.3; cursor: pointer; {{ fcScopeAllStyle }}"><input type="radio" name="sc-fc-scope" onChange="{{ setFcScopeAll }}" style="position: absolute; opacity: 0; pointer-events: none"><span data-i18n>Alle kommenden</span></label>
+                <label style="position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 40px; padding: 8px 12px; border: 1px solid var(--color-accent); border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1.3; cursor: pointer; {{ fcScopeRangeStyle }}"><input type="radio" name="sc-fc-scope" onChange="{{ setFcScopeRange }}" style="position: absolute; opacity: 0; pointer-events: none"><span data-i18n>Bestimmter Zeitraum</span></label>
               </div>
             </div>
             <sc-if value="{{ fcIsRange }}" hint-placeholder-val="{{ false }}">
@@ -1630,13 +1628,13 @@
             </sc-if>
             <div style="display: flex; flex-direction: column; gap: 4px">
               <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Produkte</div>
-              <div class="seg">
-                <label class="seg-opt" style="{{ fcItemsAllStyle }}"><input type="radio" name="sc-fc-items" onChange="{{ setFcItemsAll }}"><span data-i18n>Alle Produkte</span></label>
-                <label class="seg-opt" style="{{ fcItemsOpenStyle }}"><input type="radio" name="sc-fc-items" onChange="{{ setFcItemsOpen }}"><span data-i18n>Nur noch nicht bestellte</span></label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px">
+                <label style="position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 40px; padding: 8px 12px; border: 1px solid var(--color-accent); border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1.3; cursor: pointer; {{ fcItemsAllStyle }}"><input type="radio" name="sc-fc-items" onChange="{{ setFcItemsAll }}" style="position: absolute; opacity: 0; pointer-events: none"><span data-i18n>Alle Produkte</span></label>
+                <label style="position: relative; display: flex; align-items: center; justify-content: center; text-align: center; min-height: 40px; padding: 8px 12px; border: 1px solid var(--color-accent); border-radius: 8px; font-size: 13.5px; font-weight: 500; line-height: 1.3; cursor: pointer; {{ fcItemsOpenStyle }}"><input type="radio" name="sc-fc-items" onChange="{{ setFcItemsOpen }}" style="position: absolute; opacity: 0; pointer-events: none"><span data-i18n>Nur noch nicht bestellte</span></label>
               </div>
             </div>
-            <div style="display: flex; gap: var(--space-2); align-items: flex-end; flex-wrap: wrap">
-              <button class="btn btn-primary" style="white-space: nowrap; gap: 7px; font-weight: 600" disabled="{{ fcDisabled }}" onClick="{{ runForecast }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><rect x="5" y="2" width="14" height="20" rx="1"></rect><path d="M8 6h8"></path><path d="M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h8"></path></svg><span data-i18n>Vorschau rechnen</span></button>
+            <div style="display: flex; padding-top: var(--space-3); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent)">
+              <button class="btn btn-primary" style="white-space: nowrap; gap: 7px; font-weight: 600; flex: 1; justify-content: center" disabled="{{ fcDisabled }}" onClick="{{ runForecast }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><rect x="5" y="2" width="14" height="20" rx="1"></rect><path d="M8 6h8"></path><path d="M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h8"></path></svg><span data-i18n>Vorschau rechnen</span></button>
             </div>
             <sc-if value="{{ fcOn }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2)">
@@ -1669,9 +1667,9 @@
                       </tbody>
                     </table>
                   </div>
-                  <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-                    <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportForecast }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
-                    <button class="btn btn-ghost" onClick="{{ clearForecast }}"><span data-i18n>Vorschau schließen</span></button>
+                  <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; justify-content: space-between">
+                    <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportForecast }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
+                    <button class="btn btn-ghost" style="white-space: nowrap" onClick="{{ clearForecast }}"><span data-i18n>Vorschau schließen</span></button>
                   </div>
                 </sc-if>
               </div>
@@ -1968,8 +1966,8 @@
                   </sc-for>
                 </select>
               </div>
-              <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ showName }}" onChange="{{ toggleShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname auf dem Etikett</span></label>
-              <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ showId }}" onChange="{{ toggleShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID auf dem Etikett</span></label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px"><input type="checkbox" checked="{{ showName }}" onChange="{{ toggleShowName }}" style="position: static; margin: 0; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname auf dem Etikett</span></label>
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px"><input type="checkbox" checked="{{ showId }}" onChange="{{ toggleShowId }}" style="position: static; margin: 0; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID auf dem Etikett</span></label>
             </div>
             <div style="display: flex; flex-direction: column; gap: var(--space-3)">
               <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Texte für alle Etiketten</div>
@@ -1999,14 +1997,16 @@
               <label data-i18n>Artikel auswählen</label>
               <input class="input" type="search" data-i18n-ph placeholder="Suchen nach Name, EAN, Lagerort …" onInput="{{ setQrQuery }}">
             </div>
-            <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); padding-bottom: 10px">{{ qrCountLabel }}</div>
+            <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); padding-bottom: 10px; white-space: nowrap">{{ qrCountLabel }}</div>
           </div>
-          <div style="max-height: 232px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--sc-ground); display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr))">
+          <div style="max-height: 300px; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); background: var(--sc-ground); display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); align-content: start">
             <sc-for list="{{ qrPickList }}" as="q" hint-placeholder-count="7">
-              <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
-                <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
-                <span style="flex: 1; min-width: 0; font-size: 13px">{{ q.name }}</span>
-                <span style="font-size: 11px; color: var(--sc-ink-3)">{{ q.meta }}</span>
+              <label style="display: flex; align-items: flex-start; gap: 10px; min-width: 0; padding: 9px var(--space-3); cursor: pointer; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); border-right: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); background: {{ q.rowBg }}">
+                <input type="checkbox" checked="{{ q.checked }}" onChange="{{ q.toggle }}" style="position: static; margin: 2px 0 0; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                <span style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0">
+                  <span style="font-size: 13px; line-height: 1.35; overflow-wrap: anywhere">{{ q.name }}</span>
+                  <span style="font-size: 11px; line-height: 1.3; color: var(--sc-ink-3); overflow-wrap: anywhere">{{ q.meta }}</span>
+                </span>
               </label>
             </sc-for>
           </div>
@@ -2023,8 +2023,8 @@
               <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end"><div class="field" style="margin: 0"><label data-i18n>Text unter dem Code</label><input class="input" value="{{ qeBottom }}" onInput="{{ setQeBottom }}"></div><div class="field" style="margin: 0"><label data-i18n>Größe</label><select class="input" style="width: 100%" value="{{ qeFsBottom }}" onChange="{{ setQeFsBottom }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div></div>
               <div style="display: grid; grid-template-columns: minmax(0, 1fr) 92px; gap: var(--space-2); align-items: end">
                 <div style="display: flex; flex-direction: column; gap: 6px; padding-bottom: 8px">
-                  <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ qeShowName }}" onChange="{{ toggleQeShowName }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname zeigen</span></label>
-                  <label class="radio" style="gap: 8px"><input type="checkbox" checked="{{ qeShowId }}" onChange="{{ toggleQeShowId }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID zeigen</span></label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px"><input type="checkbox" checked="{{ qeShowName }}" onChange="{{ toggleQeShowName }}" style="position: static; margin: 0; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Produktname zeigen</span></label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px"><input type="checkbox" checked="{{ qeShowId }}" onChange="{{ toggleQeShowId }}" style="position: static; margin: 0; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n>Artikel-ID zeigen</span></label>
                 </div>
                 <div class="field" style="margin: 0"><label data-i18n>ID-Größe</label><select class="input" style="width: 100%" value="{{ qeFsId }}" onChange="{{ setQeFsId }}"><sc-for list="{{ fsOptions }}" as="fo" hint-placeholder-count="6"><option value="{{ fo }}">{{ fo }} px</option></sc-for></select></div>
               </div>
@@ -4393,6 +4393,64 @@ const DICT = {
     "Markierung lösen": "Clear marker", "Markierungen ausblenden": "Hide markers", "Preisänderungen markieren": "Mark price changes",
     "Bestand × gültiger Preis · letzte ": "Stock × valid price · last ", " Tage": " days", "jetzt ": "now ",
     "Bestandswert an dem Tag: ": "Stock value that day: ", "Menge in ": "Quantity in ", "in der kleinsten Einheit": "in the smallest unit",
+    "Zu den Quantitäten": "To quantities",
+    "Zu den Abteilungen": "To departments",
+    "Zur Produktverwaltung": "To product management",
+    "Zu den Einstellungen": "To settings",
+    "Zu den Bestellungen": "To orders",
+    "Zu den Events": "To events",
+    "Zum Bestandswert": "To stock value",
+    "Zu den Lagerorten": "To storage locations",
+    "Einkauf": "Purchasing",
+    "Bestellliste und Bestellungen": "Order list and orders",
+    "Planung": "Planning",
+    "Konto": "Account",
+    "Anmeldung und Sprache": "Sign-in and language",
+    "Wie übernehme ich eine bestehende Liste?": "How do I bring in an existing list?",
+    "Stammdaten → Produktverwaltung, Karte „Viele Produkte aus einer Tabelle importieren\". Vorlage herunterladen — leer oder mit dem heutigen Bestand —, in Excel ausfüllen und wieder hochladen. Gelesen werden Excel (.xlsx) und CSV.": "Master data → Product management, card “Import many products from a table”. Download the template — empty or with today's stock —, fill it in Excel and upload it again. Excel (.xlsx) and CSV are read.",
+    "Istbestand, Mindestbestand und Bestellmenge stehen in der Standardquantität des Produkts. Zeilen mit Fehlern werden vor dem Übernehmen einzeln angezeigt.": "Stock, minimum and order quantity are in the product's default quantity. Rows with errors are listed one by one before importing.",
+    "Auf dem Buchungsschirm zählt das Hauptfeld in der Standardquantität. Darunter steht für jede weitere Quantität ein eigenes Feld — zwei Kästen und drei Flaschen ergeben automatisch die richtige Gesamtmenge.": "On the booking screen the main field counts in the default quantity. Below it each further quantity has its own field — two crates and three bottles give the right total automatically.",
+    "Welche Quantitäten ein Produkt hat, steht in seinem Detail unter „Bearbeiten\".": "Which quantities a product has is set in its detail under “Edit”.",
+    "Wie lege ich Quantitäten und die Standardquantität fest?": "How do I set quantities and the default quantity?",
+    "Einstellungen → Quantitäten: Gebinde wie Flasche, Kasten oder Palette anlegen und angeben, wie viele der kleineren darin stecken — 1 Kasten = 12 Flaschen.": "Settings → Quantities: create packs such as bottle, crate or pallet and state how many of the smaller ones they hold — 1 crate = 12 bottles.",
+    "Im Produkt die passenden Quantitäten anhaken und eine als Standardquantität wählen. In ihr werden Bestand, Mindestbestand und Bestellmenge gezeigt, gebucht und in Mails genannt; was nicht aufgeht, steht in den kleineren Quantitäten daneben.": "In the product tick the matching quantities and choose one as the default. Stock, minimum and order quantity are shown, booked and mailed in it; any remainder appears in the smaller quantities.",
+    "Wie trage ich das Mindesthaltbarkeitsdatum ein?": "How do I enter the best-before date?",
+    "Beim Nachfüllen und in offenen Bestellungen gibt es ein Feld „MHD\". Jede Lieferung behält ihr eigenes Datum.": "When refilling and in open orders there is a “Best before” field. Each delivery keeps its own date.",
+    "Entnommen wird nach „first in, first out\": das älteste MHD zuerst.": "Withdrawals follow “first in, first out”: the oldest date first.",
+    "Wie verschicke ich die Bestellliste sofort?": "How do I send the order list right away?",
+    "Einstellungen → Benachrichtigungen → „Bestellliste jetzt mailen\". Inhaber und Lagerleitung bekommen alles unter Mindestbestand, die Mengen in der Standardquantität jedes Produkts.": "Settings → Notifications → “Mail order list now”. Owner and warehouse management get everything below minimum, quantities in each product's default quantity.",
+    "Was zeigt der Bestandswert?": "What does the stock value show?",
+    "In der Karte „Preisverlauf und Umsatz\": Bestand × Preis, der an dem Tag galt, über den gewählten Zeitraum. Bei einem einzelnen Produkt zeigt die gestrichelte Linie den Wert des Mindestbestands.": "In the card “Price history and revenue”: stock × the price valid that day, over the chosen period. For a single product the dashed line shows the value of the minimum stock.",
+    "Tage mit Preisänderung sind als Raute markiert. Ein Klick darauf — oder auf die Zeile in der Tabelle „Preisänderungen\" — zeigt alten und neuen Preis.": "Days with a price change carry a diamond. Clicking it — or the row in the “Price changes” table — shows old and new price.",
+    "Wie arbeite ich mit Abteilungen?": "How do I work with departments?",
+    "Einstellungen → Abteilungen: Abteilungen anlegen und Personen zuordnen. Eine Person kann in mehreren Abteilungen sein.": "Settings → Departments: create departments and assign people. One person can be in several departments.",
+    "Oben in der Menüleiste wird die Abteilung gewechselt. Produkte, Bestellungen, Events, Merkzettel und Verlauf zeigen dann nur ihre Daten; „Ganze Firma\" zählt alles zusammen.": "Switch the department at the top of the menu bar. Products, orders, events, notes and history then show only its data; “Whole company” adds everything up.",
+    "Wie kopiere ich Produkte in eine andere Abteilung?": "How do I copy products to another department?",
+    "Stammdaten → Produktverwaltung: ein oder mehrere Produkte auswählen, Zielabteilung wählen, kopieren. Die Kopie bekommt eine eigene Kennung und einen neuen QR-Code; der Bestand wird getrennt geführt.": "Master data → Product management: select one or more products, choose the target department, copy. The copy gets its own ID and a new QR code; stock is kept separately.",
+    "Das Etikett der Kopie neu drucken — sonst bucht der Scan im ursprünglichen Produkt.": "Print a new label for the copy — otherwise scanning books on the original product.",
+    "Was sieht welche Abteilung?": "What does each department see?",
+    "Einstellungen → Sichtbarkeit je Abteilung: Lagerorte, Quantitäten und Merkmale lassen sich für einzelne Abteilungen ausblenden. Wer dort arbeitet, bekommt sie in Auswahllisten nicht angeboten.": "Settings → Visibility per department: storage locations, quantities and attributes can be hidden for single departments. People working there no longer see them in pick lists.",
+    "Wie benenne ich einen Lagerort um?": "How do I rename a storage location?",
+    "Einstellungen → Lagerorte, beim Lagerort „Umbenennen\" wählen. Alle Produkte an diesem Ort ziehen automatisch mit.": "Settings → Storage locations, choose “Rename” on the location. All products there move along automatically.",
+    "Warum ist eine Seite für mich gesperrt?": "Why is a page locked for me?",
+    "Welche Seiten und Aktionen jemand nutzen darf, legt die Rolle fest; einzelne Rechte können je Person abweichen. Freigeben kann, wer das Recht „Rechte ändern\" hat.": "The role sets which pages and actions someone may use; single rights can differ per person. Anyone with the right “Change rights” can unlock them.",
+    "Die Hilfe ist für alle immer offen.": "Help is always open to everyone.",
+    "Wie entsteht die Bestellliste?": "How is the order list built?",
+    "Lager → Bestellungen. Jedes aktive Produkt unter Mindestbestand steht dort bei der verantwortlichen Person — verschiebbar zu jeder anderen. Oben lässt sich nach Abteilung filtern.": "Stock → Orders. Every active product below minimum is listed with its responsible person — movable to anyone else. Filter by department at the top.",
+    "„Alle mit Bestellmenge in Bestellung\" übernimmt die hinterlegte Bestellmenge. Sie steht zuerst in der Standardquantität; nur was darin nicht aufgeht, kommt in die kleineren Quantitäten.": "“Order all with order quantity” takes the stored order quantity. It goes into the default quantity first; only a remainder goes into the smaller quantities.",
+    "Die Ware ist da — was jetzt?": "The goods have arrived — now what?",
+    "In der offenen Bestellung die gelieferte Menge prüfen, bei Bedarf das MHD eintragen und zurück in den Bestand buchen. Der Bestand steigt, das Produkt verlässt die Bestellung.": "In the open order check the delivered amount, enter the best-before date if needed and book it back into stock. Stock rises and the product leaves the order.",
+    "Wie plane ich ein Event?": "How do I plan an event?",
+    "Lager → Events: Name, Datum, Ort und die benötigten Artikel mit Menge eintragen. Beim Anlegen entsteht die Bedarfsliste mit den Fehlmengen gegenüber dem heutigen Bestand.": "Stock → Events: enter name, date, place and the needed items with amounts. Saving creates the demand list with shortfalls against today's stock.",
+    "„Bestellung abschicken\" setzt die Fehlmengen auf die Bestelllisten der Verantwortlichen.": "“Send order” puts the shortfalls on the responsible people's order lists.",
+    "Was zeigt die Vorschau?": "What does the preview show?",
+    "Alle kommenden Events — oder die eines Zeitraums — zusammengerechnet und gegen den heutigen Bestand gestellt. „Nur noch nicht bestellte\" blendet aus, was schon unterwegs ist. Das Ergebnis lässt sich als Excel exportieren.": "All upcoming events — or those in a period — added up and set against today's stock. “Only not yet ordered” hides what is already on its way. The result can be exported to Excel.",
+    "Passwort vergessen?": "Forgot password?",
+    "Auf der Anmeldeseite „Passwort vergessen?\" wählen. Der Link in der Mail gilt 15 Minuten.": "Choose “Forgot password?” on the sign-in page. The link in the mail is valid for 15 minutes.",
+    "Wie schütze ich mein Konto zusätzlich?": "How do I protect my account further?",
+    "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Set up two-factor in the settings. Sign-in then also asks for a code from the authenticator app.",
+    "Wie ändere ich die Sprache?": "How do I change the language?",
+    "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Choose DE, EN or SV at the top right of the menu bar.",
     "Nur beim Bearbeiten": "Only while editing", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tap Edit above, then quantities can be assigned.",
     "Standardquantität": "Default quantity", "Standardquantität wählen.": "Choose a default quantity.", "Standardquantität fehlt.": "Default quantity missing.",
@@ -5179,6 +5237,64 @@ const DICT = {
     "Markierung lösen": "Ta bort markering", "Markierungen ausblenden": "Dölj markeringar", "Preisänderungen markieren": "Markera prisändringar",
     "Bestand × gültiger Preis · letzte ": "Lager × gällande pris · senaste ", " Tage": " dagar", "jetzt ": "nu ",
     "Bestandswert an dem Tag: ": "Lagervärde den dagen: ", "Menge in ": "Antal i ", "in der kleinsten Einheit": "i minsta enheten",
+    "Zu den Quantitäten": "Till kvantiteter",
+    "Zu den Abteilungen": "Till avdelningar",
+    "Zur Produktverwaltung": "Till artikelhantering",
+    "Zu den Einstellungen": "Till inställningar",
+    "Zu den Bestellungen": "Till beställningar",
+    "Zu den Events": "Till evenemang",
+    "Zum Bestandswert": "Till lagervärde",
+    "Zu den Lagerorten": "Till lagerplatser",
+    "Einkauf": "Inköp",
+    "Bestellliste und Bestellungen": "Beställningslista och beställningar",
+    "Planung": "Planering",
+    "Konto": "Konto",
+    "Anmeldung und Sprache": "Inloggning och språk",
+    "Wie übernehme ich eine bestehende Liste?": "Hur tar jag in en befintlig lista?",
+    "Stammdaten → Produktverwaltung, Karte „Viele Produkte aus einer Tabelle importieren\". Vorlage herunterladen — leer oder mit dem heutigen Bestand —, in Excel ausfüllen und wieder hochladen. Gelesen werden Excel (.xlsx) und CSV.": "Grunddata → Artikelhantering, kortet ”Importera många artiklar från en tabell”. Ladda ner mallen — tom eller med dagens lager —, fyll i den i Excel och ladda upp igen. Excel (.xlsx) och CSV läses.",
+    "Istbestand, Mindestbestand und Bestellmenge stehen in der Standardquantität des Produkts. Zeilen mit Fehlern werden vor dem Übernehmen einzeln angezeigt.": "Lager, minimum och beställningsantal anges i artikelns standardkvantitet. Rader med fel visas en och en före importen.",
+    "Auf dem Buchungsschirm zählt das Hauptfeld in der Standardquantität. Darunter steht für jede weitere Quantität ein eigenes Feld — zwei Kästen und drei Flaschen ergeben automatisch die richtige Gesamtmenge.": "På bokningsskärmen räknar huvudfältet i standardkvantiteten. Under det har varje ytterligare kvantitet ett eget fält — två backar och tre flaskor ger automatiskt rätt total.",
+    "Welche Quantitäten ein Produkt hat, steht in seinem Detail unter „Bearbeiten\".": "Vilka kvantiteter en artikel har ställs in i dess detaljvy under ”Redigera”.",
+    "Wie lege ich Quantitäten und die Standardquantität fest?": "Hur ställer jag in kvantiteter och standardkvantitet?",
+    "Einstellungen → Quantitäten: Gebinde wie Flasche, Kasten oder Palette anlegen und angeben, wie viele der kleineren darin stecken — 1 Kasten = 12 Flaschen.": "Inställningar → Kvantiteter: skapa förpackningar som flaska, back eller pall och ange hur många mindre de rymmer — 1 back = 12 flaskor.",
+    "Im Produkt die passenden Quantitäten anhaken und eine als Standardquantität wählen. In ihr werden Bestand, Mindestbestand und Bestellmenge gezeigt, gebucht und in Mails genannt; was nicht aufgeht, steht in den kleineren Quantitäten daneben.": "Markera passande kvantiteter i artikeln och välj en som standard. Lager, minimum och beställningsantal visas, bokas och mejlas i den; en rest visas i de mindre kvantiteterna.",
+    "Wie trage ich das Mindesthaltbarkeitsdatum ein?": "Hur anger jag bäst-före-datum?",
+    "Beim Nachfüllen und in offenen Bestellungen gibt es ein Feld „MHD\". Jede Lieferung behält ihr eigenes Datum.": "Vid påfyllning och i öppna beställningar finns fältet ”Bäst före”. Varje leverans behåller sitt eget datum.",
+    "Entnommen wird nach „first in, first out\": das älteste MHD zuerst.": "Uttag sker enligt ”first in, first out”: äldsta datum först.",
+    "Wie verschicke ich die Bestellliste sofort?": "Hur skickar jag beställningslistan direkt?",
+    "Einstellungen → Benachrichtigungen → „Bestellliste jetzt mailen\". Inhaber und Lagerleitung bekommen alles unter Mindestbestand, die Mengen in der Standardquantität jedes Produkts.": "Inställningar → Aviseringar → ”Mejla beställningslistan nu”. Ägare och lagerledning får allt under minimum, antal i varje artikels standardkvantitet.",
+    "Was zeigt der Bestandswert?": "Vad visar lagervärdet?",
+    "In der Karte „Preisverlauf und Umsatz\": Bestand × Preis, der an dem Tag galt, über den gewählten Zeitraum. Bei einem einzelnen Produkt zeigt die gestrichelte Linie den Wert des Mindestbestands.": "I kortet ”Prishistorik och omsättning”: lager × det pris som gällde den dagen, över vald period. För en enskild artikel visar den streckade linjen minimilagrets värde.",
+    "Tage mit Preisänderung sind als Raute markiert. Ein Klick darauf — oder auf die Zeile in der Tabelle „Preisänderungen\" — zeigt alten und neuen Preis.": "Dagar med prisändring har en romb. Ett klick på den — eller på raden i tabellen ”Prisändringar” — visar gammalt och nytt pris.",
+    "Wie arbeite ich mit Abteilungen?": "Hur arbetar jag med avdelningar?",
+    "Einstellungen → Abteilungen: Abteilungen anlegen und Personen zuordnen. Eine Person kann in mehreren Abteilungen sein.": "Inställningar → Avdelningar: skapa avdelningar och tilldela personer. En person kan vara i flera avdelningar.",
+    "Oben in der Menüleiste wird die Abteilung gewechselt. Produkte, Bestellungen, Events, Merkzettel und Verlauf zeigen dann nur ihre Daten; „Ganze Firma\" zählt alles zusammen.": "Byt avdelning högst upp i menyraden. Artiklar, beställningar, evenemang, anteckningar och historik visar då bara dess data; ”Hela företaget” räknar ihop allt.",
+    "Wie kopiere ich Produkte in eine andere Abteilung?": "Hur kopierar jag artiklar till en annan avdelning?",
+    "Stammdaten → Produktverwaltung: ein oder mehrere Produkte auswählen, Zielabteilung wählen, kopieren. Die Kopie bekommt eine eigene Kennung und einen neuen QR-Code; der Bestand wird getrennt geführt.": "Grunddata → Artikelhantering: välj en eller flera artiklar, välj målavdelning, kopiera. Kopian får eget ID och ny QR-kod; lagret förs separat.",
+    "Das Etikett der Kopie neu drucken — sonst bucht der Scan im ursprünglichen Produkt.": "Skriv ut en ny etikett för kopian — annars bokar skanningen på originalet.",
+    "Was sieht welche Abteilung?": "Vad ser varje avdelning?",
+    "Einstellungen → Sichtbarkeit je Abteilung: Lagerorte, Quantitäten und Merkmale lassen sich für einzelne Abteilungen ausblenden. Wer dort arbeitet, bekommt sie in Auswahllisten nicht angeboten.": "Inställningar → Synlighet per avdelning: lagerplatser, kvantiteter och egenskaper kan döljas för enskilda avdelningar. De som arbetar där ser dem inte i vallistor.",
+    "Wie benenne ich einen Lagerort um?": "Hur byter jag namn på en lagerplats?",
+    "Einstellungen → Lagerorte, beim Lagerort „Umbenennen\" wählen. Alle Produkte an diesem Ort ziehen automatisch mit.": "Inställningar → Lagerplatser, välj ”Byt namn” vid platsen. Alla artiklar där följer med automatiskt.",
+    "Warum ist eine Seite für mich gesperrt?": "Varför är en sida låst för mig?",
+    "Welche Seiten und Aktionen jemand nutzen darf, legt die Rolle fest; einzelne Rechte können je Person abweichen. Freigeben kann, wer das Recht „Rechte ändern\" hat.": "Rollen avgör vilka sidor och åtgärder någon får använda; enskilda rättigheter kan skilja per person. Den som har rätten ”Ändra rättigheter” kan låsa upp.",
+    "Die Hilfe ist für alle immer offen.": "Hjälpen är alltid öppen för alla.",
+    "Wie entsteht die Bestellliste?": "Hur skapas beställningslistan?",
+    "Lager → Bestellungen. Jedes aktive Produkt unter Mindestbestand steht dort bei der verantwortlichen Person — verschiebbar zu jeder anderen. Oben lässt sich nach Abteilung filtern.": "Lager → Beställningar. Varje aktiv artikel under minimum står hos den ansvariga personen — flyttbar till vem som helst. Filtrera på avdelning högst upp.",
+    "„Alle mit Bestellmenge in Bestellung\" übernimmt die hinterlegte Bestellmenge. Sie steht zuerst in der Standardquantität; nur was darin nicht aufgeht, kommt in die kleineren Quantitäten.": "”Beställ alla med beställningsantal” tar det sparade antalet. Det hamnar först i standardkvantiteten; bara en rest går till de mindre kvantiteterna.",
+    "Die Ware ist da — was jetzt?": "Varorna har kommit — vad nu?",
+    "In der offenen Bestellung die gelieferte Menge prüfen, bei Bedarf das MHD eintragen und zurück in den Bestand buchen. Der Bestand steigt, das Produkt verlässt die Bestellung.": "Kontrollera levererat antal i den öppna beställningen, ange bäst-före vid behov och boka tillbaka till lagret. Lagret ökar och artikeln lämnar beställningen.",
+    "Wie plane ich ein Event?": "Hur planerar jag ett evenemang?",
+    "Lager → Events: Name, Datum, Ort und die benötigten Artikel mit Menge eintragen. Beim Anlegen entsteht die Bedarfsliste mit den Fehlmengen gegenüber dem heutigen Bestand.": "Lager → Evenemang: ange namn, datum, plats och behövda artiklar med antal. När du sparar skapas behovslistan med bristerna mot dagens lager.",
+    "„Bestellung abschicken\" setzt die Fehlmengen auf die Bestelllisten der Verantwortlichen.": "”Skicka beställning” lägger bristerna på de ansvarigas beställningslistor.",
+    "Was zeigt die Vorschau?": "Vad visar förhandsvyn?",
+    "Alle kommenden Events — oder die eines Zeitraums — zusammengerechnet und gegen den heutigen Bestand gestellt. „Nur noch nicht bestellte\" blendet aus, was schon unterwegs ist. Das Ergebnis lässt sich als Excel exportieren.": "Alla kommande evenemang — eller de inom en period — summerade och ställda mot dagens lager. ”Bara ej beställda” döljer det som redan är på väg. Resultatet kan exporteras till Excel.",
+    "Passwort vergessen?": "Glömt lösenordet?",
+    "Auf der Anmeldeseite „Passwort vergessen?\" wählen. Der Link in der Mail gilt 15 Minuten.": "Välj ”Glömt lösenordet?” på inloggningssidan. Länken i mejlet gäller i 15 minuter.",
+    "Wie schütze ich mein Konto zusätzlich?": "Hur skyddar jag mitt konto ytterligare?",
+    "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Aktivera tvåfaktor i inställningarna. Inloggningen frågar sedan även efter en kod från autentiseringsappen.",
+    "Wie ändere ich die Sprache?": "Hur byter jag språk?",
+    "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Välj DE, EN eller SV längst upp till höger i menyraden.",
     "Nur beim Bearbeiten": "Bara vid redigering", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Tilldela bara vid redigering eller via Excel-tabellen.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tryck på Redigera ovan, sedan kan enheter tilldelas.",
     "Standardquantität": "Standardkvantitet", "Standardquantität wählen.": "Välj en standardkvantitet.", "Standardquantität fehlt.": "Standardkvantitet saknas.",
@@ -5435,7 +5551,7 @@ const ROLES = {
 
 const PAGE_PERMS = { dashboard: "page_dashboard", products: "page_products", detail: "page_products", scan: "page_scan",
   orders: "page_orders", events: "page_events", memo: "page_memo", history: "page_history", new: "page_new", import: "page_new",
-  qr: "page_qr", team: "page_team", settings: "page_settings", help: "page_help" };
+  qr: "page_qr", team: "page_team", settings: "page_settings" };
 const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "memo", "history", "new", "qr", "team", "settings", "help"];
 
 const PERM_LIST = [
@@ -5450,7 +5566,6 @@ const PERM_LIST = [
   ["page_qr", "Seite: QR-Codes", ["owner","manager","worker"]],
   ["page_team", "Seite: Team & Rechte", ["owner","manager","worker","reader"]],
   ["page_settings", "Seite: Einstellungen", ["owner","manager","worker","reader"]],
-  ["page_help", "Seite: Hilfe", ["owner","manager","worker","reader"]],
   ["view", "Produkte ansehen", ["owner","manager","worker","reader"]],
   ["withdraw", "Entnahme buchen", ["owner","manager","worker"]],
   ["refill", "Nachfüllung buchen", ["owner","manager","worker"]],
@@ -5549,10 +5664,13 @@ const HELP_TOPICS = [
       a: ["Stammdaten → Produktverwaltung. Pflicht ist nur der Name; alles andere lässt sich später ergänzen.",
           "Gleiche Namen sind erlaubt, solange sich Lagerort oder Quantität unterscheiden — „Wasser 0,5 l\" kann im Keller und in der Küche liegen. Stimmen Name, Lagerort und Quantität überein, bleibt der Knopf gesperrt."],
       go: "new", linkLabel: "Produkt anlegen" },
+    { q: "Wie lege ich Quantitäten und die Standardquantität fest?",
+      a: ["Einstellungen → Quantitäten: Gebinde wie Flasche, Kasten oder Palette anlegen und angeben, wie viele der kleineren darin stecken — 1 Kasten = 12 Flaschen.",
+          "Im Produkt die passenden Quantitäten anhaken und eine als Standardquantität wählen. In ihr werden Bestand, Mindestbestand und Bestellmenge gezeigt, gebucht und in Mails genannt; was nicht aufgeht, steht in den kleineren Quantitäten daneben."],
+      go: "settings", linkLabel: "Zu den Quantitäten" },
     { q: "Wie übernehme ich eine bestehende Liste?",
-      a: ["Stammdaten → Produktverwaltung, unten die Karte „Viele Produkte aus einer Tabelle importieren\". Bei „Vorlage\" wählen, ob die Datei leer sein soll oder den heutigen Bestand enthält, herunterladen, ausfüllen und in das blau umrandete Feld hochladen.",
-          "Excel-Dateien kann der Browser nicht lesen. In Excel über „Speichern unter\" als CSV ablegen (Trennzeichen Semikolon) und diese Datei wählen.",
-          "Erkannt werden Spalten wie Name, Artikelnummer, Istbestand, Mindestbestand, Lagerort, Preis, Lieferant. Zeilen ohne Namen gelten als Zwischenüberschrift und werden übersprungen — Kategoriezeilen landen also nicht als Produkt im Lager."],
+      a: ["Stammdaten → Produktverwaltung, Karte „Viele Produkte aus einer Tabelle importieren\". Vorlage herunterladen — leer oder mit dem heutigen Bestand —, in Excel ausfüllen und wieder hochladen. Gelesen werden Excel (.xlsx) und CSV.",
+          "Istbestand, Mindestbestand und Bestellmenge stehen in der Standardquantität des Produkts. Zeilen mit Fehlern werden vor dem Übernehmen einzeln angezeigt."],
       go: "new", linkLabel: "Zum Import" },
     { q: "Wie bekomme ich QR-Etiketten an das Regal?",
       a: ["Stammdaten → QR-Codes. Format wählen (2×4 bis 5×13 je Blatt oder Endlosrolle 62 mm), Produkte auswählen, drucken.",
@@ -5565,13 +5683,15 @@ const HELP_TOPICS = [
           "Der Bestand ändert sich sofort. Jede Buchung bleibt mit Person und Zeitpunkt im Bestandsverlauf nachvollziehbar."],
       go: "scan", linkLabel: "Zum Scannen" },
     { q: "Wie buche ich Kisten und Einzelflaschen zusammen?",
-      a: ["Auf dem Buchungsschirm steht unter dem Mengenfeld je Einheit ein eigenes Feld. Zwei Kisten und drei Flaschen einzutragen ergibt automatisch die Gesamtmenge in der kleinsten Einheit.",
-          "Angelegt werden Einheiten im Buchungsschirm unter „Einheiten dieses Produkts\": Name und Verhältnis zur bisherigen Einheit. Eine Kiste mit zwölf Flaschen ist „größer als Flasche, 12\"; eine Palette mit 32 Kisten dann „größer als Flasche, 384\".",
-          "Wird eine kleinere Einheit nachgetragen, rechnet das Programm Bestand, Mindestbestand und Verlauf mit um — aus 8 Kisten werden 96 Flaschen. Die Zahlen bedeuten also weiter dasselbe."],
+      a: ["Auf dem Buchungsschirm zählt das Hauptfeld in der Standardquantität. Darunter steht für jede weitere Quantität ein eigenes Feld — zwei Kästen und drei Flaschen ergeben automatisch die richtige Gesamtmenge.",
+          "Welche Quantitäten ein Produkt hat, steht in seinem Detail unter „Bearbeiten\"."],
       go: "scan", linkLabel: "Zum Buchen" },
     { q: "Ein Produkt wird nicht mehr geführt — löschen?",
       a: ["Besser deaktivieren: im Produktdetail den Schalter „Aktiv\" ausschalten. Das Produkt verschwindet aus Listen, Filtern und Bestellvorschlägen, bleibt aber für die verantwortliche Person grau sichtbar.",
-          "So bleibt der Verlauf erhalten. Gelöschte Produkte würden auch ihre Buchungen mitnehmen."] }
+          "So bleibt der Verlauf erhalten. Gelöschte Produkte würden auch ihre Buchungen mitnehmen."] },
+    { q: "Wie trage ich das Mindesthaltbarkeitsdatum ein?",
+      a: ["Beim Nachfüllen und in offenen Bestellungen gibt es ein Feld „MHD\". Jede Lieferung behält ihr eigenes Datum.",
+          "Entnommen wird nach „first in, first out\": das älteste MHD zuerst."] }
   ]},
   { kicker: "Benachrichtigungen", title: "Mindestbestand und Mails", items: [
     { q: "Wer bekommt die Warnmail?",
@@ -5585,7 +5705,10 @@ const HELP_TOPICS = [
       a: ["Einstellungen → Systemdienste → Mailversand prüfen: Testmail an die eigene Adresse schicken, dann „Antworten abrufen\". Dort steht die Antwort des Maildienstes im Klartext.",
           "201 heißt angenommen. 401 heißt falscher Schlüssel, 400 heißt Absenderadresse nicht freigeschaltet. Bleibt die Tabelle leer, ist die Anwendung nicht mit der Datenbank verbunden.",
           "Bestätigungs- und Passwortmails laufen über einen anderen Weg als die Warnmails. Die vollständige Anleitung dazu liegt im Dokument „Registrierung und Mail\"."],
-      go: "settings", linkLabel: "Zu den Systemdiensten" }
+      go: "settings", linkLabel: "Zu den Systemdiensten" },
+    { q: "Wie verschicke ich die Bestellliste sofort?",
+      a: ["Einstellungen → Benachrichtigungen → „Bestellliste jetzt mailen\". Inhaber und Lagerleitung bekommen alles unter Mindestbestand, die Mengen in der Standardquantität jedes Produkts."],
+      go: "settings", linkLabel: "Zu den Benachrichtigungen" }
   ]},
   { kicker: "Auswertung", title: "Verlauf, Preise, Umsatz", items: [
     { q: "Wie sehe ich, was sich verbraucht?",
@@ -5599,7 +5722,11 @@ const HELP_TOPICS = [
     { q: "Wie bekomme ich den Umsatz mehrerer Produkte?",
       a: ["In derselben Karte die Produkte anklicken, die zusammengerechnet werden sollen. Ohne Auswahl rechnet das Programm über alle aktiven Produkte.",
           "Oben stehen Umsatz, entnommene Menge und Anzahl der Preisänderungen; die Tabelle schlüsselt nach Produkt auf. „Umsatz als CSV\" gibt alles heraus."],
-      go: "history", linkLabel: "Zum Umsatz" }
+      go: "history", linkLabel: "Zum Umsatz" },
+    { q: "Was zeigt der Bestandswert?",
+      a: ["In der Karte „Preisverlauf und Umsatz\": Bestand × Preis, der an dem Tag galt, über den gewählten Zeitraum. Bei einem einzelnen Produkt zeigt die gestrichelte Linie den Wert des Mindestbestands.",
+          "Tage mit Preisänderung sind als Raute markiert. Ein Klick darauf — oder auf die Zeile in der Tabelle „Preisänderungen\" — zeigt alten und neuen Preis."],
+      go: "history", linkLabel: "Zum Bestandswert" }
   ]},
   { kicker: "Organisation", title: "Team, Rechte, Merkmale", items: [
     { q: "Wie hole ich Kollegen dazu?",
@@ -5610,10 +5737,54 @@ const HELP_TOPICS = [
       a: ["Verwaltung → Team & Rechte, Person auswählen, Name eintragen und „Änderungen übernehmen\" drücken. Erst dann gilt der neue Name überall — auch bei Verantwortlichkeiten und Stellvertretungen.",
           "Solange etwas nicht übernommen ist, steht das ausdrücklich daneben."],
       go: "team", linkLabel: "Zu Team & Rechte" },
+    { q: "Wie arbeite ich mit Abteilungen?",
+      a: ["Einstellungen → Abteilungen: Abteilungen anlegen und Personen zuordnen. Eine Person kann in mehreren Abteilungen sein.",
+          "Oben in der Menüleiste wird die Abteilung gewechselt. Produkte, Bestellungen, Events, Merkzettel und Verlauf zeigen dann nur ihre Daten; „Ganze Firma\" zählt alles zusammen."],
+      go: "settings", linkLabel: "Zu den Abteilungen" },
+    { q: "Wie kopiere ich Produkte in eine andere Abteilung?",
+      a: ["Stammdaten → Produktverwaltung: ein oder mehrere Produkte auswählen, Zielabteilung wählen, kopieren. Die Kopie bekommt eine eigene Kennung und einen neuen QR-Code; der Bestand wird getrennt geführt.",
+          "Das Etikett der Kopie neu drucken — sonst bucht der Scan im ursprünglichen Produkt."],
+      go: "new", linkLabel: "Zur Produktverwaltung" },
+    { q: "Was sieht welche Abteilung?",
+      a: ["Einstellungen → Sichtbarkeit je Abteilung: Lagerorte, Quantitäten und Merkmale lassen sich für einzelne Abteilungen ausblenden. Wer dort arbeitet, bekommt sie in Auswahllisten nicht angeboten."],
+      go: "settings", linkLabel: "Zu den Einstellungen" },
+    { q: "Wie benenne ich einen Lagerort um?",
+      a: ["Einstellungen → Lagerorte, beim Lagerort „Umbenennen\" wählen. Alle Produkte an diesem Ort ziehen automatisch mit."],
+      go: "settings", linkLabel: "Zu den Lagerorten" },
+    { q: "Warum ist eine Seite für mich gesperrt?",
+      a: ["Welche Seiten und Aktionen jemand nutzen darf, legt die Rolle fest; einzelne Rechte können je Person abweichen. Freigeben kann, wer das Recht „Rechte ändern\" hat.",
+          "Die Hilfe ist für alle immer offen."] },
     { q: "Wozu sind eigene Merkmale gut?",
       a: ["Einstellungen → Eigene Merkmale. Damit lässt sich erfassen, was dieses Lager braucht und kein anderes: Gefahrstoffklasse, Prüfdatum, Regalhöhe.",
           "Jedes Merkmal kann eine Regel tragen — eine Warnmail auslösen, auf die Bestellliste wandern, eine Entnahme sperren oder auf das Etikett gedruckt werden."],
       go: "settings", linkLabel: "Zu den Merkmalen" }
+  ]},
+  { kicker: "Einkauf", title: "Bestellliste und Bestellungen", items: [
+    { q: "Wie entsteht die Bestellliste?",
+      a: ["Lager → Bestellungen. Jedes aktive Produkt unter Mindestbestand steht dort bei der verantwortlichen Person — verschiebbar zu jeder anderen. Oben lässt sich nach Abteilung filtern.",
+          "„Alle mit Bestellmenge in Bestellung\" übernimmt die hinterlegte Bestellmenge. Sie steht zuerst in der Standardquantität; nur was darin nicht aufgeht, kommt in die kleineren Quantitäten."],
+      go: "orders", linkLabel: "Zu den Bestellungen" },
+    { q: "Die Ware ist da — was jetzt?",
+      a: ["In der offenen Bestellung die gelieferte Menge prüfen, bei Bedarf das MHD eintragen und zurück in den Bestand buchen. Der Bestand steigt, das Produkt verlässt die Bestellung."],
+      go: "orders", linkLabel: "Zu den Bestellungen" }
+  ]},
+  { kicker: "Planung", title: "Events", items: [
+    { q: "Wie plane ich ein Event?",
+      a: ["Lager → Events: Name, Datum, Ort und die benötigten Artikel mit Menge eintragen. Beim Anlegen entsteht die Bedarfsliste mit den Fehlmengen gegenüber dem heutigen Bestand.",
+          "„Bestellung abschicken\" setzt die Fehlmengen auf die Bestelllisten der Verantwortlichen."],
+      go: "events", linkLabel: "Zu den Events" },
+    { q: "Was zeigt die Vorschau?",
+      a: ["Alle kommenden Events — oder die eines Zeitraums — zusammengerechnet und gegen den heutigen Bestand gestellt. „Nur noch nicht bestellte\" blendet aus, was schon unterwegs ist. Das Ergebnis lässt sich als Excel exportieren."],
+      go: "events", linkLabel: "Zu den Events" }
+  ]},
+  { kicker: "Konto", title: "Anmeldung und Sprache", items: [
+    { q: "Passwort vergessen?",
+      a: ["Auf der Anmeldeseite „Passwort vergessen?\" wählen. Der Link in der Mail gilt 15 Minuten."] },
+    { q: "Wie schütze ich mein Konto zusätzlich?",
+      a: ["In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab."],
+      go: "settings", linkLabel: "Zu den Einstellungen" },
+    { q: "Wie ändere ich die Sprache?",
+      a: ["Oben rechts in der Menüleiste DE, EN oder SV wählen."] }
   ]}
 ];
 
@@ -8542,63 +8713,6 @@ class Component extends DCLogic {
     ]);
   }
 
-  // Preisverlauf als Stufenkurve: ein Preis gilt bis zur nächsten Änderung,
-  // deshalb Stufen und keine schrägen Verbindungen. Bis zu vier Produkte
-  // liegen übereinander, mehr wäre nicht mehr lesbar.
-  priceChartEl(list) {
-    const R = React.createElement;
-    const series = list.slice(0, 4).map(p => ({
-      name: p.name,
-      pts: this.priceHistFor(p).slice().sort((a, b) => String(a.datum) < String(b.datum) ? -1 : 1)
-    })).filter(s => s.pts.length);
-    if (!series.length) return null;
-    const days = Array.from(new Set([].concat.apply([], series.map(s => s.pts.map(x => String(x.datum)))))).sort();
-    const vals = [].concat.apply([], series.map(s => s.pts.map(x => Number(x.preis) || 0)));
-    const hi = Math.max.apply(null, vals), lo = Math.min.apply(null, vals);
-    const top = hi + Math.max(0.2, (hi - lo) * 0.25), bottom = Math.max(0, lo - Math.max(0.2, (hi - lo) * 0.25));
-    const w = 300, h = 120, padL = 6, padR = 6, padT = 8, padB = 16;
-    const xOf = i => padL + (days.length < 2 ? (w - padL - padR) / 2 : i * (w - padL - padR) / (days.length - 1));
-    const yOf = v => padT + (h - padT - padB) * (1 - ((v - bottom) / ((top - bottom) || 1)));
-    const colors = ["var(--color-accent-700)", "var(--color-accent-500)", "var(--color-accent-900)", "var(--color-accent-300)"];
-    const kids = [
-      R("line", { key: "ax", x1: padL, y1: h - padB, x2: w - padR, y2: h - padB,
-        stroke: "color-mix(in srgb, currentColor 18%, transparent)", strokeWidth: 1, vectorEffect: "non-scaling-stroke" })
-    ];
-    series.forEach((s, si) => {
-      // Für jeden Stichtag der zuletzt gültige Preis — daraus die Stufen.
-      let last = null;
-      const pts = [];
-      days.forEach((d, i) => {
-        const hit = s.pts.filter(x => String(x.datum) <= d).pop();
-        if (hit) last = Number(hit.preis) || 0;
-        if (last != null) pts.push([xOf(i), yOf(last)]);
-      });
-      if (!pts.length) return;
-      let path = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
-      for (let i = 1; i < pts.length; i++) {
-        path += " H" + pts[i][0].toFixed(1) + " V" + pts[i][1].toFixed(1);
-      }
-      kids.push(R("path", { key: "p" + si, d: path, fill: "none", stroke: colors[si % colors.length],
-        strokeWidth: 1.6, vectorEffect: "non-scaling-stroke" }));
-      pts.forEach((pt, i) => kids.push(R("circle", { key: "c" + si + "_" + i, cx: pt[0], cy: pt[1], r: 2,
-        fill: colors[si % colors.length] })));
-    });
-    return R("div", { style: { display: "flex", flexDirection: "column", gap: "6px" } }, [
-      R("div", { key: "sv", style: { display: "flex", justifyContent: "space-between", fontSize: "11px", opacity: 0.7 } }, [
-        R("span", { key: "a" }, this.money(bottom)), R("span", { key: "b" }, this.money(top))
-      ]),
-      R("svg", { key: "g", viewBox: "0 0 " + w + " " + h, style: { width: "100%", height: "150px", display: "block", color: "var(--color-text)" } }, kids),
-      R("div", { key: "ax", style: { display: "flex", justifyContent: "space-between", fontSize: "11px", opacity: 0.7 } }, [
-        R("span", { key: "a" }, days[0] || ""), R("span", { key: "b" }, days[days.length - 1] || "")
-      ]),
-      R("div", { key: "lg", style: { display: "flex", flexWrap: "wrap", gap: "10px", fontSize: "11.5px" } },
-        series.map((s, si) => R("span", { key: s.name + si, style: { display: "inline-flex", alignItems: "center", gap: "5px" } }, [
-          R("i", { key: "d", style: { width: "10px", height: "2px", background: colors[si % colors.length], display: "inline-block" } }),
-          R("span", { key: "n" }, s.name)
-        ])))
-    ]);
-  }
-
   pwRules(v) {
     return [
       { ok: v.length >= 10, de: "mindestens 10 Zeichen", en: "at least 10 characters", sv: "minst 10 tecken" },
@@ -9129,7 +9243,7 @@ class Component extends DCLogic {
         kicker: this.tr(g.kicker), title: this.tr(g.title),
         items: g.items.map(it => ({
           q: this.tr(it.q), a: it.a.map(p => this.tr(p)),
-          hasLink: !!it.go, linkLabel: it.linkLabel ? this.tr(it.linkLabel) : "",
+          hasLink: !!it.go && this.pageOk(it.go), linkLabel: it.linkLabel ? this.tr(it.linkLabel) : "",
           go: () => this.go(it.go)
         }))
       })),
@@ -9528,8 +9642,6 @@ class Component extends DCLogic {
       pvHasSel: !!pvSel,
       pvSelLabel: pvSel ? pvSel.label + " · " + this.tr("Bestandswert an dem Tag: ") + this.money(pv.valAt(pvSel.t)) : "",
       clearPvSel: () => this.setState({ priceMarkSel: null }),
-      priceChart: this.priceChartEl(revSel.map(r => r.p)),
-      hasPriceChart: !!this.priceChartEl(revSel.map(r => r.p)),
       priceRows: this.capped("prices", (() => {
         const out = [];
         revSel.forEach(r => {
