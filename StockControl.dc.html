@@ -143,7 +143,7 @@
               <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
               <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
               <button class="btn" style="{{ navOrders }}" onClick="{{ goOrders }}"><span data-i18n>Bestellungen</span></button>
-              <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+              <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button><button class="btn" style="{{ navMemo }}" onClick="{{ goMemo }}"><span data-i18n>Merkzettel</span></button>
               <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
             </div>
           </sc-if>
@@ -220,7 +220,7 @@
             <button class="btn" style="{{ navProducts }}" onClick="{{ goProducts }}"><span data-i18n>Produkte</span></button>
             <button class="btn" style="{{ navScan }}" onClick="{{ goScan }}"><span data-i18n>Scannen</span></button>
             <button class="btn" style="{{ navOrders }}" onClick="{{ goOrders }}"><span data-i18n>Bestellungen</span></button>
-            <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button>
+            <button class="btn" style="{{ navEvents }}" onClick="{{ goEvents }}"><span data-i18n>Events</span></button><button class="btn" style="{{ navMemo }}" onClick="{{ goMemo }}"><span data-i18n>Merkzettel</span></button>
             <button class="btn" style="{{ navHistory }}" onClick="{{ goHistory }}"><span data-i18n>Bestandsverlauf</span></button>
           </div>
         </div>
@@ -1056,7 +1056,7 @@
               </sc-for>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
-              <button class="btn btn-primary blueprint" disabled="{{ pickOff }}" onClick="{{ pickCommit }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span data-i18n>Auf „ist bestellt" setzen</span></button>
+              <button class="btn btn-primary" disabled="{{ pickOff }}" onClick="{{ pickCommit }}"><span data-i18n>Auf „ist bestellt" setzen</span></button>
               <button class="btn btn-ghost" onClick="{{ pickClose }}"><span data-i18n>Schließen</span></button>
             </div>
           </section>
@@ -1296,6 +1296,130 @@
             </section>
           </sc-for>
         </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ onMemo }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Merkzettel" style="display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 720px; margin: 0 auto; padding-bottom: 96px">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0; margin-right: auto" data-i18n>Meine Merkzettel</h4>
+            <button class="btn btn-primary" style="min-height: 44px; white-space: nowrap" onClick="{{ memoNew }}"><span data-i18n>Neuer Merkzettel</span></button>
+          </div>
+          <p class="card-body" style="margin: 0" data-i18n>Produkte und Mengen vormerken. Abhaken bucht die Position sofort aus dem Bestand aus. Gespeicherte Merkzettel lassen sich immer wieder verwenden.</p>
+          <sc-if value="{{ memoNoWithdraw }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 12.5px; color: var(--color-accent-800)" data-i18n>Du darfst keine Entnahmen buchen — abhaken ist deshalb gesperrt.</p>
+          </sc-if>
+        </section>
+
+        <sc-if value="{{ memoEditOn }}" hint-placeholder-val="{{ false }}">
+          <section class="card blueprint" style="border-color: var(--color-accent)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n-keep>{{ memoEditTitle }}</h4>
+            <div class="field" style="margin: 0"><label data-i18n>Name des Merkzettels</label>
+              <input class="input" style="font-size: 16px; min-height: 44px" value="{{ memoEditName }}" placeholder="z. B. Wochenende Bar" onInput="{{ setMemoEditName }}">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Produkt</div>
+              <div style="position: relative">
+                <input class="input" type="search" style="width: 100%; font-size: 16px; min-height: 44px" value="{{ memoQuery }}" placeholder="Produkt suchen …" onInput="{{ setMemoQuery }}" onFocus="{{ memoPickFocus }}">
+                <sc-if value="{{ memoPickOpen }}" hint-placeholder-val="{{ false }}">
+                  <div class="elev-md" style="position: absolute; left: 0; right: 0; top: calc(100% + 2px); z-index: 30; background: var(--sc-card); border: 1px solid var(--color-divider); max-height: 320px; overflow-y: auto; display: flex; flex-direction: column">
+                    <sc-for list="{{ memoMatches }}" as="mm" hint-placeholder-count="5">
+                      <button class="btn" style="justify-content: flex-start; text-align: left; min-height: 48px; padding: 8px 12px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); flex-direction: column; align-items: flex-start; gap: 1px" onClick="{{ mm.pick }}">
+                        <span style="font-size: 14.5px">{{ mm.name }}</span>
+                        <span data-i18n-keep style="font-size: 11.5px; color: var(--sc-ink-3)">{{ mm.meta }}</span>
+                      </button>
+                    </sc-for>
+                    <sc-if value="{{ memoNoMatch }}" hint-placeholder-val="{{ false }}">
+                      <div style="padding: 12px; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Kein Produkt gefunden.</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+            <sc-if value="{{ memoHasPick }}" hint-placeholder-val="{{ false }}">
+              <div class="blueprint" style="padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2)">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="font-weight: 600">{{ memoPickName }}</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-2)">
+                  <sc-for list="{{ memoUnits }}" as="mu" hint-placeholder-count="2">
+                    <div class="field" style="margin: 0"><label data-i18n-keep>{{ mu.name }}</label>
+                      <input class="input" type="number" min="0" step="1" inputmode="numeric" style="font-size: 16px; min-height: 44px" value="{{ mu.value }}" placeholder="0" onInput="{{ mu.set }}">
+                    </div>
+                  </sc-for>
+                </div>
+                <button class="btn btn-secondary btn-block" style="min-height: 44px" onClick="{{ memoAddItem }}"><span data-i18n>Zum Merkzettel hinzufügen</span></button>
+              </div>
+            </sc-if>
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{ memoEditRows }}" as="er" hint-placeholder-count="2">
+                <div style="display: flex; align-items: center; gap: var(--space-2); padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                  <div style="flex: 1; min-width: 0">
+                    <div style="font-size: 14.5px">{{ er.name }}</div>
+                    <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ er.amount }}</div>
+                  </div>
+                  <button class="btn btn-ghost btn-icon" style="width: 44px; height: 44px; flex: none" aria-label="Entfernen" onClick="{{ er.remove }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+                </div>
+              </sc-for>
+              <sc-if value="{{ memoEditEmpty }}" hint-placeholder-val="{{ true }}">
+                <p style="margin: 0; font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Noch keine Positionen.</p>
+              </sc-if>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2)">
+              <button class="btn btn-secondary" style="min-height: 44px" onClick="{{ memoCancelEdit }}"><span data-i18n>Abbrechen</span></button>
+              <button class="btn btn-primary" style="min-height: 44px" disabled="{{ memoSaveOff }}" onClick="{{ memoSaveEdit }}"><span data-i18n>Speichern</span></button>
+            </div>
+          </section>
+        </sc-if>
+
+        <sc-for list="{{ memoCards }}" as="mc" hint-placeholder-count="2">
+          <section class="card blueprint" onClick="{{ mc.open }}">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; cursor: pointer">
+              <h4 style="margin: 0; margin-right: auto; min-width: 0">{{ mc.name }}</h4>
+              <span data-i18n-keep class="{{ mc.statusClass }}">{{ mc.statusLabel }}</span>
+              <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap; min-height: 36px" onClick="{{ mc.toggle }}"><span data-i18n-keep>{{ mc.toggleLabel }}</span></button>
+            </div>
+            <sc-if value="{{ mc.isOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column">
+                <sc-for list="{{ mc.rows }}" as="mr" hint-placeholder-count="3">
+                  <div style="display: flex; align-items: center; gap: var(--space-3); padding: 8px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                    <button class="btn btn-secondary" style="width: 48px; height: 48px; flex: none; padding: 0; justify-content: center; color: var(--color-accent-700)" disabled="{{ memoNoWithdraw }}" aria-label="Abhaken und ausbuchen" onClick="{{ mr.check }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></button>
+                    <div style="flex: 1; min-width: 0">
+                      <div style="font-size: 15px">{{ mr.name }}</div>
+                      <div data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2)">{{ mr.amount }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ mc.allDone }}" hint-placeholder-val="{{ false }}">
+                  <p style="margin: 0; padding: 8px 0; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Alle Positionen sind abgehakt und ausgebucht.</p>
+                </sc-if>
+              </div>
+              <sc-if value="{{ mc.hasRows }}" hint-placeholder-val="{{ true }}">
+                <button class="btn btn-primary btn-block" style="min-height: 48px" disabled="{{ memoNoWithdraw }}" onClick="{{ mc.checkAll }}"><span data-i18n>Alle abhaken und ausbuchen</span></button>
+              </sc-if>
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+                <button class="btn btn-secondary" style="flex: 1; min-height: 44px" onClick="{{ mc.edit }}"><span data-i18n>Bearbeiten</span></button>
+                <sc-if value="{{ mc.canReset }}" hint-placeholder-val="{{ false }}">
+                  <button class="btn btn-secondary" style="flex: 1; min-height: 44px; white-space: nowrap" onClick="{{ mc.reset }}"><span data-i18n>Wieder alle zeigen</span></button>
+                </sc-if>
+                <button class="btn btn-ghost" style="flex: 1; min-height: 44px" onClick="{{ mc.del }}"><span data-i18n>Löschen</span></button>
+              </div>
+            </sc-if>
+          </section>
+        </sc-for>
+        <sc-if value="{{ memoNone }}" hint-placeholder-val="{{ false }}">
+          <p style="margin: 0; font-size: 13px; color: var(--sc-ink-2); text-align: center" data-i18n>Noch kein Merkzettel gespeichert.</p>
+        </sc-if>
+
+        <sc-if value="{{ memoHasUndo }}" hint-placeholder-val="{{ false }}">
+          <div class="elev-lg" style="position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: var(--sc-card); border-top: 1px solid var(--color-divider); padding: 10px var(--space-4) calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: var(--space-3)">
+            <span data-i18n-keep style="flex: 1; min-width: 0; font-size: 13.5px">{{ memoUndoLabel }}</span>
+            <button class="btn btn-secondary" style="min-height: 44px; white-space: nowrap; flex: none" onClick="{{ memoUndoNow }}"><span data-i18n>Rückgängig</span></button>
+          </div>
+        </sc-if>
       </div>
       </sc-if>
 
@@ -2124,37 +2248,48 @@
           <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
           <p class="card-body" style="margin: 0" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC.</p>
           <div style="display: flex; flex-direction: column; gap: var(--space-2)">
-            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailNow }}"><span class="dot"></span><span data-i18n>Sofort bei jeder Unterschreitung</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailDay }}"><span class="dot"></span><span data-i18n>Einmal am Tag, gesammelt</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailWeek }}"><span class="dot"></span><span data-i18n>Einmal in der Woche</span></label>
-            <label class="radio"><input type="radio" name="sc-mail" onChange="{{ setMailMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmNow }}" onChange="{{ setDmNow }}"><span class="dot"></span><span data-i18n>Sofort bei jeder Unterschreitung</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmDay }}" onChange="{{ setDmDay }}"><span class="dot"></span><span data-i18n>Einmal am Tag, gesammelt</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmWeek }}" onChange="{{ setDmWeek }}"><span class="dot"></span><span data-i18n>Einmal in der Woche</span></label>
+            <label class="radio"><input type="radio" name="sc-mail" checked="{{ dmMonth }}" onChange="{{ setDmMonth }}"><span class="dot"></span><span data-i18n>Einmal im Monat</span></label>
           </div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-2)">
-            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="{{ mailTime }}" onInput="{{ setMailTime }}"></div>
+            <div class="field"><label data-i18n>Uhrzeit</label><input class="input" type="time" value="{{ dmTime }}" onInput="{{ setDmTime }}"></div>
             <div class="field"><label data-i18n>Wochentag</label>
-              <select class="input" value="{{ mailWeekday }}" onChange="{{ setMailWeekday }}">
+              <select class="input" value="{{ dmWeekday }}" onChange="{{ setDmWeekday }}">
                 <sc-for list="{{ mailWeekdays }}" as="wd" hint-placeholder-count="7">
                   <option data-i18n-keep value="{{ wd.value }}">{{ wd.label }}</option>
                 </sc-for>
               </select>
             </div>
-            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" value="{{ mailDay }}" onInput="{{ setMailDay }}"></div>
+            <div class="field"><label data-i18n>Tag im Monat</label><input class="input" type="number" min="1" max="28" step="1" value="{{ dmDayOfMonth }}" onInput="{{ setDmDayOfMonth }}"></div>
           </div>
           <div class="field" style="margin-top: var(--space-2)">
             <label data-i18n>Wer bekommt die Mail?</label>
             <div>
               <div class="seg">
-                <label class="seg-opt" style="{{ segCcOn }}"><input type="radio" name="sc-cc" onChange="{{ setCcOn }}"><span data-i18n>Verantwortliche + Stellvertretung im CC</span></label>
-                <label class="seg-opt" style="{{ segCcOff }}"><input type="radio" name="sc-cc" onChange="{{ setCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
+                <label class="seg-opt" style="{{ dmCcOnStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOn }}"><span data-i18n>Verantwortliche + Stellvertretung im CC</span></label>
+                <label class="seg-opt" style="{{ dmCcOffStyle }}"><input type="radio" name="sc-cc" onChange="{{ setDmCcOff }}"><span data-i18n>Nur verantwortliche Person</span></label>
               </div>
             </div>
             <div style="font-size: 12px; color: var(--sc-ink-2); margin-top: 6px" data-i18n>Diese Einstellung gilt firmenweit und kann nur im höchsten Rechtelevel geändert werden.</div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; margin-top: var(--space-2)">
+            <button class="btn btn-primary" disabled="{{ dmSaveOff }}" onClick="{{ saveMailDraft }}"><span data-i18n>Speichern</span></button>
+            <sc-if value="{{ dmDirty }}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-ghost" onClick="{{ discardMailDraft }}"><span data-i18n>Verwerfen</span></button>
+              <span style="font-size: 12.5px; color: var(--color-accent-800)" data-i18n>Nicht gespeichert — ohne „Speichern" wird nichts übernommen.</span>
+            </sc-if>
           </div>
           <div class="blueprint" style="padding: var(--space-3); margin-top: var(--space-2)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div class="card-kicker" data-i18n>Aktuell aktiv</div>
             <div style="font-size: 14px">{{ mailModeLabel }}</div>
             <div class="text-muted" style="font-size: 12px" data-i18n>Bei gesammelten Mails entsteht automatisch eine Bestellliste mit allen Produktinfos.</div>
+          </div>
+          <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+            <button class="btn btn-secondary" disabled="{{ orderMailOff }}" onClick="{{ sendOrderListNow }}"><span data-i18n>Bestellliste jetzt mailen</span></button>
+            <span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Schickt sofort alles unter Mindestbestand an Inhaber und Lagerleitung — unabhängig vom Zeitplan.</span>
           </div>
         </section>
 
@@ -3586,6 +3721,18 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
+    "Merkzettel": "Notes", "Meine Merkzettel": "My notes", "Neuer Merkzettel": "New note", "Seite: Merkzettel": "Page: Notes",
+    "Merkzettel bearbeiten": "Edit note", "Name des Merkzettels": "Note name", "Produkt": "Product",
+    "Kein Produkt gefunden.": "No product found.", "Zum Merkzettel hinzufügen": "Add to note", "Noch keine Positionen.": "No items yet.",
+    "Alle abhaken und ausbuchen": "Check all and book out", "Wieder alle zeigen": "Show all again",
+    "Alle Positionen sind abgehakt und ausgebucht.": "All items are checked and booked out.",
+    "Noch kein Merkzettel gespeichert.": "No note saved yet.", "Rückgängig": "Undo", "Rückgängig gemacht": "Undone",
+    "alles erledigt": "all done", "Verwerfen": "Discard", "Gespeichert": "Saved",
+    "Bestellliste jetzt mailen": "Mail order list now", "Mail verschickt": "Mail sent", "Nichts zu bestellen": "Nothing to order",
+    "Du darfst keine Entnahmen buchen — abhaken ist deshalb gesperrt.": "You may not book withdrawals — checking off is locked.",
+    "Produkte und Mengen vormerken. Abhaken bucht die Position sofort aus dem Bestand aus. Gespeicherte Merkzettel lassen sich immer wieder verwenden.": "Note products and amounts. Checking off books the item out of stock right away. Saved notes can be reused.",
+    "Nicht gespeichert — ohne „Speichern\" wird nichts übernommen.": "Not saved — nothing is applied without “Save”.",
+    "Schickt sofort alles unter Mindestbestand an Inhaber und Lagerleitung — unabhängig vom Zeitplan.": "Sends everything below minimum to owner and managers right away — regardless of schedule.",
     "Aus der Bestellmail: Positionen wählen": "From the order mail: pick items",
     "Alles wählen": "Select all",
     "Alles abwählen": "Deselect all",
@@ -4968,9 +5115,9 @@ const ROLES = {
 };
 
 const PAGE_PERMS = { dashboard: "page_dashboard", products: "page_products", detail: "page_products", scan: "page_scan",
-  orders: "page_orders", events: "page_events", history: "page_history", new: "page_new", import: "page_new",
+  orders: "page_orders", events: "page_events", memo: "page_memo", history: "page_history", new: "page_new", import: "page_new",
   qr: "page_qr", team: "page_team", settings: "page_settings", help: "page_help" };
-const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "history", "new", "qr", "team", "settings", "help"];
+const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "memo", "history", "new", "qr", "team", "settings", "help"];
 
 const PERM_LIST = [
   ["page_dashboard", "Seite: Übersicht", ["owner","manager","worker","reader"]],
@@ -4978,6 +5125,7 @@ const PERM_LIST = [
   ["page_scan", "Seite: Scannen", ["owner","manager","worker"]],
   ["page_orders", "Seite: Bestellungen", ["owner","manager","worker","reader"]],
   ["page_events", "Seite: Events", ["owner","manager","worker","reader"]],
+  ["page_memo", "Seite: Merkzettel", ["owner","manager","worker"]],
   ["page_history", "Seite: Bestandsverlauf", ["owner","manager","reader"]],
   ["page_new", "Seite: Produktverwaltung", ["owner","manager"]],
   ["page_qr", "Seite: QR-Codes", ["owner","manager","worker"]],
@@ -5222,7 +5370,7 @@ class Component extends DCLogic {
       importErrors: [], importErrorsPending: [],
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true, min: true, bestellmenge: true },
       eanScan: null, detailHistId: null, openCards: {},
-      pickIds: [], pickSel: {}, ask: null, fcDate: "", fcFrom: "", fcScope: "all", fcItems: "all", fcOn: false, showAll: {}, orderQty: {},
+      pickIds: [], pickSel: {}, memos: [], memoOpen: {}, memoEdit: null, memoQuery: "", memoPickOpen: false, memoPickId: "", memoQty: {}, memoUndo: [], mailDraft: null, ask: null, fcDate: "", fcFrom: "", fcScope: "all", fcItems: "all", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
       inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
@@ -5461,6 +5609,10 @@ class Component extends DCLogic {
         orders: d.settings && d.settings.orders ? d.settings.orders : prev.orders,
         attrs: d.settings && Array.isArray(d.settings.attrs) ? d.settings.attrs : prev.attrs
       }));
+      if (this.api.loadMemos && !this.memosLoaded) {
+        this.memosLoaded = true;
+        this.api.loadMemos().then(m => this.setState({ memos: Array.isArray(m) ? m : [] })).catch(() => { this.memosLoaded = false; });
+      }
     } catch (e) {
       this.say("Supabase", this.tr("Laden fehlgeschlagen"), String((e && e.message) || e));
     }
@@ -6734,6 +6886,9 @@ class Component extends DCLogic {
     if (!list.some(k => /^page_/.test(k))) {
       PERM_LIST.filter(p => /^page_/.test(p[0]) && p[2].includes(role)).forEach(p => list.push(p[0]));
     }
+    // Merkzettel kam später dazu: gespeicherte Rollen kennen das Recht noch nicht.
+    if (list.indexOf("page_memo") < 0 && !(rd && (rd.perms || []).indexOf("page_memo") >= 0)
+        && ["owner", "manager", "worker"].indexOf(role) >= 0) list.push("page_memo");
     const ov = (this.state.overrides || {})[this.state.meId] || {};
     Object.keys(ov).forEach(k => {
       if (ov[k]) { if (list.indexOf(k) < 0) list.push(k); }
@@ -7468,6 +7623,7 @@ class Component extends DCLogic {
     window.addEventListener("hashchange", this.hashL);
     try {
       this.setState({
+        memos: (() => { try { return JSON.parse(localStorage.getItem("sc-memos") || "[]"); } catch (e) { return []; } })(),
         ...(localStorage.getItem("sc-pref-theme") ? { theme: localStorage.getItem("sc-pref-theme") } : {}),
         ...(localStorage.getItem("sc-pref-lang") ? { lang: localStorage.getItem("sc-pref-lang") } : {}),
         onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
@@ -7557,6 +7713,83 @@ class Component extends DCLogic {
       const line = root.querySelector(".sub");
       if (line && line.innerHTML !== sub) line.innerHTML = sub;
     });
+  }
+
+  // ── Merkzettel ───────────────────────────────────────────
+  // Jede Änderung legt den Stand davor auf einen Rückgängig-Stapel; bei
+  // Abhaken werden zusätzlich die Buchungen gemerkt, um sie zurückzubuchen.
+  persistMemos(list) {
+    if (this.state.live && this.api && this.api.saveMemos) {
+      this.api.saveMemos(list).catch(e => this.say(this.tr("Merkzettel"), this.tr("Nicht gespeichert"), String((e && e.message) || e)));
+    } else {
+      try { localStorage.setItem("sc-memos", JSON.stringify(list)); } catch (e) {}
+    }
+  }
+
+  memoCommit(list, label, extra) {
+    const entry = Object.assign({ label: label, memos: this.state.memos || [] }, extra || {});
+    this.setState(prev => ({ memos: list, memoUndo: (prev.memoUndo || []).concat(entry).slice(-30) }));
+    this.persistMemos(list);
+  }
+
+  memoDraft(next, label) {
+    const entry = { label: label, edit: this.state.memoEdit };
+    this.setState(prev => ({ memoEdit: next, memoUndo: (prev.memoUndo || []).concat(entry).slice(-30) }));
+  }
+
+  memoTotal(p, parts) {
+    return this.unitsFor(p).reduce((a, u) => a + (Math.max(0, Math.round(Number((parts || {})[u.name]) || 0)) * (Number(u.faktor) || 1)), 0);
+  }
+
+  memoAmount(p, parts) {
+    const t = this.unitsFor(p).slice().sort((a, b) => b.faktor - a.faktor)
+      .filter(u => Number((parts || {})[u.name]) > 0).map(u => Number(parts[u.name]) + " " + u.name).join(" · ");
+    return t || "—";
+  }
+
+  memoCheck(listId, keys, who) {
+    if (!this.may("withdraw")) { this.say(this.tr("Merkzettel"), this.tr("Kein Zugriff"), this.tr("Entnahme buchen ist für dich gesperrt.")); return; }
+    const memos = this.state.memos || [];
+    const L = memos.find(m => m.id === listId);
+    if (!L) return;
+    const done = L.done || [];
+    const items = (L.items || []).filter(i => keys.indexOf(i.key) >= 0 && done.indexOf(i.key) < 0);
+    if (!items.length) return;
+    const running = {}, bookings = [];
+    items.forEach(it => {
+      const p = (this.state.products || []).find(x => x.id === it.productId);
+      if (!p) return;
+      const have = running[p.id] != null ? running[p.id] : (Number(p.ist) || 0);
+      const n = Math.min(this.memoTotal(p, it.parts), have);
+      if (n <= 0) return;
+      running[p.id] = have - n;
+      this.applyBooking(Object.assign({}, p, { ist: have }), have - n, have - n < p.min, "−" + n, who);
+      this.bookRemote(p.id, -n, "Entnahme · Merkzettel " + (L.name || ""));
+      bookings.push({ pid: p.id, n: n });
+    });
+    const next = memos.map(m => m.id === listId ? Object.assign({}, m, { done: done.concat(items.map(i => i.key)) }) : m);
+    const label = items.length === 1
+      ? this.tr("Abgehakt und ausgebucht: ") + ((this.state.products.find(x => x.id === items[0].productId) || {}).name || "")
+      : items.length + " " + this.tr("Positionen abgehakt und ausgebucht");
+    this.memoCommit(next, label, { bookings: bookings });
+  }
+
+  memoUndo(who) {
+    const stack = (this.state.memoUndo || []).slice();
+    const e = stack.pop();
+    if (!e) return;
+    (e.bookings || []).forEach(b => {
+      const p = (this.state.products || []).find(x => x.id === b.pid);
+      if (!p) return;
+      this.applyBooking(p, (Number(p.ist) || 0) + b.n, false, "+" + b.n, who);
+      this.bookRemote(p.id, b.n, "Rückgängig · Merkzettel");
+    });
+    const patch = { memoUndo: stack };
+    if ("edit" in e) patch.memoEdit = e.edit;
+    if (e.memos) patch.memos = e.memos;
+    this.setState(patch);
+    if (e.memos) this.persistMemos(e.memos);
+    this.say(this.tr("Merkzettel"), this.tr("Rückgängig gemacht"), e.label);
   }
 
   // Darstellung und Sprache gehören zur Person am Gerät, nicht zur Firma.
@@ -9021,6 +9254,145 @@ class Component extends DCLogic {
       setCcOn: () => { this.setState({ ccDeputies: true }); this.remote(api => api.saveSettings({ cc_deputies: true })); },
       setCcOff: () => { this.setState({ ccDeputies: false }); this.remote(api => api.saveSettings({ cc_deputies: false })); },
 
+      ...(() => {
+        const memos = st.memos || [];
+        const mo = st.memoOpen || {};
+        const prodOf = id => (st.products || []).find(p => p.id === id);
+        const ed = st.memoEdit;
+        const pp = prodOf(st.memoPickId);
+        const stop = e => { if (e && e.stopPropagation) e.stopPropagation(); };
+        const matches = st.memoPickOpen
+          ? (st.products || []).filter(p => p.aktiv !== false && this.matchEv(p, st.memoQuery)).slice(0, 12) : [];
+        const undoTop = (st.memoUndo || [])[(st.memoUndo || []).length - 1];
+        return {
+          onMemo: st.screen === "memo", navMemo: this.navStyle("memo"), goMemo: () => this.go("memo"),
+          memoNoWithdraw: !this.may("withdraw"),
+          memoNew: () => this.memoDraft({ id: null, name: "", items: [] }, this.tr("Neuer Merkzettel geöffnet")),
+          memoEditOn: !!ed,
+          memoEditTitle: ed && ed.id ? this.tr("Merkzettel bearbeiten") : this.tr("Neuer Merkzettel"),
+          memoEditName: ed ? ed.name : "",
+          setMemoEditName: e => this.setState({ memoEdit: Object.assign({}, st.memoEdit, { name: e.target.value }) }),
+          memoQuery: st.memoQuery,
+          setMemoQuery: e => this.setState({ memoQuery: e.target.value, memoPickOpen: true, memoPickId: "" }),
+          memoPickFocus: () => this.setState({ memoPickOpen: true }),
+          memoPickOpen: !!st.memoPickOpen,
+          memoMatches: matches.map(p => ({
+            name: p.name, meta: this.codeOf(p) + " · " + (p.ort || "—") + " · " + this.tr("Bestand ") + this.fmtStock(p, p.ist),
+            pick: () => this.setState({ memoPickId: p.id, memoQuery: p.name, memoPickOpen: false, memoQty: {} })
+          })),
+          memoNoMatch: !!st.memoPickOpen && matches.length === 0,
+          memoHasPick: !!pp,
+          memoPickName: pp ? pp.name : "",
+          memoUnits: pp ? this.unitsFor(pp).slice().sort((a, b) => b.faktor - a.faktor).map(u => ({
+            name: u.name, value: (st.memoQty || {})[u.name] || "",
+            set: e => { const v = e.target.value; this.setState(prev => ({ memoQty: Object.assign({}, prev.memoQty, { [u.name]: v }) })); }
+          })) : [],
+          memoAddItem: () => {
+            if (!pp || !ed) return;
+            const parts = {};
+            Object.keys(st.memoQty || {}).forEach(k => { const n = Math.round(Number(st.memoQty[k]) || 0); if (n > 0) parts[k] = n; });
+            if (this.memoTotal(pp, parts) <= 0) { this.say(this.tr("Merkzettel"), this.tr("Keine Menge eingetragen"), this.tr("Menge je Quantität eintragen.")); return; }
+            const had = ed.items.find(i => i.productId === pp.id);
+            const items = had
+              ? ed.items.map(i => { if (i !== had) return i; const m = Object.assign({}, i.parts); Object.keys(parts).forEach(k => { m[k] = (Number(m[k]) || 0) + parts[k]; }); return Object.assign({}, i, { parts: m }); })
+              : ed.items.concat({ key: "k" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), productId: pp.id, parts: parts });
+            this.memoDraft(Object.assign({}, ed, { items: items }), this.tr("Position hinzugefügt: ") + pp.name);
+            this.setState({ memoPickId: "", memoQuery: "", memoQty: {} });
+          },
+          memoEditRows: ed ? ed.items.map(it => {
+            const p = prodOf(it.productId) || { name: "?", id: it.productId };
+            return {
+              name: p.name, amount: this.memoAmount(p, it.parts),
+              remove: () => this.memoDraft(Object.assign({}, st.memoEdit, { items: st.memoEdit.items.filter(x => x.key !== it.key) }), this.tr("Position entfernt: ") + p.name)
+            };
+          }) : [],
+          memoEditEmpty: !ed || ed.items.length === 0,
+          memoSaveOff: !ed || ed.items.length === 0,
+          memoCancelEdit: () => this.setState({ memoEdit: null, memoPickId: "", memoQuery: "", memoPickOpen: false, memoQty: {} }),
+          memoSaveEdit: () => {
+            if (!ed || !ed.items.length) return;
+            const name = String(ed.name || "").trim() || this.tr("Merkzettel") + " " + new Date().toLocaleDateString("de-DE");
+            const id = ed.id || "m" + Date.now().toString(36);
+            const keys = ed.items.map(i => i.key);
+            const row = { id: id, name: name, items: ed.items };
+            const next = ed.id
+              ? memos.map(m => m.id === id ? Object.assign({}, m, row, { done: (m.done || []).filter(k => keys.indexOf(k) >= 0) }) : m)
+              : memos.concat(Object.assign({ done: [] }, row));
+            this.memoCommit(next, this.tr("Merkzettel gespeichert: ") + name, { edit: ed });
+            this.setState(prev => ({ memoEdit: null, memoPickId: "", memoQuery: "", memoPickOpen: false, memoQty: {}, memoOpen: Object.assign({}, prev.memoOpen, { [id]: true }) }));
+          },
+          memoNone: memos.length === 0 && !ed,
+          memoCards: memos.map(L => {
+            const done = L.done || [];
+            const rows = (L.items || []).filter(i => done.indexOf(i.key) < 0);
+            const isOpen = !!mo[L.id];
+            const setOpen = v => this.setState(prev => ({ memoOpen: Object.assign({}, prev.memoOpen, { [L.id]: v }) }));
+            return {
+              name: L.name, isOpen: isOpen,
+              statusLabel: rows.length ? rows.length + " " + this.tr("offen") : this.tr("alles erledigt"),
+              statusClass: rows.length ? "tag tag-accent" : "tag tag-neutral",
+              toggleLabel: isOpen ? this.tr("Schließen") : this.tr("Öffnen"),
+              toggle: e => { stop(e); setOpen(!isOpen); },
+              open: () => { if (!isOpen) setOpen(true); },
+              rows: rows.map(it => {
+                const p = prodOf(it.productId) || { name: "?", id: it.productId };
+                return { name: p.name, amount: this.memoAmount(p, it.parts), check: e => { stop(e); this.memoCheck(L.id, [it.key], meLabel); } };
+              }),
+              hasRows: rows.length > 0, allDone: rows.length === 0 && (L.items || []).length > 0,
+              canReset: done.length > 0,
+              checkAll: e => { stop(e); this.memoCheck(L.id, rows.map(r => r.key), meLabel); },
+              edit: e => { stop(e); this.memoDraft({ id: L.id, name: L.name, items: (L.items || []).slice() }, this.tr("Bearbeiten: ") + L.name); try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (x) {} },
+              reset: e => { stop(e); this.memoCommit(memos.map(m => m.id === L.id ? Object.assign({}, m, { done: [] }) : m), this.tr("Wieder alle Positionen gezeigt: ") + L.name); },
+              del: e => { stop(e); this.memoCommit(memos.filter(m => m.id !== L.id), this.tr("Merkzettel gelöscht: ") + L.name); }
+            };
+          }),
+          memoHasUndo: !!undoTop,
+          memoUndoLabel: undoTop ? undoTop.label : "",
+          memoUndoNow: () => this.memoUndo(meLabel)
+        };
+      })(),
+      ...(() => {
+        const dm = st.mailDraft || { mode: st.mailMode, time: st.mailTime, weekday: st.mailWeekday, day: st.mailDay, cc: st.ccDeputies };
+        const set = patch => this.setState(prev => ({ mailDraft: Object.assign({}, prev.mailDraft || dm, patch) }));
+        const dirty = !!st.mailDraft && (dm.mode !== st.mailMode || dm.time !== st.mailTime || String(dm.weekday) !== String(st.mailWeekday)
+          || String(dm.day) !== String(st.mailDay) || dm.cc !== st.ccDeputies);
+        return {
+          dmNow: dm.mode === "now", dmDay: dm.mode === "day", dmWeek: dm.mode === "week", dmMonth: dm.mode === "month",
+          setDmNow: () => set({ mode: "now" }), setDmDay: () => set({ mode: "day" }),
+          setDmWeek: () => set({ mode: "week" }), setDmMonth: () => set({ mode: "month" }),
+          dmTime: dm.time, setDmTime: e => set({ time: e.target.value }),
+          dmWeekday: dm.weekday, setDmWeekday: e => set({ weekday: e.target.value }),
+          dmDayOfMonth: dm.day, setDmDayOfMonth: e => set({ day: e.target.value }),
+          dmCcOnStyle: this.segStyle(!!dm.cc), dmCcOffStyle: this.segStyle(!dm.cc),
+          setDmCcOn: () => set({ cc: true }), setDmCcOff: () => set({ cc: false }),
+          dmDirty: dirty, dmSaveOff: !dirty,
+          discardMailDraft: () => this.setState({ mailDraft: null }),
+          saveMailDraft: () => {
+            if (!dirty) return;
+            this.setState({ mailMode: dm.mode, mailTime: dm.time, mailWeekday: dm.weekday, mailDay: dm.day, ccDeputies: !!dm.cc, mailDraft: null });
+            this.remote(api => api.saveSettings({
+              mail_mode: dm.mode, mail_time: dm.time || "07:30", mail_weekday: this.toNum(dm.weekday),
+              mail_day: this.toNum(dm.day), cc_deputies: !!dm.cc
+            }));
+            this.say(this.tr("Benachrichtigung"), this.tr("Gespeichert"), "");
+          },
+          orderMailOff: !(st.role === "owner" || st.role === "manager"),
+          sendOrderListNow: () => {
+            if (!st.live || !this.api || !this.api.sendOrderListNow) {
+              this.say(this.tr("Bestellliste"), this.tr("Nur mit Datenbank"), this.tr("Die Mail geht erst raus, wenn das Lager mit Supabase verbunden ist."));
+              return;
+            }
+            this.api.sendOrderListNow()
+              .then(r => {
+                const n = (r && r.count) || 0;
+                if (!n) this.say(this.tr("Bestellliste"), this.tr("Nichts zu bestellen"), this.tr("Kein Produkt liegt unter dem Mindestbestand."));
+                else this.say(this.tr("Bestellliste"), this.tr("Mail verschickt"), n + " " + this.tr("Positionen") + " → " + ((r.to || []).join(", ") || "—"));
+                if (this.loadMailStatus) this.loadMailStatus();
+              })
+              .catch(e => this.say(this.tr("Bestellliste"), this.tr("Nicht verschickt"), String((e && e.message) || e)));
+          }
+        };
+      })(),
       onEvents: st.screen === "events",
       navEvents: this.navStyle("events"), goEvents: () => this.go("events"),
       events: st.events.map(e => ({

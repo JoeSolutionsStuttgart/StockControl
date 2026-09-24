@@ -439,3 +439,31 @@ export async function mailStatus(n = 8) {
   if (error) throw error;
   return data || [];
 }
+
+/* ── Merkzettel (je Person, am eigenen Profil) ─────────────── */
+
+export async function loadMemos() {
+  const sb = await client();
+  const { data: auth } = await sb.auth.getUser();
+  if (!auth || !auth.user) return [];
+  const { data, error } = await sb.from("profiles").select("memos").eq("id", auth.user.id).maybeSingle();
+  if (error) throw error;
+  return (data && data.memos) || [];
+}
+
+export async function saveMemos(memos) {
+  const sb = await client();
+  const { data: auth } = await sb.auth.getUser();
+  if (!auth || !auth.user) throw new Error("Nicht angemeldet");
+  const { error } = await sb.from("profiles").update({ memos: memos || [] }).eq("id", auth.user.id);
+  if (error) throw error;
+}
+
+/* ── Bestellliste sofort mailen ────────────────────────────── */
+
+export async function sendOrderListNow() {
+  const sb = await client();
+  const { data, error } = await sb.rpc("sc_send_order_list_now");
+  if (error) throw error;
+  return data;
+}
