@@ -2001,7 +2001,7 @@
             </div>
             <div class="hr"></div>
             <h5 style="margin: 0" data-i18n>Team einladen</h5>
-            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.</p>
+            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden.</p>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
               <div class="field" style="flex: 1; min-width: 190px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setInvite }}"></div>
               <div class="field" style="width: 172px"><label data-i18n>Rolle</label><select class="input"><option>Mitarbeitende Person</option><option>Lagerleitung</option><option>Lesezugriff</option></select></div>
@@ -2014,7 +2014,7 @@
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
               <div class="card-kicker" data-i18n>Profil und Feinrechte</div>
               <h4 style="margin: 0" data-i18n>Kein Zugriff auf die Rechteverwaltung</h4>
-              <p class="card-body" style="margin: 0" data-i18n>Wer welche Rechte hat, sehen und ändern nur die inhabende Person und wer das Recht „Rechte ändern" ausdrücklich bekommen hat.</p>
+              <p class="card-body" style="margin: 0" data-i18n>Wer welche Rechte hat, sehen und ändern können nur die inhabende Person und wer das Recht „Rechte ändern" ausdrücklich bekommen hat.</p>
             </section>
           </sc-if>
 
@@ -3087,21 +3087,21 @@
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nie wieder leer</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Einfache Bestandskontrolle</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Jede Person ihr Maß</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Automatischer Mailversand</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nur euer Lager</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Super individualisierbar</span>
       </div>
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--sc-ink-2)">
       <span style="width: 26px; height: 1px; background: var(--color-accent)"></span>
-      <span data-i18n>Derzeit kostenlos, jederzeit kündbar.</span>
+      <span data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</span>
     </div>
   </div>
 
@@ -3232,7 +3232,7 @@
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Derzeit kostenlos, jederzeit kündbar.</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</div>
         </div>
       </sc-if>
 
@@ -7565,6 +7565,11 @@ class Component extends DCLogic {
         try { history.replaceState(null, "", location.pathname); } catch (e) {}
         return true;
       }
+      if (/#\/orders\b/.test(h)) {
+        this.pendingOrder = { list: true };
+        try { history.replaceState(null, "", location.pathname); } catch (e) {}
+        return true;
+      }
       const all = /#\/order-all/.test(h);
       const one = /#\/order\/([^\/?#]+)/.exec(h);
       if (all || one) { this.pendingOrder = all ? "*" : one[1]; this.cleanUrl(); return true; }
@@ -7604,6 +7609,11 @@ class Component extends DCLogic {
     if (!this.state.authed || !this.state.products.length) return;
     this.pendingOrder = null;
     const who = this.state.meNameLive || "";
+    if (raw && raw.list) {
+      this.go("orders");
+      this.setState(prev => ({ openCards: Object.assign({}, prev.openCards, { list: true }) }));
+      return;
+    }
     if (raw && raw.pick) {
       const low = this.state.products.filter(p => p.aktiv !== false && (p.status === "low" || p.status === "ordered"));
       const hits = raw.pick.length ? raw.pick.map(c => this.findByCode(c)).filter(Boolean) : low.filter(p => p.status === "low");
