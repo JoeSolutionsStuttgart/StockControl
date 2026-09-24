@@ -544,7 +544,9 @@
             <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
               <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Geändert von</div><div style="font-size: 14px">{{ current.geaendert }}</div></div>
             </sc-if>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" style="font-size: 14px">{{ current.linkLabel }}</a></div>
+            <sc-if value="{{ current.hasLink }}" hint-placeholder-val="{{ false }}">
+              <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Produktlink</div><a href="{{ current.link }}" target="_blank" rel="noopener noreferrer" style="font-size: 14px">{{ current.linkLabel }}</a></div>
+            </sc-if>
           </div>
 
           <sc-if value="{{ canEditProduct }}" hint-placeholder-val="{{ true }}">
@@ -1033,6 +1035,33 @@
 
       <sc-if value="{{ onOrders }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Bestellungen" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <sc-if value="{{ pickOn }}" hint-placeholder-val="{{ false }}">
+          <section class="card blueprint" style="border-color: var(--color-accent)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+              <h4 style="margin: 0; margin-right: auto" data-i18n>Aus der Bestellmail: Positionen wählen</h4>
+              <span data-i18n-keep class="tag tag-accent">{{ pickCountLabel }}</span>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-secondary" style="padding: 4px 11px; font-size: 12.5px" onClick="{{ pickAll }}"><span data-i18n>Alles wählen</span></button>
+              <button class="btn btn-secondary" style="padding: 4px 11px; font-size: 12.5px" onClick="{{ pickNone }}"><span data-i18n>Alles abwählen</span></button>
+            </div>
+            <div style="display: flex; flex-direction: column">
+              <sc-for list="{{ pickRows }}" as="pk" hint-placeholder-count="4">
+                <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 9px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); opacity: {{ pk.opacity }}">
+                  <input type="checkbox" checked="{{ pk.checked }}" disabled="{{ pk.done }}" onChange="{{ pk.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                  <span style="flex: 1; min-width: 0; font-size: 13px">{{ pk.name }}</span>
+                  <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ pk.meta }}</span>
+                </label>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+              <button class="btn btn-primary blueprint" disabled="{{ pickOff }}" onClick="{{ pickCommit }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i><span data-i18n>Auf „ist bestellt" setzen</span></button>
+              <button class="btn btn-ghost" onClick="{{ pickClose }}"><span data-i18n>Schließen</span></button>
+            </div>
+          </section>
+        </sc-if>
+
           <section class="card blueprint" onClick="{{ openList }}">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
@@ -1109,7 +1138,38 @@
             <h4 style="margin: 0" data-i18n>Offene Bestellungen</h4>
             <span data-i18n-keep class="tag tag-neutral">{{ ordersCountLabel }}</span>
           </div>
-          <p class="card-body" style="margin: 0" data-i18n>Was über die Bestellmail oder aus der Bestellliste in Bestellung gesetzt wurde, steht hier als Bündel. Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.</p>
+          <p class="card-body" style="margin: 0" data-i18n>Alle Produkte mit dem Status „in Bestellung". Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.</p>
+          <sc-if value="{{ hasOrderedRows }}" hint-placeholder-val="{{ false }}">
+            <div style="overflow-x: auto; max-width: 100%">
+              <table class="table" data-zebra style="min-width: 520px">
+                <thead>
+                  <tr>
+                    <th data-i18n>Artikel</th>
+                    <th style="text-align: right" data-i18n>Bestellmenge</th>
+                    <th data-i18n>Lieferant</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ orderedRows }}" as="od" hint-placeholder-count="3">
+                    <tr>
+                      <td style="font-weight: 500">
+                        <sc-if value="{{ od.hasLink }}" hint-placeholder-val="{{ false }}"><a href="{{ od.link }}" target="_blank" rel="noopener noreferrer">{{ od.name }}</a></sc-if>
+                        <sc-if value="{{ od.noLink }}" hint-placeholder-val="{{ true }}"><span>{{ od.name }}</span></sc-if>
+                        <div data-i18n-keep style="font-size: 11px; font-weight: 400; color: var(--sc-ink-3)">{{ od.code }} · {{ od.ort }}</div>
+                      </td>
+                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap">{{ od.bm }}</td>
+                      <td class="text-muted">{{ od.lieferant }}</td>
+                      <td style="text-align: right"><button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noOrderedRows }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Nichts in Bestellung</p>
+          </sc-if>
         </section>
 
         <section class="card blueprint" onClick="{{ openPl }}">
@@ -3526,6 +3586,12 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
+    "Aus der Bestellmail: Positionen wählen": "From the order mail: pick items",
+    "Alles wählen": "Select all",
+    "Alles abwählen": "Deselect all",
+    "gewählt": "selected",
+    "Auf „ist bestellt\" setzen": "Mark as ordered",
+    "Alle Produkte mit dem Status „in Bestellung\". Solange ein Artikel hier steht, taucht er nicht wieder in der Bestellliste auf und löst keine Mail aus.": "All products with the status “on order”. While an item is listed here it won't reappear on the order list or trigger a mail.",
     "Keine kommenden Events.": "No upcoming events.",
     "Keine vergangenen Events.": "No past events.",
     "bestellt": "ordered",
@@ -5156,7 +5222,7 @@ class Component extends DCLogic {
       importErrors: [], importErrorsPending: [],
       clashRows: [], clashFresh: [], clashPick: { ort: true, ean: true, person: true, preis: true, ist: true, units: true, min: true, bestellmenge: true },
       eanScan: null, detailHistId: null, openCards: {},
-      ask: null, fcDate: "", fcFrom: "", fcScope: "all", fcItems: "all", fcOn: false, showAll: {}, orderQty: {},
+      pickIds: [], pickSel: {}, ask: null, fcDate: "", fcFrom: "", fcScope: "all", fcItems: "all", fcOn: false, showAll: {}, orderQty: {},
       orders: [], mailWeekday: "1",
       roleDefs: null, newRoleName: "", companyId: null,
       inviteToken: "", inviteName: "", inviteMail: "", inviteCompany: "",
@@ -7288,6 +7354,14 @@ class Component extends DCLogic {
       try { h = decodeURIComponent(h); } catch (e) {}
       // Knöpfe aus der Bestellmail: "#/order-all" setzt die ganze Liste,
       // "#/order/P-003" genau einen Artikel auf „ist bestellt".
+      const q0 = new URLSearchParams(location.search || "");
+      const picks = q0.getAll("pick").concat(((/#\/order-pick\/([^?#]+)/.exec(h) || [])[1] || "").split(","))
+        .map(x => x.trim()).filter(Boolean);
+      if (picks.length || q0.has("pick") || /#\/order-pick/.test(h)) {
+        this.pendingOrder = { pick: picks };
+        try { history.replaceState(null, "", location.pathname); } catch (e) {}
+        return true;
+      }
       const all = /#\/order-all/.test(h);
       const one = /#\/order\/([^\/?#]+)/.exec(h);
       if (all || one) { this.pendingOrder = all ? "*" : one[1]; this.cleanUrl(); return true; }
@@ -7307,6 +7381,12 @@ class Component extends DCLogic {
 
   // Die Adresse wird aufgeräumt, damit ein Neuladen nicht wieder dasselbe
   // Produkt aufschlägt oder eine Bestellung ein zweites Mal setzt.
+  linkUrl(v) {
+    const t = String(v || "").trim();
+    if (!t || t === "—") return "";
+    return /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : "https://" + t;
+  }
+
   cleanUrl() {
     try {
       const search = (location.search || "").replace(/([?&])p=[^&]*&?/, "$1").replace(/[?&]$/, "");
@@ -7321,6 +7401,16 @@ class Component extends DCLogic {
     if (!this.state.authed || !this.state.products.length) return;
     this.pendingOrder = null;
     const who = this.state.meNameLive || "";
+    if (raw && raw.pick) {
+      const low = this.state.products.filter(p => p.aktiv !== false && (p.status === "low" || p.status === "ordered"));
+      const hits = raw.pick.length ? raw.pick.map(c => this.findByCode(c)).filter(Boolean) : low.filter(p => p.status === "low");
+      const ids = Array.from(new Set(hits.map(p => p.id)));
+      const sel = {};
+      ids.forEach(id => { const p = this.state.products.find(x => x.id === id); if (p && p.status !== "ordered") sel[id] = true; });
+      this.setState({ pickIds: ids, pickSel: sel });
+      this.go("orders");
+      return;
+    }
     if (raw === "*") {
       const ids = this.state.products
         .filter(p => p.aktiv !== false && p.status === "low").map(p => p.id);
@@ -8271,6 +8361,50 @@ class Component extends DCLogic {
           this.xlsxBuild([{ name: this.tr("Bestellliste").slice(0, 31), rows: rows, freeze: true, widths: [36, 16, 20, 26, 22, 22] }]));
       },
       noOrders: orderCards.length === 0,
+      ...(() => {
+        const ordered = (st.products || []).filter(p => p.aktiv !== false && p.status === "ordered")
+          .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+        const lnk = p => this.linkUrl(p.link);
+        return {
+          hasOrderedRows: ordered.length > 0, noOrderedRows: ordered.length === 0,
+          orderedRows: ordered.map(p => ({
+            name: p.name, code: this.codeOf(p), ort: p.ort || "—",
+            link: lnk(p), hasLink: !!lnk(p), noLink: !lnk(p),
+            bm: this.fmtStock(p, p.bestellmenge), lieferant: p.lieferant || "—",
+            backOff: !this.may("order"), back: () => this.backToStock([p.id], null)
+          }))
+        };
+      })(),
+      ...(() => {
+        const ids = (st.pickIds || []).filter(id => (st.products || []).some(p => p.id === id));
+        const sel = st.pickSel || {};
+        const prod = id => (st.products || []).find(p => p.id === id);
+        const open = ids.filter(id => prod(id).status !== "ordered");
+        const n = open.filter(id => sel[id]).length;
+        const setSel = v => this.setState({ pickSel: v });
+        return {
+          pickOn: ids.length > 0,
+          pickCountLabel: n + " / " + open.length + " " + this.tr("gewählt"),
+          pickOff: n === 0,
+          pickAll: () => { const v = {}; open.forEach(id => { v[id] = true; }); setSel(v); },
+          pickNone: () => setSel({}),
+          pickClose: () => this.setState({ pickIds: [], pickSel: {} }),
+          pickCommit: () => {
+            const chosen = open.filter(id => sel[id]);
+            if (!chosen.length) return;
+            this.putInOrder(chosen, st.meNameLive || "");
+            this.setState({ pickIds: [], pickSel: {} });
+          },
+          pickRows: ids.map(id => {
+            const p = prod(id), done = p.status === "ordered";
+            return {
+              name: p.name, done: done, checked: done || !!sel[id], opacity: done ? ".55" : "1",
+              meta: done ? this.tr("steht schon in Bestellung") : this.fmtStock(p, p.bestellmenge) + " · " + (p.lieferant || "—"),
+              toggle: () => setSel(Object.assign({}, sel, { [id]: !sel[id] }))
+            };
+          })
+        };
+      })(),
       ordersCountLabel: (() => {
         const n = orderCards.reduce((a, c) => a + c.items.length, 0);
         return orderCards.length + " × " + this.tr("Bestellung") + " · " + n + " × " + this.tr("Artikel");
@@ -8791,7 +8925,7 @@ class Component extends DCLogic {
       current: Object.assign({}, cur, {
         statusLabel: this.statusOf(cur).label, tagClass: this.statusOf(cur).tag,
         linkLabel: this.tr("Beim Lieferanten öffnen"),
-        link: "https://example.com/" + cur.id.toLowerCase(),
+        link: this.linkUrl(cur.link), hasLink: !!this.linkUrl(cur.link),
         qr: this.qrEl(this.qrPayload(cur), 110),
         code: this.codeOf(cur),
         geaendert: this.may("who") ? cur.geaendert : this.tr("Person verdeckt"),
