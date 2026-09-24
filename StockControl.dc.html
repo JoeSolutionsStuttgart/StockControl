@@ -177,6 +177,14 @@
       </nav>
 
       <div style="margin-left: auto; display: flex; align-items: center; gap: var(--space-2)">
+        <sc-if value="{{ deptSwitchOn }}" hint-placeholder-val="{{ false }}">
+          <select class="input" style="flex: none; max-width: 170px; padding: 6px 8px; font-size: 13px; font-weight: 600; border-color: var(--color-accent)" value="{{ activeDept }}" onChange="{{ setActiveDept }}" aria-label="Abteilung" title="Abteilung wechseln">
+            <option value="all" data-i18n>Ganze Firma</option>
+            <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+              <option value="{{ dp.id }}">{{ dp.name }}</option>
+            </sc-for>
+          </select>
+        </sc-if>
         <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
         </button>
@@ -538,7 +546,13 @@
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>MHD</div><div style="font-size: 14px">{{ current.mhd }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Preis</div><div style="font-size: 14px">{{ current.preis }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Quantität</div><div data-i18n-keep style="font-size: 14px">{{ current.quantitaet }}</div></div>
-            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lieferant</div><div style="font-size: 14px">{{ current.lieferant }}</div></div>
+            <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lieferant</div>
+              <sc-if value="{{ current.hasSupplierLink }}" hint-placeholder-val="{{ false }}"><a href="{{ current.supplierHref }}" target="_blank" rel="noopener noreferrer" style="font-size: 14px">{{ current.lieferant }}</a></sc-if>
+              <sc-if value="{{ current.noSupplierLink }}" hint-placeholder-val="{{ true }}"><div style="font-size: 14px">{{ current.lieferant }}</div></sc-if>
+            </div>
+            <sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}">
+              <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Abteilung</div><div style="font-size: 14px">{{ current.deptName }}</div></div>
+            </sc-if>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Entnahme</div><div style="font-size: 14px">{{ current.entnahme }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Letzte Auffüllung</div><div style="font-size: 14px">{{ current.auffuell }}</div></div>
             <sc-if value="{{ mayWho }}" hint-placeholder-val="{{ false }}">
@@ -587,6 +601,7 @@
             </sc-if>
 
             <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+            <div class="field" style="margin: 0"><label data-i18n>MHD der Nachfüllung (optional)</label><input class="input" type="date" value="{{ refillMhd }}" onInput="{{ setRefillMhd }}"></div>
             <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
             <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
@@ -691,6 +706,18 @@
               <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ openDetailHist }}"><span data-i18n>Bestandsverlauf dieses Produkts ansehen</span></button>
               <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ printThisLabel }}"><span data-i18n>Etikett drucken</span></button>
             </div>
+            <sc-if value="{{ copyDeptOn }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+                <select class="input" style="flex: 1; min-width: 160px" value="{{ copyDept }}" onChange="{{ setCopyDept }}">
+                  <option value="" data-i18n>In weitere Abteilung übernehmen …</option>
+                  <sc-for list="{{ copyDeptOptions }}" as="cd" hint-placeholder-count="2">
+                    <option value="{{ cd.id }}">{{ cd.name }}</option>
+                  </sc-for>
+                </select>
+                <button class="btn btn-secondary" style="white-space: nowrap" disabled="{{ copyDeptOff }}" onClick="{{ doCopyDept }}"><span data-i18n>Übernehmen</span></button>
+              </div>
+              <div style="font-size: 11.5px; color: var(--sc-ink-2)" data-i18n>Gleiche Bezeichnung und EAN, aber eigener Bestand (startet bei 0), eigene Kennzahlen und eigener QR-Code.</div>
+            </sc-if>
           </section>
         </div>
       </div>
@@ -785,6 +812,16 @@
                 </sc-for>
               </select>
             </div>
+            <sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label data-i18n>Abteilung</label>
+                <select class="input" value="{{ hDept }}" onChange="{{ setHDept }}">
+                  <option value="" data-i18n>Alle Abteilungen</option>
+                  <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+                    <option value="{{ dp.id }}">{{ dp.name }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </sc-if>
             <div class="field"><label data-i18n>Lagerort</label>
               <select class="input" value="{{ hPlace }}" onChange="{{ setHPlace }}">
                 <option value="">Alle Lagerorte</option>
@@ -1071,6 +1108,25 @@
               <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ toggleList }}"><span data-i18n-keep>{{ listToggleLabel }}</span></button>
             </div>
             <sc-if value="{{ listOpen }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+                <div class="field" style="margin: 0; min-width: 160px"><label data-i18n>Abteilung</label>
+                  <select class="input" value="{{ orderDept }}" onChange="{{ setOrderDept }}">
+                    <option value="" data-i18n>Alle Abteilungen</option>
+                    <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+                      <option value="{{ dp.id }}">{{ dp.name }}</option>
+                    </sc-for>
+                  </select>
+                </div>
+                <div class="field" style="margin: 0; min-width: 160px"><label data-i18n>Sortieren nach</label>
+                  <select class="input" value="{{ orderSort }}" onChange="{{ setOrderSort }}">
+                    <option value="name" data-i18n>Artikel</option>
+                    <option value="dept" data-i18n>Abteilung</option>
+                    <option value="lieferant" data-i18n>Lieferant</option>
+                  </select>
+                </div>
+              </div>
+            </sc-if>
             <div style="overflow-x: auto; max-width: 100%">
             <table class="table" style="min-width: 540px">
               <thead>
@@ -1086,9 +1142,9 @@
                 </tr>
               </thead>
               <tbody>
-                <sc-for list="{{ orderList }}" as="row" hint-placeholder-count="4">
+                <sc-for list="{{ orderListView }}" as="row" hint-placeholder-count="4">
                   <tr>
-                    <td style="font-weight: 500">{{ row.name }}<div data-i18n-keep style="font-size: 11px; font-weight: 400; color: var(--sc-ink-3)">{{ row.srcNote }}</div></td>
+                    <td style="font-weight: 500">{{ row.name }}<div data-i18n-keep style="font-size: 11px; font-weight: 400; color: var(--sc-ink-3)">{{ row.srcNote }}</div><sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}"><span class="tag tag-neutral" style="font-size: 10.5px; margin-top: 3px; display: inline-block">{{ row.deptName }}</span></sc-if></td>
                     <td data-i18n-keep>{{ row.istLabel }}</td>
                     <td data-i18n-keep>{{ row.minLabel }}</td>
                     <td data-i18n-keep>{{ row.bmLabel }}</td>
@@ -1104,6 +1160,7 @@
                           </sc-for>
                         </div>
                         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+                          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 11.5px; white-space: nowrap" disabled="{{ row.fillOff }}" onClick="{{ row.fillBm }}"><span data-i18n-keep>{{ row.fillLabel }}</span></button>
                           <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ row.amountNote }}</span>
                         </div>
                       </div>
@@ -1169,14 +1226,29 @@
                             </sc-for>
                           </div>
                           <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ od.note }}</span>
+                          <label style="display: flex; flex-direction: column; gap: 1px; max-width: 160px">
+                            <span style="font-size: 10.5px; color: var(--sc-ink-2)" data-i18n>MHD (optional)</span>
+                            <input class="input" type="date" style="padding: 3px 6px; font-size: 12.5px" value="{{ od.mhd }}" onInput="{{ od.setMhd }}">
+                          </label>
                         </div>
                       </td>
                       <td class="text-muted">{{ od.lieferant }}</td>
-                      <td style="text-align: right"><button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button></td>
+                      <td style="text-align: right">
+                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end">
+                          <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button>
+                          <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.toList }}"><span data-i18n>Zurück in Bestellliste</span></button>
+                        </div>
+                      </td>
                     </tr>
                   </sc-for>
                 </tbody>
               </table>
+            </div>
+          </sc-if>
+          <sc-if value="{{ hasOrderedRows }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ receiveAllOff }}" onClick="{{ receiveAll }}"><span data-i18n-keep>{{ receiveAllLabel }}</span></button>
+              <span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Bucht bei allen Produkten die bestellte Menge ein und setzt den Status neu.</span>
             </div>
           </sc-if>
           <sc-if value="{{ noOrderedRows }}" hint-placeholder-val="{{ false }}">
@@ -1757,6 +1829,16 @@
             <div class="field"><label data-i18n>MHD</label><input class="input" type="date" value="{{ npMhd }}" onInput="{{ setNpMhd }}"></div>
             <div class="field"><label data-i18n>Preis</label><input class="input" value="{{ npPrice }}" placeholder="8,49 €" onInput="{{ setNpPrice }}"></div>
             <div class="field"><label data-i18n>Lieferant</label><input class="input" value="{{ npSupplier }}" data-i18n-ph placeholder="Getränke Nord GmbH" onInput="{{ setNpSupplier }}"></div>
+            <div class="field"><label data-i18n>Link zum Lieferanten</label><input class="input" type="url" value="{{ npSupplierLink }}" placeholder="https://" onInput="{{ setNpSupplierLink }}"></div>
+            <sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label data-i18n>Abteilung</label>
+                <select class="input" value="{{ npDeptVal }}" onChange="{{ setNpDept }}">
+                  <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+                    <option value="{{ dp.id }}">{{ dp.name }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </sc-if>
             <div class="field" style="grid-column: 1 / -1"><label data-i18n>Link zum Produkt</label><input class="input" type="url" value="{{ npLink }}" placeholder="https://" onInput="{{ setNpLink }}"></div>
             <div class="field" style="grid-column: 1 / -1"><label data-i18n>Kategorien</label><input class="input" value="{{ npCats }}" data-i18n-ph placeholder="Getränke, Küche, Verbrauchsmaterial — mit Komma trennen" onInput="{{ setNpCats }}"></div>
             <sc-for list="{{ attrFields }}" as="f" hint-placeholder-count="2">
@@ -2054,6 +2136,19 @@
                 </div>
               </div>
             </div>
+            <sc-if value="{{ deptSwitchAny }}" hint-placeholder-val="{{ false }}">
+              <div class="field" style="margin: 0"><label data-i18n>Abteilungen</label>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                  <sc-for list="{{ pickedDepts }}" as="pd" hint-placeholder-count="2">
+                    <label class="radio" style="gap: 7px; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)">
+                      <input type="checkbox" checked="{{ pd.on }}" disabled="{{ pd.locked }}" onChange="{{ pd.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                      <span style="font-size: 13px">{{ pd.name }}</span>
+                    </label>
+                  </sc-for>
+                </div>
+                <div data-i18n-keep style="font-size: 12px; color: {{ pickedDeptColor }}; margin-top: 4px">{{ pickedDeptNote }}</div>
+              </div>
+            </sc-if>
             <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
               <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ profileSaveDisabled }}" onClick="{{ saveProfile }}"><span data-i18n>Änderungen übernehmen</span></button>
               <span style="font-size: 12px; color: {{ profileNoteColor }}">{{ profileNote }}</span>
@@ -2147,6 +2242,27 @@
           <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">01</span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
+
+        <sc-if value="{{ deptAdminOn }}" hint-placeholder-val="{{ false }}">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Abteilungen</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Abteilungen sind streng getrennt: jede hat ihren eigenen Bestand, eigene Kennzahlen und eigene QR-Codes. Wer einer Abteilung nicht zugeordnet ist, sieht sie nicht. Zuordnen unter Team &amp; Rechte.</p>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <sc-for list="{{ deptRows }}" as="dr" hint-placeholder-count="2">
+              <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
+                <span style="flex: 1; min-width: 0; font-size: 14px">{{ dr.name }}</span>
+                <span data-i18n-keep class="tag tag-neutral">{{ dr.countLabel }}</span>
+                <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" disabled="{{ dr.delOff }}" title="{{ dr.delTitle }}" onClick="{{ dr.del }}"><span data-i18n>Löschen</span></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+            <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neue Abteilung</label><input class="input" value="{{ newDept }}" placeholder="z. B. Werkstatt" onInput="{{ setNewDept }}"></div>
+            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addDeptOff }}" onClick="{{ addDept }}"><span data-i18n>Abteilung anlegen</span></button>
+          </div>
+        </section>
+        </sc-if>
 
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -3244,7 +3360,7 @@
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com.</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</div>
         </div>
       </sc-if>
 
@@ -3763,7 +3879,20 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
-    "Bestellte Menge": "Ordered quantity", "Wareneingang": "Goods received", "danach: ": "then: ",
+    "Abteilung": "Department", "Abteilungen": "Departments", "Ganze Firma": "Whole company", "Alle Abteilungen": "All departments",
+    "Neue Abteilung": "New department", "Abteilung anlegen": "Create department", "Sortieren nach": "Sort by",
+    "In weitere Abteilung übernehmen …": "Copy to another department …", "Übernehmen": "Copy", "übernommen nach ": "copied to ",
+    "Bestand 0": "stock 0", "angelegt": "created", "Link zum Lieferanten": "Supplier link",
+    "MHD der Nachfüllung (optional)": "Best-before of refill (optional)", "MHD (optional)": "Best-before (optional)",
+    "Die inhabende Person sieht immer alle Abteilungen.": "The owner always sees all departments.",
+    "Keiner Abteilung zugeordnet — diese Person sieht keine Produkte.": "Not in any department — this person sees no products.",
+    "Zuordnen darf nur die inhabende Person.": "Only the owner can assign.", "Wird sofort gespeichert.": "Saved right away.",
+    "Erst alle Produkte dieser Abteilung löschen oder verschieben.": "Delete or move all products of this department first.",
+    "Bestellte Menge": "Ordered quantity",
+    "Alle mit Bestellmenge in Bestellung": "Order all with order quantity", "Zurück in Bestellliste": "Back to order list",
+    "eingebucht": "booked in", "mit Bestand ok.": "with stock ok.", "Ohne Menge übersprungen: ": "Skipped without quantity: ",
+    "noch unter Mindestbestand — zurück in der Bestellliste.": "still below minimum — back on the order list.",
+    "Bucht bei allen Produkten die bestellte Menge ein und setzt den Status neu.": "Books in the ordered quantity for all products and updates the status.", "Wareneingang": "Goods received", "danach: ": "then: ",
     "Bestellte Menge eintragen, dann zurück in Bestand buchen.": "Enter the ordered quantity, then book back to stock.",
     "Bestand ok — aus beiden Listen entfernt.": "Stock ok — removed from both lists.",
     "Noch unter Mindestbestand — zurück in der Bestellliste.": "Still below minimum — back on the order list.",
@@ -4097,7 +4226,7 @@ const DICT = {
     "Anmelden": "Sign in", "Registrieren": "Register", "Einladung": "Invitation", "Schließen": "Close",
     "Ich habe schon ein Konto": "I already have an account", "Neue Firma anlegen": "Create a new company",
     "Konto anlegen": "Create account", "Ich bin kein Bot": "I am not a bot",
-    "Derzeit kostenlos, jederzeit kündbar.": "Free for now, cancel anytime.",
+    "Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com": "Free for now, cancel anytime.",
     "E-Mail bestätigen": "Confirm your email",
     "Wir haben dir einen Link geschickt. Er gilt 15 Minuten.": "We sent you a link. It is valid for 15 minutes.",
     "Neue Mail anfordern": "Request a new mail", "Zugang einrichten": "Set up access",
@@ -4879,7 +5008,7 @@ const DICT = {
     "Anmelden": "Logga in", "Registrieren": "Registrera", "Einladung": "Inbjudan", "Schließen": "Stäng",
     "Ich habe schon ein Konto": "Jag har redan ett konto", "Neue Firma anlegen": "Skapa nytt företag",
     "Konto anlegen": "Skapa konto", "Ich bin kein Bot": "Jag är inte en bot",
-    "Derzeit kostenlos, jederzeit kündbar.": "Gratis just nu, avsluta när du vill.",
+    "Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com": "Gratis just nu, avsluta när du vill.",
     "E-Mail bestätigen": "Bekräfta e-post",
     "Wir haben dir einen Link geschickt. Er gilt 15 Minuten.": "Vi har skickat en länk. Den gäller i 15 minuter.",
     "Neue Mail anfordern": "Begär nytt mejl", "Zugang einrichten": "Skapa åtkomst",
@@ -5251,6 +5380,8 @@ const SEED = [
     entnahme:"05.09.2026 11:11", auffuell:"22.08.2026 16:25", geaendert:"Jonas Pelz", hist:[9,8,8,7,6,6,5] }
 ];
 
+const DEPTS_DEMO = [{ id: "d1", name: "Werkstatt" }, { id: "d2", name: "Büro" }];
+
 const MEMBERS = [
   { id:"u1", name:"Marie Kohl", email:"m.kohl@internet-gmbh.de", role:"owner", status:"active" },
   { id:"u2", name:"Timo Brand", email:"t.brand@internet-gmbh.de", role:"manager", status:"active" },
@@ -5365,7 +5496,9 @@ class Component extends DCLogic {
       role: (props && props.demoRole) ? this.roleKey(props.demoRole) : "owner",
       theme: (props && props.theme) || "Hell",
       lang: "de",
-      products: SEED.map(p => Object.assign({ aktiv: true }, p)),
+      products: SEED.map((p, i) => Object.assign({ aktiv: true, department: i % 3 === 2 ? "d2" : "d1" }, p)),
+      departments: DEPTS_DEMO.slice(), activeDept: "all", hDept: "", orderSort: "name", orderDept: "",
+      refillMhd: "", orderMhd: {}, copyDept: "", newDept: "",
       ccDeputies: true,
 
       events: [{ id: "E-1", name: "Betriebsfest Werkstatt", datum: "02.10.2026", ort: "Werkstatt & Hof",
@@ -5410,7 +5543,7 @@ class Component extends DCLogic {
       newPlace: "", draftFor: null, draftName: "", draftEmail: "",
       npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
       npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "", npIstRest: "",
-      npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: "",
+      npMhd: "", npPrice: "", npSupplier: "", npLink: "", npSupplierLink: "", npDept: "", npCats: "",
       mailTime: "07:30", mailDay: "1", importParsed: [],
       units: {}, unitQty: {}, newUnitName: "", newUnitFactor: "12", newUnitRef: "",
       unitDefs: null,
@@ -5558,7 +5691,7 @@ class Component extends DCLogic {
       if (isAdmin) {
         companies = await api.loadCompanies().catch(() => null);
       }
-      const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status, permissions: m.permissions || {} }));
+      const members = d.members.map(m => ({ id: m.id, name: m.name || m.email, email: m.email, role: m.role, status: m.status, permissions: m.permissions || {}, departments: Array.isArray(m.departments) ? m.departments : null }));
       const nameOf = id => (members.find(m => m.id === id) || {}).name || "—";
       const when = t => t ? new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "—";
       // Produkte ohne dauerhafte Kennung bekommen eine, und zwar sofort
@@ -5583,7 +5716,7 @@ class Component extends DCLogic {
       const products = d.products.map(r => ({
         id: r.id, code: r.code || r.id, name: r.name, ean: r.ean || "—", ist: r.ist, min: r.min, bestellmenge: r.bestellmenge,
         ort: r.ort || "—", mhd: r.mhd || "—", preis: r.preis != null ? Number(r.preis).toFixed(2).replace(".", ",") + " €" : "—",
-        quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "", status: r.status, bildKey: r.bild_url || "",
+        quantitaet: r.quantitaet || "—", lieferant: r.lieferant || "—", link: r.link || "", lieferantLink: r.lieferant_link || "", department: r.department_id || null, status: r.status, bildKey: r.bild_url || "",
         verantwortlich: nameOf(r.verantwortlich), vertretung: (r.vertreter || []).map(nameOf).join(", ") || "—",
         kategorien: r.kategorien || [], entnahme: when(r.entnahme_am), auffuell: when(r.auffuell_am),
         geaendert: nameOf(r.geaendert_von), aktiv: r.aktiv !== false, hist: [r.ist]
@@ -5626,6 +5759,7 @@ class Component extends DCLogic {
       }));
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
+        departments: Array.isArray(d.departments) ? d.departments.map(x => ({ id: x.id, name: x.name })) : [],
         units, priceHist, log: logClean,
         // Gespeicherte Feinrechte aus der Datenbank; ungespeicherte Änderungen bleiben stehen.
         overrides: Object.assign({}, ...members.map(m => ({ [m.id]: m.permissions || {} })),
@@ -6152,7 +6286,7 @@ class Component extends DCLogic {
     if (navigator.vibrate) { try { navigator.vibrate(60); } catch (e) {} }
     if (hit) {
       this.stopCamera();
-      this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} });
+      this.setState(Object.assign({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} }, this.deptFor(hit)));
       this.say(this.tr("Gescannt"), hit.name, hit.ort);
     } else {
       this.setState({ readMiss: text });
@@ -7026,9 +7160,9 @@ class Component extends DCLogic {
   // Mit Datenbank: buchen und danach den echten Stand nachladen, damit
   // Bestand, Status und Benachrichtigung aus der Quelle kommen und nicht
   // aus der Schätzung im Browser.
-  bookRemote(id, delta, note) {
+  bookRemote(id, delta, note, mhd) {
     if (!this.state.live || !this.api) return;
-    this.api.bookMovement({ productId: id, delta, note })
+    this.api.bookMovement({ productId: id, delta, note, mhd: mhd || null })
       .then(() => this.refresh())
       .catch(err => this.say("Supabase", this.tr("Buchung nicht gespeichert"), String((err && err.message) || err)));
   }
@@ -7208,7 +7342,8 @@ class Component extends DCLogic {
       mhd: p.mhd === "—" ? null : (this.isoDay(p.mhd) || null), preis: this.parsePrice(p.preis),
       verantwortlich: this.personId(p.verantwortlich) || meId,
       vertreter: this.personIds(p.vertretung),
-      link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true
+      link: p.link || null, kategorien: p.kategorien, status: p.status, aktiv: true,
+      ...(this.depts().length ? { department_id: this.newDeptId() } : {})
     }));
   }
 
@@ -7542,36 +7677,63 @@ class Component extends DCLogic {
 
   // Ware ist da: bestellte Menge einbuchen, Produkt aus der Bestellung
   // nehmen und den Status aus dem neuen Bestand ableiten.
-  receiveOrdered(pid, who) {
-    const p = this.state.products.find(x => x.id === pid);
-    if (!p) return;
-    const o = (this.state.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(pid) >= 0).slice(-1)[0];
-    const rows = o ? (o.amounts || {})[pid] : (this.state.orderQty || {})[pid];
-    const add = this.amountTotal(p, rows);
-    if (add <= 0) {
+  receiveOrdered(pid, who) { this.receiveMany([pid], who); }
+
+  // Mehrere auf einmal: alles in einem Durchgang rechnen, damit sich die
+  // einzelnen Schritte nicht gegenseitig den Stand überschreiben.
+  receiveMany(pids, who) {
+    const st = this.state;
+    const lastOrder = pid => (st.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(pid) >= 0).slice(-1)[0];
+    const done = [], skipped = [], status = {};
+    pids.forEach(pid => {
+      const p = st.products.find(x => x.id === pid);
+      if (!p) return;
+      const o = lastOrder(pid);
+      const add = this.amountTotal(p, o ? (o.amounts || {})[pid] : (st.orderQty || {})[pid]);
+      if (add <= 0) { skipped.push(p.name); return; }
+      const next = (Number(p.ist) || 0) + add;
+      status[pid] = next < (Number(p.min) || 0) ? "low" : "ok";
+      this.applyBooking(p, next, false, "+" + add, who);
+      const mhd = (st.orderMhd || {})[pid] || null;
+      if (mhd) this.localMhd(pid, mhd);
+      done.push({ pid: pid, add: add, name: p.name, mhd: mhd });
+    });
+    if (!done.length) {
       this.say(this.tr("Wareneingang"), this.tr("Keine Menge eingetragen"), this.tr("Bestellte Menge eintragen, dann zurück in Bestand buchen."));
       return;
     }
-    const next = (Number(p.ist) || 0) + add;
-    const status = next < (Number(p.min) || 0) ? "low" : "ok";
-    this.applyBooking(p, next, false, "+" + add, who);
-    const orders = (this.state.orders || [])
-      .map(x => (x.items || []).indexOf(pid) < 0 ? x : Object.assign({}, x, {
-        items: x.items.filter(i => i !== pid),
-        amounts: (() => { const a = Object.assign({}, x.amounts || {}); delete a[pid]; return a; })()
-      }))
+    const ids = done.map(d => d.pid);
+    const orders = (st.orders || [])
+      .map(x => (x.items || []).some(i => ids.indexOf(i) >= 0) ? Object.assign({}, x, {
+        items: x.items.filter(i => ids.indexOf(i) < 0),
+        amounts: (() => { const a = Object.assign({}, x.amounts || {}); ids.forEach(i => delete a[i]); return a; })()
+      }) : x)
       .filter(x => x.id === "__meta" || (x.items || []).length);
     this.setState(prev => ({
       orders: orders,
-      orderQty: (() => { const q = Object.assign({}, prev.orderQty || {}); delete q[pid]; return q; })(),
-      products: prev.products.map(x => x.id === pid ? Object.assign({}, x, { status: status }) : x)
+      orderQty: (() => { const q = Object.assign({}, prev.orderQty || {}); ids.forEach(i => delete q[i]); return q; })(),
+      orderMhd: (() => { const q = Object.assign({}, prev.orderMhd || {}); ids.forEach(i => delete q[i]); return q; })(),
+      products: prev.products.map(x => status[x.id] ? Object.assign({}, x, { status: status[x.id] }) : x)
     }));
-    this.remote(api => api.bookMovement({ productId: pid, delta: add, note: this.tr("Wareneingang aus Bestellung") })
-      .then(() => api.updateProduct(pid, { status: status }))
+    this.remote(api => done.reduce((chain, d) => chain
+        .then(() => api.bookMovement({ productId: d.pid, delta: d.add, note: this.tr("Wareneingang aus Bestellung"), mhd: d.mhd }))
+        .then(() => api.updateProduct(d.pid, { status: status[d.pid] })), Promise.resolve())
       .then(() => api.setOrders(orders)));
-    this.say(this.tr("Wareneingang"), p.name + " · +" + this.fmtStock(p, add),
-      status === "ok" ? this.tr("Bestand ok — aus beiden Listen entfernt.")
-        : this.tr("Noch unter Mindestbestand — zurück in der Bestellliste."));
+    const low = done.filter(d => status[d.pid] === "low").length;
+    this.say(this.tr("Wareneingang"),
+      done.length === 1 ? done[0].name + " · +" + this.fmtStock(st.products.find(x => x.id === done[0].pid), done[0].add) : done.length + " × " + this.tr("Artikel") + " " + this.tr("eingebucht"),
+      (low ? low + " " + this.tr("noch unter Mindestbestand — zurück in der Bestellliste.") + " " : "")
+        + (done.length - low ? (done.length - low) + " " + this.tr("mit Bestand ok.") : "")
+        + (skipped.length ? " " + this.tr("Ohne Menge übersprungen: ") + skipped.join(", ") : ""));
+  }
+
+  // Bestellung zurücknehmen: Produkt wieder in die Bestellliste, die
+  // eingetragene Menge bleibt dort vorausgefüllt.
+  backToList(pid) {
+    const o = (this.state.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(pid) >= 0).slice(-1)[0];
+    const rows = o ? (o.amounts || {})[pid] : null;
+    if (rows && rows.length) this.setState(prev => ({ orderQty: Object.assign({}, prev.orderQty, { [pid]: rows }) }));
+    this.backToStock([pid], null);
   }
 
   backToStock(ids, orderId) {
@@ -7711,7 +7873,7 @@ class Component extends DCLogic {
     const hit = this.findByCode(raw);
     if (hit) {
       this.stopCamera();
-      this.setState({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} });
+      this.setState(Object.assign({ currentId: hit.id, screen: "detail", qty: 1, scanCode: "", unitQty: {} }, this.deptFor(hit)));
       this.say(this.tr("Gescannt"), hit.name, hit.ort);
     } else {
       // Kennung unbekannt: auf dem Scan-Schirm steht sie zum Nachsehen bereit.
@@ -7733,6 +7895,7 @@ class Component extends DCLogic {
     try {
       this.setState({
         memos: (() => { try { return JSON.parse(localStorage.getItem("sc-memos") || "[]"); } catch (e) { return []; } })(),
+        ...(localStorage.getItem("sc-pref-dept") ? { activeDept: localStorage.getItem("sc-pref-dept") } : {}),
         ...(localStorage.getItem("sc-pref-theme") ? { theme: localStorage.getItem("sc-pref-theme") } : {}),
         ...(localStorage.getItem("sc-pref-lang") ? { lang: localStorage.getItem("sc-pref-lang") } : {}),
         onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
@@ -7822,6 +7985,49 @@ class Component extends DCLogic {
       const line = root.querySelector(".sub");
       if (line && line.innerHTML !== sub) line.innerHTML = sub;
     });
+  }
+
+  // ── Abteilungen ──────────────────────────────────────────
+  depts() { return this.state.departments || []; }
+  deptOf(p) { const d = this.depts(); if (!d.length) return null; return (p && p.department && d.some(x => x.id === p.department)) ? p.department : (p && p.department) || d[0].id; }
+  deptName(id) { const d = this.depts().find(x => x.id === id); return d ? d.name : "—"; }
+  activeDeptId() { const a = this.state.activeDept; return a && a !== "all" && this.depts().some(d => d.id === a) ? a : null; }
+  newDeptId() { return this.activeDeptId() || (this.depts()[0] || {}).id || null; }
+  deptFor(p) { const a = this.activeDeptId(); return a && this.deptOf(p) !== a ? { activeDept: this.deptOf(p) } : {}; }
+
+  // Demo ohne Datenbank: das MHD der Nachfüllung sofort zeigen.
+  localMhd(pid, iso) {
+    const de = String(iso).split("-").reverse().join(".");
+    this.setState(prev => ({ products: prev.products.map(p => p.id !== pid ? p
+      : Object.assign({}, p, { mhd: (!p.mhd || p.mhd === "—") ? (this.state.live ? iso : de) : p.mhd })) }));
+  }
+
+  copyToDept(cur, target) {
+    if (!cur || !target) return;
+    const min = Number(cur.min) || 0;
+    if (this.state.live && this.api) {
+      const payload = {
+        name: cur.name, ean: cur.ean && cur.ean !== "—" ? cur.ean : null, ist: 0, min: min,
+        bestellmenge: Number(cur.bestellmenge) || 0, ort: cur.ort && cur.ort !== "—" ? cur.ort : null,
+        preis: this.parsePrice(cur.preis), quantitaet: cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : null,
+        einheiten: (this.state.units || {})[cur.id] || null,
+        lieferant: cur.lieferant && cur.lieferant !== "—" ? cur.lieferant : null,
+        link: cur.link || null, kategorien: cur.kategorien || [], status: 0 < min ? "low" : "ok", aktiv: true,
+        verantwortlich: this.personId(cur.verantwortlich) || this.state.meId,
+        vertreter: this.personIds(cur.vertretung), department_id: target,
+        ...(cur.lieferantLink ? { lieferant_link: cur.lieferantLink } : {})
+      };
+      this.api.createProduct(payload)
+        .catch(err => this.withoutCode(err, payload, p => this.api.createProduct(p)))
+        .then(() => this.refresh())
+        .catch(err => this.say("Supabase", this.tr("Nicht gespeichert"), String((err && err.message) || err)));
+    } else {
+      const id = "SC-" + Math.floor(2000 + Math.random() * 7000);
+      this.setState(prev => ({ products: prev.products.concat(Object.assign({}, cur, {
+        id: id, code: id, ist: 0, status: 0 < min ? "low" : "ok", department: target, hist: [0], entnahme: "—", auffuell: "—" })) }));
+    }
+    this.setState({ copyDept: "" });
+    this.say(this.tr("Abteilung"), cur.name, this.tr("übernommen nach ") + this.deptName(target) + " · " + this.tr("Bestand 0"));
   }
 
   // ── Merkzettel ───────────────────────────────────────────
@@ -8165,7 +8371,11 @@ class Component extends DCLogic {
   h(tag, style, kids) { return React.createElement(tag, { style }, kids); }
 
   renderVals() {
-    const st = this.state, lang = st.lang;
+    const st0 = this.state, lang = st0.lang;
+    // Aktive Abteilung: alle Ansichten sehen nur deren Produkte.
+    const st = this.activeDeptId()
+      ? Object.assign({}, st0, { products: st0.products.filter(p => this.deptOf(p) === this.activeDeptId()) }) : st0;
+    const npDeptVal = st.npDept || this.newDeptId() || "";
     const name = st.brand || this.props.serviceName || "StockControl";
     const products = st.products;
     const EMPTY_PRODUCT = { id: "—", name: "—", ean: "—", ist: 0, min: 0, bestellmenge: 0, ort: "—", mhd: "—",
@@ -8281,6 +8491,9 @@ class Component extends DCLogic {
         lockNote: this.tr("nur ") + p.verantwortlich,
         action: this.tr("In Bestellung"),
         toggleOrdered: () => this.putInOrder([p.id], meLabel),
+        fillLabel: "= " + this.fmtStock(p, p.bestellmenge),
+        fillOff: !(Number(p.bestellmenge) > 0),
+        fillBm: () => this.setState(prev => ({ orderQty: Object.assign({}, prev.orderQty, { [p.id]: [{ qty: String(p.bestellmenge), unit: "" }] }) })),
         // Menge und Quantität der Bestellung — mehrere Zeilen je Produkt.
         unitOptions: this.unitsFor(p).map(u => ({ name: u.name, label: u.name })),
         amountFields: this.amountFieldsFor(p, (st.orderQty || {})[p.id], (u, v) => this.setAmountU(p, u, v), false),
@@ -8419,7 +8632,7 @@ class Component extends DCLogic {
     const matchProduct = p => !!p &&
       (!st.hProduct || p.id === st.hProduct) &&
       (!st.hCategory || (p.kategorien || []).includes(st.hCategory)) &&
-      (!st.hPlace || p.ort === st.hPlace) &&
+      (!st.hPlace || p.ort === st.hPlace) && (!st.hDept || this.deptOf(p) === st.hDept) &&
       (!st.hResp || p.verantwortlich === st.hResp) &&
       (!st.hSupplier || p.lieferant === st.hSupplier);
     const days = parseInt(st.hRange, 10) || 0;
@@ -8684,9 +8897,24 @@ class Component extends DCLogic {
         return base;
       })(),
       orderList,
+      orderListView: orderList
+        .filter(r => !st.orderDept || this.deptOf(r) === st.orderDept)
+        .map(r => Object.assign({}, r, { deptName: this.deptName(this.deptOf(r)) }))
+        .sort((a, b) => st.orderSort === "dept" ? (a.deptName.localeCompare(b.deptName) || String(a.name).localeCompare(String(b.name)))
+          : st.orderSort === "lieferant" ? (String(a.lieferant || "").localeCompare(String(b.lieferant || "")) || String(a.name).localeCompare(String(b.name)))
+          : String(a.name).localeCompare(String(b.name))),
+      orderSort: st.orderSort, setOrderSort: setSel("orderSort"),
+      orderDept: st.orderDept, setOrderDept: setSel("orderDept"),
       hasLow: orderList.length > 0,
-      orderAllLabel: this.tr("Alle in Bestellung") + " (" + orderList.filter(mine).length + ")",
-      orderAll: () => this.putInOrder(orderList.filter(mine).map(p => p.id), meLabel),
+      orderAllLabel: this.tr("Alle mit Bestellmenge in Bestellung") + " (" + orderList.filter(mine).length + ")",
+      orderAll: () => {
+        const ids = orderList.filter(mine).map(p => p.id);
+        this.setState(prev => {
+          const q = Object.assign({}, prev.orderQty || {});
+          ids.forEach(id => { const p = prev.products.find(x => x.id === id); if (p && Number(p.bestellmenge) > 0) q[id] = [{ qty: String(p.bestellmenge), unit: "" }]; });
+          return { orderQty: q };
+        }, () => this.putInOrder(ids, meLabel));
+      },
 
       // ── Bestellungen ───────────────────────────────────────
       onOrders: st.screen === "orders", navOrders: this.navStyle("orders"),
@@ -8721,6 +8949,9 @@ class Component extends DCLogic {
         const lnk = p => this.linkUrl(p.link);
         return {
           hasOrderedRows: ordered.length > 0, noOrderedRows: ordered.length === 0,
+          receiveAllOff: !this.may("order"),
+          receiveAllLabel: this.tr("Alle zurück in Bestand") + " (" + ordered.length + ")",
+          receiveAll: () => this.receiveMany(ordered.map(p => p.id), meLabel),
           orderedRows: ordered.map(p => ({
             ...(() => {
               const o = (st.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(p.id) >= 0).slice(-1)[0];
@@ -8728,6 +8959,8 @@ class Component extends DCLogic {
               const onSet = o ? (u, v) => this.setOrderAmountU(o.id, p, u, v) : (u, v) => this.setAmountU(p, u, v);
               const add = this.amountTotal(p, rows);
               return {
+                mhd: (st.orderMhd || {})[p.id] || "",
+                setMhd: e => { const v = e.target.value; this.setState(prev => ({ orderMhd: Object.assign({}, prev.orderMhd, { [p.id]: v }) })); },
                 fields: this.amountFieldsFor(p, rows, onSet, !this.may("order")),
                 note: add > 0 ? this.tr("danach: ") + this.fmtStock(p, (Number(p.ist) || 0) + add) + " · " + this.tr("Min ") + this.fmtStock(p, p.min) : this.tr("Keine Menge eingetragen")
               };
@@ -8735,7 +8968,7 @@ class Component extends DCLogic {
             name: p.name, code: this.codeOf(p), ort: p.ort || "—",
             link: lnk(p), hasLink: !!lnk(p), noLink: !lnk(p),
             bm: this.fmtStock(p, p.bestellmenge), lieferant: p.lieferant || "—",
-            backOff: !this.may("order"), back: () => this.receiveOrdered(p.id, meLabel)
+            backOff: !this.may("order"), back: () => this.receiveOrdered(p.id, meLabel), toList: () => this.backToList(p.id)
           }))
         };
       })(),
@@ -9073,6 +9306,9 @@ class Component extends DCLogic {
           f("preis", "Preis", { hint: "8,49 €" }),
           f("mhd", "MHD", { hint: "30.04.2027" }),
           f("lieferant", "Lieferant"),
+          f("lieferantLink", "Link zum Lieferanten", { hint: "https://" }),
+          ...(this.depts().length ? [f("department", "Abteilung", { isSelect: true, isText: false,
+            options: this.depts().map(d => ({ value: d.id, label: d.name })) })] : []),
           f("verantwortlich", "Verantwortlich", { isSelect: true, isText: false,
             options: (st.members || []).filter(m => m.status !== "gesperrt").map(m => ({ value: m.name, label: m.name })) }),
           ...["d1", "d2", "d3"].map((k, i) => f(k, "Stellvertretung " + (i + 1), { isSelect: true, isText: false,
@@ -9126,6 +9362,7 @@ class Component extends DCLogic {
             return { d1: v[0] || "", d2: v[1] || "", d3: v[2] || "" };
           })(),
           kategorien: (cur.kategorien || []).join(", "), link: cur.link || "",
+          lieferantLink: cur.lieferantLink || "", department: this.deptOf(cur) || "",
           aktiv: cur.aktiv === false ? "nein" : "ja"
         })
       }),
@@ -9149,6 +9386,8 @@ class Component extends DCLogic {
           vertretung: Array.from(new Set([d.d1, d.d2, d.d3].filter(Boolean))).join(", ") || "—",
           kategorien: String(d.kategorien || "").split(",").map(x => x.trim()).filter(Boolean),
           link: String(d.link || "").trim(),
+          lieferantLink: String(d.lieferantLink || "").trim(),
+          department: d.department || cur.department || null,
           aktiv: d.aktiv !== "nein",
           status: ist < min ? "low" : "ok",
           geaendert: meLabel
@@ -9164,6 +9403,8 @@ class Component extends DCLogic {
           ort: patch.ort, quantitaet: patch.quantitaet === "—" ? null : patch.quantitaet, einheiten: ladder,
           lieferant: patch.lieferant === "—" ? null : patch.lieferant,
           link: patch.link || null, kategorien: patch.kategorien,
+          ...(patch.lieferantLink || cur.lieferantLink ? { lieferant_link: patch.lieferantLink || null } : {}),
+          ...(this.depts().length && patch.department ? { department_id: patch.department } : {}),
           aktiv: patch.aktiv, status: patch.status,
           preis: this.parsePrice(patch.preis), mhd: patch.mhd === "—" ? null : patch.mhd,
           verantwortlich: this.personId(patch.verantwortlich),
@@ -9290,6 +9531,8 @@ class Component extends DCLogic {
         statusLabel: this.statusOf(cur).label, tagClass: this.statusOf(cur).tag,
         linkLabel: String(cur.link || "").replace(/^https?:\/\//i, "").replace(/\/$/, "").slice(0, 60) || this.tr("Beim Lieferanten öffnen"),
         link: this.linkUrl(cur.link), hasLink: !!this.linkUrl(cur.link),
+        supplierHref: this.linkUrl(cur.lieferantLink), hasSupplierLink: !!this.linkUrl(cur.lieferantLink), noSupplierLink: !this.linkUrl(cur.lieferantLink),
+        deptName: this.deptName(this.deptOf(cur)),
         qr: this.qrEl(this.qrPayload(cur), 110),
         code: this.codeOf(cur),
         geaendert: this.may("who") ? cur.geaendert : this.tr("Person verdeckt"),
@@ -9337,7 +9580,9 @@ class Component extends DCLogic {
         if (n <= 0) { this.say(this.tr("Buchung"), this.tr("Keine Menge eingetragen"), this.tr("Menge eintragen, dann buchen.")); return; }
         const next = cur.ist + n;
         this.applyBooking(cur, next, false, "+" + n, meLabel);
-        this.bookRemote(cur.id, n, "Nachfüllung");
+        this.bookRemote(cur.id, n, "Nachfüllung", st.refillMhd || null);
+        if (st.refillMhd) this.localMhd(cur.id, st.refillMhd);
+        this.setState({ refillMhd: "" });
         this.say(this.tr("Nachfüllung"), this.fmtStock(cur, n) + " · " + this.tr("gebucht"), this.tr("Neuer Bestand: ") + this.fmtStock(cur, next) + " · " + this.tr("Status zurückgesetzt"));
       },
       hasPhoto: !!st.photoUrl, noPhoto: !st.photoUrl,
@@ -9544,6 +9789,67 @@ class Component extends DCLogic {
                 if (this.loadMailStatus) this.loadMailStatus();
               })
               .catch(e => this.say(this.tr("Bestellliste"), this.tr("Nicht verschickt"), String((e && e.message) || e)));
+          }
+        };
+      })(),
+      ...(() => {
+        const D = this.depts();
+        const all = st0.products || [];
+        const isOwner = st.role === "owner";
+        const ed = D.length > 0;
+        const pickedU = (st.members || []).find(m => m.id === st.pickedUser) || {};
+        const pDeps = Array.isArray(pickedU.departments) ? pickedU.departments : D.map(d => d.id);
+        const saveDeps = next => {
+          this.setState(prev => ({ members: prev.members.map(m => m.id === pickedU.id ? Object.assign({}, m, { departments: next }) : m) }));
+          if (st.live && this.api && this.isDbId(pickedU.id)) this.remote(api => api.updateMember(pickedU.id, { departments: next }));
+        };
+        const target = st.copyDept;
+        const copyOpts = D.filter(d => d.id !== this.deptOf(cur)
+          && !all.some(p => p.id !== cur.id && this.deptOf(p) === d.id && p.name === cur.name && String(p.ean || "") === String(cur.ean || "")));
+        return {
+          deptSwitchAny: ed, deptSwitchOn: D.length > 1,
+          deptOptions: D.map(d => ({ id: d.id, name: d.name })),
+          activeDept: this.activeDeptId() || "all",
+          setActiveDept: e => { const v = e.target.value; this.setState({ activeDept: v }); try { localStorage.setItem("sc-pref-dept", v); } catch (x) {} },
+          npDeptVal: npDeptVal, setNpDept: e => this.setState({ npDept: e.target.value }),
+          npSupplierLink: st.npSupplierLink || "", setNpSupplierLink: e => this.setState({ npSupplierLink: e.target.value }),
+          refillMhd: st.refillMhd || "", setRefillMhd: e => this.setState({ refillMhd: e.target.value }),
+          copyDeptOn: ed && copyOpts.length > 0 && (st.role === "owner" || st.role === "manager" || this.may("create")),
+          copyDeptOptions: copyOpts.map(d => ({ id: d.id, name: d.name })),
+          copyDept: target || "", setCopyDept: e => this.setState({ copyDept: e.target.value }),
+          copyDeptOff: !target, doCopyDept: () => this.copyToDept(cur, target),
+          pickedDepts: D.map(d => ({
+            name: d.name, on: pickedU.role === "owner" || pDeps.indexOf(d.id) >= 0,
+            locked: !isOwner || pickedU.role === "owner",
+            toggle: () => saveDeps(pDeps.indexOf(d.id) >= 0 ? pDeps.filter(x => x !== d.id) : pDeps.concat(d.id))
+          })),
+          pickedDeptNote: pickedU.role === "owner" ? this.tr("Die inhabende Person sieht immer alle Abteilungen.")
+            : !pDeps.length ? this.tr("Keiner Abteilung zugeordnet — diese Person sieht keine Produkte.")
+            : !isOwner ? this.tr("Zuordnen darf nur die inhabende Person.") : this.tr("Wird sofort gespeichert."),
+          pickedDeptColor: !pDeps.length && pickedU.role !== "owner" ? "var(--color-accent-800)" : "var(--sc-ink-2)",
+          deptAdminOn: isOwner,
+          deptRows: D.map(d => {
+            const n = all.filter(p => this.deptOf(p) === d.id).length;
+            return {
+              name: d.name, countLabel: n + " " + this.tr("Produkte"), delOff: n > 0 || D.length <= 1,
+              delTitle: n > 0 ? this.tr("Erst alle Produkte dieser Abteilung löschen oder verschieben.") : "",
+              del: () => {
+                if (n > 0 || D.length <= 1) return;
+                this.setState(prev => ({ departments: prev.departments.filter(x => x.id !== d.id), activeDept: prev.activeDept === d.id ? "all" : prev.activeDept }));
+                this.remote(api => api.deleteDepartment(d.id));
+              }
+            };
+          }),
+          newDept: st.newDept || "", setNewDept: e => this.setState({ newDept: e.target.value }),
+          addDeptOff: !String(st.newDept || "").trim() || D.some(d => d.name.toLowerCase() === String(st.newDept).trim().toLowerCase()),
+          addDept: () => {
+            const v = String(st.newDept || "").trim();
+            if (!v || D.some(d => d.name.toLowerCase() === v.toLowerCase())) return;
+            this.setState({ newDept: "" });
+            if (!this.remote(api => api.createDepartment(v))) {
+              this.setState(prev => ({ departments: (prev.departments || []).concat({ id: "d" + Date.now().toString(36), name: v }) }));
+            }
+            this.say(this.tr("Abteilung"), v, this.tr("angelegt"));
           }
         };
       })(),
@@ -9777,7 +10083,8 @@ class Component extends DCLogic {
       hResp: st.hResp, hSupplier: st.hSupplier, hRange: st.hRange,
       setHProduct: setSel("hProduct"), setHCategory: setSel("hCategory"), setHPlace: setSel("hPlace"),
       setHResp: setSel("hResp"), setHSupplier: setSel("hSupplier"), setHRange: setSel("hRange"),
-      resetHistory: () => this.setState({ hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90" }),
+      resetHistory: () => this.setState({ hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90", hDept: "" }),
+      hDept: st.hDept, setHDept: setSel("hDept"),
       hSummary: hMatched.length + " " + this.tr("Artikel in der Auswahl"),
       hCountLabel: hEntries.length + " " + this.tr("Buchungen"),
       rowsOpen: st.rowsOpen,
@@ -10313,6 +10620,7 @@ class Component extends DCLogic {
           id, code: id, name, ean: st.npEan || "—", ist, min, bestellmenge: bm,
           ort: placeOf(st.npPlace), mhd: st.npMhd || "—", preis: st.npPrice || "—",
           quantitaet: st.npStd || st.npQty || "—", lieferant: st.npSupplier || "—", link: st.npLink || "",
+          lieferantLink: st.npSupplierLink || "", department: npDeptVal || null,
           kategorien: String(st.npCats || "").split(",").map(x => x.trim()).filter(Boolean),
           status: ist < min ? "low" : "ok", aktiv: true,
           verantwortlich: st.npResp || meLabel,
@@ -10324,7 +10632,7 @@ class Component extends DCLogic {
           units: Object.assign({}, prev.units, { [id]: ladder }), unitQty: {},
           npName: "", npEan: "", npResp: "", npD1: "", npD2: "", npD3: "",
           npMin: "10", npIst: "0", npOrder: "20", npQty: "", npPlace: "", npUnits: [], npStd: "", npIstRest: "",
-          npMhd: "", npPrice: "", npSupplier: "", npLink: "", npCats: ""
+          npMhd: "", npPrice: "", npSupplier: "", npLink: "", npSupplierLink: "", npDept: "", npCats: ""
         }));
         // Nach dem Anlegen neu laden: erst dann trägt das Produkt seine
         // dauerhafte Kennung aus der Datenbank, die auf das Etikett kommt.
@@ -10335,6 +10643,8 @@ class Component extends DCLogic {
             ort: row.ort, preis: this.parsePrice(st.npPrice), mhd: st.npMhd || null,
             quantitaet: st.npStd || st.npQty || null, einheiten: ladder, lieferant: st.npSupplier || null,
             link: st.npLink || null, kategorien: row.kategorien, status: row.status,
+            ...(st.npSupplierLink ? { lieferant_link: st.npSupplierLink } : {}),
+            ...(this.depts().length && npDeptVal ? { department_id: npDeptVal } : {}),
             verantwortlich: this.personId(st.npResp) || st.meId,
             vertreter: this.personIds([st.npD1, st.npD2, st.npD3].join(","))
           };
