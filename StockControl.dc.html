@@ -14,6 +14,14 @@
 <script src="qr.js"></script>
 <style>
   html, body { margin: 0; }
+  /* Einstellungen: Kacheln schrumpfen sauber, lange Texte und Knopfreihen brechen um */
+  [data-screen-label="Einstellungen"] > div[style*="grid"] { grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)) !important; }
+  [data-screen-label="Einstellungen"] section { min-width: 0; overflow-wrap: anywhere; }
+  [data-screen-label="Einstellungen"] section div[style*="display: flex"] { flex-wrap: wrap; }
+  [data-screen-label="Einstellungen"] .seg { flex-wrap: wrap; max-width: 100%; height: auto; }
+  [data-screen-label="Einstellungen"] .seg-opt { white-space: normal; flex: 1 1 auto; text-align: center; }
+  [data-screen-label="Einstellungen"] .btn { max-width: 100%; }
+  [data-screen-label="Einstellungen"] .tag { white-space: nowrap; }
   html[data-sc-theme="dark"] {
     --color-bg: #15191d;
     --color-surface: #1d242b;
@@ -2095,7 +2103,7 @@
             </div>
             <div class="hr"></div>
             <h5 style="margin: 0" data-i18n>Team einladen</h5>
-            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden</p>
+            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.</p>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
               <div class="field" style="flex: 1; min-width: 190px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setInvite }}"></div>
               <div class="field" style="width: 172px"><label data-i18n>Rolle</label><select class="input"><option>Mitarbeitende Person</option><option>Lagerleitung</option><option>Lesezugriff</option></select></div>
@@ -2251,9 +2259,17 @@
           <div style="display: flex; flex-direction: column; gap: 2px">
             <sc-for list="{{ deptRows }}" as="dr" hint-placeholder-count="2">
               <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                <span style="flex: 1; min-width: 0; font-size: 14px">{{ dr.name }}</span>
-                <span data-i18n-keep class="tag tag-neutral">{{ dr.countLabel }}</span>
-                <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" disabled="{{ dr.delOff }}" title="{{ dr.delTitle }}" onClick="{{ dr.del }}"><span data-i18n>Löschen</span></button>
+                <sc-if value="{{ dr.editing }}" hint-placeholder-val="{{ false }}">
+                  <input class="input" style="flex: 1; min-width: 140px" value="{{ dr.editVal }}" onInput="{{ dr.setEdit }}">
+                  <button class="btn btn-primary" style="padding: 3px 10px; font-size: 12.5px" disabled="{{ dr.saveOff }}" onClick="{{ dr.save }}"><span data-i18n>Speichern</span></button>
+                  <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" onClick="{{ dr.cancel }}"><span data-i18n>Abbrechen</span></button>
+                </sc-if>
+                <sc-if value="{{ dr.viewing }}" hint-placeholder-val="{{ true }}">
+                  <span style="flex: 1; min-width: 0; font-size: 14px">{{ dr.name }}</span>
+                  <span data-i18n-keep class="tag tag-neutral">{{ dr.countLabel }}</span>
+                  <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" onClick="{{ dr.edit }}"><span data-i18n>Umbenennen</span></button>
+                  <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" disabled="{{ dr.delOff }}" title="{{ dr.delTitle }}" onClick="{{ dr.del }}"><span data-i18n>Löschen</span></button>
+                </sc-if>
               </div>
             </sc-for>
           </div>
@@ -2261,6 +2277,78 @@
             <div class="field" style="flex: 1; min-width: 200px; margin: 0"><label data-i18n>Neue Abteilung</label><input class="input" value="{{ newDept }}" placeholder="z. B. Werkstatt" onInput="{{ setNewDept }}"></div>
             <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ addDeptOff }}" onClick="{{ addDept }}"><span data-i18n>Abteilung anlegen</span></button>
           </div>
+        </section>
+
+        <sc-if value="{{ scopeOn }}" hint-placeholder-val="{{ false }}">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Sichtbarkeit je Abteilung</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Welche Lagerorte, Quantitäten und eigenen Merkmale in einer Abteilung zur Auswahl stehen. Abgewählt heißt: in dieser Abteilung ausgeblendet.</p>
+          <div class="field" style="margin: 0"><label data-i18n>Abteilung</label>
+            <select class="input" value="{{ scopeDept }}" onChange="{{ setScopeDept }}">
+              <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+                <option value="{{ dp.id }}">{{ dp.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>Lagerorte</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <sc-for list="{{ scopePlaces }}" as="sx" hint-placeholder-count="4">
+              <label class="radio" style="gap: 7px; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)"><input type="checkbox" checked="{{ sx.on }}" onChange="{{ sx.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span style="font-size: 13px">{{ sx.name }}</span></label>
+            </sc-for>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>Quantitäten</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <sc-for list="{{ scopeUnits }}" as="sx" hint-placeholder-count="3">
+              <label class="radio" style="gap: 7px; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)"><input type="checkbox" checked="{{ sx.on }}" onChange="{{ sx.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span data-i18n-keep style="font-size: 13px">{{ sx.name }}</span></label>
+            </sc-for>
+          </div>
+          <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>Eigene Merkmale</div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <sc-for list="{{ scopeAttrs }}" as="sx" hint-placeholder-count="2">
+              <label class="radio" style="gap: 7px; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent)"><input type="checkbox" checked="{{ sx.on }}" onChange="{{ sx.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none"><span style="font-size: 13px">{{ sx.name }}</span></label>
+            </sc-for>
+          </div>
+        </section>
+        </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ bulkCopyOn }}" hint-placeholder-val="{{ false }}">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <h4 style="margin: 0" data-i18n>Produkte in andere Abteilung kopieren</h4>
+          <p class="card-body" style="margin: 0" data-i18n>Spart das Neuanlegen. Die Kopien haben gleiche Bezeichnung und EAN, aber eigenen Bestand (startet bei 0), eigene Kennzahlen und neue QR-Codes.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-2)">
+            <div class="field" style="margin: 0"><label data-i18n>Aus Abteilung</label>
+              <select class="input" value="{{ bcFrom }}" onChange="{{ setBcFrom }}">
+                <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
+                  <option value="{{ dp.id }}">{{ dp.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+            <div class="field" style="margin: 0"><label data-i18n>In Abteilung</label>
+              <select class="input" value="{{ bcTo }}" onChange="{{ setBcTo }}">
+                <sc-for list="{{ bcTargets }}" as="dp" hint-placeholder-count="2">
+                  <option value="{{ dp.id }}">{{ dp.name }}</option>
+                </sc-for>
+              </select>
+            </div>
+          </div>
+          <input class="input" type="search" value="{{ bcQuery }}" placeholder="Produkte filtern …" onInput="{{ setBcQuery }}">
+          <div style="display: flex; gap: var(--space-2)">
+            <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px" onClick="{{ bcAll }}"><span data-i18n>Alle wählen</span></button>
+            <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px" onClick="{{ bcNone }}"><span data-i18n>Alle abwählen</span></button>
+          </div>
+          <div style="display: flex; flex-direction: column; max-height: 300px; overflow-y: auto; border: 1px solid var(--color-divider)">
+            <sc-for list="{{ bcRows }}" as="bc" hint-placeholder-count="5">
+              <label class="radio" style="display: flex; gap: 10px; width: 100%; padding: 8px var(--space-3); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); opacity: {{ bc.opacity }}">
+                <input type="checkbox" checked="{{ bc.on }}" disabled="{{ bc.exists }}" onChange="{{ bc.toggle }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent); flex: none">
+                <span style="flex: 1; min-width: 0; font-size: 13px">{{ bc.name }}</span>
+                <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ bc.meta }}</span>
+              </label>
+            </sc-for>
+          </div>
+          <button class="btn btn-primary" disabled="{{ bcOff }}" onClick="{{ bcCopy }}"><span data-i18n-keep>{{ bcLabel }}</span></button>
         </section>
         </sc-if>
 
@@ -2271,9 +2359,17 @@
           <div style="display: flex; flex-direction: column; gap: 2px">
             <sc-for list="{{ placeList }}" as="pl" hint-placeholder-count="4">
               <div style="display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
-                <span style="font-size: 13px; margin-right: auto">{{ pl.name }}</span>
-                <span class="tag tag-neutral">{{ pl.countLabel }}</span>
-                <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ pl.locked }}" onClick="{{ pl.remove }}"><span data-i18n>Löschen</span></button>
+                <sc-if value="{{ pl.editing }}" hint-placeholder-val="{{ false }}">
+                  <input class="input" style="flex: 1; min-width: 140px" value="{{ pl.editVal }}" onInput="{{ pl.setEdit }}">
+                  <button class="btn btn-primary" style="padding: 2px 9px; font-size: 12px" disabled="{{ pl.saveOff }}" onClick="{{ pl.save }}"><span data-i18n>Speichern</span></button>
+                  <button class="btn btn-ghost" style="padding: 2px 9px; font-size: 12px" onClick="{{ pl.cancel }}"><span data-i18n>Abbrechen</span></button>
+                </sc-if>
+                <sc-if value="{{ pl.viewing }}" hint-placeholder-val="{{ true }}">
+                  <span style="font-size: 13px; margin-right: auto">{{ pl.name }}</span>
+                  <span class="tag tag-neutral">{{ pl.countLabel }}</span>
+                  <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ pl.edit }}"><span data-i18n>Umbenennen</span></button>
+                  <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" disabled="{{ pl.locked }}" onClick="{{ pl.remove }}"><span data-i18n>Löschen</span></button>
+                </sc-if>
               </div>
             </sc-for>
           </div>
@@ -3215,21 +3311,21 @@
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Einfache Bestandskontrolle</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nie wieder leer</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Automatischer Mailversand</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Jede Person ihr Maß</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Super individualisierbar</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nur euer Lager</span>
       </div>
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--sc-ink-2)">
       <span style="width: 26px; height: 1px; background: var(--color-accent)"></span>
-      <span data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</span>
+      <span data-i18n>Derzeit kostenlos, jederzeit kündbar.</span>
     </div>
   </div>
 
@@ -3360,7 +3456,7 @@
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Derzeit kostenlos, jederzeit kündbar.</div>
         </div>
       </sc-if>
 
@@ -3879,6 +3975,11 @@ const DICT = {
     "Verantwortung": "Responsibility",
     "Informationen über das Produkt": "Product information",
     "Vergangene Events": "Past events",
+    "Umbenennen": "Rename", "Umbenannt": "Renamed", "Sichtbarkeit je Abteilung": "Visibility per department",
+    "Produkte in andere Abteilung kopieren": "Copy products to another department", "Aus Abteilung": "From department",
+    "In Abteilung": "To department", "Produkte kopieren nach": "products copy to", "schon vorhanden": "already there",
+    "Welche Lagerorte, Quantitäten und eigenen Merkmale in einer Abteilung zur Auswahl stehen. Abgewählt heißt: in dieser Abteilung ausgeblendet.": "Which locations, units and custom fields are offered in a department. Unchecked means hidden there.",
+    "Spart das Neuanlegen. Die Kopien haben gleiche Bezeichnung und EAN, aber eigenen Bestand (startet bei 0), eigene Kennzahlen und neue QR-Codes.": "Saves creating them again. Copies keep name and EAN but get their own stock (starts at 0), own figures and new QR codes.",
     "Abteilung": "Department", "Abteilungen": "Departments", "Ganze Firma": "Whole company", "Alle Abteilungen": "All departments",
     "Neue Abteilung": "New department", "Abteilung anlegen": "Create department", "Sortieren nach": "Sort by",
     "In weitere Abteilung übernehmen …": "Copy to another department …", "Übernehmen": "Copy", "übernommen nach ": "copied to ",
@@ -4207,7 +4308,7 @@ const DICT = {
     "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
     "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Role", "Feinrechte": "Fine-grained rights", "Team einladen": "Invite someone",
-    "Die Einladung gilt 3 Stunden": "The invitation is valid for 3 hours. If it expires you can invite again.",
+    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "The invitation is valid for 3 hours. If it expires you can invite again.",
     "E-Mail-Adresse": "Email address", "Einladung senden": "Send invitation",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "The role sets the default. Individual rights can be allowed or blocked here.",
     "Alles erlauben": "Allow everything", "Alles sperren": "Block everything",
@@ -4226,7 +4327,7 @@ const DICT = {
     "Anmelden": "Sign in", "Registrieren": "Register", "Einladung": "Invitation", "Schließen": "Close",
     "Ich habe schon ein Konto": "I already have an account", "Neue Firma anlegen": "Create a new company",
     "Konto anlegen": "Create account", "Ich bin kein Bot": "I am not a bot",
-    "Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com": "Free for now, cancel anytime.",
+    "Derzeit kostenlos, jederzeit kündbar.": "Free for now, cancel anytime.",
     "E-Mail bestätigen": "Confirm your email",
     "Wir haben dir einen Link geschickt. Er gilt 15 Minuten.": "We sent you a link. It is valid for 15 minutes.",
     "Neue Mail anfordern": "Request a new mail", "Zugang einrichten": "Set up access",
@@ -4989,7 +5090,7 @@ const DICT = {
     "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
     "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Roll", "Feinrechte": "Detaljrättigheter", "Team einladen": "Bjud in någon",
-    "Die Einladung gilt 3 Stunden": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
+    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
     "E-Mail-Adresse": "E-postadress", "Einladung senden": "Skicka inbjudan",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "Rollen sätter standarden. Enskilda rättigheter kan tillåtas eller blockeras här.",
     "Alles erlauben": "Tillåt allt", "Alles sperren": "Blockera allt",
@@ -5008,7 +5109,7 @@ const DICT = {
     "Anmelden": "Logga in", "Registrieren": "Registrera", "Einladung": "Inbjudan", "Schließen": "Stäng",
     "Ich habe schon ein Konto": "Jag har redan ett konto", "Neue Firma anlegen": "Skapa nytt företag",
     "Konto anlegen": "Skapa konto", "Ich bin kein Bot": "Jag är inte en bot",
-    "Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com": "Gratis just nu, avsluta när du vill.",
+    "Derzeit kostenlos, jederzeit kündbar.": "Gratis just nu, avsluta när du vill.",
     "E-Mail bestätigen": "Bekräfta e-post",
     "Wir haben dir einen Link geschickt. Er gilt 15 Minuten.": "Vi har skickat en länk. Den gäller i 15 minuter.",
     "Neue Mail anfordern": "Begär nytt mejl", "Zugang einrichten": "Skapa åtkomst",
@@ -5499,6 +5600,7 @@ class Component extends DCLogic {
       products: SEED.map((p, i) => Object.assign({ aktiv: true, department: i % 3 === 2 ? "d2" : "d1" }, p)),
       departments: DEPTS_DEMO.slice(), activeDept: "all", hDept: "", orderSort: "name", orderDept: "",
       refillMhd: "", orderMhd: {}, copyDept: "", newDept: "",
+      deptScope: {}, scopeDept: "", editDept: null, editPlace: null, bcFrom: "", bcTo: "", bcQuery: "", bcSel: {},
       ccDeputies: true,
 
       events: [{ id: "E-1", name: "Betriebsfest Werkstatt", datum: "02.10.2026", ort: "Werkstatt & Hof",
@@ -5751,8 +5853,8 @@ class Component extends DCLogic {
       });
       const movements = d.movements.filter(mv => !/^Storno:/.test(mv.note || "") && !reverted.has(mv.id)).slice(0, 50).map(mv => {
         const p = d.products.find(x => x.id === mv.product_id) || {};
-        return { name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
-      }).slice(0, 6);
+        return { productId: mv.product_id, name: p.name || "—", delta: (mv.delta > 0 ? "+" : "−") + Math.abs(mv.delta), who: nameOf(mv.profile_id), when: when(mv.created_at) };
+      });
       const events = d.events.map(e => ({
         id: e.id, name: e.name, datum: e.datum || "—", ort: e.ort || "—",
         items: (e.event_items || []).map(i => ({ id: i.product_id, qty: i.qty }))
@@ -5760,6 +5862,7 @@ class Component extends DCLogic {
       this.setState(prev => ({
         live: true, authed: true, source: "Supabase", products, members, events, movements,
         departments: Array.isArray(d.departments) ? d.departments.map(x => ({ id: x.id, name: x.name })) : [],
+        deptScope: d.settings && d.settings.dept_scope && typeof d.settings.dept_scope === "object" ? d.settings.dept_scope : {},
         units, priceHist, log: logClean,
         // Gespeicherte Feinrechte aus der Datenbank; ungespeicherte Änderungen bleiben stehen.
         overrides: Object.assign({}, ...members.map(m => ({ [m.id]: m.permissions || {} })),
@@ -7995,6 +8098,63 @@ class Component extends DCLogic {
   newDeptId() { return this.activeDeptId() || (this.depts()[0] || {}).id || null; }
   deptFor(p) { const a = this.activeDeptId(); return a && this.deptOf(p) !== a ? { activeDept: this.deptOf(p) } : {}; }
 
+  // Sichtbarkeit je Abteilung: gespeichert wird, was AUSGEBLENDET ist.
+  scopeOk(kind, key, dept) {
+    const a = dept || this.activeDeptId();
+    if (!a) return true;
+    const hidden = (((this.state.deptScope || {})[kind] || {})[key]) || [];
+    return hidden.indexOf(a) < 0;
+  }
+
+  setScope(kind, key, dept, visible) {
+    const all = JSON.parse(JSON.stringify(this.state.deptScope || {}));
+    const k = all[kind] = all[kind] || {};
+    const h = (k[key] || []).filter(x => x !== dept);
+    if (!visible) h.push(dept);
+    if (h.length) k[key] = h; else delete k[key];
+    this.setState({ deptScope: all });
+    this.remote(api => api.saveSettings({ dept_scope: all }));
+  }
+
+  renameScopeKey(all, kind, from, to) {
+    if (all[kind] && all[kind][from]) { all[kind][to] = all[kind][from]; delete all[kind][from]; }
+  }
+
+  // Mehrere Produkte auf einmal in eine andere Abteilung kopieren.
+  copyManyToDept(list, target) {
+    const items = (list || []).filter(Boolean);
+    if (!items.length || !target) return;
+    if (this.state.live && this.api) {
+      const payloads = items.map(cur => this.copyPayload(cur, target));
+      payloads.reduce((ch, pl) => ch.then(() => this.api.createProduct(pl)
+          .catch(err => this.withoutCode(err, pl, p => this.api.createProduct(p)))), Promise.resolve())
+        .then(() => this.refresh())
+        .catch(err => this.say("Supabase", this.tr("Nicht gespeichert"), String((err && err.message) || err)));
+    } else {
+      this.setState(prev => ({ products: prev.products.concat(items.map((cur, i) => {
+        const id = "SC-" + (Date.now().toString(36).slice(-4) + i).toUpperCase();
+        const min = Number(cur.min) || 0;
+        return Object.assign({}, cur, { id: id, code: id, ist: 0, status: 0 < min ? "low" : "ok", department: target, hist: [0], entnahme: "—", auffuell: "—" });
+      })) }));
+    }
+    this.say(this.tr("Abteilung"), items.length + " × " + this.tr("Artikel"), this.tr("übernommen nach ") + this.deptName(target) + " · " + this.tr("Bestand 0"));
+  }
+
+  copyPayload(cur, target) {
+    const min = Number(cur.min) || 0;
+    return {
+      name: cur.name, ean: cur.ean && cur.ean !== "—" ? cur.ean : null, ist: 0, min: min,
+      bestellmenge: Number(cur.bestellmenge) || 0, ort: cur.ort && cur.ort !== "—" ? cur.ort : null,
+      preis: this.parsePrice(cur.preis), quantitaet: cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : null,
+      einheiten: (this.state.units || {})[cur.id] || null,
+      lieferant: cur.lieferant && cur.lieferant !== "—" ? cur.lieferant : null,
+      link: cur.link || null, kategorien: cur.kategorien || [], status: 0 < min ? "low" : "ok", aktiv: true,
+      verantwortlich: this.personId(cur.verantwortlich) || this.state.meId,
+      vertreter: this.personIds(cur.vertretung), department_id: target,
+      ...(cur.lieferantLink ? { lieferant_link: cur.lieferantLink } : {})
+    };
+  }
+
   // Demo ohne Datenbank: das MHD der Nachfüllung sofort zeigen.
   localMhd(pid, iso) {
     const de = String(iso).split("-").reverse().join(".");
@@ -8004,30 +8164,8 @@ class Component extends DCLogic {
 
   copyToDept(cur, target) {
     if (!cur || !target) return;
-    const min = Number(cur.min) || 0;
-    if (this.state.live && this.api) {
-      const payload = {
-        name: cur.name, ean: cur.ean && cur.ean !== "—" ? cur.ean : null, ist: 0, min: min,
-        bestellmenge: Number(cur.bestellmenge) || 0, ort: cur.ort && cur.ort !== "—" ? cur.ort : null,
-        preis: this.parsePrice(cur.preis), quantitaet: cur.quantitaet && cur.quantitaet !== "—" ? cur.quantitaet : null,
-        einheiten: (this.state.units || {})[cur.id] || null,
-        lieferant: cur.lieferant && cur.lieferant !== "—" ? cur.lieferant : null,
-        link: cur.link || null, kategorien: cur.kategorien || [], status: 0 < min ? "low" : "ok", aktiv: true,
-        verantwortlich: this.personId(cur.verantwortlich) || this.state.meId,
-        vertreter: this.personIds(cur.vertretung), department_id: target,
-        ...(cur.lieferantLink ? { lieferant_link: cur.lieferantLink } : {})
-      };
-      this.api.createProduct(payload)
-        .catch(err => this.withoutCode(err, payload, p => this.api.createProduct(p)))
-        .then(() => this.refresh())
-        .catch(err => this.say("Supabase", this.tr("Nicht gespeichert"), String((err && err.message) || err)));
-    } else {
-      const id = "SC-" + Math.floor(2000 + Math.random() * 7000);
-      this.setState(prev => ({ products: prev.products.concat(Object.assign({}, cur, {
-        id: id, code: id, ist: 0, status: 0 < min ? "low" : "ok", department: target, hist: [0], entnahme: "—", auffuell: "—" })) }));
-    }
+    this.copyManyToDept([cur], target);
     this.setState({ copyDept: "" });
-    this.say(this.tr("Abteilung"), cur.name, this.tr("übernommen nach ") + this.deptName(target) + " · " + this.tr("Bestand 0"));
   }
 
   // ── Merkzettel ───────────────────────────────────────────
@@ -8373,8 +8511,20 @@ class Component extends DCLogic {
   renderVals() {
     const st0 = this.state, lang = st0.lang;
     // Aktive Abteilung: alle Ansichten sehen nur deren Produkte.
-    const st = this.activeDeptId()
-      ? Object.assign({}, st0, { products: st0.products.filter(p => this.deptOf(p) === this.activeDeptId()) }) : st0;
+    const st = (() => {
+      const a = this.activeDeptId();
+      if (!a) return st0;
+      const prods = st0.products.filter(p => this.deptOf(p) === a);
+      const vis = new Set(prods.map(p => p.id)), names = new Set(prods.map(p => p.name));
+      return Object.assign({}, st0, {
+        products: prods,
+        log: (st0.log || []).filter(e => vis.has(e.productId)),
+        movements: (st0.movements || []).filter(m => m.productId ? vis.has(m.productId) : names.has(m.name)),
+        orders: (st0.orders || []).map(o => o.id === "__meta" ? o
+          : Object.assign({}, o, { items: (o.items || []).filter(i => vis.has(i)) })).filter(o => o.id === "__meta" || (o.items || []).length),
+        events: (st0.events || []).map(e => Object.assign({}, e, { items: (e.items || []).filter(i => vis.has(i.id)) }))
+      });
+    })();
     const npDeptVal = st.npDept || this.newDeptId() || "";
     const name = st.brand || this.props.serviceName || "StockControl";
     const products = st.products;
@@ -8383,7 +8533,7 @@ class Component extends DCLogic {
       kategorien: [], entnahme: "—", auffuell: "—", geaendert: "—", aktiv: true, hist: [0], bildUrl: "" };
     const cur = products.find(p => p.id === st.currentId) || products[0] || EMPTY_PRODUCT;
     const places = Array.from(new Set(
-      (st.placesOwn || []).concat(products.filter(p => p.aktiv !== false).map(p => p.ort)).filter(Boolean)));
+      (st.placesOwn || []).filter(pl => this.scopeOk("places", pl)).concat(products.filter(p => p.aktiv !== false).map(p => p.ort)).filter(Boolean)));
     const q = st.query.toLowerCase();
 
     const meLabel = st.meNameLive || (st.role === "super" ? "Internet GmbH · Betrieb" : "Marie Kohl");
@@ -8885,7 +9035,7 @@ class Component extends DCLogic {
       kpiTotal: activeProducts.length, kpiLocations: places.length,
       kpiLow: activeProducts.filter(p => p.status === "low").length,
       kpiOrdered: activeProducts.filter(p => p.status === "ordered").length,
-      kpiToday: 3,
+      kpiToday: (() => { const t = new Date().toDateString(); return (st.log || []).filter(e => e.delta < 0 && new Date(e.date).toDateString() === t).length; })(),
       // Was eingestellt ist, steht auch so da: Uhrzeit, Wochentag und Tag
       // im Monat wandern mit in jede Anzeige des Zeitplans.
       mailModeLabel: (() => {
@@ -9009,7 +9159,7 @@ class Component extends DCLogic {
       // Ohne das Recht „Sehen, wer was entnommen hat" bleibt die Person
       // verdeckt — die Bewegung selbst ist weiter sichtbar.
       mayWho: this.may("who"), mayUndo: this.may("undo"),
-      movements: (st.movements || []).map(m => Object.assign({}, m, {
+      movements: (st.movements || []).slice(0, 6).map(m => Object.assign({}, m, {
         who: this.may("who") ? m.who : "",
         // Ohne das Recht steht dort nur der Zeitpunkt — kein Platzhalter,
         // der verrät, dass etwas verborgen wird.
@@ -9057,7 +9207,7 @@ class Component extends DCLogic {
 
       // Welche Gebinde gelten für dieses Produkt.
       unitPickLocked: !st.editing,
-      unitPick: this.unitDefs().map(d => {
+      unitPick: this.unitDefs().filter(d => this.scopeOk("units", d.name) || (st.units[cur.id] || []).some(u => u.name === d.name)).map(d => {
         const on = (st.units[cur.id] || []).some(u => u.name === d.name);
         return {
           name: d.name, checked: on, relLabel: this.relLabel(d),
@@ -9321,7 +9471,7 @@ class Component extends DCLogic {
             { value: "nein", label: this.tr("nein — aus Listen ausgeblendet") }] })
         ];
       })(),
-      editUnitPick: this.unitDefs().map(d => {
+      editUnitPick: this.unitDefs().filter(d => this.scopeOk("units", d.name) || ((st.editDraft && st.editDraft.units) || []).indexOf(d.name) >= 0).map(d => {
         const on = ((st.editDraft && st.editDraft.units) || []).indexOf(d.name) >= 0;
         return { name: d.name, checked: on, relLabel: this.relLabel(d),
           toggle: () => this.setState(prev => {
@@ -9491,8 +9641,29 @@ class Component extends DCLogic {
       togglePlaceMore: this.capped("places", places).toggle,
       placeList: this.capped("places", places.map(pl => {
         const used = products.filter(p => p.ort === pl).length;
+        const ep = st.editPlace;
+        const editing = !!ep && ep.old === pl;
+        const nv = editing ? String(ep.val || "").trim() : "";
         return {
           name: pl,
+          editing: editing, viewing: !editing, editVal: editing ? ep.val : "",
+          edit: () => this.setState({ editPlace: { old: pl, val: pl } }),
+          cancel: () => this.setState({ editPlace: null }),
+          setEdit: e => this.setState({ editPlace: { old: pl, val: e.target.value } }),
+          saveOff: !nv || nv === pl || places.some(x => x !== pl && x.toLowerCase() === nv.toLowerCase()),
+          save: () => {
+            if (!nv || nv === pl) return;
+            const own = (st0.placesOwn || []);
+            const next = own.indexOf(pl) >= 0 ? own.map(x => x === pl ? nv : x) : own.concat(nv);
+            const hit = (st0.products || []).filter(p => p.ort === pl);
+            const scope = JSON.parse(JSON.stringify(st0.deptScope || {}));
+            this.renameScopeKey(scope, "places", pl, nv);
+            this.setState(prev => ({ editPlace: null, placesOwn: next, deptScope: scope,
+              products: prev.products.map(p => p.ort === pl ? Object.assign({}, p, { ort: nv }) : p) }));
+            this.remote(api => Promise.all([api.saveSettings({ places: next, dept_scope: scope })]
+              .concat(hit.map(p => api.updateProduct(p.id, { ort: nv })))));
+            this.say(this.tr("Lagerort"), this.tr("Umbenannt"), pl + " → " + nv + (hit.length ? " · " + hit.length + " " + this.tr("Produkte angepasst") : ""));
+          },
           countLabel: used + " " + (used === 1 ? this.tr("Produkt") : this.tr("Produkte")),
           locked: used > 0,
           remove: () => {
@@ -9710,7 +9881,8 @@ class Component extends DCLogic {
           memoNone: memos.length === 0 && !ed,
           memoCards: memos.map(L => {
             const done = L.done || [];
-            const rows = (L.items || []).filter(i => done.indexOf(i.key) < 0);
+            // Nur Positionen dieser Abteilung — sonst würde abhaken fremden Bestand buchen.
+            const rows = (L.items || []).filter(i => done.indexOf(i.key) < 0 && prodOf(i.productId));
             const isOpen = !!mo[L.id];
             const setOpen = v => this.setState(prev => ({ memoOpen: Object.assign({}, prev.memoOpen, { [L.id]: v }) }));
             return {
@@ -9828,9 +10000,60 @@ class Component extends DCLogic {
             : !isOwner ? this.tr("Zuordnen darf nur die inhabende Person.") : this.tr("Wird sofort gespeichert."),
           pickedDeptColor: !pDeps.length && pickedU.role !== "owner" ? "var(--color-accent-800)" : "var(--sc-ink-2)",
           deptAdminOn: isOwner,
+          ...(() => {
+            const sd = D.some(d => d.id === st.scopeDept) ? st.scopeDept : (D[0] || {}).id;
+            const allPlaces = Array.from(new Set((st0.placesOwn || []).concat(all.map(p => p.ort)).filter(x => x && x !== "—")));
+            return {
+              scopeOn: isOwner && D.length > 1,
+              scopeDept: sd || "", setScopeDept: e => this.setState({ scopeDept: e.target.value }),
+              scopePlaces: allPlaces.map(pl => ({ name: pl, on: this.scopeOk("places", pl, sd), toggle: () => this.setScope("places", pl, sd, !this.scopeOk("places", pl, sd)) })),
+              scopeUnits: this.unitDefs().map(u => ({ name: u.name, on: this.scopeOk("units", u.name, sd), toggle: () => this.setScope("units", u.name, sd, !this.scopeOk("units", u.name, sd)) })),
+              scopeAttrs: (st0.attrs || []).map(a => ({ name: a.name, on: this.scopeOk("attrs", a.id, sd), toggle: () => this.setScope("attrs", a.id, sd, !this.scopeOk("attrs", a.id, sd)) }))
+            };
+          })(),
+          ...(() => {
+            const from = D.some(d => d.id === st.bcFrom) ? st.bcFrom : (this.activeDeptId() || (D[0] || {}).id);
+            const targets = D.filter(d => d.id !== from);
+            const to = targets.some(d => d.id === st.bcTo) ? st.bcTo : (targets[0] || {}).id;
+            const exists = p => all.some(x => this.deptOf(x) === to && x.name === p.name && String(x.ean || "") === String(p.ean || ""));
+            const src = all.filter(p => this.deptOf(p) === from && p.aktiv !== false && this.matchEv(p, st.bcQuery));
+            const sel = st.bcSel || {};
+            const pickable = src.filter(p => !exists(p));
+            const n = pickable.filter(p => sel[p.id]).length;
+            return {
+              bulkCopyOn: D.length > 1 && (isOwner || this.may("create")),
+              bcFrom: from || "", setBcFrom: e => this.setState({ bcFrom: e.target.value, bcSel: {} }),
+              bcTo: to || "", setBcTo: e => this.setState({ bcTo: e.target.value }),
+              bcTargets: targets.map(d => ({ id: d.id, name: d.name })),
+              bcQuery: st.bcQuery || "", setBcQuery: e => this.setState({ bcQuery: e.target.value }),
+              bcAll: () => { const v = Object.assign({}, sel); pickable.forEach(p => { v[p.id] = true; }); this.setState({ bcSel: v }); },
+              bcNone: () => this.setState({ bcSel: {} }),
+              bcRows: src.map(p => ({
+                name: p.name, exists: exists(p), on: exists(p) || !!sel[p.id], opacity: exists(p) ? ".5" : "1",
+                meta: exists(p) ? this.tr("schon vorhanden") : (p.ean && p.ean !== "—" ? p.ean : this.codeOf(p)),
+                toggle: () => this.setState(prev => ({ bcSel: Object.assign({}, prev.bcSel, { [p.id]: !(prev.bcSel || {})[p.id] }) }))
+              })),
+              bcOff: !to || n === 0,
+              bcLabel: n + " " + this.tr("Produkte kopieren nach") + " " + (to ? this.deptName(to) : "—"),
+              bcCopy: () => { const list = pickable.filter(p => sel[p.id]); this.copyManyToDept(list, to); this.setState({ bcSel: {} }); }
+            };
+          })(),
           deptRows: D.map(d => {
             const n = all.filter(p => this.deptOf(p) === d.id).length;
+            const ex = st.editDept, editing = !!ex && ex.id === d.id;
+            const nv = editing ? String(ex.val || "").trim() : "";
             return {
+              editing: editing, viewing: !editing, editVal: editing ? ex.val : "",
+              edit: () => this.setState({ editDept: { id: d.id, val: d.name } }),
+              cancel: () => this.setState({ editDept: null }),
+              setEdit: e => this.setState({ editDept: { id: d.id, val: e.target.value } }),
+              saveOff: !nv || nv === d.name || D.some(x => x.id !== d.id && x.name.toLowerCase() === nv.toLowerCase()),
+              save: () => {
+                if (!nv || nv === d.name) return;
+                this.setState(prev => ({ editDept: null, departments: prev.departments.map(x => x.id === d.id ? Object.assign({}, x, { name: nv }) : x) }));
+                this.remote(api => api.renameDepartment(d.id, nv));
+                this.say(this.tr("Abteilung"), this.tr("Umbenannt"), d.name + " → " + nv);
+              },
               name: d.name, countLabel: n + " " + this.tr("Produkte"), delOff: n > 0 || D.length <= 1,
               delTitle: n > 0 ? this.tr("Erst alle Produkte dieser Abteilung löschen oder verschieben.") : "",
               del: () => {
@@ -10565,7 +10788,7 @@ class Component extends DCLogic {
       npRestLabel: st.npStd ? this.tr("dazu einzeln") + " (" + this.baseNameOf(st.npStd) + ")" : "",
       setNpOrder: e => this.setState({ npOrder: e.target.value }),
       setNpQty: e => this.setState({ npQty: e.target.value }),
-      npUnitPick: this.unitDefs().map(d => {
+      npUnitPick: this.unitDefs().filter(d => this.scopeOk("units", d.name, npDeptVal)).map(d => {
         const on = (st.npUnits || []).indexOf(d.name) >= 0;
         return { name: d.name, checked: on, relLabel: this.relLabel(d),
           toggle: () => this.setState(prev => {
@@ -10814,7 +11037,7 @@ class Component extends DCLogic {
           ? this.tr("Regel aktiv: ") + (ATTR_TRIGGERS[st.attrTrigger][lang] || ATTR_TRIGGERS[st.attrTrigger].de)
           : this.tr("Feld steht ab jetzt in jedem Produkt."));
       },
-      attrFields: st.attrs.map(a => ({
+      attrFields: st.attrs.filter(a => this.scopeOk("attrs", a.id)).map(a => ({
         name: a.name,
         inputType: a.type === "number" ? "number" : a.type === "email" ? "email" : a.type === "date" ? "date" : "text",
         isBool: a.type === "bool", isPlain: a.type !== "bool"

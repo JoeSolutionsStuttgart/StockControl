@@ -489,3 +489,8 @@ export async function deleteDepartment(id) {
   if (error) throw error;
   return true;
 }
+
+export async function renameDepartment(id, name) {
+  const sb = await client();
+  return ok(await sb.from("departments").update({ name }).eq("id", id).select().single());
+}
