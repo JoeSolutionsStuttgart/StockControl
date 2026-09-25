@@ -119,7 +119,57 @@
     [data-detail-main], [data-detail-book], [data-detail-side] { grid-column: 1; grid-row: auto; }
     [data-detail-book] { order: -1; }
     [data-wide-only] { display: none !important; }
+    [data-desk-only] { display: none !important; }
+    [data-mobile-only] { display: flex !important; }
+    /* Kopfzeile Handy: Scannen groß und beschriftet, Sprache und Hilfe im Menü */
+    [data-scanbtn] { width: auto !important; height: 44px !important; padding: 0 14px !important; gap: 7px !important;
+      background: var(--color-accent) !important; border-color: var(--color-accent) !important; color: var(--color-bg) !important; font-weight: 600; }
+    [data-scanbtn] [data-scanlbl] { display: inline !important; }
+    [data-deptsel] { max-width: 116px !important; height: 44px !important; }
+    [data-userbtn] { height: 44px !important; padding: 0 8px !important; }
+    [data-toast] { bottom: 92px !important; }
+    main > div { padding-left: var(--space-3) !important; padding-right: var(--space-3) !important; }
+    /* Produktliste als Karten */
+    [data-pfilter] > .field { flex: 1 1 140px !important; width: auto !important; min-width: 0 !important; }
+    [data-pfilter] > .btn { flex: 1 1 100% !important; min-height: 44px; }
+    [data-ptable] thead { display: none; }
+    [data-ptable], [data-ptable] tbody { display: block; }
+    [data-ptable] tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 4px; padding: 11px 2px; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); }
+    [data-ptable] td { padding: 0 !important; border: 0 !important; text-align: left !important; }
+    [data-ptable] td[data-c="name"] { grid-column: 1; grid-row: 1; }
+    [data-ptable] td[data-c="status"] { grid-column: 2; grid-row: 1; justify-self: end; align-self: start; }
+    [data-ptable] td[data-c="ist"] { grid-column: 1; grid-row: 2; font-size: 13px; }
+    [data-ptable] td[data-c="ist"]::before { content: attr(data-l) " "; color: var(--sc-ink-3); font-size: 11px; }
+    [data-ptable] td[data-c="min"] { grid-column: 2; grid-row: 2; justify-self: end; font-size: 12px; }
+    [data-ptable] td[data-c="min"]::before { content: "Min "; color: var(--sc-ink-3); font-size: 11px; }
+    [data-ptable] td[data-c="ort"] { grid-column: 1 / -1; grid-row: 3; font-size: 12px; }
+    [data-ptable] td[data-c="more"] { display: none; }
+    /* Produktdetail schlank */
+    [data-detail] { gap: var(--space-3); }
+    [data-detail] > .card { padding: var(--space-3) !important; gap: var(--space-3) !important; }
+    [data-detail-head] { gap: var(--space-3) !important; flex-wrap: nowrap !important; }
+    [data-detail-photo] { width: 76px !important; }
+    [data-detail-photo] > .blueprint { width: 76px !important; aspect-ratio: 1 / 1 !important; }
+    [data-detail-photo] > label { font-size: 11px !important; padding: 2px 4px !important; min-height: 0 !important; }
+    [data-detail-photo] > div:last-child { display: none; }
+    [data-detail-head] h3 { font-size: 20px !important; line-height: 1.2; overflow-wrap: anywhere; }
+    [data-detail-stats] { grid-template-columns: minmax(0, 1fr) !important; gap: 0 !important; margin-top: var(--space-2) !important; }
+    [data-detail-stats] > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; column-gap: 8px;
+      padding: 6px 0 !important; border-left: 0 !important; border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); }
+    [data-detail-stats] > div > div:nth-child(2) { font-size: 17px !important; text-align: right; }
+    [data-detail-stats] > div > div:first-child { font-size: 10px !important; }
+    [data-detail-stats] > div > div:nth-child(3) { flex-basis: 100%; text-align: right; margin-top: 0 !important; font-size: 11.5px !important; }
+    [data-detail-photo] image-slot { display: none; }
+    main { padding-bottom: 84px; }
+    [data-detail-facts] { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: var(--space-3) var(--space-3) !important; }
+    [data-detail-facts] > div > div:first-child, [data-detail-facts] > sc-if > div > div:first-child { font-size: 10px !important; }
+    [data-detail-facts] div[style*="font-size: 14px"], [data-detail-facts] a { font-size: 13px !important; overflow-wrap: anywhere; }
+    [data-detail-book] > p { display: none; }
+    [data-bookpair] { display: grid !important; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+    [data-bookpair] > .btn { margin: 0 !important; }
   }
+  [data-mobile-only] { display: none; }
+  [data-scanbtn] [data-scanlbl] { display: none; }
   @keyframes sc-scan { 0% { top: 4%; } 100% { top: 92%; } }
   @keyframes sc-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   @media print {
@@ -187,26 +237,26 @@
 
       <div style="margin-left: auto; display: flex; align-items: center; gap: var(--space-2); flex: none; flex-wrap: nowrap">
         <sc-if value="{{ deptSwitchOn }}" hint-placeholder-val="{{ false }}">
-          <select class="input" style="flex: none; width: auto; max-width: 170px; height: 40px; padding: 0 8px; font-size: 13px; font-weight: 600; border-color: var(--color-accent)" value="{{ activeDept }}" onChange="{{ setActiveDept }}" aria-label="Abteilung" title="Abteilung wechseln">
+          <select data-deptsel class="input" style="flex: none; width: auto; max-width: 170px; height: 40px; padding: 0 8px; font-size: 13px; font-weight: 600; border-color: var(--color-accent)" value="{{ activeDept }}" onChange="{{ setActiveDept }}" aria-label="Abteilung" title="Abteilung wechseln">
             <option value="all" data-i18n>Ganze Firma</option>
             <sc-for list="{{ deptOptions }}" as="dp" hint-placeholder-count="2">
               <option value="{{ dp.id }}">{{ dp.name }}</option>
             </sc-for>
           </select>
         </sc-if>
-        <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+        <button data-scanbtn class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg><span data-scanlbl data-i18n>Scannen</span>
         </button>
-        <button class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goHelp }}" aria-label="Hilfe" title="Hilfe">
+        <button data-desk-only class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goHelp }}" aria-label="Hilfe" title="Hilfe">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.2a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.9"></path><path d="M12 17h.01"></path></svg>
         </button>
-        <select data-langsel class="input" style="width: 68px; height: 40px; flex: none; padding: 0 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
+        <select data-langsel data-desk-only class="input" style="width: 68px; height: 40px; flex: none; padding: 0 6px" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
           <option value="de">DE</option>
           <option value="en">EN</option>
           <option value="sv">SV</option>
         </select>
         <div style="position: relative" onMouseEnter="{{ hoverUser }}" onMouseLeave="{{ closeMenu }}">
-          <button class="btn btn-secondary" style="gap: 8px; white-space: nowrap; flex: none; height: 40px" onClick="{{ toggleUser }}">
+          <button data-userbtn class="btn btn-secondary" style="gap: 8px; white-space: nowrap; flex: none; height: 40px" onClick="{{ toggleUser }}">
             <span style="width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 18%, transparent); color: var(--color-accent-700); display: grid; place-items: center; font-size: 10px; font-weight: 500">{{ meInitials }}</span>
             <span data-xl-only style="max-width: 140px; overflow: hidden; text-overflow: ellipsis">{{ meName }}</span>
             <span style="font-size: 10px; opacity: .7">▾</span>
@@ -233,6 +283,14 @@
 
     <sc-if value="{{ burgerOpen }}" hint-placeholder-val="{{ false }}">
       <div data-burger-panel style="border-top: 1px solid var(--color-divider); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: var(--space-3)">
+        <div data-mobile-only style="align-items: center; gap: var(--space-2)">
+          <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-right: auto" data-i18n>Sprache</div>
+          <select class="input" style="width: 90px; height: 44px; flex: none" value="{{ lang }}" onChange="{{ setLang }}" aria-label="Sprache">
+            <option value="de">DE</option>
+            <option value="en">EN</option>
+            <option value="sv">SV</option>
+          </select>
+        </div>
         <div>
           <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-bottom: 4px" data-i18n>Lager</div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
@@ -265,6 +323,13 @@
       </div>
     </sc-if>
   </header>
+
+  <sc-if value="{{ showScanFab }}" hint-placeholder-val="{{ false }}">
+    <button data-mobile-only data-print-hide class="btn btn-primary elev-lg" style="position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 45; height: 60px; padding: 0 22px 0 18px; border-radius: 30px; gap: 9px; font-size: 16px; font-weight: 600; align-items: center" onClick="{{ goScan }}" aria-label="QR-Code scannen">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+      <span data-i18n>Scannen</span>
+    </button>
+  </sc-if>
 
   <main style="min-width: 0; display: flex; flex-direction: column">
 
@@ -369,7 +434,7 @@
 
       <sc-if value="{{ onProducts }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Produktliste" style="display: flex; flex-direction: column; gap: var(--space-4)">
-        <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
+        <div data-pfilter style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
           <div class="field" style="flex: 1; min-width: 200px">
             <label data-i18n>Suche</label>
             <input class="input" type="search" data-i18n-ph placeholder="Name, EAN, Lieferant …" onInput="{{ setQuery }}">
@@ -392,12 +457,12 @@
               <option value="ordered">Ist bestellt</option>
             </select>
           </div>
-          <button class="btn btn-primary" onClick="{{ goNew }}"><span data-i18n>Neues Produkt</span></button>
+          <button class="btn btn-primary" style="white-space: nowrap; flex: none" onClick="{{ goNew }}"><span data-i18n>Neues Produkt</span></button>
         </div>
 
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <table class="table" data-zebra>
+          <table class="table" data-zebra data-ptable>
             <thead>
               <tr>
                 <th data-i18n>Name</th>
@@ -411,15 +476,15 @@
             <tbody>
               <sc-for list="{{ filtered }}" as="p" hint-placeholder-count="8">
                 <tr style="cursor: pointer; {{ p.rowStyle }}" onClick="{{ p.open }}">
-                  <td style="font-weight: 500">
+                  <td data-c="name" style="font-weight: 500">
                     {{ p.name }}
                     <div style="font-size: 11px; color: var(--sc-ink-3)">{{ p.quantitaet }} · EAN {{ p.ean }}</div>
                   </td>
-                  <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ p.istLabel }}</td>
-                  <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.minLabel }}</td>
-                  <td><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
-                  <td class="text-muted">{{ p.ort }}</td>
-                  <td style="text-align: right"><span style="color: var(--color-accent); font-size: 12px" data-i18n>Details</span></td>
+                  <td data-c="ist" data-l="Bestand" data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ p.istLabel }}</td>
+                  <td data-c="min" data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; color: var(--sc-ink-2)">{{ p.minLabel }}</td>
+                  <td data-c="status"><span class="{{ p.tagClass }}">{{ p.statusLabel }}</span></td>
+                  <td data-c="ort" class="text-muted">{{ p.ort }}</td>
+                  <td data-c="more" style="text-align: right"><span style="color: var(--color-accent); font-size: 12px" data-i18n>Details</span></td>
                 </tr>
               </sc-for>
             </tbody>
@@ -452,9 +517,9 @@
         <div data-print-hide style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
           <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ goProducts }}">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
-            <span data-i18n>Zurück zu den Produkten</span>
+            <span data-desk-only data-i18n>Zurück zu den Produkten</span><span data-mobile-only data-i18n>Zurück</span>
           </button>
-          <span style="font-size: 12.5px; color: var(--sc-ink-2)">{{ current.name }}</span>
+          <span data-desk-only style="font-size: 12.5px; color: var(--sc-ink-2)">{{ current.name }}</span>
         </div>
       <sc-if value="{{ detailHistOn }}" hint-placeholder-val="{{ false }}">
         <section class="card blueprint">
@@ -504,8 +569,8 @@
       <div data-detail>
         <section class="card blueprint" data-detail-main style="animation: sc-in .18s ease-out">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-          <div style="display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap">
-            <div style="width: 226px; flex: none; display: flex; flex-direction: column; gap: 6px">
+          <div data-detail-head style="display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap">
+            <div data-detail-photo style="width: 226px; flex: none; display: flex; flex-direction: column; gap: 6px">
               <div class="blueprint" style="width: 226px; aspect-ratio: 3 / 2; overflow: hidden; display: grid; place-items: center">
                 <sc-if value="{{ hasPhoto }}" hint-placeholder-val="{{ false }}">
                   {{ photoImg }}
@@ -520,7 +585,7 @@
               </label>
               <div style="font-size: 10px; text-align: center; color: var(--sc-ink-3)">{{ storageLabel }}</div>
             </div>
-            <div style="flex: 1; min-width: 200px">
+            <div style="flex: 1; min-width: 0">
               <div class="card-kicker">{{ current.ean }}</div>
               <h3 style="margin: 0 0 var(--space-2)">{{ current.name }}</h3>
               <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center">
@@ -529,7 +594,7 @@
                   <span class="tag tag-outline">{{ k }}</span>
                 </sc-for>
               </div>
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4)">
+              <div data-detail-stats style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4)">
                 <div>
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Istbestand</div>
                   <div data-i18n-keep style="font-family: var(--font-heading); font-size: 26px; line-height: 1.1">{{ stockMain }}</div>
@@ -551,7 +616,7 @@
 
           <div class="hr"></div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-4) var(--space-6)">
+          <div data-detail-facts style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-4) var(--space-6)">
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Lagerort</div><div style="font-size: 14px">{{ current.ort }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Verantwortlich</div><div style="font-size: 14px">{{ current.verantwortlich }}</div></div>
             <div><div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--sc-ink-2)" data-i18n>Stellvertretung</div><div style="font-size: 14px">{{ current.vertretung }}</div></div>
@@ -612,16 +677,20 @@
               <div data-i18n-keep style="font-size: 12.5px; line-height: 1.45; padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); color: var(--color-accent-900)">{{ overStockNote }}</div>
             </sc-if>
 
-            <button class="btn btn-primary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+            <div data-bookpair style="display: flex; flex-direction: column; gap: var(--space-2)">
+              <button class="btn btn-primary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+              <button class="btn btn-secondary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
+            </div>
             <div class="field" style="margin: 0"><label data-i18n>MHD der Nachfüllung (optional)</label><input class="input" type="date" value="{{ refillMhd }}" onInput="{{ setRefillMhd }}"></div>
-            <button class="btn btn-secondary btn-block" style="height: 46px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
             <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
             </sc-if>
-            <button class="btn btn-secondary btn-block" onClick="{{ toggleActive }}">{{ activeBtnLabel }}</button>
-            <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
-              <button class="btn btn-secondary btn-block" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
-            </sc-if>
+            <div data-bookpair style="display: flex; flex-direction: column; gap: var(--space-2)">
+              <button class="btn btn-secondary btn-block" style="min-height: 44px" onClick="{{ toggleActive }}">{{ activeBtnLabel }}</button>
+              <sc-if value="{{ canOrder }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-secondary btn-block" style="min-height: 44px" onClick="{{ markOrdered }}">{{ orderBtnLabel }}</button>
+              </sc-if>
+            </div>
             <sc-if value="{{ statusLocked }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)">{{ statusLockedNote }}</div>
             </sc-if>
@@ -3690,7 +3759,7 @@
 </sc-if>
 
 <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}">
-  <div data-print-hide style="position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 50; width: min(370px, calc(100vw - 32px)); animation: sc-in .2s ease-out">
+  <div data-toast data-print-hide style="position: fixed; right: var(--space-4); bottom: var(--space-4); z-index: 50; width: min(370px, calc(100vw - 32px)); animation: sc-in .2s ease-out">
     <div class="blueprint elev-lg" style="padding: var(--space-4); background: var(--sc-card)">
       <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
       <div class="card-kicker">{{ toastKicker }}</div>
@@ -4451,6 +4520,7 @@ const DICT = {
     "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Set up two-factor in the settings. Sign-in then also asks for a code from the authenticator app.",
     "Wie ändere ich die Sprache?": "How do I change the language?",
     "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Choose DE, EN or SV at the top right of the menu bar.",
+    "Sprache": "Language", "Zurück": "Back",
     "Nur beim Bearbeiten": "Only while editing", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tap Edit above, then quantities can be assigned.",
     "Standardquantität": "Default quantity", "Standardquantität wählen.": "Choose a default quantity.", "Standardquantität fehlt.": "Default quantity missing.",
@@ -5295,6 +5365,7 @@ const DICT = {
     "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Aktivera tvåfaktor i inställningarna. Inloggningen frågar sedan även efter en kod från autentiseringsappen.",
     "Wie ändere ich die Sprache?": "Hur byter jag språk?",
     "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Välj DE, EN eller SV längst upp till höger i menyraden.",
+    "Sprache": "Språk", "Zurück": "Tillbaka",
     "Nur beim Bearbeiten": "Bara vid redigering", "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Tilldela bara vid redigering eller via Excel-tabellen.",
     "Oben auf „Bearbeiten\" tippen, dann lassen sich Quantitäten zuweisen.": "Tryck på Redigera ovan, sedan kan enheter tilldelas.",
     "Standardquantität": "Standardkvantitet", "Standardquantität wählen.": "Välj en standardkvantitet.", "Standardquantität fehlt.": "Standardkvantitet saknas.",
@@ -9202,6 +9273,7 @@ class Component extends DCLogic {
         help: this.tr("Hilfe")
       }[st.screen] || "",
       onDashboard: st.screen === "dashboard", onProducts: st.screen === "products", onDetail: st.screen === "detail",
+      showScanFab: st.screen !== "scan" && !(st.screen === "memo" && (st.memoUndo || []).length) && this.pageOk("scan"),
       onScan: st.screen === "scan", onNew: st.screen === "new", onQr: st.screen === "qr",
       onHistory: st.screen === "history", navHistory: this.navStyle("history"),
       goHistory: () => this.go("history"),
