@@ -17,7 +17,11 @@
   /* Einstellungen: Kacheln schrumpfen sauber, lange Texte und Knopfreihen brechen um */
   [data-screen-label="Einstellungen"] > div[style*="grid"] { grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)) !important; }
   [data-screen-label="Einstellungen"] section { min-width: 0; overflow-wrap: anywhere; }
-  [data-screen-label="Einstellungen"] section div[style*="display: flex"] { flex-wrap: wrap; }
+  [data-screen-label="Einstellungen"] section div[style*="display: flex"]:not([style*="column"]) { flex-wrap: wrap; }
+  [data-masonry] section { break-inside: avoid; margin: 0 0 var(--space-4) !important; min-width: 0; overflow-wrap: anywhere; }
+  [data-screen-label="Mein Konto"] .seg { flex-wrap: wrap; max-width: 100%; height: auto; }
+  [data-screen-label="Mein Konto"] .seg-opt { white-space: normal; flex: 1 1 auto; text-align: center; }
+  @media (max-width: 720px) { [data-masonry] { columns: 1 !important; } }
   [data-screen-label="Einstellungen"] .seg { flex-wrap: wrap; max-width: 100%; height: auto; }
   [data-screen-label="Einstellungen"] .seg-opt { white-space: normal; flex: 1 1 auto; text-align: center; }
   [data-screen-label="Einstellungen"] .btn { max-width: 100%; }
@@ -224,6 +228,7 @@
           <sc-if value="{{ menuVerw }}" hint-placeholder-val="{{ false }}">
             <div class="blueprint elev-md" style="position: absolute; top: calc(100% + 1px); left: 0; min-width: 235px; background: var(--sc-card); padding: var(--space-2); display: flex; flex-direction: column; gap: 2px; z-index: 40">
               <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <button class="btn" style="{{ navAccount }}" onClick="{{ goAccount }}"><span data-i18n>Mein Konto</span></button>
               <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
               <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
               <button class="btn" style="{{ navHelp }}" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
@@ -268,7 +273,8 @@
                 <div style="font-size: 13px; font-weight: 500">{{ meName }}</div>
                 <div style="font-size: 12px; color: var(--sc-ink-2)">{{ roleLabel }} · {{ companyName }}</div>
               </div>
-              <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
+              <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goAccount }}"><span data-i18n>Mein Konto</span></button>
+              <sc-if value="{{ settingsOk }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button></sc-if>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
               <button class="btn btn-secondary" style="justify-content: flex-start" onClick="{{ logout }}"><span data-i18n>Abmelden</span></button>
             </div>
@@ -312,7 +318,8 @@
         <div>
           <div style="font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sc-ink-3); margin-bottom: 4px" data-i18n>Verwaltung</div>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px">
-            <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
+            <button class="btn" style="{{ navAccount }}" onClick="{{ goAccount }}"><span data-i18n>Mein Konto</span></button>
+              <button class="btn" style="{{ navTeam }}" onClick="{{ goTeam }}"><span data-i18n>Team &amp; Rechte</span></button>
             <button class="btn" style="{{ navSettings }}" onClick="{{ goSettings }}"><span data-i18n>Einstellungen</span></button>
             <button class="btn" style="{{ navHelp }}" onClick="{{ goHelp }}"><span data-i18n>Hilfe</span></button>
             <sc-if value="{{ isSuper }}" hint-placeholder-val="{{ false }}">
@@ -329,6 +336,29 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg>
       <span data-i18n>Scannen</span>
     </button>
+  </sc-if>
+
+  <sc-if value="{{ tourOn }}" hint-placeholder-val="{{ false }}">
+    <div data-print-hide style="{{ tourRingStyle }}"></div>
+    <div data-print-hide class="blueprint elev-lg" role="dialog" aria-live="polite" style="{{ tourCardStyle }}">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: center; gap: var(--space-2)">
+        <span data-i18n-keep class="card-kicker" style="margin: 0; margin-right: auto">{{ tourKicker }}</span>
+        <button class="btn btn-ghost btn-icon" style="width: 36px; height: 36px; flex: none" aria-label="Tutorial beenden" title="Tutorial beenden" onClick="{{ tourEnd }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="display: flex; gap: 4px">
+        <sc-for list="{{ tourDots }}" as="td" hint-placeholder-count="5"><span style="flex: 1; height: 3px; background: {{ td.bg }}"></span></sc-for>
+      </div>
+      <h4 data-i18n-keep style="margin: 0; font-size: 20px">{{ tourTitle }}</h4>
+      <p data-i18n-keep style="margin: 0; font-size: 14px; line-height: 1.55; color: var(--sc-ink-2)">{{ tourBody }}</p>
+      <sc-if value="{{ tourMissing }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size: 12.5px; line-height: 1.45; padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent-900)" data-i18n>Dieser Bereich ist gerade nicht zu sehen — etwa weil er für dich gesperrt ist oder noch Daten fehlen. Mit „Weiter" geht es trotzdem.</div>
+      </sc-if>
+      <div style="display: flex; gap: var(--space-2)">
+        <button class="btn btn-secondary" style="min-height: 44px" disabled="{{ tourFirst }}" onClick="{{ tourPrev }}"><span data-i18n>Zurück</span></button>
+        <button class="btn btn-primary" style="flex: 1; min-height: 44px" onClick="{{ tourNext }}"><span data-i18n-keep>{{ tourNextLabel }}</span></button>
+      </div>
+    </div>
   </sc-if>
 
   <main style="min-width: 0; display: flex; flex-direction: column">
@@ -648,12 +678,16 @@
           </sc-if>
         </section>
 
-        <section class="card blueprint" data-detail-book>
+        <section class="card blueprint" data-detail-book data-tour="book">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n>Entnehmen oder nachfüllen</h4>
             <p class="card-body" style="margin: 0" data-i18n>Menge eingeben und buchen. Jede Buchung wird mit Person und Zeitstempel protokolliert.</p>
+            <sc-if value="{{ noBook }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size: 12.5px; line-height: 1.45; padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 10%, transparent); color: var(--color-accent-900)" data-i18n>Buchen ist für dich gesperrt. Freigeben kann das, wer das Recht „Rechte ändern" hat.</div>
+            </sc-if>
+            <sc-if value="{{ canBook }}" hint-placeholder-val="{{ true }}">
             <div data-i18n-keep style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)">{{ baseUnitLabel }}</div>
-            <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
+            <div data-tour="book-qty" style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0">
               <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ dec }}">−</button>
               <input class="input" type="number" min="0" step="1" inputmode="numeric" style="flex: 1; min-width: 70px; height: 46px; text-align: center; font-family: var(--font-heading); font-size: 24px" value="{{ qty }}" onChange="{{ setQty }}">
               <button class="btn btn-secondary" style="width: 46px; height: 46px; font-size: 20px; flex: none" onClick="{{ inc }}">+</button>
@@ -678,10 +712,17 @@
             </sc-if>
 
             <div data-bookpair style="display: flex; flex-direction: column; gap: var(--space-2)">
-              <button class="btn btn-primary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
-              <button class="btn btn-secondary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
+              <sc-if value="{{ canWithdraw }}" hint-placeholder-val="{{ true }}">
+                <button data-tour="book-withdraw" class="btn btn-primary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ withdraw }}"><span data-i18n>Entnahme buchen</span></button>
+              </sc-if>
+              <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}">
+                <button data-tour="book-refill" class="btn btn-secondary btn-block" style="height: 48px" disabled="{{ bookingOff }}" onClick="{{ refill }}"><span data-i18n>Nachfüllung buchen</span></button>
+              </sc-if>
             </div>
-            <div class="field" style="margin: 0"><label data-i18n>MHD der Nachfüllung (optional)</label><input class="input" type="date" value="{{ refillMhd }}" onInput="{{ setRefillMhd }}"></div>
+            <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}">
+              <div data-tour="book-mhd" class="field" style="margin: 0"><label data-i18n>MHD der Nachfüllung (optional)</label><input class="input" type="date" value="{{ refillMhd }}" onInput="{{ setRefillMhd }}"></div>
+            </sc-if>
+            </sc-if>
             <sc-if value="{{ isInactive }}" hint-placeholder-val="{{ false }}">
               <div style="font-size: 12px; color: var(--color-accent-700); margin-top: var(--space-2)" data-i18n>Dieses Produkt ist deaktiviert: keine Buchungen, keine Mails, kein Bestandsverlauf. Es taucht nur noch bei Verantwortlichen und Stellvertretungen auf.</div>
             </sc-if>
@@ -815,7 +856,7 @@
       <sc-if value="{{ onScan }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Scannen" style="display: flex; flex-direction: column; align-items: center; gap: var(--space-6)">
         <p class="text-muted" style="max-width: 420px; text-align: center; margin: 0" data-i18n>Am Lagerort den QR-Code am Regal scannen. Der Code passt nur auf ein Produkt und öffnet dessen Detailansicht.</p>
-        <div class="blueprint" style="width: 330px; max-width: 100%; padding: 14px; background: var(--color-surface)">
+        <div data-tour="scan-box" class="blueprint" style="width: 330px; max-width: 100%; padding: 14px; background: var(--color-surface)">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="position: relative; aspect-ratio: 9 / 16; background: var(--color-accent-900); overflow: hidden; display: flex; flex-direction: column">
             <video ref="{{ videoRef }}" playsinline autoplay muted style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: {{ camOpacity }}"></video>
@@ -1203,7 +1244,7 @@
           </section>
         </sc-if>
 
-          <section class="card blueprint" onClick="{{ openList }}">
+          <section data-tour="ord-list" class="card blueprint" onClick="{{ openList }}">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
               <h4 style="margin: 0" data-i18n>Bestellliste</h4>
@@ -1285,7 +1326,7 @@
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
               <sc-if value="{{ hasLow }}" hint-placeholder-val="{{ false }}">
-                <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ orderAll }}"><span data-i18n-keep>{{ orderAllLabel }}</span></button>
+                <button data-tour="ord-orderall" class="btn btn-primary" style="white-space: nowrap" onClick="{{ orderAll }}"><span data-i18n-keep>{{ orderAllLabel }}</span></button>
               </sc-if>
               <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportOrderCsv }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
               <button class="btn btn-secondary" style="gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
@@ -1293,7 +1334,7 @@
             </sc-if>
           </section>
 
-        <section class="card blueprint">
+        <section data-tour="ord-open" class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
             <h4 style="margin: 0" data-i18n>Offene Bestellungen</h4>
@@ -1330,16 +1371,18 @@
                             </sc-for>
                           </div>
                           <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ od.note }}</span>
+                          <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}">
                           <label style="display: flex; flex-direction: column; gap: 1px; max-width: 160px">
                             <span style="font-size: 10.5px; color: var(--sc-ink-2)" data-i18n>MHD (optional)</span>
                             <input class="input" type="date" style="padding: 3px 6px; font-size: 12.5px" value="{{ od.mhd }}" onInput="{{ od.setMhd }}">
                           </label>
+                          </sc-if>
                         </div>
                       </td>
                       <td class="text-muted">{{ od.lieferant }}</td>
                       <td style="text-align: right">
                         <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-end">
-                          <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button>
+                          <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.back }}"><span data-i18n>Zurück in Bestand</span></button></sc-if>
                           <button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12px; white-space: nowrap" disabled="{{ od.backOff }}" onClick="{{ od.toList }}"><span data-i18n>Zurück in Bestellliste</span></button>
                         </div>
                       </td>
@@ -1350,9 +1393,9 @@
             </div>
           </sc-if>
           <sc-if value="{{ hasOrderedRows }}" hint-placeholder-val="{{ false }}">
-            <div style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
-              <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ receiveAllOff }}" onClick="{{ receiveAll }}"><span data-i18n-keep>{{ receiveAllLabel }}</span></button>
-              <span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Bucht bei allen Produkten die bestellte Menge ein und setzt den Status neu.</span>
+            <div data-tour="ord-receive" style="display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap">
+              <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}"><button class="btn btn-primary" style="white-space: nowrap" disabled="{{ receiveAllOff }}" onClick="{{ receiveAll }}"><span data-i18n-keep>{{ receiveAllLabel }}</span></button></sc-if>
+              <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}"><span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Bucht bei allen Produkten die bestellte Menge ein und setzt den Status neu.</span></sc-if>
             </div>
           </sc-if>
           <sc-if value="{{ noOrderedRows }}" hint-placeholder-val="{{ false }}">
@@ -1360,7 +1403,7 @@
           </sc-if>
         </section>
 
-        <section class="card blueprint" onClick="{{ openPl }}">
+        <section data-tour="ord-person" class="card blueprint" onClick="{{ openPl }}">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
             <h4 style="margin: 0; margin-right: auto" data-i18n>Bestelllisten je Person</h4>
@@ -1439,7 +1482,7 @@
               <sc-if value="{{ o.isOpen }}" hint-placeholder-val="{{ false }}">
               <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
                 <sc-if value="{{ o.hasOpen }}" hint-placeholder-val="{{ true }}">
-                  <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.refillAll }}"><span data-i18n>Alle Positionen nachfüllen</span></button>
+                  <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}"><button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.refillAll }}"><span data-i18n>Alle Positionen nachfüllen</span></button></sc-if>
                 </sc-if>
                 <sc-if value="{{ o.allFilled }}" hint-placeholder-val="{{ false }}">
                   <button class="btn btn-primary" style="white-space: nowrap" onClick="{{ o.close }}"><span data-i18n>Bestellung abschließen</span></button>
@@ -1473,7 +1516,7 @@
                     </sc-if>
                     <sc-if value="{{ oi.open }}" hint-placeholder-val="{{ true }}">
                       <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
-                        <button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" disabled="{{ oi.refillOff }}" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button>
+                        <sc-if value="{{ canRefill }}" hint-placeholder-val="{{ true }}"><button class="btn btn-secondary" style="padding: 2px 9px; font-size: 12px; white-space: nowrap" disabled="{{ oi.refillOff }}" onClick="{{ oi.refill }}"><span data-i18n>Nachfüllen</span></button></sc-if>
                         <span data-i18n-keep style="font-size: 11px; color: var(--sc-ink-3)">{{ oi.amountNote }}</span>
                       </div>
                     </sc-if>
@@ -1493,7 +1536,7 @@
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
             <h4 style="margin: 0; margin-right: auto" data-i18n>Meine Merkzettel</h4>
-            <button class="btn btn-primary" style="min-height: 44px; white-space: nowrap" onClick="{{ memoNew }}"><span data-i18n>Neuer Merkzettel</span></button>
+            <button class="btn btn-primary" style="min-height: 44px; white-space: nowrap" data-tour="memo-new" onClick="{{ memoNew }}"><span data-i18n>Neuer Merkzettel</span></button>
           </div>
           <p class="card-body" style="margin: 0" data-i18n>Produkte und Mengen vormerken. Abhaken bucht die Position sofort aus dem Bestand aus. Gespeicherte Merkzettel lassen sich immer wieder verwenden.</p>
           <sc-if value="{{ memoNoWithdraw }}" hint-placeholder-val="{{ false }}">
@@ -1505,12 +1548,12 @@
           <section class="card blueprint" style="border-color: var(--color-accent)">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
             <h4 style="margin: 0" data-i18n-keep>{{ memoEditTitle }}</h4>
-            <div class="field" style="margin: 0"><label data-i18n>Name des Merkzettels</label>
+            <div data-tour="memo-name" class="field" style="margin: 0"><label data-i18n>Name des Merkzettels</label>
               <input class="input" style="font-size: 16px; min-height: 44px" value="{{ memoEditName }}" placeholder="z. B. Wochenende Bar" onInput="{{ setMemoEditName }}">
             </div>
             <div style="display: flex; flex-direction: column; gap: 6px">
               <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2)" data-i18n>Produkt</div>
-              <div style="position: relative; display: flex; gap: 6px">
+              <div data-tour="memo-search" style="position: relative; display: flex; gap: 6px">
                 <button class="btn btn-secondary" style="order: 2; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center" aria-label="Produkt scannen" title="QR-Code oder EAN scannen" onClick="{{ memoScan }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="4" height="4"></rect><path d="M14 7v4"></path><path d="M17 7v4"></path><path d="M7 14h10"></path><path d="M7 17h10"></path></svg></button>
                 <input class="input" type="search" style="flex: 1; min-width: 0; font-size: 16px; min-height: 44px" value="{{ memoQuery }}" placeholder="Produkt suchen …" onInput="{{ setMemoQuery }}" onFocus="{{ memoPickFocus }}">
                 <sc-if value="{{ memoPickOpen }}" hint-placeholder-val="{{ false }}">
@@ -1569,11 +1612,12 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2)">
               <button class="btn btn-secondary" style="min-height: 44px" onClick="{{ memoCancelEdit }}"><span data-i18n>Abbrechen</span></button>
-              <button class="btn btn-primary" style="min-height: 44px" disabled="{{ memoSaveOff }}" onClick="{{ memoSaveEdit }}"><span data-i18n>Speichern</span></button>
+              <button data-tour="memo-save" class="btn btn-primary" style="min-height: 44px" disabled="{{ memoSaveOff }}" onClick="{{ memoSaveEdit }}"><span data-i18n>Speichern</span></button>
             </div>
           </section>
         </sc-if>
 
+        <div data-tour="memo-list" style="display: flex; flex-direction: column; gap: var(--space-4)">
         <sc-for list="{{ memoCards }}" as="mc" hint-placeholder-count="2">
           <section class="card blueprint" onClick="{{ mc.open }}">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
@@ -1610,6 +1654,7 @@
             </sc-if>
           </section>
         </sc-for>
+        </div>
         <sc-if value="{{ memoNone }}" hint-placeholder-val="{{ false }}">
           <p style="margin: 0; font-size: 13px; color: var(--sc-ink-2); text-align: center" data-i18n>Noch kein Merkzettel gespeichert.</p>
         </sc-if>
@@ -1850,11 +1895,11 @@
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Einzelnes Produkt anlegen</h4>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--space-3)">
-            <div class="field" style="grid-column: 1 / -1"><label data-i18n>Name</label><input class="input" value="{{ npName }}" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg" onInput="{{ setNpName }}">
+            <div data-tour="np-name" class="field" style="grid-column: 1 / -1"><label data-i18n>Name</label><input class="input" value="{{ npName }}" data-i18n-ph placeholder="z. B. Kaffeebohnen 1 kg" onInput="{{ setNpName }}">
               <div style="font-size: 11.5px; margin-top: 3px; color: {{ npNameColor }}">{{ npNameNote }}</div>
             </div>
-            <div class="field"><label data-i18n>EAN</label><div style="display: flex; gap: 6px"><input class="input" style="flex: 1; min-width: 0" inputmode="numeric" value="{{ npEan }}" placeholder="4001234567890" onInput="{{ setNpEan }}"><button class="btn btn-secondary" style="flex: none; gap: 6px; white-space: nowrap; padding-inline: 10px" onClick="{{ openEanScanNp }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M8 7v10"></path><path d="M12 7v10"></path><path d="M17 7v10"></path></svg><span data-i18n>Scannen</span></button></div></div>
-            <div class="field">
+            <div data-tour="np-ean" class="field"><label data-i18n>EAN</label><div style="display: flex; gap: 6px"><input class="input" style="flex: 1; min-width: 0" inputmode="numeric" value="{{ npEan }}" placeholder="4001234567890" onInput="{{ setNpEan }}"><button class="btn btn-secondary" style="flex: none; gap: 6px; white-space: nowrap; padding-inline: 10px" onClick="{{ openEanScanNp }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M8 7v10"></path><path d="M12 7v10"></path><path d="M17 7v10"></path></svg><span data-i18n>Scannen</span></button></div></div>
+            <div data-tour="np-resp" class="field">
               <label data-i18n>Verantwortliche Person</label>
               <select class="input" value="{{ npResp }}" onChange="{{ setNpResp }}">
                 <sc-for list="{{ contacts }}" as="c" hint-placeholder-count="5">
@@ -1890,13 +1935,13 @@
               </select>
             </div>
             <div style="grid-column: 1 / -1; font-size: 12px; color: var(--sc-ink-2); margin-top: -4px" data-i18n>Nur Personen aus dieser Firma — an ihre hinterlegten Adressen gehen die Bestandsmails.</div>
-            <div class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
+            <div data-tour="np-min" class="field"><label data-i18n>Mindestbestand</label><input class="input" type="number" min="0" step="1" value="{{ npMin }}" onInput="{{ setNpMin }}"></div>
             <div class="field"><label data-i18n>Istbestand</label><input class="input" type="number" min="0" step="1" value="{{ npIst }}" onInput="{{ setNpIst }}"></div>
             <sc-if value="{{ npHasRest }}" hint-placeholder-val="{{ false }}">
               <div class="field"><label data-i18n-keep>{{ npRestLabel }}</label><input class="input" type="number" min="0" step="1" value="{{ npIstRest }}" onInput="{{ setNpIstRest }}"></div>
             </sc-if>
             <div class="field"><label data-i18n>Bestellmenge</label><input class="input" type="number" min="0" step="1" value="{{ npOrder }}" onInput="{{ setNpOrder }}"></div>
-            <div style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
+            <div data-tour="np-units" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid color-mix(in srgb, var(--color-text) 9%, transparent); padding-top: var(--space-3)">
                 <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
                   <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); margin-right: auto" data-i18n>Quantitäten</div>
                   <button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ goUnitSettings }}"><span data-i18n>Quantitäten verwalten</span></button>
@@ -1922,7 +1967,7 @@
                 <div data-i18n-keep style="font-size: 12px; line-height: 1.45; color: var(--sc-ink-2)">{{ npUnitNote }}</div>
               </div>
 
-            <div class="field"><label data-i18n>Lagerort</label>
+            <div data-tour="np-place" class="field"><label data-i18n>Lagerort</label>
               <select class="input" value="{{ npPlace }}" onChange="{{ setNpPlace }}">
                 <option value="">— bitte wählen —</option>
                 <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
@@ -1961,7 +2006,7 @@
             </sc-for>
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
-            <button class="btn btn-primary" style="white-space: nowrap" disabled="{{ npDisabled }}" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
+            <button data-tour="np-save" class="btn btn-primary" style="white-space: nowrap" disabled="{{ npDisabled }}" onClick="{{ createProduct }}"><span data-i18n>Produkt speichern</span></button>
             <button class="btn btn-secondary" onClick="{{ goProducts }}"><span data-i18n>Abbrechen</span></button>
           </div>
         </section>
@@ -2201,7 +2246,7 @@
             </div>
             <div class="hr"></div>
             <h5 style="margin: 0" data-i18n>Team einladen</h5>
-            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.</p>
+            <p class="card-body" style="margin: 0" data-i18n>Die Einladung gilt 3 Stunden</p>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: flex-end">
               <div class="field" style="flex: 1; min-width: 190px"><label data-i18n>E-Mail-Adresse</label><input class="input" type="email" placeholder="name@internet-gmbh.de" onInput="{{ setInvite }}"></div>
               <div class="field" style="width: 172px"><label data-i18n>Rolle</label><select class="input"><option>Mitarbeitende Person</option><option>Lagerleitung</option><option>Lesezugriff</option></select></div>
@@ -2267,8 +2312,12 @@
             <sc-if value="{{ isLastOwner }}" hint-placeholder-val="{{ false }}">
               <div style="padding: 9px 12px; border-radius: 10px; background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-size: 12.5px; line-height: 1.45; color: var(--color-accent-800)" data-i18n>Diese Person verwaltet aktuell allein die Rechte. Rolle, Zugang und das Recht „Rechte ändern" sind deshalb gesperrt — vergib die Rolle zuerst an jemand anderen.</div>
             </sc-if>
-            <div style="display: flex; flex-direction: column; gap: 2px; max-height: 330px; overflow-y: auto">
-              <sc-for list="{{ perms }}" as="pm" hint-placeholder-count="10">
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{ permGroups }}" as="pg" hint-placeholder-count="5">
+                <details style="border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent)">
+                  <summary style="cursor: pointer; display: flex; align-items: center; gap: var(--space-2); padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 7%, transparent); font-family: var(--font-heading); font-size: 15px; color: var(--color-accent-900)"><span data-i18n-keep style="margin-right: auto">{{ pg.title }}</span><span data-i18n-keep class="tag tag-neutral">{{ pg.count }}</span><span style="font-size: 11px">▾</span></summary>
+                  <div style="display: flex; flex-direction: column; padding: 2px 6px 6px">
+              <sc-for list="{{ pg.items }}" as="pm" hint-placeholder-count="4">
                 <label class="radio" style="justify-content: space-between; width: 100%; padding: 7px var(--space-2); border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent)">
                   <span style="font-size: 13px">{{ pm.label }}</span>
                   <span style="display: flex; align-items: center; gap: 7px">
@@ -2276,6 +2325,9 @@
                     <input type="checkbox" checked="{{ pm.on }}" onChange="{{ pm.toggle }}" disabled="{{ pm.pinned }}" style="position: static; width: 16px; height: 16px; opacity: 1; accent-color: var(--color-accent)">
                   </span>
                 </label>
+              </sc-for>
+                  </div>
+                </details>
               </sc-for>
             </div>
             <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2)">
@@ -2308,6 +2360,38 @@
           </div>
         </section>
 
+        <sc-if value="{{ tutorialsOn }}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+          <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: 8px 0; border-bottom: 2px solid var(--color-accent)">
+            <span style="flex: none; width: 30px; height: 30px; display: grid; place-items: center; background: var(--color-accent); color: var(--color-bg)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></span>
+            <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-accent-900)" data-i18n>Tutorials</h3>
+            <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Schritt für Schritt auf den echten Seiten — jedes Tutorial für sich</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--space-4); align-items: stretch">
+            <sc-for list="{{ tutorials }}" as="tu" hint-placeholder-count="4">
+              <section class="card blueprint" style="display: flex; flex-direction: column; gap: var(--space-2)">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="display: flex; align-items: center; gap: var(--space-2)">
+                  <span style="flex: none; width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid var(--color-accent); color: var(--color-accent-800); font-family: var(--font-heading); font-size: 14px; font-weight: 600">{{ tu.num }}</span>
+                  <span data-i18n-keep class="card-kicker" style="margin: 0">{{ tu.stepsLabel }}</span>
+                </div>
+                <h4 data-i18n-keep style="margin: 0">{{ tu.title }}</h4>
+                <p data-i18n-keep class="card-body" style="margin: 0">{{ tu.text }}</p>
+                <ol style="margin: 0; padding: var(--space-2) 0 0 18px; border-top: 1px solid var(--color-divider); font-size: 12.5px; line-height: 1.6; color: var(--sc-ink-2); flex: 1">
+                  <sc-for list="{{ tu.steps }}" as="ts" hint-placeholder-count="4"><li data-i18n-keep>{{ ts }}</li></sc-for>
+                </ol>
+                <sc-if value="{{ tu.ok }}" hint-placeholder-val="{{ true }}">
+                  <button class="btn btn-primary btn-block" style="min-height: 44px" onClick="{{ tu.start }}"><span data-i18n>Tutorial starten</span></button>
+                </sc-if>
+                <sc-if value="{{ tu.locked }}" hint-placeholder-val="{{ false }}">
+                  <div data-i18n-keep style="font-size: 12px; color: var(--color-accent-700)">{{ tu.lockNote }}</div>
+                </sc-if>
+              </section>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
         <sc-for list="{{ helpGroups }}" as="hg" hint-placeholder-count="3">
           <section class="card">
             <div class="card-kicker">{{ hg.kicker }}</div>
@@ -2339,15 +2423,154 @@
       </div>
       </sc-if>
 
+      <sc-if value="{{ onAccount }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Mein Konto" style="display: flex; flex-direction: column; gap: var(--space-4)">
+        <section class="card blueprint">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap">
+            <span style="flex: none; width: 56px; height: 56px; border-radius: 50%; background: color-mix(in srgb, var(--color-accent) 18%, transparent); color: var(--color-accent-800); display: grid; place-items: center; font-family: var(--font-heading); font-size: 22px; font-weight: 600">{{ meInitials }}</span>
+            <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px">
+              <h4 style="margin: 0; font-size: 22px">{{ meName }}</h4>
+              <span style="font-size: 13px; color: var(--sc-ink-2)">{{ meEmail }}</span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap">
+              <span data-i18n-keep class="tag tag-accent">{{ roleLabel }}</span>
+              <span data-i18n-keep class="tag tag-neutral">{{ companyName }}</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); font-size: 12.5px; color: var(--sc-ink-2)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; color: var(--color-accent-700)"><rect x="4" y="11" width="16" height="10" rx="1"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <span data-i18n>Diese Seite gehört dir: Sprache, Design und Passwort gelten nur für dein Konto. Niemand kann sie für dich sperren.</span>
+          </div>
+        </section>
+        <div data-masonry style="columns: 2 360px; column-gap: var(--space-4)">
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Sprache und Darstellung</h4>
+            <div class="field"><label data-i18n>Sprache dieses Kontos</label>
+              <select class="input" value="{{ lang }}" onChange="{{ setLang }}">
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                <option value="sv">Svenska</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n>Design</label>
+              <div>
+                <div class="seg">
+                  <label class="seg-opt" style="{{ segLight }}"><input type="radio" name="sc-theme2" onChange="{{ setLight }}"><span data-i18n>Hell</span></label>
+                  <label class="seg-opt" style="{{ segDark }}"><input type="radio" name="sc-theme2" onChange="{{ setDark }}"><span data-i18n>Dunkel</span></label>
+                  <label class="seg-opt" style="{{ segSystem }}"><input type="radio" name="sc-theme2" onChange="{{ setSystem }}"><span data-i18n>System</span></label>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <h4 style="margin: 0" data-i18n>Passwort ändern</h4>
+            <div class="field"><label data-i18n>Aktuelles Passwort</label><input class="input" type="password"></div>
+            <div class="field"><label data-i18n>Neues Passwort</label>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
+            </div>
+            </div>
+            <div class="field"><label data-i18n>Neues Passwort wiederholen</label>
+            <div style="position: relative; display: flex">
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw2 }}">
+              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
+                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
+                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
+                    <path d="M2 2l20 20"></path>
+                  </svg>
+                </sc-if>
+                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </sc-if>
+              </button>
+            </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
+              <sc-for list="{{ pwRulesList }}" as="r" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
+                  <span style="width: 13px; height: 13px; flex: none; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; line-height: 1">{{ r.mark }}</span>
+                  <span>{{ r.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <button class="btn btn-primary" style="margin-top: var(--space-2)" onClick="{{ savePassword }}"><span data-i18n>Passwort speichern</span></button>
+          </section>
+
+          <section class="card">
+            <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
+              <h4 style="margin: 0; margin-right: auto" data-i18n>Zwei-Faktor-Anmeldung</h4>
+              <span class="tag tag-outline" data-i18n>Vorbereitet</span>
+            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.</p>
+          </section>
+          <section class="card blueprint">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+              <h4 style="margin: 0; margin-right: auto" data-i18n>Meine Rechte</h4>
+              <span data-i18n-keep class="tag tag-neutral">{{ myPermCount }}</span>
+            </div>
+            <p class="card-body" style="margin: 0" data-i18n>Was du in dieser Firma darfst. Ändern kann das nur, wer das Recht „Rechte ändern" hat.</p>
+            <div style="display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{ myPermGroups }}" as="pg" hint-placeholder-count="5">
+                <details style="border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent)">
+                  <summary style="cursor: pointer; display: flex; align-items: center; gap: var(--space-2); padding: 8px 10px; background: color-mix(in srgb, var(--color-accent) 7%, transparent); font-family: var(--font-heading); font-size: 15px; color: var(--color-accent-900)"><span data-i18n-keep style="margin-right: auto">{{ pg.title }}</span><span data-i18n-keep class="tag tag-neutral">{{ pg.count }}</span><span style="font-size: 11px">▾</span></summary>
+                  <div style="display: flex; flex-direction: column; padding: 2px 10px 6px">
+                    <sc-for list="{{ pg.items }}" as="mp" hint-placeholder-count="4">
+                      <div style="display: flex; align-items: center; gap: var(--space-2); padding: 6px 0; border-bottom: 1px solid color-mix(in srgb, var(--color-text) 7%, transparent); font-size: 13px">
+                        <span data-i18n-keep style="flex: 1; min-width: 0; color: {{ mp.color }}">{{ mp.label }}</span>
+                        <span data-i18n-keep style="font-size: 11.5px; font-weight: 600; color: {{ mp.color }}">{{ mp.state }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </details>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </div>
+      </sc-if>
+
       <sc-if value="{{ onSettings }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="Einstellungen" style="display: flex; flex-direction: column; gap: var(--space-4)">
-
-        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
-          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Lager und Artikel</h3>
-          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Lagerorte, Gebinde und eigene Felder</span>
-          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">01</span>
+        <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: 10px 14px; background: color-mix(in srgb, var(--color-accent) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent)">
+          <span style="font-size: 13px; color: var(--color-accent-900); flex: 1; min-width: 220px" data-i18n>Persönliche Einstellungen wie Sprache, Design und Passwort findest du unter „Mein Konto".</span>
+          <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ goAccount }}"><span data-i18n>Zu Mein Konto</span></button>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
+        <sc-if value="{{ setStockOn }}" hint-placeholder-val="{{ true }}">
+        <div role="button" tabindex="0" onClick="{{ toggleSetStock }}" style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: 8px 6px 8px 0; border-bottom: 2px solid var(--color-accent); cursor: pointer; user-select: none" style-hover="background: color-mix(in srgb, var(--color-accent) 6%, transparent)">
+          <span style="flex: none; width: 30px; height: 30px; display: grid; place-items: center; background: var(--color-accent); color: var(--color-bg); font-family: var(--font-heading); font-size: 15px; font-weight: 600">01</span>
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-accent-900)" data-i18n>Lager und Artikel</h3>
+          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Lagerorte, Gebinde und eigene Felder</span>
+          <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--color-accent-800)"><span data-i18n-keep>{{ lblSetStock }}</span><span style="font-size: 12px">{{ chevSetStock }}</span></span>
+        </div>
+        <sc-if value="{{ openSetStock }}" hint-placeholder-val="{{ true }}">
+        <div data-masonry style="columns: 3 340px; column-gap: var(--space-4)">
 
         <sc-if value="{{ deptAdminOn }}" hint-placeholder-val="{{ false }}">
         <section class="card blueprint">
@@ -2569,24 +2792,22 @@
         </section>
 
         </div>
+        </sc-if>
+        </sc-if>
 
-        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
-          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Warnungen und Mail</h3>
+        <sc-if value="{{ setMailOn }}" hint-placeholder-val="{{ true }}">
+        <div role="button" tabindex="0" onClick="{{ toggleSetMail }}" style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: 8px 6px 8px 0; border-bottom: 2px solid var(--color-accent); cursor: pointer; user-select: none" style-hover="background: color-mix(in srgb, var(--color-accent) 6%, transparent)">
+          <span style="flex: none; width: 30px; height: 30px; display: grid; place-items: center; background: var(--color-accent); color: var(--color-bg); font-family: var(--font-heading); font-size: 15px; font-weight: 600">02</span>
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-accent-900)" data-i18n>Warnungen und Mail</h3>
           <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Wann wer eine Nachricht bekommt</span>
-          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">02</span>
+          <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--color-accent-800)"><span data-i18n-keep>{{ lblSetMail }}</span><span style="font-size: 12px">{{ chevSetMail }}</span></span>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
-
+        <sc-if value="{{ openSetMail }}" hint-placeholder-val="{{ true }}">
         <section class="card blueprint">
           <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
           <h4 style="margin: 0" data-i18n>Benachrichtigung bei Unterschreitung</h4>
-          <div class="blueprint" style="padding: var(--space-3)">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <div class="card-kicker" data-i18n>Aktuell gespeichert</div>
-            <div style="font-size: 14px; font-weight: 600">{{ mailModeLabel }}</div>
-            <div class="text-muted" style="font-size: 12px" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC. Gesammelte Mails enthalten die ganze Bestellliste.</div>
-          </div>
-
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--space-4) var(--space-6); align-items: start">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3); min-width: 0">
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>1 · Wann wird gemailt?</div>
           <div style="display: flex; flex-direction: column; gap: 6px">
             <div style="display: flex; flex-direction: column; gap: var(--space-2); padding: 10px 12px; border: 1px solid {{ dmNowOBorder }}; background: {{ dmNowOBg }}">
@@ -2617,7 +2838,14 @@
               </div>
             </div>
           </div>
-
+            </div>
+            <div style="display: flex; flex-direction: column; gap: var(--space-3); min-width: 0">
+          <div class="blueprint" style="padding: var(--space-3)">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="card-kicker" data-i18n>Aktuell gespeichert</div>
+            <div style="font-size: 14px; font-weight: 600">{{ mailModeLabel }}</div>
+            <div class="text-muted" style="font-size: 12px" data-i18n>Die Mail geht an die verantwortliche Person, Stellvertretungen stehen im CC. Gesammelte Mails enthalten die ganze Bestellliste.</div>
+          </div>
           <div style="font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-2); font-weight: 600" data-i18n>2 · Wer bekommt die Mail?</div>
           <div>
             <div class="seg">
@@ -2643,110 +2871,28 @@
             <button class="btn btn-secondary" disabled="{{ orderMailOff }}" onClick="{{ sendOrderListNow }}"><span data-i18n>Bestellliste jetzt mailen</span></button>
             <span style="font-size: 12px; color: var(--sc-ink-2); flex: 1; min-width: 180px" data-i18n>Schickt sofort alles unter Mindestbestand an Inhaber und Lagerleitung — unabhängig vom Zeitplan.</span>
           </div>
+            </div>
+          </div>
         </section>
+        </sc-if>
+        </sc-if>
 
-        </div>
-
-        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
-          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>Mein Konto</h3>
-          <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Sprache, Darstellung, Anmeldung</span>
-          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">03</span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
+        <sc-if value="{{ noSettings }}" hint-placeholder-val="{{ false }}">
           <section class="card blueprint">
             <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>Sprache und Darstellung</h4>
-            <div class="field"><label data-i18n>Sprache dieses Kontos</label>
-              <select class="input" value="{{ lang }}" onChange="{{ setLang }}">
-                <option value="de">Deutsch</option>
-                <option value="en">English</option>
-                <option value="sv">Svenska</option>
-              </select>
-            </div>
-            <div class="field"><label data-i18n>Design</label>
-              <div>
-                <div class="seg">
-                  <label class="seg-opt" style="{{ segLight }}"><input type="radio" name="sc-theme2" onChange="{{ setLight }}"><span data-i18n>Hell</span></label>
-                  <label class="seg-opt" style="{{ segDark }}"><input type="radio" name="sc-theme2" onChange="{{ setDark }}"><span data-i18n>Dunkel</span></label>
-                  <label class="seg-opt" style="{{ segSystem }}"><input type="radio" name="sc-theme2" onChange="{{ setSystem }}"><span data-i18n>System</span></label>
-                </div>
-              </div>
-            </div>
+            <h4 style="margin: 0" data-i18n>Keine Einstellungen freigegeben</h4>
+            <p class="card-body" style="margin: 0" data-i18n>Die Bereiche „Lager und Artikel" und „Warnungen und Mail" hat die inhabende Person für dich gesperrt. Deine persönlichen Einstellungen findest du unter „Mein Konto".</p>
           </section>
-
-          <section class="card blueprint">
-            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-            <h4 style="margin: 0" data-i18n>Passwort ändern</h4>
-            <div class="field"><label data-i18n>Aktuelles Passwort</label><input class="input" type="password"></div>
-            <div class="field"><label data-i18n>Neues Passwort</label>
-            <div style="position: relative; display: flex">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
-                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
-                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
-                    <path d="M2 2l20 20"></path>
-                  </svg>
-                </sc-if>
-                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </sc-if>
-              </button>
-            </div>
-            </div>
-            <div class="field"><label data-i18n>Neues Passwort wiederholen</label>
-            <div style="position: relative; display: flex">
-              <input class="input" type="{{ pwType }}" autocomplete="new-password" style="flex: 1; min-width: 0; padding-right: 42px" onInput="{{ setPw2 }}">
-              <button type="button" aria-label="{{ pwToggleLabel }}" title="{{ pwToggleLabel }}" style="position: absolute; right: 7px; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; display: grid; place-items: center; background: none; border: 0; padding: 0; cursor: pointer; color: var(--sc-ink-2)" onClick="{{ togglePw }}">
-                <sc-if value="{{ pwVisible }}" hint-placeholder-val="{{ false }}">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-                    <path d="M10.73 5.08A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a13.2 13.2 0 0 1-1.67 2.68"></path>
-                    <path d="M6.61 6.61A13.5 13.5 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.39-1.61"></path>
-                    <path d="M2 2l20 20"></path>
-                  </svg>
-                </sc-if>
-                <sc-if value="{{ pwHidden }}" hint-placeholder-val="{{ true }}">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                </sc-if>
-              </button>
-            </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px; margin: 6px 0">
-              <sc-for list="{{ pwRulesList }}" as="r" hint-placeholder-count="6">
-                <div style="display: flex; align-items: center; gap: 7px; font-size: 12px; color: {{ r.color }}">
-                  <span style="width: 13px; height: 13px; flex: none; border: 1px solid currentColor; display: grid; place-items: center; font-size: 9px; line-height: 1">{{ r.mark }}</span>
-                  <span>{{ r.label }}</span>
-                </div>
-              </sc-for>
-            </div>
-            <button class="btn btn-primary" style="margin-top: var(--space-2)" onClick="{{ savePassword }}"><span data-i18n>Passwort speichern</span></button>
-          </section>
-
-          <section class="card">
-            <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
-              <h4 style="margin: 0; margin-right: auto" data-i18n>Zwei-Faktor-Anmeldung</h4>
-              <span class="tag tag-outline" data-i18n>Vorbereitet</span>
-            </div>
-            <p class="card-body" style="margin: 0" data-i18n>Die Anmeldung verlangt Passwort und Bot-Prüfung. Der zweite Faktor über eine Authenticator-App ist im Programm angelegt, aber noch abgeschaltet — er lässt sich später zuschalten, ohne dass Konten neu eingerichtet werden müssen.</p>
-          </section>
-
-        </div>
+        </sc-if>
 
         <sc-if value="{{ showSystemCards }}" hint-placeholder-val="{{ false }}">
-        <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; padding-bottom: 7px; margin-top: var(--space-4); border-bottom: 2px solid color-mix(in srgb, var(--color-text) 20%, transparent)">
-          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em" data-i18n>System und Kosten</h3>
+        <div role="button" tabindex="0" onClick="{{ toggleSetSys }}" style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: 8px 6px 8px 0; border-bottom: 2px solid var(--color-accent); cursor: pointer; user-select: none" style-hover="background: color-mix(in srgb, var(--color-accent) 6%, transparent)">
+          <span style="flex: none; width: 30px; height: 30px; display: grid; place-items: center; background: var(--color-accent); color: var(--color-bg); font-family: var(--font-heading); font-size: 15px; font-weight: 600">03</span>
+          <h3 style="margin: 0; font-family: var(--font-heading); font-size: 21px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-accent-900)" data-i18n>System und Kosten</h3>
           <span style="font-size: 12.5px; color: var(--sc-ink-2)" data-i18n>Dienste, Mailversand prüfen, Grenzen</span>
-          <span style="margin-left: auto; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--sc-ink-3)">04</span>
+          <span style="margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--color-accent-800)"><span data-i18n-keep>{{ lblSetSys }}</span><span style="font-size: 12px">{{ chevSetSys }}</span></span>
         </div>
+        <sc-if value="{{ openSetSys }}" hint-placeholder-val="{{ true }}">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-4); align-items: start">
           <section class="card">
             <div class="card-kicker" data-i18n>Systemdienste</div>
@@ -2829,6 +2975,7 @@
             <p class="card-body" style="margin: var(--space-2) 0 0; font-size: 12.5px" data-i18n>Umschalten in config.js: FREE_TIER_GUARD auf false setzen hebt die Sperre auf, einzelne Grenzen stehen in FREE_TIER_LIMITS.</p>
           </section>
         </div>
+        </sc-if>
         </sc-if>
       </div>
       </sc-if>
@@ -3409,21 +3556,21 @@
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nie wieder leer</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Einfache Bestandskontrolle</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Jede Person ihr Maß</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Automatischer Mailversand</span>
       </div>
       <div style="display: grid; grid-template-columns: 7px minmax(0, 1fr); gap: 11px; align-items: center">
         <span style="width: 7px; height: 7px; border-radius: 50%; background: var(--color-accent)"></span>
-        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Nur euer Lager</span>
+        <span style="font-family: var(--font-heading); font-size: 16.5px" data-i18n>Super individualisierbar</span>
       </div>
     </div>
 
     <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--sc-ink-2)">
       <span style="width: 26px; height: 1px; background: var(--color-accent)"></span>
-      <span data-i18n>Derzeit kostenlos, jederzeit kündbar.</span>
+      <span data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</span>
     </div>
   </div>
 
@@ -3554,7 +3701,7 @@
             </label>
           </sc-if>
           <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ regDisabled }}" onClick="{{ doRegister }}"><span data-i18n>Konto anlegen</span></button>
-          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Derzeit kostenlos, jederzeit kündbar.</div>
+          <div style="font-size: 11.5px; margin-top: var(--space-3); text-align: center; color: var(--sc-ink-2)" data-i18n>Bei Fragen und Problemen, gerne eine Mail an: joe.solutions.stuttgart@gmail.com</div>
         </div>
       </sc-if>
 
@@ -4406,7 +4553,7 @@ const DICT = {
     "Text über dem Code": "Text above the code", "Text unter dem Code": "Text below the code",
     "Etikettgröße": "Label size", "Drucken / PDF": "Print / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Role", "Feinrechte": "Fine-grained rights", "Team einladen": "Invite someone",
-    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "The invitation is valid for 3 hours. If it expires you can invite again.",
+    "Die Einladung gilt 3 Stunden": "The invitation is valid for 3 hours. If it expires you can invite again.",
     "E-Mail-Adresse": "Email address", "Einladung senden": "Send invitation",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "The role sets the default. Individual rights can be allowed or blocked here.",
     "Alles erlauben": "Allow everything", "Alles sperren": "Block everything",
@@ -5251,7 +5398,7 @@ const DICT = {
     "Text über dem Code": "Text ovanför koden", "Text unter dem Code": "Text under koden",
     "Etikettgröße": "Etikettstorlek", "Drucken / PDF": "Skriv ut / PDF", "Team": "Team", "Person": "Person",
     "Rolle": "Roll", "Feinrechte": "Detaljrättigheter", "Team einladen": "Bjud in någon",
-    "Die Einladung gilt 3 Stunden. Läuft sie ab, kannst du erneut einladen.": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
+    "Die Einladung gilt 3 Stunden": "Inbjudan gäller i 3 timmar. Går den ut kan du bjuda in igen.",
     "E-Mail-Adresse": "E-postadress", "Einladung senden": "Skicka inbjudan",
     "Die Rolle setzt die Voreinstellung. Einzelne Rechte kannst du hier abweichend erlauben oder sperren.": "Rollen sätter standarden. Enskilda rättigheter kan tillåtas eller blockeras här.",
     "Alles erlauben": "Tillåt allt", "Alles sperren": "Blockera allt",
@@ -5623,7 +5770,117 @@ const ROLES = {
 const PAGE_PERMS = { dashboard: "page_dashboard", products: "page_products", detail: "page_products", scan: "page_scan",
   orders: "page_orders", events: "page_events", memo: "page_memo", history: "page_history", new: "page_new", import: "page_new",
   qr: "page_qr", team: "page_team", settings: "page_settings" };
-const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "memo", "history", "new", "qr", "team", "settings", "help"];
+const PAGE_ORDER = ["dashboard", "products", "scan", "orders", "events", "memo", "history", "new", "qr", "team", "settings", "account", "help"];
+
+// Rechte im Team-Bildschirm und unter „Mein Konto\" gruppiert statt als eine lange Liste.
+const PERM_GROUPS = [
+  { title: "Seiten", test: k => /^page_/.test(k) },
+  { title: "Produkte und Buchungen", keys: ["view", "withdraw", "refill", "create", "edit", "delete", "import", "qr", "order", "undo"] },
+  { title: "Einstellungen", keys: ["places", "mail"] },
+  { title: "Team und Profile", keys: ["invite", "rights", "profiles", "profileEdit", "list_public"] },
+  { title: "Auswertung und Dateien", keys: ["history", "who", "export", "pdf", "upload"] }
+];
+const permGroupOf = k => PERM_GROUPS.findIndex(g => g.test ? g.test(k) : g.keys.indexOf(k) >= 0);
+
+// Tutorials: jedes führt über die echten Seiten und markiert das Feld, um das es geht.
+// s = Seite, t = data-tour-Ziel, card = Kachel vorher aufklappen, prep = Vorbereitung.
+const TUTORIALS = [
+  { id: "product", need: ["page_new", "create"],
+    title: { de: "Ein Produkt anlegen", en: "Create a product", sv: "Skapa en produkt" },
+    text: { de: "Vom leeren Formular bis zum gespeicherten Produkt mit Mindestbestand und Verantwortung.", en: "From the empty form to a saved product with minimum stock and an owner.", sv: "Från tomt formulär till sparad produkt med minsta lager och ansvarig." },
+    steps: [
+      { s: "new", t: "np-name", h: { de: "Namen eingeben", en: "Enter a name", sv: "Ange namn" },
+        b: { de: "Unter Stammdaten → Produktverwaltung. Gib dem Produkt einen eindeutigen Namen, so wie es im Regal steht — etwa „Kaffeebohnen 1 kg\".", en: "Under Master data → Product management. Give the product a clear name, the way it sits on the shelf — e.g. “Coffee beans 1 kg”.", sv: "Under Grunddata → Produkthantering. Ge produkten ett tydligt namn, så som den står på hyllan — t.ex. ”Kaffebönor 1 kg”." } },
+      { s: "new", t: "np-ean", h: { de: "EAN erfassen", en: "Add the EAN", sv: "Ange EAN" },
+        b: { de: "Die EAN steht unter dem Strichcode. Eintippen oder „Scannen\" wählen — die Kamera liest sie direkt von der Verpackung.", en: "The EAN is printed under the barcode. Type it or choose “Scan” — the camera reads it straight off the package.", sv: "EAN står under streckkoden. Skriv in den eller välj ”Skanna” — kameran läser den direkt från förpackningen." } },
+      { s: "new", t: "np-resp", h: { de: "Verantwortung festlegen", en: "Choose who is responsible", sv: "Välj ansvarig" },
+        b: { de: "Die verantwortliche Person bekommt die Mail, sobald der Mindestbestand unterschritten wird. Stellvertretungen stehen im CC.", en: "The responsible person gets the email as soon as stock drops below the minimum. Deputies are copied in.", sv: "Den ansvariga får mejlet så fort lagret går under minimum. Ersättare får kopia." } },
+      { s: "new", t: "np-min", h: { de: "Mengen festlegen", en: "Set the amounts", sv: "Ange mängder" },
+        b: { de: "Mindestbestand: ab hier wird bestellt. Istbestand: was jetzt im Regal liegt. Bestellmenge: wie viel eine Bestellung normalerweise umfasst.", en: "Minimum stock: reorder from here. Current stock: what is on the shelf now. Order quantity: what one order usually contains.", sv: "Minsta lager: härifrån beställs det. Aktuellt lager: det som finns nu. Beställningsmängd: vad en beställning brukar omfatta." } },
+      { s: "new", t: "np-units", h: { de: "Quantitäten wählen", en: "Pick the units", sv: "Välj enheter" },
+        b: { de: "In welchen Gebinden kommt die Ware — Stück, Kiste, Palette? Die Standardquantität ist die, in der gezählt und bestellt wird.", en: "Which packaging does it come in — piece, crate, pallet? The standard unit is the one used for counting and ordering.", sv: "Vilka förpackningar kommer varan i — styck, back, pall? Standardenheten används för räkning och beställning." } },
+      { s: "new", t: "np-place", h: { de: "Lagerort und Details", en: "Location and details", sv: "Lagerplats och detaljer" },
+        b: { de: "Lagerort, MHD, Preis und Lieferant helfen beim Finden und Nachbestellen. Außer dem Namen ist alles freiwillig.", en: "Location, best-before date, price and supplier help with finding and reordering. Everything except the name is optional.", sv: "Lagerplats, bäst före, pris och leverantör hjälper vid sökning och beställning. Allt utom namnet är frivilligt." } },
+      { s: "new", t: "np-save", h: { de: "Speichern", en: "Save", sv: "Spara" },
+        b: { de: "„Produkt speichern\" legt es an und öffnet die Detailseite. Danach unter Stammdaten → QR-Codes das Etikett drucken und ans Regal kleben.", en: "“Save product” creates it and opens its detail page. Then print the label under Master data → QR codes and stick it on the shelf.", sv: "”Spara produkt” skapar den och öppnar detaljsidan. Skriv sedan ut etiketten under Grunddata → QR-koder och sätt den på hyllan." } }
+    ] },
+  { id: "book", need: ["page_products"], needAny: ["withdraw", "refill"],
+    title: { de: "Ausbuchen und nachfüllen", en: "Withdraw and refill", sv: "Ta ut och fylla på" },
+    text: { de: "Am Regal scannen, Menge eingeben, buchen — so bleibt der Bestand stimmig.", en: "Scan at the shelf, enter an amount, book it — that keeps stock accurate.", sv: "Skanna vid hyllan, ange mängd, bokför — så stämmer lagret." },
+    steps: [
+      { s: "scan", t: "scan-box", h: { de: "QR-Code scannen", en: "Scan the QR code", sv: "Skanna QR-koden" },
+        b: { de: "Am Regal den QR-Code scannen. Auf dem Handy ist „Scannen\" immer unten rechts. Alternativ die Artikel-ID oder EAN eintippen.", en: "Scan the QR code on the shelf. On a phone, “Scan” is always at the bottom right. Or type the item ID or EAN.", sv: "Skanna QR-koden på hyllan. På mobilen finns ”Skanna” alltid nere till höger. Eller skriv in artikel-ID eller EAN." } },
+      { s: "detail", t: "book-qty", h: { de: "Menge eingeben", en: "Enter the amount", sv: "Ange mängd" },
+        b: { de: "Die Detailseite des Produkts öffnet sich. Menge mit − und + oder per Tastatur eingeben. Gezählt wird in der Standardquantität.", en: "The product's detail page opens. Enter the amount with − and + or the keyboard. It counts in the standard unit.", sv: "Produktens detaljsida öppnas. Ange mängden med − och + eller tangentbordet. Det räknas i standardenheten." } },
+      { s: "detail", t: "book-withdraw", h: { de: "Entnahme buchen", en: "Book a withdrawal", sv: "Bokför uttag" },
+        b: { de: "Zieht die Menge vom Bestand ab. Fällt er unter den Mindestbestand, kommt das Produkt auf die Bestellliste und die verantwortliche Person wird benachrichtigt.", en: "Subtracts the amount from stock. If it drops below the minimum, the product goes on the order list and the responsible person is notified.", sv: "Drar av mängden från lagret. Går det under minimum hamnar produkten på beställningslistan och den ansvariga meddelas." } },
+      { s: "detail", t: "book-refill", h: { de: "Nachfüllung buchen", en: "Book a refill", sv: "Bokför påfyllning" },
+        b: { de: "Neue Ware eingeräumt? Menge eingeben und „Nachfüllung buchen\". Der Status wird dabei zurückgesetzt.", en: "Put new goods away? Enter the amount and choose “Book refill”. The status is reset.", sv: "Ställt in nya varor? Ange mängden och välj ”Bokför påfyllning”. Statusen återställs." } },
+      { s: "detail", t: "book-mhd", h: { de: "MHD mitgeben", en: "Add the best-before date", sv: "Ange bäst före" },
+        b: { de: "Bei Lebensmitteln vor dem Nachfüllen das MHD eintragen. Entnommen wird später immer zuerst die älteste Ware.", en: "For food, enter the best-before date before refilling. Withdrawals always use the oldest stock first.", sv: "För livsmedel, ange bäst före innan påfyllning. Uttag tar alltid den äldsta varan först." } }
+    ] },
+  { id: "memo", need: ["page_memo"],
+    title: { de: "Einen Merkzettel verwenden", en: "Use a checklist", sv: "Använda en minneslista" },
+    text: { de: "Produkte, die du immer wieder zusammen holst, einmal sammeln und später mit einem Haken ausbuchen.", en: "Collect products you always fetch together once, then book them out with a tick.", sv: "Samla produkter du ofta hämtar tillsammans och bokför dem sedan med en bock." },
+    steps: [
+      { s: "memo", t: "memo-new", h: { de: "Merkzettel anlegen", en: "Create a checklist", sv: "Skapa minneslista" },
+        b: { de: "Ein Merkzettel sammelt Produkte für einen wiederkehrenden Anlass — etwa den Wochenputz oder eine Baustelle. Er startet mit „Neuer Merkzettel\".", en: "A checklist collects products for a recurring job — the weekly clean or a site visit. Start with “New checklist”.", sv: "En minneslista samlar produkter för ett återkommande tillfälle — veckostädningen eller ett bygge. Börja med ”Ny minneslista”." } },
+      { s: "memo", t: "memo-name", prep: "memoNew", h: { de: "Namen vergeben", en: "Give it a name", sv: "Ge den ett namn" },
+        b: { de: "Ein kurzer Name, unter dem du den Merkzettel wiederfindest.", en: "A short name so you can find it again.", sv: "Ett kort namn så att du hittar den igen." } },
+      { s: "memo", t: "memo-search", prep: "memoNew", h: { de: "Produkte hinzufügen", en: "Add products", sv: "Lägg till produkter" },
+        b: { de: "Produkt suchen oder mit dem Knopf daneben scannen, Menge wählen und „Zum Merkzettel hinzufügen\". Beliebig oft wiederholen.", en: "Search a product or scan it with the button next to it, choose the amount and “Add to checklist”. Repeat as often as needed.", sv: "Sök en produkt eller skanna med knappen bredvid, välj mängd och ”Lägg till i minneslistan”. Upprepa så ofta du vill." } },
+      { s: "memo", t: "memo-save", prep: "memoNew", h: { de: "Speichern", en: "Save", sv: "Spara" },
+        b: { de: "„Speichern\" legt den Merkzettel ab. Gebucht wird dabei noch nichts.", en: "“Save” stores the checklist. Nothing is booked yet.", sv: "”Spara” lagrar listan. Inget bokförs ännu." } },
+      { s: "memo", t: "memo-list", h: { de: "Abhaken und ausbuchen", en: "Tick off and book out", sv: "Bocka av och bokför" },
+        b: { de: "Beim Holen jede Position abhaken — das bucht die Entnahme sofort. Oder alles auf einmal mit „Alle abhaken und ausbuchen\". Ein Versehen lässt sich rückgängig machen.", en: "Tick each line as you fetch it — that books the withdrawal at once. Or everything with “Tick all and book out”. Mistakes can be undone.", sv: "Bocka av varje rad när du hämtar — uttaget bokförs direkt. Eller allt på en gång. Misstag kan ångras." } }
+    ] },
+  { id: "order", need: ["page_orders"],
+    title: { de: "Eine Bestellung abwickeln", en: "Handle an order", sv: "Hantera en beställning" },
+    text: { de: "Für verantwortliche Personen: von der Bestellmail bis zur eingebuchten Lieferung.", en: "For responsible people: from the order email to the booked delivery.", sv: "För ansvariga: från beställningsmejlet till den bokförda leveransen." },
+    steps: [
+      { s: "orders", t: "ord-list", card: "list", h: { de: "Die Bestellliste", en: "The order list", sv: "Beställningslistan" },
+        b: { de: "Fällt ein Produkt unter den Mindestbestand, bekommst du als verantwortliche Person eine Mail. Der Link darin öffnet diese Liste mit allem, was fehlt.", en: "When a product drops below the minimum, you get an email as the responsible person. Its link opens this list with everything missing.", sv: "När en produkt går under minimum får du som ansvarig ett mejl. Länken öppnar den här listan med allt som saknas." } },
+      { s: "orders", t: "ord-orderall", card: "list", h: { de: "Bestellen und markieren", en: "Order and mark", sv: "Beställ och markera" },
+        b: { de: "Beim Lieferanten bestellen — die Menge steht in der Standardquantität dabei — und die Positionen hier „in Bestellung\" setzen. So weiß das Team, dass sich jemand kümmert.", en: "Order from the supplier — the amount is shown in the standard unit — and set the lines to “ordered” here, so the team knows it is handled.", sv: "Beställ hos leverantören — mängden visas i standardenheten — och sätt raderna som ”beställda” här, så vet teamet att någon tar hand om det." } },
+      { s: "orders", t: "ord-open", h: { de: "Offene Bestellungen", en: "Open orders", sv: "Öppna beställningar" },
+        b: { de: "Hier stehen alle bestellten Produkte. Kommt eine andere Menge als bestellt, die Zahl anpassen; bei Lebensmitteln das MHD der Lieferung eintragen.", en: "All ordered products are listed here. If a different amount arrives, adjust it; for food, enter the delivery's best-before date.", sv: "Här står alla beställda produkter. Kommer en annan mängd, justera den; för livsmedel, ange leveransens bäst före." } },
+      { s: "orders", t: "ord-receive", h: { de: "Lieferung einbuchen", en: "Book the delivery", sv: "Bokför leveransen" },
+        b: { de: "„Zurück in Bestand\" bucht die gelieferte Menge ein — einzeln oder alle zusammen. Reicht der Bestand danach noch nicht, kommt das Produkt wieder auf die Bestellliste.", en: "“Back to stock” books in the delivered amount — one by one or all at once. If stock is still short, the product returns to the order list.", sv: "”Tillbaka i lager” bokför den levererade mängden — en i taget eller alla. Räcker lagret inte, hamnar produkten på listan igen." } },
+      { s: "orders", t: "ord-person", card: "pl", h: { de: "Deine Liste", en: "Your list", sv: "Din lista" },
+        b: { de: "Unter „Bestelllisten je Person\" siehst du, welche Produkte in deiner Verantwortung liegen und was Stellvertretungen übernehmen.", en: "“Order lists per person” shows which products you are responsible for and what deputies cover.", sv: "”Beställningslistor per person” visar vilka produkter du ansvarar för och vad ersättare tar hand om." } }
+    ] }
+];
+
+Object.assign(DICT.en, {
+  "Mein Konto": "My account", "Zu Mein Konto": "Go to my account", "Tutorials": "Tutorials", "Tutorial starten": "Start tutorial", "Tutorial beenden": "End tutorial",
+  "Schritt für Schritt auf den echten Seiten — jedes Tutorial für sich": "Step by step on the real pages — each tutorial on its own",
+  "Persönliche Einstellungen wie Sprache, Design und Passwort findest du unter „Mein Konto\".": "Personal settings such as language, theme and password are under “My account”.",
+  "Keine Einstellungen freigegeben": "No settings available",
+  "Die Bereiche „Lager und Artikel\" und „Warnungen und Mail\" hat die inhabende Person für dich gesperrt. Deine persönlichen Einstellungen findest du unter „Mein Konto\".": "The owner has locked “Storage and items” and “Warnings and mail” for you. Your personal settings are under “My account”.",
+  "Diese Seite gehört dir: Sprache, Design und Passwort gelten nur für dein Konto. Niemand kann sie für dich sperren.": "This page is yours: language, theme and password apply only to your account. Nobody can lock it for you.",
+  "Meine Rechte": "My permissions", "Was du in dieser Firma darfst. Ändern kann das nur, wer das Recht „Rechte ändern\" hat.": "What you may do in this company. Only people with “Change permissions” can change it.",
+  "Buchen ist für dich gesperrt. Freigeben kann das, wer das Recht „Rechte ändern\" hat.": "Booking is locked for you. Anyone with “Change permissions” can unlock it.",
+  "Dieser Bereich ist gerade nicht zu sehen — etwa weil er für dich gesperrt ist oder noch Daten fehlen. Mit „Weiter\" geht es trotzdem.": "This part isn't visible right now — perhaps it is locked for you or data is missing. “Next” continues anyway.",
+  "Einklappen": "Collapse", "Aufklappen": "Expand", "Weiter": "Next", "Fertig": "Done", "Schritt": "Step", "Schritte": "steps", "erlaubt": "allowed", "gesperrt": "locked",
+  "Seiten": "Pages", "Produkte und Buchungen": "Products and bookings", "Team und Profile": "Team and profiles", "Auswertung und Dateien": "Reports and files",
+  "Einstellungen: Lager und Artikel": "Settings: storage and items", "Einstellungen: Warnungen und Mail": "Settings: warnings and mail",
+  "Für dich gesperrt — dafür fehlt dir ein Recht.": "Locked for you — a permission is missing."
+});
+Object.assign(DICT.sv, {
+  "Mein Konto": "Mitt konto", "Zu Mein Konto": "Till mitt konto", "Tutorials": "Guider", "Tutorial starten": "Starta guiden", "Tutorial beenden": "Avsluta guiden",
+  "Schritt für Schritt auf den echten Seiten — jedes Tutorial für sich": "Steg för steg på de riktiga sidorna — varje guide för sig",
+  "Persönliche Einstellungen wie Sprache, Design und Passwort findest du unter „Mein Konto\".": "Personliga inställningar som språk, tema och lösenord finns under ”Mitt konto”.",
+  "Keine Einstellungen freigegeben": "Inga inställningar tillgängliga",
+  "Die Bereiche „Lager und Artikel\" und „Warnungen und Mail\" hat die inhabende Person für dich gesperrt. Deine persönlichen Einstellungen findest du unter „Mein Konto\".": "Ägaren har låst ”Lager och artiklar” och ”Varningar och mejl” för dig. Dina personliga inställningar finns under ”Mitt konto”.",
+  "Diese Seite gehört dir: Sprache, Design und Passwort gelten nur für dein Konto. Niemand kann sie für dich sperren.": "Den här sidan är din: språk, tema och lösenord gäller bara ditt konto. Ingen kan låsa den för dig.",
+  "Meine Rechte": "Mina rättigheter", "Was du in dieser Firma darfst. Ändern kann das nur, wer das Recht „Rechte ändern\" hat.": "Vad du får göra i företaget. Bara den med ”Ändra rättigheter” kan ändra det.",
+  "Buchen ist für dich gesperrt. Freigeben kann das, wer das Recht „Rechte ändern\" hat.": "Bokföring är låst för dig. Den med ”Ändra rättigheter” kan låsa upp.",
+  "Dieser Bereich ist gerade nicht zu sehen — etwa weil er für dich gesperrt ist oder noch Daten fehlen. Mit „Weiter\" geht es trotzdem.": "Den här delen syns inte just nu — kanske är den låst eller data saknas. ”Nästa” fortsätter ändå.",
+  "Einklappen": "Fäll ihop", "Aufklappen": "Fäll ut", "Weiter": "Nästa", "Fertig": "Klar", "Schritt": "Steg", "Schritte": "steg", "erlaubt": "tillåtet", "gesperrt": "låst",
+  "Seiten": "Sidor", "Produkte und Buchungen": "Produkter och bokningar", "Team und Profile": "Team och profiler", "Auswertung und Dateien": "Rapporter och filer",
+  "Einstellungen: Lager und Artikel": "Inställningar: lager och artiklar", "Einstellungen: Warnungen und Mail": "Inställningar: varningar och mejl",
+  "Für dich gesperrt — dafür fehlt dir ein Recht.": "Låst för dig — en rättighet saknas."
+});
 
 const PERM_LIST = [
   ["page_dashboard", "Seite: Übersicht", ["owner","manager","worker","reader"]],
@@ -5645,7 +5902,7 @@ const PERM_LIST = [
   ["delete", "Produkte löschen", ["owner"]],
   ["import", "Excel-Import", ["owner","manager"]],
   ["qr", "QR-Codes generieren", ["owner","manager","worker"]],
-  ["places", "Lagerorte verwalten", ["owner","manager"]],
+  ["places", "Einstellungen: Lager und Artikel", ["owner","manager"]],
   ["order", "Bestellstatus ändern", ["owner","manager"]],
   ["invite", "Team einladen", ["owner"]],
   ["rights", "Rechte ändern", ["owner"]],
@@ -5658,7 +5915,7 @@ const PERM_LIST = [
   ["export", "Excel-Datei erstellen", ["owner","manager","reader"]],
   ["pdf", "PDF erstellen", ["owner","manager","reader"]],
   ["upload", "Dateien hochladen", ["owner","manager"]],
-  ["mail", "Benachrichtigungen einstellen", ["owner","manager"]]
+  ["mail", "Einstellungen: Warnungen und Mail", ["owner","manager"]]
 ];
 
 const SEED = [
@@ -7997,6 +8254,7 @@ class Component extends DCLogic {
   }
 
   refillOrder(orderId, ids, who) {
+    if (!this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Nachfüllung buchen"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
     const o = (this.state.orders || []).find(x => x.id === orderId);
     if (!o) return;
     const done = [], snap = {};
@@ -8064,6 +8322,7 @@ class Component extends DCLogic {
   // Mehrere auf einmal: alles in einem Durchgang rechnen, damit sich die
   // einzelnen Schritte nicht gegenseitig den Stand überschreiben.
   receiveMany(pids, who) {
+    if (!this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Nachfüllung buchen"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
     const st = this.state;
     const lastOrder = pid => (st.orders || []).filter(x => x.id !== "__meta" && (x.items || []).indexOf(pid) >= 0).slice(-1)[0];
     const done = [], skipped = [], status = {};
@@ -8119,6 +8378,7 @@ class Component extends DCLogic {
   }
 
   backToStock(ids, orderId) {
+    if (!this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Nachfüllung buchen"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
     const list = (ids || []).filter(Boolean);
     if (!list.length) return;
     const orders = (this.state.orders || [])
@@ -8321,6 +8581,7 @@ class Component extends DCLogic {
     this.mq.addEventListener("change", this.mqL);
   }
   componentWillUnmount() {
+    if (this._tourL) { window.removeEventListener("scroll", this._tourL, true); window.removeEventListener("resize", this._tourL); }
     clearInterval(this.tick);
     clearInterval(this.dirtyT);
     if (this.unwatch) this.unwatch();
@@ -8333,6 +8594,7 @@ class Component extends DCLogic {
     if (this.mq) this.mq.removeEventListener("change", this.mqL);
   }
   componentDidUpdate() {
+    if (this.state.tour) this.tourMeasure();
     if (this.state.authed && !this.pageOk(this.state.screen) && this.state.screen !== this.firstPage()) {
       const to = this.firstPage();
       setTimeout(() => {
@@ -8608,6 +8870,66 @@ class Component extends DCLogic {
   }
   // Seitenrechte: ohne das Recht ist die Seite im Menü verborgen und
   // lässt sich auch über Umwege (Links, Scan, Adresse) nicht öffnen.
+  tourDef() { const tr = this.state.tour; return tr ? TUTORIALS.find(x => x.id === tr.id) : null; }
+  tourOk(tu) {
+    return tu.need.every(k => this.may(k)) && (!tu.needAny || tu.needAny.some(k => this.may(k)));
+  }
+  startTour(id) {
+    if (!this._tourL) {
+      this._tourL = () => this.tourMeasure();
+      window.addEventListener("scroll", this._tourL, true);
+      window.addEventListener("resize", this._tourL);
+    }
+    this.tourGo(id, 0);
+  }
+  tourGo(id, i) {
+    const tu = TUTORIALS.find(x => x.id === id);
+    const s = tu && tu.steps[i];
+    if (!s) return;
+    const st = this.state;
+    if (s.card) this.setState(prev => ({ openCards: Object.assign({}, prev.openCards, { [s.card]: true }) }));
+    if (s.s === "detail") {
+      const ps = (st.products || []).filter(p => p.aktiv !== false);
+      if (!ps.some(p => p.id === st.currentId) && ps[0]) this.setState({ currentId: ps[0].id });
+    }
+    if (s.s && st.screen !== s.s && this.pageOk(s.s)) this.go(s.s);
+    if (s.prep === "memoNew" && !this.state.memoEdit) this.memoDraft({ id: null, name: "", items: [] }, this.tr("Neuer Merkzettel geöffnet"));
+    this._tourScroll = true; this._tourKey = null;
+    this.setState({ tour: { id, i }, tourRect: null, tourSeen: false, menu: null, burgerOpen: false });
+  }
+  tourEnd() {
+    if (this._tourL) {
+      window.removeEventListener("scroll", this._tourL, true);
+      window.removeEventListener("resize", this._tourL);
+      this._tourL = null;
+    }
+    this.setState({ tour: null, tourRect: null });
+  }
+  tourMeasure() {
+    const tr = this.state.tour, tu = this.tourDef();
+    const s = tu && tu.steps[tr.i];
+    if (!s) return;
+    const el = document.querySelector('[data-tour="' + s.t + '"]');
+    let r = null;
+    if (el) {
+      const b = el.getBoundingClientRect();
+      if (b.width || b.height) {
+        if (this._tourScroll) {
+          this._tourScroll = false;
+          const vh = window.innerHeight;
+          if (b.top < 80 || b.top > vh * 0.4) {
+            const se = document.scrollingElement || document.documentElement;
+            se.scrollTop = Math.max(0, se.scrollTop + b.top - 100);
+            requestAnimationFrame(() => this.tourMeasure());
+          }
+        }
+        r = { x: Math.round(b.left), y: Math.round(b.top), w: Math.round(b.width), h: Math.round(b.height) };
+      }
+    }
+    const key = JSON.stringify(r) + ":" + tr.id + tr.i;
+    if (key !== this._tourKey) { this._tourKey = key; this.setState({ tourRect: r, tourSeen: true }); }
+  }
+
   pageOk(screen) {
     const key = PAGE_PERMS[screen];
     return !key || this.may(key);
@@ -9072,7 +9394,7 @@ class Component extends DCLogic {
         // entzogen werden — sonst könnte niemand mehr Rechte vergeben.
         const pinned = lastOwner && key === "rights" && on;
         return {
-          label: this.tr(label), on, pinned,
+          key, label: this.tr(label), on, pinned,
           pinNote: pinned ? this.tr("gesetzt") : "",
           locked: !this.may("rights"),
           toggle: () => {
@@ -9239,7 +9561,54 @@ class Component extends DCLogic {
     const evFuture = !!ev && !!this.isoDay(ev.datum) && this.isoDay(ev.datum) >= todayIso;
     const plMembers = (st.members || []).filter(m => ["removed", "gesperrt", "blocked"].indexOf(m.status) < 0).map(m => m.name);
 
+    const L3 = o => (o && (o[lang] || o.de)) || "";
+    const myList = this.myPerms();
+    const mayW = this.may("withdraw"), mayR = this.may("refill");
+    const tourTu = this.tourDef();
+    const tourStep = tourTu ? tourTu.steps[st.tour.i] : null;
+    const tr0 = st.tourRect, pad = 6;
+    const groupPerms = list => PERM_GROUPS.map((g, gi) => {
+      const items = list.filter(x => permGroupOf(x.key) === gi);
+      return { title: this.tr(g.title), items, count: items.filter(x => x.on).length + " / " + items.length + " " + this.tr("erlaubt") };
+    }).filter(g => g.items.length);
+    const meRow = (st.members || []).find(m => m.id === st.meId) || (st.members || []).find(m => m.name === meLabel) || {};
     return {
+      canWithdraw: mayW, canRefill: mayR, canBook: mayW || mayR, noBook: !mayW && !mayR,
+      onAccount: st.screen === "account", navAccount: this.navStyle("account"), goAccount: () => this.go("account"),
+      settingsOk: this.pageOk("settings"),
+      meEmail: meRow.email || st.authEmail || "",
+      myPermGroups: groupPerms(PERM_LIST.map(([key, label]) => {
+        const on = myList.indexOf(key) >= 0;
+        return { key, on, label: this.tr(label), state: on ? this.tr("erlaubt") : this.tr("gesperrt"), color: on ? "var(--color-text)" : "var(--sc-ink-3)" };
+      })),
+      myPermCount: myList.filter(k => PERM_LIST.some(p => p[0] === k)).length + " / " + PERM_LIST.length + " " + this.tr("erlaubt"),
+      permGroups: groupPerms(permsFor()),
+      setStockOn: this.may("places"), setMailOn: this.may("mail"), noSettings: !this.may("places") && !this.may("mail") && !(st.testMode || st.platformAdmin),
+      toggleSetStock: tgl("setStockShut"), openSetStock: !oc.setStockShut, lblSetStock: oc.setStockShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetStock: oc.setStockShut ? "▸" : "▾",
+      toggleSetMail: tgl("setMailShut"), openSetMail: !oc.setMailShut, lblSetMail: oc.setMailShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetMail: oc.setMailShut ? "▸" : "▾",
+      toggleSetSys: tgl("setSysShut"), openSetSys: !oc.setSysShut, lblSetSys: oc.setSysShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetSys: oc.setSysShut ? "▸" : "▾",
+      tutorialsOn: !(st.helpQuery || "").trim(),
+      tutorials: TUTORIALS.map((tu, i) => {
+        const ok = this.tourOk(tu);
+        return { num: String(i + 1), title: L3(tu.title), text: L3(tu.text), steps: tu.steps.map(s => L3(s.h)),
+          stepsLabel: tu.steps.length + " " + this.tr("Schritte"), ok, locked: !ok,
+          lockNote: this.tr("Für dich gesperrt — dafür fehlt dir ein Recht."), start: () => this.startTour(tu.id) };
+      }),
+      tourOn: !!tourStep,
+      tourKicker: tourTu ? L3(tourTu.title) + " · " + this.tr("Schritt") + " " + (st.tour.i + 1) + " / " + tourTu.steps.length : "",
+      tourTitle: tourStep ? L3(tourStep.h) : "", tourBody: tourStep ? L3(tourStep.b) : "",
+      tourDots: tourTu ? tourTu.steps.map((s, i) => ({ bg: i <= st.tour.i ? "var(--color-accent)" : "color-mix(in srgb, var(--color-text) 14%, transparent)" })) : [],
+      tourMissing: !!tourStep && st.tourSeen && !tr0,
+      tourFirst: !tourStep || st.tour.i === 0,
+      tourNextLabel: tourTu && st.tour.i >= tourTu.steps.length - 1 ? this.tr("Fertig") : this.tr("Weiter"),
+      tourPrev: () => st.tour && st.tour.i > 0 && this.tourGo(st.tour.id, st.tour.i - 1),
+      tourNext: () => { if (!tourTu) return; if (st.tour.i >= tourTu.steps.length - 1) this.tourEnd(); else this.tourGo(st.tour.id, st.tour.i + 1); },
+      tourEnd: () => this.tourEnd(),
+      tourCardStyle: "position: fixed; z-index: 1001; right: 16px; width: 390px; max-width: calc(100vw - 32px); background: var(--sc-card); padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); "
+        + (tr0 && typeof window !== "undefined" && tr0.y > window.innerHeight * 0.5 ? "top: 72px" : "bottom: calc(16px + env(safe-area-inset-bottom, 0px))"),
+      tourRingStyle: tr0
+        ? "position: fixed; z-index: 1000; pointer-events: none; left: " + (tr0.x - pad) + "px; top: " + (tr0.y - pad) + "px; width: " + (tr0.w + pad * 2) + "px; height: " + (tr0.h + pad * 2) + "px; border: 2px solid var(--color-accent); border-radius: 4px; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 28%, transparent), 0 0 0 9999px rgba(12, 16, 20, 0.42); transition: left .25s ease, top .25s ease, width .25s ease, height .25s ease"
+        : "position: fixed; inset: 0; z-index: 1000; pointer-events: none; background: rgba(12, 16, 20, 0.28)",
       serviceName: name,
       authed: st.authed,
       onLanding: !st.authed && st.authView === "landing",
@@ -9269,11 +9638,11 @@ class Component extends DCLogic {
         dashboard: this.tr("Übersicht"), products: this.tr("Produkte"), detail: cur.name, scan: this.tr("Scannen"),
         events: this.tr("Events"), history: this.tr("Bestandsverlauf"), orders: this.tr("Bestellungen"),
         new: this.tr("Produktverwaltung"), qr: this.tr("QR-Codes"), team: this.tr("Team & Rechte"),
-        settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole"),
+        settings: this.tr("Einstellungen"), admin: this.tr("Betriebs-Konsole"), account: this.tr("Mein Konto"),
         help: this.tr("Hilfe")
       }[st.screen] || "",
       onDashboard: st.screen === "dashboard", onProducts: st.screen === "products", onDetail: st.screen === "detail",
-      showScanFab: st.screen !== "scan" && !(st.screen === "memo" && (st.memoUndo || []).length) && this.pageOk("scan"),
+      showScanFab: !st.tour && st.screen !== "scan" && !(st.screen === "memo" && (st.memoUndo || []).length) && this.pageOk("scan"),
       onScan: st.screen === "scan", onNew: st.screen === "new", onQr: st.screen === "qr",
       onHistory: st.screen === "history", navHistory: this.navStyle("history"),
       goHistory: () => this.go("history"),
@@ -10075,6 +10444,7 @@ class Component extends DCLogic {
       // (andere Quantitäten) kommen hinzu.
       setQty: e => { const n = parseInt(e.target.value, 10); this.setState({ qty: isNaN(n) || n < 0 ? 0 : n }); },
       withdraw: () => {
+        if (!this.may("withdraw")) { this.say(this.tr("Kein Zugriff"), this.tr("Entnahme buchen"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
         // Mehr entnehmen als da ist, geht nicht: 1,5 Kisten geben keine
         // 2 Kisten her. Die Absage nennt, was tatsächlich vorhanden ist.
         const n = this.bookTotal(cur);
@@ -10105,6 +10475,7 @@ class Component extends DCLogic {
         }
       },
       refill: () => {
+        if (!this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Nachfüllung buchen"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
         const n = this.bookTotal(cur);
         if (n <= 0) { this.say(this.tr("Buchung"), this.tr("Keine Menge eingetragen"), this.tr("Menge eintragen, dann buchen.")); return; }
         const next = cur.ist + n;
