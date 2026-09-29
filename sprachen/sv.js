@@ -5,6 +5,14 @@
 window.SC.sprachen.sv = {
   // Beschriftungen, Knöpfe, Meldungen
   texte: {
+    "Bestellverlauf": "Beställningshistorik",
+    "gespeichert": "sparade",
+    "noch keine": "inga än",
+    "eingebucht": "inlevererad",
+    "Eingebucht": "Inlevererad",
+    "Nur die 5 neuesten": "Bara de 5 senaste",
+    "Alle anzeigen": "Visa alla",
+    "Noch keine Bestellung gespeichert. Jede Bestellung erscheint hier, sobald sie auf „in Bestellung\" gesetzt wird.": "Inga beställningar sparade än. Varje beställning visas här så snart den sätts till ”beställd”.",
     " oder die Stellvertretung.": " eller ersättarna.",
     "15 Personen": "15 personer",
     "2 000 Artikel": "2 000 artiklar",
@@ -783,7 +791,7 @@ window.SC.sprachen.sv = {
     "Wie schütze ich mein Konto zusätzlich?": "Hur skyddar jag mitt konto ytterligare?",
     "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Aktivera tvåfaktor i inställningarna. Inloggningen frågar sedan även efter en kod från autentiseringsappen.",
     "Wie ändere ich die Sprache?": "Hur byter jag språk?",
-    "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Välj DE, EN eller SV längst upp till höger i menyraden.",
+    "Oben rechts in der Menüleiste DE, EN, SV, ES, IT oder TR wählen.": "Välj DE, EN, SV, ES, IT eller TR längst upp till höger i menyraden.",
     "Sprache": "Språk",
     "Zurück": "Tillbaka",
     "Nur beim Bearbeiten": "Bara vid redigering",

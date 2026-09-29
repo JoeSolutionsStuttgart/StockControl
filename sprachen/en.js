@@ -5,6 +5,13 @@
 window.SC.sprachen.en = {
   // Beschriftungen, Knöpfe, Meldungen
   texte: {
+    "Bestellverlauf": "Order history",
+    "gespeichert": "saved",
+    "noch keine": "none yet",
+    "Eingebucht": "Received",
+    "Nur die 5 neuesten": "Only the 5 newest",
+    "Alle anzeigen": "Show all",
+    "Noch keine Bestellung gespeichert. Jede Bestellung erscheint hier, sobald sie auf „in Bestellung\" gesetzt wird.": "No orders saved yet. Every order appears here as soon as it is set to “on order”.",
     " oder die Stellvertretung.": " or the deputies.",
     "15 Personen": "15 people",
     "2 000 Artikel": "2,000 items",
@@ -904,7 +911,7 @@ window.SC.sprachen.en = {
     "Wie schütze ich mein Konto zusätzlich?": "How do I protect my account further?",
     "In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab.": "Set up two-factor in the settings. Sign-in then also asks for a code from the authenticator app.",
     "Wie ändere ich die Sprache?": "How do I change the language?",
-    "Oben rechts in der Menüleiste DE, EN oder SV wählen.": "Choose DE, EN or SV at the top right of the menu bar.",
+    "Oben rechts in der Menüleiste DE, EN, SV, ES, IT oder TR wählen.": "Choose DE, EN, SV, ES, IT or TR at the top right of the menu bar.",
     "Sprache": "Language",
     "Nur beim Bearbeiten": "Only while editing",
     "Zuweisen nur beim Bearbeiten oder über die Excel-Tabelle.": "Assign only while editing or via the Excel sheet.",
