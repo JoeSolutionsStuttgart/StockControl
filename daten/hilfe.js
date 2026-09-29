@@ -200,7 +200,7 @@ const HELP_TOPICS = [
       a: ["In den Einstellungen Zwei-Faktor einrichten. Danach fragt die Anmeldung zusätzlich einen Code aus der Authenticator-App ab."],
       go: "settings", linkLabel: "Zu den Einstellungen" },
     { q: "Wie ändere ich die Sprache?",
-      a: ["Oben rechts in der Menüleiste DE, EN oder SV wählen."] }
+      a: ["Oben rechts in der Menüleiste DE, EN, SV, ES, IT oder TR wählen."] }
   ]}
 ];
 
