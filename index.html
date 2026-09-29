@@ -3648,6 +3648,40 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ authIsReset }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Neues Passwort festlegen</h3>
+          <p style="margin: 0 0 var(--space-6); font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n>Wähle ein neues Passwort und wiederhole es. Danach bist du direkt angemeldet.</p>
+          <sc-if value="{{ resetChecking }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0 0 var(--space-4); font-size: 13.5px; color: var(--sc-ink-2)" data-i18n>Link wird geprüft …</p>
+          </sc-if>
+          <sc-if value="{{ resetBroken }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3)">
+              <p style="margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n-keep>{{ resetErrText }}</p>
+              <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" onClick="{{ viewForgot }}"><span data-i18n>Neuen Link anfordern</span></button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ resetReady }}" hint-placeholder-val="{{ false }}">
+            <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Neues Passwort</label>
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" value="{{ resetPw }}" onInput="{{ setResetPw }}">
+            </div>
+            <div class="field" style="margin-bottom: var(--space-3)"><label data-i18n>Passwort wiederholen</label>
+              <input class="input" type="{{ pwType }}" autocomplete="new-password" value="{{ resetPw2 }}" onInput="{{ setResetPw2 }}">
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 4px 12px; margin-bottom: var(--space-3)">
+              <sc-for list="{{ resetRules }}" as="r" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: {{ r.color }}">
+                  <span style="width: 12px; height: 12px; flex: none; border-radius: 50%; border: 1px solid currentColor; display: grid; place-items: center; font-size: 8px; line-height: 1">{{ r.mark }}</span>
+                  <span>{{ r.label }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <button type="button" class="btn btn-ghost" style="padding: 2px 6px; font-size: 12.5px; margin-bottom: var(--space-4)" onClick="{{ togglePw }}"><span data-i18n-keep>{{ pwToggleLabel }}</span></button>
+            <button class="btn btn-primary btn-block" style="height: 46px; font-size: 15px" disabled="{{ resetSaveDisabled }}" onClick="{{ saveResetPw }}"><span data-i18n>Passwort speichern</span></button>
+          </sc-if>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ authIsForgot }}" hint-placeholder-val="{{ false }}">
         <div>
           <h3 style="margin: 0 0 var(--space-2); font-size: 25px" data-i18n>Passwort zurücksetzen</h3>
@@ -4038,6 +4072,19 @@ class Component extends DCLogic {
         // Fremde Sitzung abmelden und auf dem Einladungsschirm stehen bleiben.
         try { await api.signOut(); } catch (e) {}
         this.setState({ live: true, authed: false, authView: "invite", source: "Supabase", connectError: "" });
+        return;
+      }
+      if (this.pendingReset) {
+        const tok = this.pendingReset; this.pendingReset = null;
+        try {
+          if (tok !== "session") await api.verifyRecovery(tok);
+          else { await new Promise(r => setTimeout(r, 400)); if (!(await api.session())) throw new Error(this.tr("Der Link ist abgelaufen oder wurde schon benutzt.")); }
+          history.replaceState(null, "", location.pathname);
+          this.setState({ live: true, authed: false, authView: "reset", resetState: "ready", source: "Supabase", connectError: "" });
+        } catch (e) {
+          this.setState({ live: true, authed: false, authView: "reset", resetState: "broken", source: "Supabase", connectError: "",
+            resetErr: this.tr("Der Link ist abgelaufen oder wurde schon benutzt.") + " (" + String((e && e.message) || e) + ")" });
+        }
         return;
       }
       const sess = await api.session();
@@ -6301,6 +6348,19 @@ class Component extends DCLogic {
     // Einladungslink: die Adresse trägt #invite=<Merkmal>. Wer darüber
     // kommt, richtet zuerst sein Passwort ein und ist danach in genau
     // dieser Firma — ein eigenes Konto, keine geteilten Zugangsdaten.
+    // Link aus der Passwort-Mail: #reset&token_hash=…&type=recovery.
+    // Er führt nicht zur Anmeldung, sondern direkt zum neuen Passwort.
+    try {
+      const h = location.hash || "", q = location.search || "";
+      const th = (h.match(/token_hash=([^&]+)/) || q.match(/token_hash=([^&]+)/) || [])[1];
+      const err = (h.match(/error_description=([^&]+)/) || [])[1];
+      if (th || /(^#|&)reset\b/.test(h) || /type=recovery/.test(h)) {
+        this.pendingReset = th ? decodeURIComponent(th) : "session";
+        this.setState({ authed: false, authView: "reset", resetState: err ? "broken" : "checking",
+          resetErr: err ? decodeURIComponent(err.replace(/\+/g, " ")) : "" });
+        if (th) history.replaceState(null, "", location.pathname);
+      }
+    } catch (e) {}
     try {
       const m = (location.hash || "").match(/invite=([^&]+)/);
       if (m) {
@@ -9814,6 +9874,27 @@ class Component extends DCLogic {
           this.notConnectedBody());
       },
       viewForgot: () => this.setState({ authView: "forgot" }),
+      authIsReset: st.authView === "reset",
+      resetChecking: st.authView === "reset" && st.resetState === "checking",
+      resetBroken: st.authView === "reset" && st.resetState === "broken",
+      resetReady: st.authView === "reset" && st.resetState === "ready",
+      resetErrText: st.resetErr || this.tr("Der Link ist abgelaufen oder wurde schon benutzt."),
+      resetPw: st.resetPw || "", resetPw2: st.resetPw2 || "",
+      setResetPw: e => this.setState({ resetPw: e.target.value }),
+      setResetPw2: e => this.setState({ resetPw2: e.target.value }),
+      resetRules: this.rulesFor(st.resetPw || "", st.resetPw2 || ""),
+      resetSaveDisabled: !(this.pwRules(st.resetPw || "").every(r => r.ok) && st.resetPw === st.resetPw2) || !!st.resetBusy,
+      saveResetPw: () => {
+        if (!this.api) return;
+        this.setState({ resetBusy: true });
+        this.api.updatePassword(st.resetPw)
+          .then(() => {
+            this.setState({ resetBusy: false, resetPw: "", resetPw2: "", resetState: "" });
+            this.say(this.tr("Passwort"), this.tr("Passwort geändert"), this.tr("Du bist jetzt mit dem neuen Passwort angemeldet."));
+            return this.refresh();
+          })
+          .catch(err => { this.setState({ resetBusy: false }); this.say("Supabase", this.tr("Fehler"), String((err && err.message) || err)); });
+      },
       resetDisabled: st.captcha && !st.captchaToken,
       sendReset: () => {
         const mail = (st.authEmail || "").trim();

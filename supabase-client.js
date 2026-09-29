@@ -116,8 +116,16 @@ export async function requestPasswordReset(email, captchaToken) {
   const sb = await client();
   return ok(await sb.auth.resetPasswordForEmail(email, {
     captchaToken,
-    redirectTo: location.origin + location.pathname + "#reset"
+    redirectTo: location.origin + location.pathname
   }));
+}
+
+// Link aus der Passwort-Mail einlösen. Die Mail trägt token_hash direkt
+// (siehe mails/passwort-vergessen.html) — so landet man nicht auf der
+// Anmeldung, und es ist kein Captcha nötig: verifyOtp verlangt keins.
+export async function verifyRecovery(tokenHash) {
+  const sb = await client();
+  return ok(await sb.auth.verifyOtp({ type: "recovery", token_hash: tokenHash }));
 }
 
 export async function updatePassword(password) {
