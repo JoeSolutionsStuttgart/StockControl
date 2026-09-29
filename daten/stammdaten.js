@@ -57,7 +57,7 @@ const PERM_GROUPS = [
   { title: "Produkte und Buchungen", keys: ["view", "withdraw", "refill", "create", "edit", "delete", "import", "qr", "order", "undo"] },
   { title: "Einstellungen", keys: ["places", "mail"] },
   { title: "Team und Profile", keys: ["invite", "rights", "profiles", "profileEdit", "list_public"] },
-  { title: "Auswertung und Dateien", keys: ["history", "who", "export", "pdf", "upload"] }
+  { title: "Auswertung und Dateien", keys: ["history", "forecast", "who", "export", "pdf", "upload"] }
 ];
 const permGroupOf = k => PERM_GROUPS.findIndex(g => g.test ? g.test(k) : g.keys.indexOf(k) >= 0);
 
@@ -86,6 +86,7 @@ const PERM_LIST = [
   ["invite", "Team einladen", ["owner"]],
   ["rights", "Rechte ändern", ["owner"]],
   ["history", "Bewegungen und Entnahmehistorie sehen", ["owner","manager","reader"]],
+  ["forecast", "Bestandsprognose mit KI nutzen", ["owner","manager"]],
   ["who", "Sehen, wer was entnommen hat", ["owner","manager"]],
   ["undo", "Bewegungen rückgängig machen", ["owner","manager"]],
   ["list_public", "Eigene Personenbestellliste für alle sichtbar", []],

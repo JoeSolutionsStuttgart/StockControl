@@ -19,6 +19,7 @@
 <script src="daten/stammdaten.js"></script>
 <script src="daten/hilfe.js"></script>
 <script src="daten/demo.js"></script>
+<script src="daten/ki.js"></script>
 </head>
 <body>
 <x-dc>
@@ -820,11 +821,17 @@
                 <option value="90">Letzte 3 Monate</option>
                 <option value="365">Letzte 12 Monate</option>
                 <option value="0">Gesamter Zeitraum</option>
+                <option value="custom">Eigener Zeitraum …</option>
               </select>
             </div>
+            <sc-if value="{{ hCustom }}" hint-placeholder-val="{{ false }}">
+              <div class="field"><label data-i18n>Von</label><input class="input" type="date" value="{{ hFrom }}" max="{{ hTo }}" onChange="{{ setHFrom }}"></div>
+              <div class="field"><label data-i18n>Bis</label><input class="input" type="date" value="{{ hTo }}" min="{{ hFrom }}" max="{{ hToday }}" onChange="{{ setHTo }}"></div>
+            </sc-if>
           </div>
           <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; margin-top: var(--space-2)">
             <button class="btn btn-secondary" onClick="{{ resetHistory }}"><span data-i18n>Auswahl zurücksetzen</span></button>
+            <sc-if value="{{ canForecast }}" hint-placeholder-val="{{ false }}"><button class="btn btn-primary" style="gap: 7px" onClick="{{ fcShow }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="m7 15 4-4 3 3 6-6"></path><path d="M16 8h4v4"></path></svg><span data-i18n>Bedarf vorhersagen</span></button></sc-if>
             <span style="font-size: 12px; color: var(--sc-ink-2)">{{ hSummary }}</span>
           </div>
         </section>
@@ -2428,7 +2435,7 @@
               <h4 style="margin: 0; margin-right: auto" data-i18n>Meine Rechte</h4>
               <span data-i18n-keep class="tag tag-neutral">{{ myPermCount }}</span>
             </div>
-            <p class="card-body" style="margin: 0" data-i18n>Was du in dieser Firma darfst. Ändern kann das nur, wer das Recht „Rechte ändern" hat.</p>
+            <p class="card-body" style="margin: 0" data-i18n>Was du in dieser Firma darfst.</p>
             <div style="display: flex; flex-direction: column; gap: 6px">
               <sc-for list="{{ myPermGroups }}" as="pg" hint-placeholder-count="5">
                 <details style="border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent)">
@@ -3786,6 +3793,140 @@
   </div>
 </sc-if>
 
+<sc-if value="{{ fcOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; inset: 0; z-index: 62; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
+    <div class="blueprint elev-lg" style="width: min(900px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: var(--space-6); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-4); animation: sc-in .18s ease-out">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: flex-start; gap: var(--space-3)">
+        <div style="flex: 1; min-width: 0">
+          <div class="card-kicker" data-i18n>Prognose</div>
+          <h3 style="font-family: var(--font-heading); font-size: 25px; margin: 0" data-i18n>Bestandsbedarf vorhersagen</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; line-height: 1.5; color: var(--sc-ink-2)" data-i18n>Du bestimmst, was die KI bekommt: Waren, Zeitraum des Verlaufs und Faktoren. Deine Auswahl bleibt für die nächste Prognose gespeichert.</p>
+        </div>
+        <button class="btn btn-ghost btn-icon" style="width: 40px; height: 40px; flex: none" aria-label="Schließen" onClick="{{ fcClose }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3)">
+        <div class="field"><label data-i18n>KI-Modell</label>
+          <select class="input" value="{{ fcModel }}" onChange="{{ setFcModel }}">
+            <optgroup label="★ Europa">
+              <sc-for list="{{ fcModelsEu }}" as="m" hint-placeholder-count="2">
+                <option value="{{ m.id }}">★ {{ m.label }}</option>
+              </sc-for>
+            </optgroup>
+            <optgroup label="Weitere">
+              <sc-for list="{{ fcModelsOther }}" as="m" hint-placeholder-count="3">
+                <option value="{{ m.id }}">{{ m.label }}</option>
+              </sc-for>
+            </optgroup>
+          </select>
+          <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 11.5px; color: var(--sc-ink-2)">
+            <span class="{{ fcModelTag }}" data-i18n-keep>{{ fcModelOrigin }}</span>
+            <span data-i18n-keep>{{ fcModelNote }}</span>
+          </div>
+        </div>
+        <div class="field"><label data-i18n>Vorhersage für</label>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px">
+            <sc-for list="{{ fcHorizons }}" as="hz" hint-placeholder-count="4">
+              <button type="button" class="btn btn-secondary" style="{{ hz.style }}" onClick="{{ hz.pick }}"><span data-i18n-keep>{{ hz.label }}</span></button>
+            </sc-for>
+          </div>
+        </div>
+        <div class="field"><label data-i18n>Verlauf für die KI</label>
+          <select class="input" value="{{ fcSpan }}" onChange="{{ setFcSpan }}">
+            <option value="90">Letzte 3 Monate</option>
+            <option value="365">Letzte 12 Monate</option>
+            <option value="730">Letzte 2 Jahre</option>
+            <option value="1095">Letzte 3 Jahre</option>
+            <option value="0">Gesamter Zeitraum</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+          <div style="font-family: var(--font-heading); font-size: 17px; margin-right: auto" data-i18n>Waren</div>
+          <span class="tag tag-neutral" data-i18n-keep>{{ fcPickedLabel }}</span>
+          <button type="button" class="btn btn-ghost" style="padding: 2px 8px; font-size: 12.5px" onClick="{{ fcPickAll }}"><span data-i18n>Alle auswählen</span></button>
+          <button type="button" class="btn btn-ghost" style="padding: 2px 8px; font-size: 12.5px" onClick="{{ fcPickNone }}"><span data-i18n>Keine</span></button>
+        </div>
+        <input class="input" type="search" value="{{ fcQuery }}" onInput="{{ setFcQuery }}" placeholder="Name, EAN, Lieferant …">
+        <div style="max-height: 176px; overflow: auto; border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr))">
+          <sc-for list="{{ fcWaren }}" as="fw" hint-placeholder-count="6">
+            <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; font-size: 13px; cursor: pointer; min-width: 0">
+              <input type="checkbox" checked="{{ fw.on }}" onChange="{{ fw.toggle }}" style="width: 16px; height: 16px; accent-color: var(--color-accent); flex: none">
+              <span data-i18n-keep style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ fw.name }}</span>
+            </label>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+        <div style="display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap">
+          <div style="font-family: var(--font-heading); font-size: 17px; margin-right: auto" data-i18n>Faktoren</div>
+          <span style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Nur was du hinzufügst, geht an die KI.</span>
+        </div>
+        <sc-for list="{{ fcFactorRows }}" as="ff" hint-placeholder-count="0">
+          <div style="display: grid; grid-template-columns: 170px minmax(0, 1fr) 40px; gap: var(--space-2); align-items: center">
+            <span data-i18n-keep style="font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ ff.label }}</span>
+            <sc-if value="{{ ff.isText }}" hint-placeholder-val="{{ true }}">
+              <input class="input" value="{{ ff.value }}" onInput="{{ ff.set }}" placeholder="{{ ff.ph }}">
+            </sc-if>
+            <sc-if value="{{ ff.isEvents }}" hint-placeholder-val="{{ false }}">
+              <span data-i18n-keep style="font-size: 12.5px; color: var(--sc-ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ ff.info }}</span>
+            </sc-if>
+            <button type="button" class="btn btn-ghost btn-icon" style="width: 40px; height: 40px" aria-label="Entfernen" onClick="{{ ff.remove }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          </div>
+        </sc-for>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center">
+          <span style="font-size: 12px; color: var(--sc-ink-2)" data-i18n>Hinzufügen:</span>
+          <sc-for list="{{ fcFactorAdd }}" as="fa" hint-placeholder-count="5">
+            <button type="button" class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ fa.add }}"><span data-i18n-keep>+ {{ fa.label }}</span></button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center">
+        <button class="btn btn-primary" disabled="{{ fcRunOff }}" onClick="{{ fcRun }}"><span data-i18n-keep>{{ fcRunLabel }}</span></button>
+        <span style="font-size: 12px; color: var(--sc-ink-2)" data-i18n-keep>{{ fcEngineNote }}</span>
+        <span class="{{ fcQuotaTag }}" style="margin-left: auto" data-i18n-keep>{{ fcQuotaLabel }}</span>
+      </div>
+
+      <sc-if value="{{ fcHasResult }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+          <div style="display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap">
+            <h4 style="margin: 0; margin-right: auto" data-i18n-keep>{{ fcResultTitle }}</h4>
+            <span class="tag tag-neutral" data-i18n-keep>{{ fcSourceLabel }}</span>
+          </div>
+          <sc-if value="{{ fcHasNote }}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 13px; line-height: 1.55; color: var(--sc-ink-2)" data-i18n-keep>{{ fcNote }}</p>
+          </sc-if>
+          <div style="overflow-x: auto; max-width: 100%">
+            <table class="table" style="min-width: 780px; width: 100%; table-layout: fixed; font-size: 13px">
+              <colgroup><col><col style="width: 104px"><col style="width: 120px"><col style="width: 116px"><col style="width: 130px"><col style="width: 240px"></colgroup>
+              <thead><tr>
+                <th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Ware</th><th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Bestand jetzt</th><th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Erw. Verbrauch</th><th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Bestand danach</th><th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Vorschlag</th><th data-i18n style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Begründung</th>
+              </tr></thead>
+              <tbody>
+                <sc-for list="{{ fcRows }}" as="fr" hint-placeholder-count="4">
+                  <tr>
+                    <td data-i18n-keep title="{{ fr.name }}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500">{{ fr.name }}</td>
+                    <td data-i18n-keep style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ fr.stock }}</td>
+                    <td data-i18n-keep style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--color-accent-700); font-weight: 600">{{ fr.use }}</td>
+                    <td data-i18n-keep style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ fr.after }}</td>
+                    <td style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap"><span class="{{ fr.tagClass }}" data-i18n-keep>{{ fr.advice }}</span></td>
+                    <td data-i18n-keep title="{{ fr.why }}" style="font-size: 12px; line-height: 1.4; color: var(--sc-ink-2)">{{ fr.why }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ clashOpen }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide style="position: fixed; inset: 0; z-index: 60; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
     <div class="blueprint elev-lg" style="width: min(640px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: var(--space-4); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-3); animation: sc-in .18s ease-out">
@@ -3875,7 +4016,7 @@
 const OWNER_USER = "m.kohl@internet-gmbh.de";
 const OWNER_PW = "Testen1234!";
 const GUARD_DEFAULT = true;
-const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRows: 500, uploadMb: 10, storageMb: 8000 };
+const LIMITS_DEFAULT = { products: 2000, members: 50, mailsPerDay: 250, importRows: 500, uploadMb: 10, storageMb: 8000, aiPerDay: 20 };
 
 // Sprachen, Stammdaten, Hilfetexte und Demodaten liegen in eigenen Dateien
 // (sprachen/, daten/) und werden im <head> vor dem Programm geladen.
@@ -3884,6 +4025,7 @@ const DICT = {}, PH = {};
 Object.keys(SC.sprachen || {}).forEach(l => { DICT[l] = SC.sprachen[l].texte || {}; PH[l] = SC.sprachen[l].platzhalter || {}; });
 const { STATUS, ATTR_TYPES, ATTR_TRIGGERS, LABEL_FORMATS, ROLES, PAGE_PERMS, PAGE_ORDER, PERM_GROUPS, permGroupOf, PERM_LIST } = SC.stammdaten;
 const { TUTORIALS, HELP_TOPICS } = SC.hilfe;
+const { AI_MODELS, FC_KINDS } = SC.ki;
 const { SEED, DEPTS_DEMO, MEMBERS, COMPANIES } = SC.demo;
 
 
@@ -3943,6 +4085,12 @@ class Component extends DCLogic {
       menu: null, burgerOpen: false,
       log: this.seedLog(),
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
+      hFrom: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10), hTo: new Date().toISOString().slice(0, 10),
+      orderHist: null,
+      fcOpen: false, fcBusy: false, fcResult: null, fcQuery: "", aiToday: 0,
+      ...(() => { let p = {}; try { p = JSON.parse(localStorage.getItem("sc-fc-prefs") || "{}"); } catch (e) {}
+        return { fcHorizon: p.horizon || "week", fcSpan: p.span != null ? String(p.span) : "365", fcPids: Array.isArray(p.pids) ? p.pids : [],
+          fcFactors: Array.isArray(p.factors) ? p.factors : [], fcModel: p.model || AI_MODELS[0].id }; })(),
       rowsOpen: false,
       testMailTo: "", mailChecks: [], legalTab: "impressum",
       testMode: false, pwVisible: false, connectError: "",
@@ -4105,6 +4253,7 @@ class Component extends DCLogic {
     try {
       const profile = await api.myProfile();
       const d = await api.loadAll();
+      if (api.loadOrderHistory) api.loadOrderHistory().then(h => { if (h) this.setState({ orderHist: h }); }).catch(() => {});
       const isAdmin = await api.amPlatformAdmin().catch(() => false);
       const factors = await api.mfaFactors().catch(() => []);
       this.setState({ mfaActive: factors.some(f => f.status === "verified") });
@@ -4249,7 +4398,7 @@ class Component extends DCLogic {
     if (current + (add || 1) <= cap) return true;
     const names = {
       products: this.tr("Artikel"), members: this.tr("Personen"), mailsPerDay: this.tr("Mails am Tag"),
-      importRows: this.tr("Zeilen je Import"), uploadMb: this.tr("MB je Datei"), storageMb: this.tr("MB Speicher")
+      importRows: this.tr("Zeilen je Import"), uploadMb: this.tr("MB je Datei"), storageMb: this.tr("MB Speicher"), aiPerDay: this.tr("KI-Anfragen am Tag")
     };
     this.say(this.tr("Kostenbremse"), this.tr("Grenze erreicht") + ": " + cap + " " + names[key],
       this.tr("In config.js FREE_TIER_GUARD auf false setzen oder die Grenze anheben."));
@@ -6055,6 +6204,7 @@ class Component extends DCLogic {
         this.tr("Menge und Quantität eintragen, dann nachfüllen."));
       return;
     }
+    this.markHistRecv(done, new Date().toISOString(), orderId);
     const orders = (this.state.orders || []).map(x => x.id === orderId
       ? Object.assign({}, x, { done: Array.from(new Set((x.done || []).concat(done))),
           snap: Object.assign({}, x.snap || {}, snap) }) : x);
@@ -6064,6 +6214,8 @@ class Component extends DCLogic {
   }
 
   closeOrder(orderId) {
+    const hc = this.histList().map(e => e.id === orderId ? Object.assign({}, e, { closed: new Date().toISOString() }) : e);
+    this.saveHist(hc, hc.filter(e => e.id === orderId));
     const orders = (this.state.orders || []).filter(o => o.id !== orderId);
     this.setState({ orders: orders });
     if (this.api && this.api.setOrders) this.api.setOrders(orders).catch(() => {});
@@ -6072,6 +6224,142 @@ class Component extends DCLogic {
 
   // Bestellverlauf: liegt im __meta-Eintrag der Bestellungen und bleibt
   // erhalten, auch wenn die Ware längst eingebucht ist.
+  // Der Verlauf liegt dauerhaft in der Tabelle order_history (schema.sql).
+  // Ohne die Tabelle bleibt der Rückfall im __meta-Eintrag (die letzten 100).
+  histList() {
+    if (this.state.orderHist) return this.state.orderHist;
+    return (((this.state.orders || []).find(o => o.id === "__meta") || {}).history || []);
+  }
+  saveHist(list, changed) {
+    this.setState({ orderHist: list });
+    if (this.api && this.api.saveOrderHistory && (changed || []).length)
+      this.api.saveOrderHistory(changed).catch(() => {});
+  }
+  markHistRecv(ids, at, orderId) {
+    const left = (ids || []).slice(), changed = [];
+    const list = this.histList().map(e => {
+      if (orderId && e.id !== orderId) return e;
+      let hit = false;
+      const lines = (e.lines || []).map(l => { const i = left.indexOf(l.pid); if (i < 0 || l.recv) return l; left.splice(i, 1); hit = true; return Object.assign({}, l, { recv: at }); });
+      if (!hit) return e;
+      const ne = Object.assign({}, e, { lines: lines }); changed.push(ne); return ne;
+    });
+    if (changed.length) this.saveHist(list, changed);
+  }
+
+  // ── Bedarfsprognose ──────────────────────────────────────────
+  // Kennzahlen je Ware aus dem Verlauf; die KI im Cloudflare-Worker gewichtet
+  // sie mit den selbst gewählten Faktoren. Ohne Worker rechnet die Seite selbst.
+  setFc(patch) {
+    this.setState(patch, () => {
+      const st = this.state;
+      try { localStorage.setItem("sc-fc-prefs", JSON.stringify({ horizon: st.fcHorizon, span: st.fcSpan, pids: st.fcPids,
+        factors: st.fcFactors, model: st.fcModel })); } catch (e) {}
+    });
+  }
+  aiCountKey() { return "sc-ai-" + new Date().toISOString().slice(0, 10); }
+  aiCount() { try { return parseInt(localStorage.getItem(this.aiCountKey()) || "0", 10) || 0; } catch (e) { return 0; } }
+  fcHorizon(key) {
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    const d = { today: [0, 1], tomorrow: [1, 1], week: [1, 7], month: [1, 30] }[key] || [1, 7];
+    const start = new Date(t0.getTime() + d[0] * 86400000);
+    return { key: key, start: start, days: d[1], end: new Date(start.getTime() + d[1] * 86400000) };
+  }
+  fcInHz(ev, hz) {
+    const t = new Date(this.isoDay(ev.datum) + "T12:00:00").getTime();
+    return t >= hz.start.getTime() && t < hz.end.getTime();
+  }
+  fcStats(p, hz, spanDays, withEvents) {
+    const DAY = 86400000, now = Date.now(), from = spanDays ? now - spanDays * DAY : 0;
+    const log = (this.state.log || []).filter(e => e.productId === p.id && e.delta < 0 && e.date.getTime() >= from);
+    const sumIn = (a, b) => log.reduce((s, e) => { const t = e.date.getTime(); return t >= a && t < b ? s + Math.abs(e.delta) : s; }, 0);
+    const first = log.reduce((m, e) => Math.min(m, e.date.getTime()), now);
+    const avg = n => { const span = Math.min(n, Math.max(1, (now - first) / DAY)); return sumIn(now - n * DAY, now) / span; };
+    const wd = [0, 0, 0, 0, 0, 0, 0];
+    log.forEach(e => { if (e.date.getTime() >= now - 84 * DAY) wd[(e.date.getDay() + 6) % 7] += Math.abs(e.delta) / 12; });
+    const ago = y => { const a = new Date(hz.start); a.setFullYear(a.getFullYear() - y); const t = a.getTime();
+      return first <= t && t >= from ? sumIn(t, t + hz.days * DAY) : null; };
+    const evNeed = withEvents ? (this.state.events || []).filter(ev => this.fcInHz(ev, hz))
+      .reduce((s, ev) => s + (ev.items || []).filter(it => it.id === p.id).reduce((a, it) => a + (Number(it.qty) || 0), 0), 0) : 0;
+    const std = this.stdUnit(p);
+    const out = { id: p.id, name: p.name, einheit: this.baseUnitName(p), standardEinheit: std ? std.name : null, faktor: std ? Math.max(1, Number(std.faktor) || 1) : 1,
+      bestand: Number(p.ist) || 0, min: Number(p.min) || 0,
+      schnitt7: +avg(7).toFixed(2), schnitt28: +avg(28).toFixed(2), wochentage: wd.map(v => +v.toFixed(2)),
+      tageMitDaten: Math.round((now - first) / DAY) };
+    if (!spanDays || spanDays >= 90) out.schnitt90 = +avg(90).toFixed(2);
+    if (!spanDays || spanDays >= 365) out.vorjahr = ago(1);
+    if (!spanDays || spanDays >= 730) out.vor2jahren = ago(2);
+    if (withEvents) out.eventBedarf = evNeed;
+    return out;
+  }
+  fcLocal(it, hz) {
+    const DAY = 86400000, base = it.schnitt28 || it.schnitt90 || it.schnitt7 || 0;
+    const wdSum = it.wochentage.reduce((a, b) => a + b, 0);
+    let sum = 0;
+    for (let i = 0; i < hz.days; i++) {
+      const w = (new Date(hz.start.getTime() + i * DAY).getDay() + 6) % 7;
+      sum += wdSum > 0 ? base * 7 * (it.wochentage[w] / wdSum) : base;
+    }
+    if (it.vorjahr != null) sum = 0.65 * sum + 0.35 * it.vorjahr;
+    return Math.round(sum + (it.eventBedarf || 0));
+  }
+  fcWhy(it) {
+    const parts = [this.tr("Ø 28 Tage") + " " + it.schnitt28 + "/" + this.tr("Tag")];
+    if (it.vorjahr != null) parts.push(this.tr("Vorjahr") + " " + it.vorjahr);
+    if (it.eventBedarf) parts.push(this.tr("Events") + " +" + it.eventBedarf);
+    return parts.join(" · ");
+  }
+  runForecast() {
+    const st = this.state, hz = this.fcHorizon(st.fcHorizon), span = parseInt(st.fcSpan, 10) || 0;
+    if (!this.may("forecast")) { this.say(this.tr("Kein Zugriff"), this.tr("Prognose"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
+    const picked = new Set(st.fcPids || []);
+    const pool = (st.products || []).filter(p => p.aktiv !== false && picked.has(p.id));
+    if (!pool.length) { this.say(this.tr("Prognose"), this.tr("Keine Ware gewählt"), this.tr("Bitte mindestens eine Ware auswählen.")); return; }
+    const withEvents = (st.fcFactors || []).some(f => f.kind === "events");
+    const items = pool.map(p => this.fcStats(p, hz, span, withEvents)).sort((a, b) => b.schnitt28 - a.schnitt28).slice(0, 60);
+    const kinds = {}; FC_KINDS.forEach(k => { kinds[k.kind] = k; });
+    const faktoren = (st.fcFactors || []).map(f => f.kind === "events"
+      ? { art: "Events", events: (st.events || []).filter(ev => this.fcInHz(ev, hz)).map(ev => ({ name: ev.name, datum: this.isoDay(ev.datum), ort: ev.ort || "" })) }
+      : { art: (kinds[f.kind] || {}).de || f.kind, wert: String(f.value || "").trim() })
+      .filter(f => f.events || f.wert);
+    const payload = { model: st.fcModel, sprache: st.lang, zeitraum: { von: hz.start.toISOString().slice(0, 10), tage: hz.days },
+      verlaufTage: span || null, faktoren: faktoren, waren: items };
+    const finish = (ai, source, note) => {
+      const byId = {}; ((ai && ai.waren) || []).forEach(r => { if (r && r.id) byId[r.id] = r; });
+      const rows = items.map(it => {
+        const r = byId[it.id];
+        const use = r && isFinite(Number(r.verbrauch)) ? Math.max(0, Math.round(Number(r.verbrauch))) : this.fcLocal(it, hz);
+        return { id: it.id, use: use, after: it.bestand - use,
+          order: r && isFinite(Number(r.bestellen)) ? Math.max(0, Math.round(Number(r.bestellen))) : Math.max(0, it.min + use - it.bestand),
+          why: (r && r.begruendung) || this.fcWhy(it) };
+      });
+      this.setState({ fcBusy: false, fcResult: { rows: rows, source: source, note: note || (ai && ai.hinweis) || "", hz: hz.key } });
+    };
+    const useAi = st.live && this.api && this.api.forecast && this.api.filesConfigured;
+    if (useAi) {
+      // Kostenbremse: vor dem Senden zählen — lieber keine Anfrage als eine zu viel.
+      const cap = (st.limits || {}).aiPerDay || 0, used = Math.max(this.aiCount(), st.aiToday || 0);
+      if (st.guard && cap && used >= cap) {
+        finish(null, "lokal", this.tr("Tageslimit der KI erreicht") + " (" + used + " / " + cap + "). " + this.tr("Keine Anfrage gesendet — Schätzung aus dem Verlauf, ohne Faktoren."));
+        return;
+      }
+      this.setState({ fcBusy: true, fcResult: null });
+      this.api.forecast(payload).then(ai => {
+        const n = ai && ai.used != null ? ai.used : used + 1;
+        try { localStorage.setItem(this.aiCountKey(), String(n)); } catch (e) {}
+        this.setState({ aiToday: n, aiCap: ai && ai.limit });
+        finish(ai, "ki:" + (ai.model || st.fcModel));
+      }).catch(err => {
+        const msg = String((err && err.message) || err);
+        if (/limit/i.test(msg)) { try { localStorage.setItem(this.aiCountKey(), String(cap || 999)); } catch (e) {} this.setState({ aiToday: cap || used }); }
+        finish(null, "lokal", this.tr("KI nicht erreichbar — Schätzung aus dem Verlauf, ohne Faktoren.") + " (" + msg + ")");
+      });
+    } else {
+      this.setState({ fcBusy: true, fcResult: null });
+      setTimeout(() => finish(null, "lokal", this.tr("Ohne Cloudflare-Worker rechnet die Seite selbst: Verlauf, Wochentage, Vorjahr und Events. Die übrigen Faktoren fließen erst mit der KI ein.")), 250);
+    }
+  }
+
   withHistory(orders, fn) {
     let list = (orders || []).slice();
     if (!list.some(o => o.id === "__meta")) list.push({ id: "__meta", items: [], assign: {} });
@@ -6101,7 +6389,8 @@ class Component extends DCLogic {
       return { pid: id, name: p.name || id, code: this.codeOf(p) || id, qty: amounts[id] ? this.fmtStock(p, this.amountTotal(p, amounts[id])) : "—",
         lieferant: p.lieferant || "—", recv: null };
     }) };
-    const orders = this.withHistory((this.state.orders || []).concat([batch]), h => [histEntry].concat(h).slice(0, 300));
+    const orders = this.withHistory((this.state.orders || []).concat([batch]), h => [histEntry].concat(h).slice(0, 100));
+    this.saveHist([histEntry].concat(this.histList().filter(e => e.id !== histEntry.id)), [histEntry]);
     const products = this.state.products.map(p => list.indexOf(p.id) >= 0
       ? Object.assign({}, p, { status: "ordered", geaendert: who || p.geaendert }) : p);
     this.setState({ orders: orders, products: products });
@@ -6147,6 +6436,7 @@ class Component extends DCLogic {
       }) : x)
       .filter(x => x.id === "__meta" || (x.items || []).length);
     const recvAt = new Date().toISOString();
+    this.markHistRecv(ids, recvAt);
     const ordersH = this.withHistory(orders, h => { const left = ids.slice();
       return h.map(e => Object.assign({}, e, { lines: (e.lines || []).map(l => {
         const i = left.indexOf(l.pid); if (i < 0 || l.recv) return l; left.splice(i, 1); return Object.assign({}, l, { recv: recvAt }); }) })); });
@@ -7028,7 +7318,9 @@ class Component extends DCLogic {
         done: !!st.mailChecked, go: "settings" }
     ];
     const roleDefs = this.roleDefs();
-    const revDays = this.toNum(st.hRange) || 90;
+    const revDays = st.hRange === "custom"
+      ? Math.max(1, Math.round((Date.now() - new Date((st.hFrom || "") + "T00:00:00").getTime()) / 86400000) || 90)
+      : (this.toNum(st.hRange) || 90);
     const revBase = st.pricePicked.length
       ? st.products.filter(p => st.pricePicked.includes(p.id))
       : st.products.filter(p => p.aktiv !== false);
@@ -7267,12 +7559,14 @@ class Component extends DCLogic {
       (!st.hPlace || p.ort === st.hPlace) && (!st.hDept || this.deptOf(p) === st.hDept) &&
       (!st.hResp || p.verantwortlich === st.hResp) &&
       (!st.hSupplier || p.lieferant === st.hSupplier);
-    const days = parseInt(st.hRange, 10) || 0;
-    const nowT = Date.now();
-    const cutoff = days ? nowT - days * 86400000 : 0;
+    const hIsCustom = st.hRange === "custom";
+    const dayT = (iso, end) => { const d = new Date(iso + (end ? "T23:59:59" : "T00:00:00")); return isNaN(d) ? 0 : d.getTime(); };
+    const days = hIsCustom ? 0 : (parseInt(st.hRange, 10) || 0);
+    const nowT = hIsCustom ? Math.min(Date.now(), dayT(st.hTo, true) || Date.now()) : Date.now();
+    const cutoff = hIsCustom ? (dayT(st.hFrom, false) || nowT - 30 * 86400000) : (days ? nowT - days * 86400000 : 0);
     const fmt = d => d.toLocaleString("de-DE", { day: "2-digit", month: "2-digit", year: "2-digit", hour: "2-digit", minute: "2-digit" });
 
-    const hEntries = (st.log || []).filter(e => matchProduct(byId(e.productId)) && (!cutoff || e.date.getTime() >= cutoff));
+    const hEntries = (st.log || []).filter(e => matchProduct(byId(e.productId)) && (!cutoff || e.date.getTime() >= cutoff) && e.date.getTime() <= nowT);
     const hMatched = products.filter(matchProduct);
     const taken = hEntries.filter(e => e.delta < 0).reduce((s, e) => s + Math.abs(e.delta), 0);
     const added = hEntries.filter(e => e.delta > 0).reduce((s, e) => s + e.delta, 0);
@@ -7391,19 +7685,20 @@ class Component extends DCLogic {
       onAccount: st.screen === "account", navAccount: this.navStyle("account"), goAccount: () => this.go("account"),
       settingsOk: this.pageOk("settings"),
       meEmail: meRow.email || st.authEmail || "",
-      myPermGroups: groupPerms(PERM_LIST.map(([key, label]) => {
-        const on = myList.indexOf(key) >= 0;
-        return { key, on, label: this.tr(label), state: on ? this.tr("erlaubt") : this.tr("gesperrt"), color: on ? "var(--color-text)" : "var(--sc-ink-3)" };
-      })),
-      myPermCount: myList.filter(k => PERM_LIST.some(p => p[0] === k)).length + " / " + PERM_LIST.length + " " + this.tr("erlaubt"),
+      myPermGroups: PERM_GROUPS.map((g, gi) => {
+        const items = PERM_LIST.filter(([key]) => myList.indexOf(key) >= 0 && permGroupOf(key) === gi)
+          .map(([key, label]) => ({ key, on: true, label: this.tr(label), state: "✓", color: "var(--color-text)" }));
+        return { title: this.tr(g.title), items, count: String(items.length) };
+      }).filter(g => g.items.length),
+      myPermCount: myList.filter(k => PERM_LIST.some(p => p[0] === k)).length + " " + this.tr("Rechte"),
       permGroups: groupPerms(permsFor()),
       setStockOn: this.may("places"), setMailOn: this.may("mail"), noSettings: !this.may("places") && !this.may("mail") && !(st.testMode || st.platformAdmin),
       toggleSetStock: tgl("setStockShut"), openSetStock: !oc.setStockShut, lblSetStock: oc.setStockShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetStock: oc.setStockShut ? "▸" : "▾",
       toggleSetMail: tgl("setMailShut"), openSetMail: !oc.setMailShut, lblSetMail: oc.setMailShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetMail: oc.setMailShut ? "▸" : "▾",
       toggleSetSys: tgl("setSysShut"), openSetSys: !oc.setSysShut, lblSetSys: oc.setSysShut ? this.tr("Aufklappen") : this.tr("Einklappen"), chevSetSys: oc.setSysShut ? "▸" : "▾",
       tutorialsOn: !(st.helpQuery || "").trim(),
-      tutorials: TUTORIALS.map((tu, i) => {
-        const ok = this.tourOk(tu);
+      tutorials: TUTORIALS.filter(tu => this.tourOk(tu)).map((tu, i) => {
+        const ok = true;
         return { num: String(i + 1), title: L3(tu.title), text: L3(tu.text), steps: tu.steps.map(s => L3(s.h)),
           stepsLabel: tu.steps.length + " " + this.tr("Schritte"), ok, locked: !ok,
           lockNote: this.tr("Für dich gesperrt — dafür fehlt dir ein Recht."), start: () => this.startTour(tu.id) };
@@ -7485,8 +7780,10 @@ class Component extends DCLogic {
       listOpen: !!oc.list, toggleList: tgl("list"), listToggleLabel: openLbl("list"),
       ...(() => {
         const visIds = new Set(products.map(p => p.id));
-        const hist = (((st.orders || []).find(o => o.id === "__meta") || {}).history || [])
-          .map(e => Object.assign({}, e, { lines: (e.lines || []).filter(l => visIds.has(l.pid)) })).filter(e => e.lines.length);
+        const allIds = new Set((st.products || []).map(p => p.id));
+        const hist = this.histList()
+          .map(e => Object.assign({}, e, { lines: (e.lines || []).filter(l => visIds.has(l.pid) || !allIds.has(l.pid)) })).filter(e => e.lines.length)
+          .sort((a, b) => String(b.at).localeCompare(String(a.at)));
         const fmtD = iso => { const d = new Date(iso); return isNaN(d) ? "—" : d.toLocaleDateString(({ en: "en-GB", sv: "sv-SE", es: "es-ES", it: "it-IT", tr: "tr-TR" })[this.state.lang] || "de-DE") + " · " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); };
         const shown = st.histAll ? hist : hist.slice(0, 5);
         return {
@@ -7496,7 +7793,7 @@ class Component extends DCLogic {
           histRows: shown.map(e => { const open = e.lines.filter(l => !l.recv).length; return {
             id: e.id, when: fmtD(e.at), by: e.by || "—",
             summary: e.lines.length + " × " + this.tr("Artikel"),
-            stateLabel: open ? open + " " + this.tr("offen") : this.tr("eingebucht"),
+            stateLabel: open ? open + " " + this.tr("offen") : e.closed ? this.tr("abgeschlossen") : this.tr("eingebucht"),
             stateClass: open ? "tag tag-accent" : "tag tag-neutral",
             lines: e.lines.map(l => ({ name: l.name, code: l.code, qty: l.qty, lieferant: l.lieferant, recv: l.recv ? fmtD(l.recv) : this.tr("offen") }))
           }; }),
@@ -8871,6 +9168,72 @@ class Component extends DCLogic {
       hResp: st.hResp, hSupplier: st.hSupplier, hRange: st.hRange,
       setHProduct: setSel("hProduct"), setHCategory: setSel("hCategory"), setHPlace: setSel("hPlace"),
       setHResp: setSel("hResp"), setHSupplier: setSel("hSupplier"), setHRange: setSel("hRange"),
+      canForecast: this.may("forecast"),
+      fcOpen: !!st.fcOpen,
+      fcShow: () => this.setState({ fcOpen: true, aiToday: Math.max(st.aiToday || 0, this.aiCount()) }),
+      fcClose: () => this.setState({ fcOpen: false }),
+      fcModel: st.fcModel, setFcModel: e => this.setFc({ fcModel: e.target.value, fcResult: null }),
+      fcModelsEu: AI_MODELS.filter(m => m.eu).map(m => ({ id: m.id, label: m.label + " — " + m.origin })),
+      fcModelsOther: AI_MODELS.filter(m => !m.eu).map(m => ({ id: m.id, label: m.label + " — " + m.origin })),
+      ...(() => { const m = AI_MODELS.find(x => x.id === st.fcModel) || AI_MODELS[0];
+        return { fcModelTag: m.eu ? "tag tag-accent" : "tag tag-outline", fcModelOrigin: m.eu ? this.tr("Europa") : this.tr("Außerhalb Europas"),
+          fcModelNote: this.tr(m.note || "") }; })(),
+      fcHorizons: [["today", "Heute"], ["tomorrow", "Morgen"], ["week", "Nächste Woche"], ["month", "Nächster Monat"]].map(([k, l]) => ({
+        label: this.tr(l), pick: () => this.setFc({ fcHorizon: k, fcResult: null }),
+        style: "padding: 6px 4px; font-size: 12.5px; justify-content: center; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+          + (st.fcHorizon === k ? "; background: var(--color-accent); color: #fff; border-color: var(--color-accent)" : "") })),
+      fcSpan: st.fcSpan, setFcSpan: e => this.setFc({ fcSpan: e.target.value, fcResult: null }),
+      fcQuery: st.fcQuery, setFcQuery: e => this.setState({ fcQuery: e.target.value }),
+      ...(() => {
+        const pool = (st.products || []).filter(p => p.aktiv !== false);
+        const q = (st.fcQuery || "").trim().toLowerCase();
+        const shown = q ? pool.filter(p => [p.name, p.ean, p.lieferant, p.ort, this.codeOf(p)].join(" ").toLowerCase().indexOf(q) >= 0) : pool;
+        const set = new Set(st.fcPids || []);
+        const n = pool.filter(p => set.has(p.id)).length;
+        return {
+          fcWaren: shown.map(p => ({ name: p.name, on: set.has(p.id), toggle: () => {
+            const next = new Set(this.state.fcPids || []); next.has(p.id) ? next.delete(p.id) : next.add(p.id);
+            this.setFc({ fcPids: Array.from(next), fcResult: null }); } })),
+          fcPickAll: () => { const next = new Set(this.state.fcPids || []); shown.forEach(p => next.add(p.id)); this.setFc({ fcPids: Array.from(next), fcResult: null }); },
+          fcPickNone: () => this.setFc({ fcPids: [], fcResult: null }),
+          fcPickedLabel: n + " / " + pool.length + " " + this.tr("gewählt") + (n > 60 ? " · " + this.tr("max. 60 an die KI") : ""),
+          fcNone: n === 0
+        };
+      })(),
+      fcFactorRows: (st.fcFactors || []).map((f, i) => {
+        const k = FC_KINDS.find(x => x.kind === f.kind) || { de: f.kind };
+        const hz = this.fcHorizon(st.fcHorizon);
+        return { label: this.loc(k), isText: f.kind !== "events", isEvents: f.kind === "events", value: f.value || "", ph: k.ph ? this.tr(k.ph) : "",
+          info: (st.events || []).filter(ev => this.fcInHz(ev, hz)).map(ev => ev.name).join(", ") || this.tr("Keine Events im Zeitraum"),
+          set: e => { const v = e.target.value; this.setFc({ fcFactors: this.state.fcFactors.map((x, j) => j === i ? Object.assign({}, x, { value: v }) : x) }); },
+          remove: () => this.setFc({ fcFactors: this.state.fcFactors.filter((x, j) => j !== i), fcResult: null }) };
+      }),
+      fcFactorAdd: FC_KINDS.filter(k => k.multi || !(st.fcFactors || []).some(f => f.kind === k.kind)).map(k => ({
+        label: this.loc(k), add: () => this.setFc({ fcFactors: (this.state.fcFactors || []).concat({ kind: k.kind, value: "" }), fcResult: null }) })),
+      fcBusy: !!st.fcBusy, fcRun: () => this.runForecast(),
+      fcRunOff: !!st.fcBusy || !(st.fcPids || []).length,
+      fcRunLabel: st.fcBusy ? this.tr("Wird berechnet …") : this.tr("Prognose berechnen"),
+      fcEngineNote: (st.live && this.api && this.api.filesConfigured) ? this.tr("Cloudflare Workers AI") : this.tr("Ohne Worker: Schätzung aus dem Verlauf"),
+      ...(() => { const cap = (st.limits || {}).aiPerDay || 0, used = Math.max(st.aiToday || 0, this.aiCount());
+        const on = st.guard && cap;
+        return { fcQuotaLabel: on ? this.tr("KI heute") + ": " + used + " / " + cap : this.tr("Keine KI-Grenze"),
+          fcQuotaTag: on && used >= cap ? "tag tag-accent" : "tag tag-neutral" }; })(),
+      fcHasResult: !!st.fcResult,
+      fcResultTitle: st.fcResult ? this.tr("Prognose") + " · " + this.tr(({ today: "Heute", tomorrow: "Morgen", week: "Nächste Woche", month: "Nächster Monat" })[st.fcResult.hz]) : "",
+      fcSourceLabel: st.fcResult ? (String(st.fcResult.source).indexOf("ki:") === 0
+        ? "KI · " + ((AI_MODELS.find(m => m.id === String(st.fcResult.source).slice(3)) || {}).label || String(st.fcResult.source).slice(3).split("/").pop())
+        : this.tr("Statistik")) : "",
+      fcHasNote: !!(st.fcResult && st.fcResult.note), fcNote: st.fcResult ? st.fcResult.note : "",
+      fcRows: st.fcResult ? st.fcResult.rows.map(r => {
+        const p = (st.products || []).find(x => x.id === r.id);
+        const f = v => p ? this.fmtStock(p, v) : String(v);
+        return { name: p ? p.name : r.id, stock: f(p ? Number(p.ist) || 0 : 0), use: f(r.use), after: r.after < 0 ? "−" + f(-r.after) : f(r.after),
+          advice: r.order > 0 ? this.tr("bestellen") + " " + f(r.order) : this.tr("reicht"),
+          tagClass: r.order > 0 ? "tag tag-accent" : "tag tag-neutral", why: r.why };
+      }) : [],
+      hCustom: st.hRange === "custom", hFrom: st.hFrom, hTo: st.hTo, hToday: new Date().toISOString().slice(0, 10),
+      setHFrom: e => this.setState({ hFrom: e.target.value || st.hFrom }),
+      setHTo: e => this.setState({ hTo: e.target.value || st.hTo }),
       resetHistory: () => this.setState({ hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90", hDept: "" }),
       hDept: st.hDept, setHDept: setSel("hDept"),
       hSummary: hMatched.length + " " + this.tr("Artikel in der Auswahl"),
@@ -9566,6 +9929,7 @@ class Component extends DCLogic {
           ["products", this.tr("Artikel"), products.length, L.products, ""],
           ["members", this.tr("Personen"), st.members.length, L.members, ""],
           ["mailsPerDay", this.tr("Mails heute"), st.mailsToday, L.mailsPerDay, ""],
+          ["aiPerDay", this.tr("KI-Anfragen heute"), st.aiToday, L.aiPerDay, ""],
           ["storageMb", this.tr("Speicher"), st.storageMb, L.storageMb, " MB"]
         ];
         return rows.filter(r => r[3]).map(([key, label, used, cap, unit]) => {
