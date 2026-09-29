@@ -6351,12 +6351,15 @@ class Component extends DCLogic {
         finish(ai, "ki:" + (ai.model || st.fcModel));
       }).catch(err => {
         const msg = String((err && err.message) || err);
+        if (err && err.used != null) { try { localStorage.setItem(this.aiCountKey(), String(err.used)); } catch (e) {} this.setState({ aiToday: err.used }); }
         if (/limit/i.test(msg)) { try { localStorage.setItem(this.aiCountKey(), String(cap || 999)); } catch (e) {} this.setState({ aiToday: cap || used }); }
         finish(null, "lokal", this.tr("KI nicht erreichbar — Schätzung aus dem Verlauf, ohne Faktoren.") + " (" + msg + ")");
       });
     } else {
       this.setState({ fcBusy: true, fcResult: null });
-      setTimeout(() => finish(null, "lokal", this.tr("Ohne Cloudflare-Worker rechnet die Seite selbst: Verlauf, Wochentage, Vorjahr und Events. Die übrigen Faktoren fließen erst mit der KI ein.")), 250);
+      const why = !st.live || !this.api ? this.tr("Demo-Modus: Supabase ist nicht verbunden.")
+        : !this.api.filesConfigured ? this.tr("In config.js fehlt UPLOAD_WORKER_URL.") : "";
+      setTimeout(() => finish(null, "lokal", this.tr("Ohne Cloudflare-Worker rechnet die Seite selbst: Verlauf, Wochentage, Vorjahr und Events. Die übrigen Faktoren fließen erst mit der KI ein.") + (why ? " (" + why + ")" : "")), 250);
     }
   }
 

@@ -150,13 +150,26 @@ export async function myProfile() {
 
 /* ── Stammdaten laden ───────────────────────────────────── */
 
+// Bewegungen seitenweise: Supabase liefert höchstens 1000 Zeilen je Abfrage.
+// So stehen für Verlauf und Prognose auch Vorjahre zur Verfügung.
+async function allMovements(sb) {
+  const out = [];
+  for (let from = 0; from < 60000; from += 1000) {
+    const res = await sb.from("movements").select("*").order("created_at", { ascending: false }).range(from, from + 999);
+    if (res.error) return from ? { data: out, error: null } : res;
+    out.push(...res.data);
+    if (res.data.length < 1000) break;
+  }
+  return { data: out, error: null };
+}
+
 export async function loadAll() {
   const sb = await client();
   const [products, members0, events, movements, settings, departments] = await Promise.all([
     sb.from("products").select("*").order("aktiv", { ascending: false }).order("name"),
     sb.from("profiles").select("id, name, email, role, status, permissions, departments"),
     sb.from("events").select("*, event_items(product_id, qty)").order("datum"),
-    sb.from("movements").select("*").order("created_at", { ascending: false }).limit(5000),
+    allMovements(sb),
     sb.from("settings").select("*").maybeSingle(),
     sb.from("departments").select("id, name, created_at").order("created_at")
   ]);
@@ -169,6 +182,34 @@ export async function loadAll() {
     movements: ok(movements), settings: settings.data || null,
     departments: departments.error ? [] : (departments.data || [])
   };
+}
+
+/* ── Bestellverlauf ─────────────────────────────────────── */
+// Jede Bestellung bleibt dauerhaft stehen, auch wenn sie abgearbeitet ist
+// (Tabelle order_history, schema.sql). Fehlt die Tabelle, liefert
+// loadOrderHistory null und die Oberfläche nutzt den Rückfall.
+export async function loadOrderHistory() {
+  const sb = await client();
+  const out = [];
+  for (let from = 0; from < 20000; from += 1000) {
+    const { data, error } = await sb.from("order_history").select("batch_id, at, by_name, lines, closed_at")
+      .order("at", { ascending: false }).range(from, from + 999);
+    if (error) return null;
+    out.push(...data);
+    if (data.length < 1000) break;
+  }
+  return out.map(r => ({ id: r.batch_id, at: r.at, by: r.by_name, lines: r.lines || [], closed: r.closed_at }));
+}
+
+export async function saveOrderHistory(entries) {
+  const sb = await client();
+  const me = await myProfile();
+  if (!me || !me.company_id) return false;
+  const rows = (entries || []).map(e => ({ company_id: me.company_id, batch_id: e.id, at: e.at, by_name: e.by || null,
+    lines: e.lines || [], closed_at: e.closed || null }));
+  const { error } = await sb.from("order_history").upsert(rows, { onConflict: "company_id,batch_id" });
+  if (error) throw error;
+  return true;
 }
 
 /* ── Produkte ───────────────────────────────────────────── */
@@ -401,8 +442,17 @@ async function workerCall(path, init = {}) {
     headers: { ...(init.headers || {}), authorization: `Bearer ${sess.access_token}` }
   });
   const out = await res.json().catch(() => ({}));
-  if (!res.ok || out.error) throw new Error(out.error || `Worker ${res.status}`);
+  if (!res.ok || out.error) {
+    const err = new Error(out.error || `Worker ${res.status}`);
+    if (out.used != null) err.used = out.used;
+    throw err;
+  }
   return out;
+}
+
+// Bedarfsprognose über Cloudflare Workers AI (Route /forecast im Worker).
+export async function forecast(payload) {
+  return workerCall("/forecast", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
 }
 
 export async function uploadFile(file, kind = "product") {
