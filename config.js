@@ -5,7 +5,7 @@ export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const TURNSTILE_SITE_KEY = "0x4AAAAAAE7pL0qypuwGDqrT";
 
-export const UPLOAD_WORKER_URL = "joe-solutions-stuttgart.workers.dev";
+export const UPLOAD_WORKER_URL = "https://stockcontrol-files.joe-solutions-stuttgart.workers.dev";
 
 export const FREE_TIER_GUARD = true;
 
