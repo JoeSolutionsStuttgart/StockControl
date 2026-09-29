@@ -15,5 +15,6 @@ export const FREE_TIER_LIMITS = {
   mailsPerDay: 250,     // Mails am Tag (Brevo Gratis: 300)
   importRows: 500,      // Zeilen je Excel-Import
   uploadMb: 10,         // Größe einer einzelnen Datei (Cloudflare R2)
-  storageMb: 8000       // Speicher gesamt (R2 Gratis: 10 GB)
+  storageMb: 8000,      // Speicher gesamt (R2 Gratis: 10 GB)
+  aiPerDay: 20          // KI-Prognosen am Tag (Workers AI Gratis: 10.000 Neurons/Tag).
 };
