@@ -7576,9 +7576,10 @@ class Component extends DCLogic {
     // Hilfe filtern: ein Eintrag zählt, wenn Frage oder Antwort das Stichwort trägt.
     const hq = String(st.helpQuery || "").trim().toLowerCase();
     const helpGroups = HELP_TOPICS.map(g => ({
-      kicker: g.kicker, title: g.title,
-      items: hq ? g.items.filter(it =>
-        (this.tr(it.q) + " " + it.a.map(p => this.tr(p)).join(" ") + " " + g.title).toLowerCase().includes(hq)) : g.items
+      kicker: this.tr(g.kicker), title: this.tr(g.title),
+      items: (hq ? g.items.filter(it =>
+        (it.q + " " + this.tr(it.q) + " " + it.a.map(p => p + " " + this.tr(p)).join(" ") + " " + g.title + " " + this.tr(g.title)).toLowerCase().includes(hq)) : g.items)
+        .map(it => Object.assign({}, it, { q: this.tr(it.q), a: it.a.map(p => this.tr(p)), linkLabel: it.linkLabel ? this.tr(it.linkLabel) : it.linkLabel }))
     })).filter(g => g.items.length);
 
     // Einrichtungsschritte. Erledigt wird aus den echten Daten abgeleitet,
