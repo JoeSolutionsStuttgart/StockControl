@@ -1357,6 +1357,10 @@
                     <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ h.by }} · {{ h.id }}</span>
                     <span data-i18n-keep class="{{ h.stateClass }}">{{ h.stateLabel }}</span>
                   </summary>
+                  <div style="display: flex; gap: var(--space-2); flex-wrap: wrap; padding: 2px 4px var(--space-2)">
+                    <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; gap: 6px; white-space: nowrap" onClick="{{ h.xlsx }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
+                    <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; gap: 6px; white-space: nowrap" onClick="{{ h.pdf }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als PDF exportieren</span></button>
+                  </div>
                   <div style="overflow-x: auto; max-width: 100%; padding: 0 0 var(--space-3)">
                     <table class="table" style="min-width: 560px; width: 100%; table-layout: fixed; font-size: 12.5px">
                       <colgroup><col><col style="width: 110px"><col style="width: 120px"><col style="width: 140px"></colgroup>
@@ -1376,9 +1380,12 @@
                 </details>
               </sc-for>
             </div>
-            <sc-if value="{{ histMore }}" hint-placeholder-val="{{ false }}">
-              <div><button class="btn btn-ghost" style="padding: 3px 10px; font-size: 12.5px" onClick="{{ toggleHistAll }}"><span data-i18n-keep>{{ histMoreLabel }}</span></button></div>
-            </sc-if>
+            <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; cursor: default">
+              <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ histShownLabel }}</span>
+              <sc-if value="{{ histMore }}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px; white-space: nowrap" onClick="{{ histLoadMore }}"><span data-i18n-keep>{{ histMoreLabel }}</span></button>
+              </sc-if>
+            </div>
           </sc-if>
         </section>
 
@@ -5379,6 +5386,25 @@ class Component extends DCLogic {
     return rows.map(r => r.map(esc).join(";")).join("\n");
   }
 
+  // Tabelle als druckfertige Seite (A4 quer) öffnen; „Als PDF sichern" im Druckfenster.
+  pdfTable(title, meta, head, rows, widths) {
+    const esc = v => String(v == null ? "" : v).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const tot = (widths || head.map(() => 1)).reduce((a, b) => a + b, 0);
+    const html = '<!doctype html><html lang="' + esc(this.state.lang || "de") + '"><head><meta charset="utf-8"><title>' + esc(title) + '</title><style>'
+      + '@page{size:A4 landscape;margin:14mm}body{font-family:Barlow,Arial,sans-serif;color:#1d1f20;font-size:10.5pt}'
+      + 'h1{font-family:"Barlow Condensed",Arial,sans-serif;font-size:18pt;margin:0 0 2mm}p{margin:0 0 4mm;color:#555}'
+      + 'table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{text-align:left;padding:5px 6px;border-bottom:1px solid #ccc;vertical-align:top;overflow-wrap:anywhere}'
+      + 'th{border-bottom:1.5px solid #5980a6;color:#2f4f6e;font-weight:600}</style></head><body>'
+      + '<h1>' + esc(title) + '</h1><p>' + esc(meta) + '</p><table><colgroup>'
+      + (widths || head.map(() => 1)).map(x => '<col style="width:' + (x / tot * 100).toFixed(2) + '%">').join("") + '</colgroup>'
+      + '<thead><tr>' + head.map(h => '<th>' + esc(h) + '</th>').join("") + '</tr></thead><tbody>'
+      + rows.map(r => '<tr>' + r.map(c => '<td>' + esc(c) + '</td>').join("") + '</tr>').join("")
+      + '</tbody></table><script>window.onload=function(){setTimeout(function(){window.print()},200)}<\/script></body></html>';
+    const win = window.open("", "_blank");
+    if (!win) { this.say("PDF", this.tr("Fenster blockiert"), this.tr("Bitte Pop-ups für diese Seite erlauben.")); return; }
+    win.document.open(); win.document.write(html); win.document.close();
+  }
+
   downloadBlob(name, blob) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -7301,7 +7327,9 @@ class Component extends DCLogic {
     }
     if (screen !== "detail") this.setState({ editing: false, editDraft: null, confirmDelete: false });
     if (screen !== "scan") this.stopCamera();
-    this.setState(Object.assign({ screen, menu: null, burgerOpen: false }, screen === "history" ? { invOpen: false } : {}));
+    this.setState(prev => Object.assign({ screen, menu: null, burgerOpen: false },
+      screen === "history" ? { invOpen: false } : {},
+      screen === "orders" && prev.screen !== "orders" ? { histLimit: 5, openCards: Object.assign({}, prev.openCards, { hist: false }) } : {}));
   }
   groupStyle(keys) {
     if (!keys.some(k => this.pageOk(k))) return "display: none";
@@ -8035,21 +8063,31 @@ class Component extends DCLogic {
           .map(e => Object.assign({}, e, { lines: (e.lines || []).filter(l => visIds.has(l.pid) || !allIds.has(l.pid)) })).filter(e => e.lines.length)
           .sort((a, b) => String(b.at).localeCompare(String(a.at)));
         const fmtD = iso => { const d = new Date(iso); return isNaN(d) ? "—" : d.toLocaleDateString(({ en: "en-GB", sv: "sv-SE", es: "es-ES", it: "it-IT", tr: "tr-TR" })[this.state.lang] || "de-DE") + " · " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); };
-        const shown = st.histAll ? hist : hist.slice(0, 5);
+        const lim = Math.max(5, Number(st.histLimit) || 5);
+        const shown = hist.slice(0, lim);
+        const stop = ev => { if (ev && ev.stopPropagation) ev.stopPropagation(); if (ev && ev.preventDefault) ev.preventDefault(); };
+        const head = [this.tr("Artikel"), this.tr("Kennung"), this.tr("Menge"), this.tr("Lieferant"), this.tr("Eingebucht")];
+        const bodyOf = e => e.lines.map(l => [l.name, l.code || "", l.qty, l.lieferant === "—" ? "" : (l.lieferant || ""), l.recv ? fmtD(l.recv) : this.tr("offen")]);
+        const titleOf = e => this.tr("Bestellung") + " " + e.id;
+        const metaOf = e => fmtD(e.at) + (e.by ? " · " + e.by : "") + " · " + e.lines.length + " × " + this.tr("Artikel");
         return {
           histOpen: !!oc.hist, toggleHist: tgl("hist"), openHist: opn("hist"), histToggleLabel: openLbl("hist"),
           histCountLabel: hist.length ? hist.length + " " + this.tr("gespeichert") : this.tr("noch keine"),
           hasHist: hist.length > 0, noHist: !hist.length,
           histRows: shown.map(e => { const open = e.lines.filter(l => !l.recv).length; return {
             id: e.id, when: fmtD(e.at), by: e.by || "—",
+            xlsx: ev => { stop(ev); this.downloadBlob("bestellung-" + e.id + ".xlsx", this.xlsxBuild([{ name: (this.tr("Bestellung") + " " + e.id).slice(0, 31),
+              rows: [[titleOf(e)], [metaOf(e)], []].concat([head], bodyOf(e)), widths: [36, 14, 18, 24, 20] }])); },
+            pdf: ev => { stop(ev); this.pdfTable(titleOf(e), metaOf(e), head, bodyOf(e), [36, 12, 16, 20, 16]); },
             summary: e.lines.length + " × " + this.tr("Artikel"),
             stateLabel: open ? open + " " + this.tr("offen") : e.closed ? this.tr("abgeschlossen") : this.tr("eingebucht"),
             stateClass: open ? "tag tag-accent" : "tag tag-neutral",
             lines: e.lines.map(l => ({ name: l.name, code: l.code, qty: l.qty, lieferant: l.lieferant, recv: l.recv ? fmtD(l.recv) : this.tr("offen") }))
           }; }),
-          histMore: hist.length > 5,
-          histMoreLabel: st.histAll ? this.tr("Nur die 5 neuesten") : this.tr("Alle anzeigen") + " (" + hist.length + ")",
-          toggleHistAll: e => { if (e && e.stopPropagation) e.stopPropagation(); this.setState(p => ({ histAll: !p.histAll })); }
+          histMore: hist.length > lim,
+          histShownLabel: hist.length ? Math.min(lim, hist.length) + " " + this.tr("von") + " " + hist.length + " " + this.tr("angezeigt") : "",
+          histMoreLabel: this.tr("Weitere laden") + " (" + Math.min(10, hist.length - lim) + ")",
+          histLoadMore: e => { stop(e); this.setState({ histLimit: lim + 10 }); }
         };
       })(),
       orderListCount: orderList.length ? orderList.length + " " + this.tr("offen") : this.tr("abgearbeitet"),
