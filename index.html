@@ -96,6 +96,11 @@
             </sc-for>
           </select>
         </sc-if>
+        <sc-if value="{{ memoShortcut }}" hint-placeholder-val="{{ false }}">
+          <button data-mobile-only class="btn btn-secondary btn-icon" style="{{ memoShortcutStyle }}" onClick="{{ goMemo }}" aria-label="Merkzettel" title="Merkzettel">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"></rect><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M12 11h4"></path><path d="M12 16h4"></path><path d="M8 11h.01"></path><path d="M8 16h.01"></path></svg>
+          </button>
+        </sc-if>
         <button data-scanbtn class="btn btn-secondary btn-icon" style="flex: none" onClick="{{ goScan }}" aria-label="QR-Code scannen" title="QR-Code scannen">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><line x1="3" y1="12" x2="21" y2="12"></line></svg><span data-scanlbl data-i18n>Scannen</span>
         </button>
@@ -133,6 +138,15 @@
         </button>
       </div>
     </div>
+    <sc-if value="{{ qBarOn }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: 6px var(--space-6); background: var(--color-accent-100); color: var(--color-accent-900); border-top: 1px solid var(--color-accent-300); font-size: 13px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 20h.01"></path><path d="M8.5 16.4a5 5 0 0 1 7 0"></path><path d="M5 12.9a10 10 0 0 1 5.2-2.7"></path><path d="M19 12.9a10 10 0 0 0-2.2-1.5"></path><path d="M2 8.8a15 15 0 0 1 4.2-2.6"></path><path d="M22 8.8a15 15 0 0 0-11.3-3.8"></path><path d="m2 2 20 20"></path></svg>
+        <span data-i18n-keep style="flex: 1; min-width: 0">{{ qBarText }}</span>
+        <sc-if value="{{ qCanSend }}" hint-placeholder-val="{{ false }}">
+          <button class="btn btn-secondary" style="padding: 2px 10px; font-size: 12.5px; min-height: 32px; white-space: nowrap" onClick="{{ qSendNow }}"><span data-i18n>Jetzt senden</span></button>
+        </sc-if>
+      </div>
+    </sc-if>
 
     <sc-if value="{{ burgerOpen }}" hint-placeholder-val="{{ false }}">
       <div data-burger-panel style="border-top: 1px solid var(--color-divider); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: var(--space-3)">
@@ -935,6 +949,71 @@
             <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ exportHistoryCsv }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path></svg><span data-i18n>Als Excel exportieren</span></button>
             <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ printPage }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="M6 9V3h12v6"></path><rect x="6" y="14" width="12" height="7"></rect><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path></svg><span data-i18n>Als PDF drucken</span></button>
           </div>
+        </section>
+
+        <section class="card" data-tour="inventory">
+          <div style="display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap">
+            <div style="margin-right: auto; min-width: 0">
+              <div class="card-kicker" data-i18n>Inventur</div>
+              <h4 style="margin: 0" data-i18n>Fehlerhafte Bestände</h4>
+            </div>
+            <span class="{{ invTagCls }}" data-i18n-keep>{{ invCountLabel }}</span>
+            <button class="btn btn-secondary" style="white-space: nowrap; gap: 7px; border-color: var(--color-accent); color: var(--color-accent-800); background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 600" style-hover="background: color-mix(in srgb, var(--color-accent) 24%, transparent)" onClick="{{ invToggle }}"><span data-i18n-keep>{{ invBtnLabel }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none"><path d="m6 9 6 6 6-6"></path></svg></button>
+          </div>
+          <sc-if value="{{ invOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; flex-direction: column; gap: var(--space-4)">
+              <p class="card-body" style="margin: 0" data-i18n>Hier landen Ausbuchungen, die ohne Verbindung gespeichert wurden und beim Übertragen mehr abbuchen wollten, als im Bestand war. Der Bestand steht dann auf 0 und stimmt nicht mit dem Lager überein — eine Inventur klärt das.</p>
+              <sc-if value="{{ invHas }}" hint-placeholder-val="{{ false }}">
+                <div style="overflow-x: auto; max-width: 100%">
+                  <table class="table" data-zebra style="min-width: 560px">
+                    <thead><tr>
+                      <th data-i18n>Zeitpunkt</th><th data-i18n>Ware</th><th style="text-align: right" data-i18n>Fehlmenge</th><th data-i18n>Vorgang</th><th data-i18n>Person</th><th></th>
+                    </tr></thead>
+                    <tbody>
+                      <sc-for list="{{ invRows }}" as="iv" hint-placeholder-count="3">
+                        <tr>
+                          <td style="white-space: nowrap">{{ iv.when }}</td>
+                          <td style="font-weight: 500">{{ iv.name }}</td>
+                          <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--color-accent-800); font-weight: 600">−{{ iv.missing }}</td>
+                          <td class="text-muted" data-i18n-keep>{{ iv.note }}</td>
+                          <td class="text-muted">{{ iv.who }}</td>
+                          <td style="text-align: right"><button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px; white-space: nowrap" onClick="{{ iv.reset }}"><span data-i18n>Zurücksetzen</span></button></td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+                <div style="display: flex; gap: var(--space-2); flex-wrap: wrap">
+                  <button class="btn btn-secondary" style="white-space: nowrap" onClick="{{ invResetAll }}"><span data-i18n>Alle zurücksetzen</span></button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ invNone }}" hint-placeholder-val="{{ true }}">
+                <div style="padding: var(--space-4); text-align: center; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Keine fehlerhaften Bestände.</div>
+              </sc-if>
+              <div class="blueprint" style="padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3)">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 600" data-i18n>Mail bei zu vielen Meldungen</div>
+                <p style="margin: 0; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Liegen mehr Meldungen vor als eingestellt, geht eine Mail mit den betroffenen Waren an alle Kontakte. Nach dem Zurücksetzen wird erst wieder gemailt, wenn die Grenze erneut überschritten ist.</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); align-items: start">
+                  <div class="field" style="margin: 0"><label data-i18n>Mail ab mehr als (Meldungen)</label>
+                    <input class="input" type="number" min="1" step="1" inputmode="numeric" style="min-height: 44px; max-width: 140px" value="{{ invLimit }}" onChange="{{ setInvLimit }}">
+                  </div>
+                  <div class="field" style="margin: 0"><label data-i18n>Kontakte</label>
+                    <div style="display: flex; gap: var(--space-2)">
+                      <input class="input" type="email" style="min-height: 44px; flex: 1; min-width: 0" placeholder="name@firma.de" value="{{ invContactDraft }}" onInput="{{ setInvContactDraft }}" onKeyDown="{{ invContactKey }}">
+                      <button class="btn btn-secondary" style="min-height: 44px; white-space: nowrap" onClick="{{ invAddContact }}"><span data-i18n>Hinzufügen</span></button>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px">
+                      <sc-for list="{{ invContacts }}" as="ic" hint-placeholder-count="0">
+                        <span class="tag tag-accent" style="display: inline-flex; align-items: center; gap: 6px">{{ ic.mail }}<button type="button" class="btn btn-ghost" style="padding: 0 4px; min-height: 0; line-height: 1; font-size: 14px" onClick="{{ ic.remove }}" aria-label="Entfernen">×</button></span>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+                <div style="font-size: 12.5px; color: var(--color-accent-800)" data-i18n-keep>{{ invMailState }}</div>
+              </div>
+            </div>
+          </sc-if>
         </section>
 
         <section class="card">
@@ -4095,7 +4174,7 @@ class Component extends DCLogic {
       ...(() => { let p = {}; try { p = JSON.parse(localStorage.getItem("sc-fc-prefs") || "{}"); } catch (e) {}
         return { fcHorizon: p.horizon || "week", fcSpan: p.span != null ? String(p.span) : "365", fcPids: Array.isArray(p.pids) ? p.pids : [],
           fcFactors: Array.isArray(p.factors) ? p.factors : [], fcModel: p.model || AI_MODELS[0].id }; })(),
-      rowsOpen: false,
+      rowsOpen: false, invOpen: false, stockIssues: [], invAlert: null, invContactDraft: "", queue: [], offline: false,
       testMailTo: "", mailChecks: [], legalTab: "impressum",
       testMode: false, pwVisible: false, connectError: "",
       placesOwn: ["Keller · Regal B2", "Serverraum · Schrank 3", "Küche · Oberschrank",
@@ -4368,8 +4447,11 @@ class Component extends DCLogic {
         mailDay: d.settings && d.settings.mail_day != null ? String(d.settings.mail_day) : prev.mailDay,
         mailWeekday: d.settings && d.settings.mail_weekday != null ? String(d.settings.mail_weekday) : prev.mailWeekday,
         orders: d.settings && d.settings.orders ? d.settings.orders : prev.orders,
-        attrs: d.settings && Array.isArray(d.settings.attrs) ? d.settings.attrs : prev.attrs
+        attrs: d.settings && Array.isArray(d.settings.attrs) ? d.settings.attrs : prev.attrs,
+        invAlert: d.settings && d.settings.inv_alert && typeof d.settings.inv_alert === "object" && Object.keys(d.settings.inv_alert).length ? d.settings.inv_alert : prev.invAlert
       }));
+      if (this.api.loadStockIssues) this.api.loadStockIssues().then(r => { if (r) this.setState({ stockIssues: r }); }).catch(() => {});
+      if ((this.state.queue || []).length && !this._flushing) setTimeout(() => this.flushQueue(), 800);
       if (this.api.loadMemos && !this.memosLoaded) {
         this.memosLoaded = true;
         this.api.loadMemos().then(m => this.setState({ memos: Array.isArray(m) ? m : [] })).catch(() => { this.memosLoaded = false; });
@@ -5735,11 +5817,148 @@ class Component extends DCLogic {
   // Mit Datenbank: buchen und danach den echten Stand nachladen, damit
   // Bestand, Status und Benachrichtigung aus der Quelle kommen und nicht
   // aus der Schätzung im Browser.
+  // Ohne Verbindung wandert die Buchung in eine Warteschlange auf dem Gerät
+  // (localStorage „sc-queue“). Liegt dort schon etwas, reiht sich auch eine
+  // neue Buchung hinten an — so bleibt die Reihenfolge erhalten.
   bookRemote(id, delta, note, mhd) {
     if (!this.state.live || !this.api) return;
+    const item = { k: "book", id: this.qid(), productId: id, delta: Number(delta) || 0, note: note || "", mhd: mhd || null,
+      at: new Date().toISOString(), who: this.state.meNameLive || "" };
+    if (this.isOffline() || (this.state.queue || []).length) { this.enqueue(item); return; }
     this.api.bookMovement({ productId: id, delta, note, mhd: mhd || null })
       .then(() => this.refresh())
-      .catch(err => this.say("Supabase", this.tr("Buchung nicht gespeichert"), String((err && err.message) || err)));
+      .catch(err => {
+        if (this.isNetErr(err)) this.enqueue(item);
+        else this.say("Supabase", this.tr("Buchung nicht gespeichert"), String((err && err.message) || err));
+      });
+  }
+
+  qid() { return "q" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  isOffline() { try { return navigator.onLine === false; } catch (e) { return false; } }
+  isNetErr(err) {
+    const m = String((err && (err.message || err.details)) || err || "");
+    return this.isOffline() || /failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout/i.test(m);
+  }
+  saveQueue(q) {
+    try { localStorage.setItem("sc-queue", JSON.stringify(q)); } catch (e) {}
+    this.setState({ queue: q });
+  }
+  enqueue(item) {
+    let q = (this.state.queue || []).slice();
+    if (item.k === "memos") q = q.filter(x => x.k !== "memos");
+    q.push(item);
+    const first = !(this.state.queue || []).length;
+    this.saveQueue(q);
+    if (first) this.say(this.tr("Offline gespeichert"), this.tr("Keine Verbindung"), this.tr("Wird übertragen, sobald wieder eine Verbindung besteht."));
+  }
+  dropQueued(id) {
+    const q = (this.state.queue || []).filter(x => x.id !== id);
+    this.saveQueue(q);
+  }
+
+  // Warteschlange abarbeiten: erst den echten Bestand holen, dann in der
+  // gespeicherten Reihenfolge buchen. Würde eine Ausbuchung den Bestand unter
+  // 0 bringen, wird das als fehlerhafter Bestand gemeldet (Kachel Inventur).
+  async flushQueue() {
+    if (this._flushing || !this.state.live || !this.api || this.isOffline()) return;
+    const q0 = (this.state.queue || []).slice();
+    if (!q0.length) return;
+    this._flushing = true;
+    const issues = [], failed = [];
+    let sent = 0;
+    try {
+      const d = await this.api.loadAll();
+      const stock = {};
+      (d.products || []).forEach(r => { stock[r.id] = { ist: Number(r.ist) || 0, name: r.name }; });
+      for (const it of q0) {
+        try {
+          if (it.k === "memos") {
+            if (this.api.saveMemos) await this.api.saveMemos(it.list);
+          } else {
+            const st = stock[it.productId];
+            if (st) {
+              const after = st.ist + (Number(it.delta) || 0);
+              if (it.delta < 0 && after < 0) issues.push({ product_id: it.productId, name: st.name, missing: -after, note: it.note || "", by_name: it.who || null, at: it.at });
+              st.ist = Math.max(0, after);
+            }
+            await this.api.bookMovement({ productId: it.productId, delta: it.delta, note: it.note, mhd: it.mhd || null });
+          }
+          sent++;
+          this.dropQueued(it.id);
+        } catch (err) {
+          if (this.isNetErr(err)) break;
+          failed.push(String((err && err.message) || err));
+          this.dropQueued(it.id);
+        }
+      }
+    } catch (err) {
+      if (!this.isNetErr(err)) this.say(this.tr("Warteschlange"), this.tr("Nicht übertragen"), String((err && err.message) || err));
+    }
+    this._flushing = false;
+    if (issues.length) await this.addIssues(issues);
+    if (failed.length) this.say(this.tr("Warteschlange"), this.tr("Nicht übertragen"), failed.slice(0, 3).join(" · "));
+    if (sent) {
+      this.say(this.tr("Verbindung"), sent + " " + this.tr("Vorgänge übertragen"),
+        issues.length ? issues.length + " " + this.tr("fehlerhafte Bestände gemeldet — siehe Bestandsverlauf, Kachel Inventur.") : "");
+      this.refresh();
+    }
+  }
+
+  invAlertCfg() {
+    const a = this.state.invAlert || {};
+    return { limit: Math.max(1, Math.round(Number(a.limit) || 5)), contacts: Array.isArray(a.contacts) ? a.contacts : [],
+      mailed: !!a.mailed, mailedAt: a.mailedAt || null };
+  }
+  saveInvAlert(a, now) {
+    this.setState({ invAlert: a });
+    clearTimeout(this.invSaveT);
+    const run = () => {
+      if (this.state.live && this.api && this.api.setInvAlert) {
+        this.api.setInvAlert(a).catch(e => this.say(this.tr("Inventur"), this.tr("Nicht gespeichert"), String((e && e.message) || e)));
+      } else { try { localStorage.setItem("sc-inv-alert", JSON.stringify(a)); } catch (e) {} }
+    };
+    if (now) run(); else this.invSaveT = setTimeout(run, 600);
+  }
+  saveIssuesLocal(list) { try { localStorage.setItem("sc-stock-issues", JSON.stringify(list)); } catch (e) {} }
+  async addIssues(rows) {
+    let added = rows.map(r => ({ id: "i" + this.qid().slice(1), productId: r.product_id, name: r.name, missing: r.missing, note: r.note, by: r.by_name, at: r.at }));
+    if (this.state.live && this.api && this.api.addStockIssues) {
+      try { const got = await this.api.addStockIssues(rows); if (Array.isArray(got)) added = got; }
+      catch (e) { this.say(this.tr("Inventur"), this.tr("Nicht gespeichert"), String((e && e.message) || e)); }
+    }
+    const list = added.concat(this.state.stockIssues || []);
+    this.setState({ stockIssues: list });
+    if (!this.state.live) this.saveIssuesLocal(list);
+    this.checkInvAlert(list);
+  }
+  checkInvAlert(list) {
+    const a = this.invAlertCfg();
+    if (list.length <= a.limit || a.mailed || !a.contacts.length) return;
+    const fmtDate = t => { try { return new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }); } catch (e) { return ""; } };
+    const rows = list.map(i => {
+      const p = (this.state.products || []).find(x => x.id === i.productId);
+      return { name: i.name || (p ? p.name : "—"), missing: p ? this.fmtStock(p, i.missing) : String(i.missing), at: fmtDate(i.at), note: i.note || "" };
+    });
+    const done = () => { this.saveInvAlert(Object.assign({}, a, { mailed: true, mailedAt: new Date().toISOString() }), true);
+      this.say(this.tr("Inventur nötig"), this.tr("Mail verschickt"), a.contacts.join(", ")); };
+    if (this.state.live && this.api && this.api.sendMail) {
+      this.api.sendMail({ template: "stock_issue", to: a.contacts[0], cc: a.contacts.slice(1), data: { count: list.length, rows: rows } })
+        .then(done).catch(e => this.say(this.tr("Inventur nötig"), this.tr("Mail nicht verschickt"), String((e && e.message) || e)));
+    } else {
+      this.saveInvAlert(Object.assign({}, a, { mailed: true, mailedAt: new Date().toISOString() }), true);
+      this.say(this.tr("Inventur nötig"), this.tr("Mail nicht verschickt"), this.tr("Im Demo-Modus wird nichts verschickt."));
+    }
+  }
+  resetIssues(ids) {
+    const set = new Set(ids);
+    const list = (this.state.stockIssues || []).filter(i => !set.has(i.id));
+    this.setState({ stockIssues: list });
+    if (this.state.live && this.api && this.api.deleteStockIssues) {
+      this.api.deleteStockIssues(ids).catch(e => this.say(this.tr("Inventur"), this.tr("Nicht gespeichert"), String((e && e.message) || e)));
+    } else this.saveIssuesLocal(list);
+    const a = this.invAlertCfg();
+    if (a.mailed && list.length <= a.limit) this.saveInvAlert(Object.assign({}, a, { mailed: false, mailedAt: null }), true);
+    this.say(this.tr("Inventur"), this.tr("Zurückgesetzt"), ids.length + " " + (ids.length === 1 ? this.tr("Meldung") : this.tr("Meldungen")));
   }
 
   // Rollen als Daten: Schlüssel, Bezeichnung, Standardrechte. Die vier
@@ -6645,9 +6864,18 @@ class Component extends DCLogic {
         ...(localStorage.getItem("sc-pref-lang") ? { lang: localStorage.getItem("sc-pref-lang") } : {}),
         onboardHidden: localStorage.getItem("sc-onboard-hidden") === "1",
         qrPrinted: localStorage.getItem("sc-qr-printed") === "1",
-        mailChecked: localStorage.getItem("sc-mail-checked") === "1"
+        mailChecked: localStorage.getItem("sc-mail-checked") === "1",
+        queue: (() => { try { const q = JSON.parse(localStorage.getItem("sc-queue") || "[]"); return Array.isArray(q) ? q : []; } catch (e) { return []; } })(),
+        offline: this.isOffline(),
+        stockIssues: (() => { try { const v = JSON.parse(localStorage.getItem("sc-stock-issues") || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } })(),
+        invAlert: (() => { try { return JSON.parse(localStorage.getItem("sc-inv-alert") || "null"); } catch (e) { return null; } })()
       });
     } catch (e) {}
+    this.onlineL = () => { this.setState({ offline: false }); this.flushQueue(); };
+    this.offlineL = () => this.setState({ offline: true });
+    window.addEventListener("online", this.onlineL);
+    window.addEventListener("offline", this.offlineL);
+    this.queueT = setInterval(() => { if ((this.state.queue || []).length) this.flushQueue(); }, 30000);
     // Einladungslink: die Adresse trägt #invite=<Merkmal>. Wer darüber
     // kommt, richtet zuerst sein Passwort ein und ist danach in genau
     // dieser Firma — ein eigenes Konto, keine geteilten Zugangsdaten.
@@ -6697,6 +6925,9 @@ class Component extends DCLogic {
     this.mq.addEventListener("change", this.mqL);
   }
   componentWillUnmount() {
+    window.removeEventListener("online", this.onlineL);
+    window.removeEventListener("offline", this.offlineL);
+    clearInterval(this.queueT);
     if (this._tourL) { window.removeEventListener("scroll", this._tourL, true); window.removeEventListener("resize", this._tourL); }
     clearInterval(this.tick);
     clearInterval(this.dirtyT);
@@ -6829,7 +7060,13 @@ class Component extends DCLogic {
   // Abhaken werden zusätzlich die Buchungen gemerkt, um sie zurückzubuchen.
   persistMemos(list) {
     if (this.state.live && this.api && this.api.saveMemos) {
-      this.api.saveMemos(list).catch(e => this.say(this.tr("Merkzettel"), this.tr("Nicht gespeichert"), String((e && e.message) || e)));
+      try { localStorage.setItem("sc-memos", JSON.stringify(list)); } catch (e) {}
+      const item = { k: "memos", id: this.qid(), list: list, at: new Date().toISOString() };
+      if (this.isOffline() || (this.state.queue || []).length) { this.enqueue(item); return; }
+      this.api.saveMemos(list).catch(e => {
+        if (this.isNetErr(e)) this.enqueue(item);
+        else this.say(this.tr("Merkzettel"), this.tr("Nicht gespeichert"), String((e && e.message) || e));
+      });
     } else {
       try { localStorage.setItem("sc-memos", JSON.stringify(list)); } catch (e) {}
     }
@@ -7064,7 +7301,7 @@ class Component extends DCLogic {
     }
     if (screen !== "detail") this.setState({ editing: false, editDraft: null, confirmDelete: false });
     if (screen !== "scan") this.stopCamera();
-    this.setState({ screen, menu: null, burgerOpen: false });
+    this.setState(Object.assign({ screen, menu: null, burgerOpen: false }, screen === "history" ? { invOpen: false } : {}));
   }
   groupStyle(keys) {
     if (!keys.some(k => this.pageOk(k))) return "display: none";
@@ -9303,6 +9540,51 @@ class Component extends DCLogic {
       hDept: st.hDept, setHDept: setSel("hDept"),
       hSummary: hMatched.length + " " + this.tr("Artikel in der Auswahl"),
       hCountLabel: hEntries.length + " " + this.tr("Buchungen"),
+      ...(() => {
+        const q = st.queue || [];
+        const iss = st.stockIssues || [];
+        const a = this.invAlertCfg();
+        const stamp = t => { try { return new Date(t).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }); } catch (e) { return "—"; } };
+        const addContact = () => {
+          const v = String(this.state.invContactDraft || "").trim().toLowerCase();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { this.say(this.tr("Kontakte"), this.tr("Ungültige Adresse"), this.tr("Bitte eine E-Mail-Adresse eingeben.")); return; }
+          const cur = this.invAlertCfg();
+          if (cur.contacts.indexOf(v) < 0) this.saveInvAlert(Object.assign({}, cur, { contacts: cur.contacts.concat(v) }), true);
+          this.setState({ invContactDraft: "" });
+        };
+        return {
+          memoShortcut: !st.tour && this.pageOk("memo"),
+          memoShortcutStyle: "flex: none; width: 44px; height: 44px; justify-content: center" + (st.screen === "memo" ? "; border-color: var(--color-accent); background: var(--color-accent-100); color: var(--color-accent-800)" : ""),
+          qBarOn: q.length > 0 || !!st.offline,
+          qBarText: st.offline
+            ? this.tr("Keine Verbindung") + (q.length ? " · " + q.length + " " + this.tr("Vorgänge warten auf dem Gerät und werden danach übertragen.") : " · " + this.tr("Buchungen werden auf dem Gerät gespeichert."))
+            : q.length + " " + this.tr("Vorgänge noch nicht übertragen."),
+          qCanSend: !st.offline && q.length > 0 && !!st.live,
+          qSendNow: () => this.flushQueue(),
+          invOpen: !!st.invOpen,
+          invToggle: () => this.setState(s => ({ invOpen: !s.invOpen })),
+          invBtnLabel: st.invOpen ? this.tr("Ausblenden") : this.tr("Einblenden"),
+          invCountLabel: iss.length ? iss.length + " " + (iss.length === 1 ? this.tr("Meldung") : this.tr("Meldungen")) : this.tr("Keine Meldungen"),
+          invTagCls: iss.length > a.limit ? "tag tag-accent" : iss.length ? "tag tag-outline" : "tag tag-neutral",
+          invHas: iss.length > 0, invNone: iss.length === 0,
+          invRows: iss.map(i => {
+            const p = (st.products || []).find(x => x.id === i.productId);
+            return { when: stamp(i.at), name: i.name || (p ? p.name : "—"), missing: p ? this.fmtStock(p, i.missing) : String(i.missing),
+              note: i.note || "—", who: i.by || "—", reset: () => this.resetIssues([i.id]) };
+          }),
+          invResetAll: () => this.resetIssues(iss.map(i => i.id)),
+          invLimit: String(a.limit),
+          setInvLimit: e => { const n = Math.max(1, Math.round(Number(e.target.value) || 1)); this.saveInvAlert(Object.assign({}, this.invAlertCfg(), { limit: n })); },
+          invContactDraft: st.invContactDraft || "",
+          setInvContactDraft: e => this.setState({ invContactDraft: e.target.value }),
+          invContactKey: e => { if (e.key === "Enter") { e.preventDefault(); addContact(); } },
+          invAddContact: addContact,
+          invContacts: a.contacts.map(m => ({ mail: m, remove: () => { const cur = this.invAlertCfg(); this.saveInvAlert(Object.assign({}, cur, { contacts: cur.contacts.filter(x => x !== m) }), true); } })),
+          invMailState: !a.contacts.length ? this.tr("Keine Kontakte eingetragen — es wird keine Mail verschickt.")
+            : a.mailed ? this.tr("Mail verschickt am ") + stamp(a.mailedAt) + " · " + this.tr("Nächste Mail erst nach dem Zurücksetzen.")
+            : this.tr("Noch keine Mail verschickt.") + " " + iss.length + " / " + a.limit
+        };
+      })(),
       rowsOpen: st.rowsOpen,
       rowsBtnLabel: st.rowsOpen ? this.tr("Buchungen ausblenden") : this.tr("Buchungen anzeigen"),
       toggleRows: () => this.setState(s => ({ rowsOpen: !s.rowsOpen })),

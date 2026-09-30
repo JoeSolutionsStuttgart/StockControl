@@ -212,6 +212,41 @@ export async function saveOrderHistory(entries) {
   return true;
 }
 
+/* ── Inventur: fehlerhafte Bestände ─────────────────────── */
+// Meldungen entstehen, wenn offline gespeicherte Ausbuchungen beim
+// Übertragen den Bestand unter 0 gebracht hätten (Tabelle stock_issues).
+const mapIssue = r => ({ id: r.id, productId: r.product_id, name: r.name, missing: r.missing, note: r.note, by: r.by_name, at: r.at });
+
+export async function loadStockIssues() {
+  const sb = await client();
+  const { data, error } = await sb.from("stock_issues").select("id, product_id, name, missing, note, by_name, at")
+    .order("at", { ascending: false }).limit(1000);
+  if (error) return null;
+  return (data || []).map(mapIssue);
+}
+
+export async function addStockIssues(rows) {
+  const sb = await client();
+  const { data, error } = await sb.from("stock_issues").insert(rows).select("id, product_id, name, missing, note, by_name, at");
+  if (error) throw error;
+  return (data || []).map(mapIssue);
+}
+
+export async function deleteStockIssues(ids) {
+  const sb = await client();
+  const { error } = await sb.from("stock_issues").delete().in("id", ids || []);
+  if (error) throw error;
+  return true;
+}
+
+// Grenze und Kontakte für die Inventur-Mail: {"limit":5,"contacts":[…],"mailed":false}
+export async function setInvAlert(p) {
+  const sb = await client();
+  const { error } = await sb.rpc("sc_set_inv_alert", { p: p || {} });
+  if (error) throw error;
+  return true;
+}
+
 /* ── Produkte ───────────────────────────────────────────── */
 
 export async function createProduct(row) {
