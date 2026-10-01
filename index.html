@@ -348,6 +348,17 @@
               <option value="ordered">Ist bestellt</option>
             </select>
           </div>
+          <sc-if value="{{ tfCan }}" hint-placeholder-val="{{ false }}">
+            <div class="field" style="width: 200px">
+              <label data-i18n>Umlagern nach</label>
+              <select class="input" value="" onChange="{{ tfPickTarget }}">
+                <option value="" data-i18n>Ziellager wählen …</option>
+                <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+                  <option value="{{ pl }}">{{ pl }}</option>
+                </sc-for>
+              </select>
+            </div>
+          </sc-if>
           <button class="btn btn-primary" style="white-space: nowrap; flex: none" onClick="{{ goNew }}"><span data-i18n>Neues Produkt</span></button>
         </div>
 
@@ -3879,6 +3890,115 @@
   </div>
 </sc-if>
 
+<sc-if value="{{ tfOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; inset: 0; z-index: 63; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
+    <div class="blueprint elev-lg" style="width: min(860px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: var(--space-6); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-4); animation: sc-in .18s ease-out">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: flex-start; gap: var(--space-3); flex-wrap: wrap">
+        <div style="flex: 1; min-width: 200px">
+          <div class="card-kicker" data-i18n>Umlagern</div>
+          <h3 style="margin: 0; font-family: var(--font-heading)" data-i18n-keep>{{ tfTitle }}</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Ware wählen, dann das Lager, aus dem sie kommt, und die Menge. Dieselbe Ware kann aus mehreren Lagern kommen. Kein Lager kann unter 0 fallen.</p>
+        </div>
+        <div class="field" style="margin: 0; width: 200px">
+          <label data-i18n>Ziellager</label>
+          <select class="input" value="{{ tfTo }}" onChange="{{ tfSetTo }}">
+            <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+              <option value="{{ pl }}">{{ pl }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <button class="btn btn-ghost btn-icon" onClick="{{ tfClose }}" aria-label="Schließen" title="Schließen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+        <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 600" data-i18n>1 · Ware</div>
+        <input class="input" type="search" data-i18n-ph placeholder="Ware suchen …" value="{{ tfQuery }}" onInput="{{ tfSetQuery }}" style="min-height: 44px">
+        <sc-if value="{{ tfShowWares }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; border: 1px solid var(--color-neutral-300); max-height: 240px; overflow: auto">
+            <sc-for list="{{ tfWares }}" as="tw" hint-placeholder-count="4">
+              <button type="button" onClick="{{ tw.pick }}" style="{{ tw.style }}">
+                <span style="font-weight: 500; flex: 1; min-width: 0; text-align: left">{{ tw.name }}</span>
+                <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); text-align: right">{{ tw.meta }}</span>
+              </button>
+            </sc-for>
+            <sc-if value="{{ tfNoWares }}" hint-placeholder-val="{{ false }}">
+              <div style="padding: var(--space-3); font-size: 13px; color: var(--sc-ink-2)" data-i18n>Keine passende Ware gefunden.</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ tfHasWare }}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+          <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 600"><span data-i18n>2 · Aus welchem Lager?</span> <span data-i18n-keep style="font-weight: 400; color: var(--sc-ink-2)">{{ tfWareName }}</span></div>
+          <sc-if value="{{ tfHasSources }}" hint-placeholder-val="{{ true }}">
+            <div style="overflow-x: auto">
+              <table class="table" style="min-width: 520px">
+                <thead><tr><th data-i18n>Lager</th><th style="text-align: right" data-i18n>Verfügbar</th><th data-i18n>Menge</th><th></th></tr></thead>
+                <tbody>
+                  <sc-for list="{{ tfSources }}" as="ts" hint-placeholder-count="2">
+                    <tr>
+                      <td style="font-weight: 500">{{ ts.ort }}</td>
+                      <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ ts.free }}</td>
+                      <td>
+                        <div style="display: flex; align-items: center; gap: 6px">
+                          <input class="input" type="number" min="0" max="{{ ts.max }}" step="1" inputmode="numeric" style="width: 110px; min-height: 40px" value="{{ ts.amt }}" onInput="{{ ts.setAmt }}">
+                          <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ ts.unit }}</span>
+                        </div>
+                      </td>
+                      <td style="text-align: right; white-space: nowrap">
+                        <div style="display: flex; gap: 6px; justify-content: flex-end">
+                          <button class="btn btn-ghost" style="padding: 3px 8px; font-size: 12.5px" onClick="{{ ts.all }}"><span data-i18n>Alles</span></button>
+                          <button class="btn btn-secondary" style="padding: 3px 10px; font-size: 12.5px" disabled="{{ ts.addOff }}" onClick="{{ ts.add }}"><span data-i18n>Hinzufügen</span></button>
+                        </div>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+          <sc-if value="{{ tfNoSources }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: var(--space-3); font-size: 13px; color: var(--sc-ink-2); border: 1px dashed var(--color-neutral-300)" data-i18n>Diese Ware liegt in keinem anderen Lager mit Bestand.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <div style="display: flex; flex-direction: column; gap: var(--space-2)">
+        <div style="font-family: var(--font-heading); font-size: 17px; font-weight: 600" data-i18n>3 · Umlagerung</div>
+        <sc-if value="{{ tfHasLines }}" hint-placeholder-val="{{ false }}">
+          <div style="overflow-x: auto">
+            <table class="table" data-zebra style="min-width: 520px">
+              <thead><tr><th data-i18n>Ware</th><th data-i18n>Aus Lager</th><th style="text-align: right" data-i18n>Menge</th><th></th></tr></thead>
+              <tbody>
+                <sc-for list="{{ tfLines }}" as="tl" hint-placeholder-count="2">
+                  <tr>
+                    <td style="font-weight: 500">{{ tl.name }}</td>
+                    <td>{{ tl.from }}</td>
+                    <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums">{{ tl.qty }}</td>
+                    <td style="text-align: right"><button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px" onClick="{{ tl.remove }}"><span data-i18n>Entfernen</span></button></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tfNoLines }}" hint-placeholder-val="{{ true }}">
+          <div style="padding: var(--space-3); font-size: 13px; color: var(--sc-ink-2); border: 1px dashed var(--color-neutral-300)" data-i18n>Noch nichts zum Umlagern ausgewählt.</div>
+        </sc-if>
+      </div>
+
+      <div style="display: flex; gap: var(--space-2); justify-content: flex-end; flex-wrap: wrap">
+        <button class="btn btn-secondary" onClick="{{ tfClose }}"><span data-i18n>Abbrechen</span></button>
+        <button class="btn btn-primary" disabled="{{ tfBookOff }}" onClick="{{ tfBook }}"><span data-i18n-keep>{{ tfBookLabel }}</span></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ fcOpen }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide style="position: fixed; inset: 0; z-index: 62; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
     <div class="blueprint elev-lg" style="width: min(1240px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: var(--space-6); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-4); animation: sc-in .18s ease-out">
@@ -4177,6 +4297,7 @@ class Component extends DCLogic {
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       hFrom: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10), hTo: new Date().toISOString().slice(0, 10),
       orderHist: null,
+      tfOpen: false, tfTo: "", tfQuery: "", tfWare: null, tfAmt: {}, tfLines: [], tfBusy: false,
       fcOpen: false, fcBusy: false, fcResult: null, fcQuery: "", aiToday: 0,
       ...(() => { let p = {}; try { p = JSON.parse(localStorage.getItem("sc-fc-prefs") || "{}"); } catch (e) {}
         return { fcHorizon: p.horizon || "week", fcSpan: p.span != null ? String(p.span) : "365", fcPids: Array.isArray(p.pids) ? p.pids : [],
@@ -7075,6 +7196,85 @@ class Component extends DCLogic {
       : Object.assign({}, p, { mhd: (!p.mhd || p.mhd === "—") ? (this.state.live ? iso : de) : p.mhd })) }));
   }
 
+  // ── Umlagern ─────────────────────────────────────────────
+  // Eine „Ware" ist alles mit gleichem Namen, gleicher Quantität und EAN —
+  // je Lagerort ist sie ein eigener Datensatz mit eigenem Bestand.
+  wareKey(p) {
+    const c = v => String(v == null || v === "—" ? "" : v).trim().toLowerCase();
+    return [c(p.name), c(p.quantitaet), c(p.ean)].join("|");
+  }
+  tfPool() {
+    const a = this.activeDeptId();
+    return (this.state.products || []).filter(p => p.aktiv !== false && (!a || this.deptOf(p) === a));
+  }
+  tfPlanned(srcId) { return (this.state.tfLines || []).filter(l => l.srcId === srcId).reduce((s, l) => s + l.qty, 0); }
+  tfAdd(src, qty) {
+    const n = Math.floor(Number(qty) || 0);
+    const free = (Number(src.ist) || 0) - this.tfPlanned(src.id);
+    if (n <= 0) { this.say(this.tr("Umlagern"), this.tr("Keine Menge eingetragen"), this.tr("Menge eintragen, dann hinzufügen.")); return; }
+    if (n > free) { this.say(this.tr("Umlagern"), this.tr("Zu viel"), src.ort + ": " + this.tr("verfügbar") + " " + this.fmtStock(src, free)); return; }
+    const lines = (this.state.tfLines || []).slice();
+    const i = lines.findIndex(l => l.srcId === src.id);
+    if (i >= 0) lines[i] = { srcId: src.id, qty: lines[i].qty + n }; else lines.push({ srcId: src.id, qty: n });
+    this.setState(prev => ({ tfLines: lines, tfAmt: Object.assign({}, prev.tfAmt, { [src.id]: "" }) }));
+  }
+  async doTransfer() {
+    if (!this.may("withdraw") || !this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Umlagern"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
+    const to = this.state.tfTo;
+    const lines = (this.state.tfLines || []).slice();
+    if (!to || !lines.length || this._tfBusy) return;
+    const byId = id => (this.state.products || []).find(p => p.id === id);
+    for (const l of lines) {
+      const src = byId(l.srcId);
+      if (!src || l.qty > (Number(src.ist) || 0) || src.ort === to) {
+        this.say(this.tr("Umlagern"), this.tr("Nicht gebucht"), (src ? src.name + " · " + src.ort + ": " : "") + this.tr("Bestand reicht nicht mehr. Bitte neu auswählen."));
+        return;
+      }
+    }
+    this._tfBusy = true; this.setState({ tfBusy: true });
+    const who = this.state.meNameLive || this.tr("Ich");
+    const running = {};
+    const cur = id => running[id] != null ? running[id] : (Number((byId(id) || {}).ist) || 0);
+    const targets = {};
+    let moved = 0;
+    try {
+      for (const l of lines) {
+        const src = byId(l.srcId);
+        const dept = this.deptOf(src);
+        const tk = this.wareKey(src) + "#" + (dept || "");
+        let tgt = targets[tk] || (this.state.products || []).find(p => p.ort === to && this.wareKey(p) === this.wareKey(src) && this.deptOf(p) === dept);
+        if (!tgt) {
+          if (this.state.live && this.api) {
+            const pl = Object.assign(this.copyPayload(src, dept), { ort: to });
+            if (!dept) delete pl.department_id;
+            const row = await this.api.createProduct(pl).catch(err => this.withoutCode(err, pl, p => this.api.createProduct(p)));
+            tgt = Object.assign({}, src, { id: row.id, ort: to, ist: 0, _new: true });
+          } else {
+            const id = "SC-" + (Date.now().toString(36).slice(-4) + Object.keys(targets).length).toUpperCase();
+            tgt = Object.assign({}, src, { id: id, code: id, ist: 0, ort: to, hist: [0], entnahme: "—", auffuell: "—", status: (Number(src.min) || 0) > 0 ? "low" : "ok" });
+            const nt = tgt;
+            this.setState(prev => ({ products: prev.products.concat(nt) }));
+          }
+        }
+        targets[tk] = tgt;
+        const sNow = cur(src.id), tNow = cur(tgt.id);
+        running[src.id] = sNow - l.qty; running[tgt.id] = tNow + l.qty;
+        this.applyBooking(Object.assign({}, src, { ist: sNow }), sNow - l.qty, sNow - l.qty < (Number(src.min) || 0), "−" + l.qty, who);
+        if (!tgt._new) this.applyBooking(Object.assign({}, tgt, { ist: tNow }), tNow + l.qty, false, "+" + l.qty, who);
+        this.bookRemote(src.id, -l.qty, this.tr("Umlagerung nach ") + to);
+        this.bookRemote(tgt.id, l.qty, this.tr("Umlagerung aus ") + src.ort);
+        moved++;
+      }
+    } catch (err) {
+      this.say(this.tr("Umlagern"), this.tr("Nicht gespeichert"), String((err && err.message) || err));
+    }
+    this._tfBusy = false;
+    if (moved) {
+      this.setState({ tfBusy: false, tfOpen: moved === lines.length ? false : this.state.tfOpen, tfLines: lines.slice(moved), tfWare: null, tfQuery: "", tfAmt: {} });
+      this.say(this.tr("Umlagern"), moved + " " + (moved === 1 ? this.tr("Position umgelagert") : this.tr("Positionen umgelagert")), this.tr("nach ") + to);
+    } else this.setState({ tfBusy: false });
+  }
+
   copyToDept(cur, target) {
     if (!cur || !target) return;
     this.copyManyToDept([cur], target);
@@ -9458,6 +9658,62 @@ class Component extends DCLogic {
       setHProduct: setSel("hProduct"), setHCategory: setSel("hCategory"), setHPlace: setSel("hPlace"),
       setHResp: setSel("hResp"), setHSupplier: setSel("hSupplier"), setHRange: setSel("hRange"),
       canForecast: this.may("forecast"),
+      ...(() => {
+        const pool = this.tfPool();
+        const to = st.tfTo || "";
+        const q = String(st.tfQuery || "").trim().toLowerCase();
+        const groups = {};
+        pool.forEach(p => { const k = this.wareKey(p); (groups[k] = groups[k] || []).push(p); });
+        const wares = Object.keys(groups).map(k => ({ k: k, list: groups[k] }))
+          .filter(w => !q || w.list.some(p => [p.name, p.ean, this.codeOf(p), p.lieferant].join(" ").toLowerCase().indexOf(q) >= 0))
+          .sort((a, b) => a.list[0].name.localeCompare(b.list[0].name));
+        const ware = st.tfWare && groups[st.tfWare] ? groups[st.tfWare] : null;
+        const sources = ware ? ware.filter(p => p.ort !== to && (Number(p.ist) || 0) > 0) : [];
+        const byId = id => pool.find(p => p.id === id) || (st.products || []).find(p => p.id === id);
+        const lines = (st.tfLines || []).map(l => ({ l: l, p: byId(l.srcId) })).filter(x => x.p);
+        const reset = { tfWare: null, tfQuery: "", tfAmt: {}, tfLines: [] };
+        return {
+          tfCan: this.may("withdraw") && this.may("refill") && places.length > 1,
+          tfPickTarget: e => { const v = e.target.value; e.target.value = ""; if (v) this.setState(Object.assign({ tfOpen: true, tfTo: v }, reset)); },
+          tfOpen: !!st.tfOpen,
+          tfClose: () => this.setState({ tfOpen: false }),
+          tfTo: to,
+          tfSetTo: e => { const v = e.target.value; this.setState(prev => ({ tfTo: v, tfLines: (prev.tfLines || []).filter(l => { const p = byId(l.srcId); return p && p.ort !== v; }) })); },
+          tfTitle: this.tr("Einlagern in") + " " + to,
+          tfQuery: st.tfQuery || "",
+          tfSetQuery: e => this.setState({ tfQuery: e.target.value, tfWare: null }),
+          tfShowWares: !ware,
+          tfWares: wares.slice(0, 40).map(w => {
+            const p0 = w.list[0];
+            const where = w.list.filter(p => p.ort !== to && (Number(p.ist) || 0) > 0).length;
+            return { name: p0.name + (p0.quantitaet && p0.quantitaet !== "—" ? " · " + p0.quantitaet : ""),
+              meta: (p0.ean && p0.ean !== "—" ? "EAN " + p0.ean + " · " : "") + where + " " + (where === 1 ? this.tr("Lager mit Bestand") : this.tr("Lager mit Bestand")),
+              style: "display: flex; align-items: center; gap: var(--space-3); padding: 10px 12px; min-height: 44px; border: 0; border-bottom: 1px solid var(--color-neutral-200); background: transparent; cursor: pointer; font: inherit; color: inherit" + (where ? "" : "; opacity: .55"),
+              pick: () => this.setState({ tfWare: w.k, tfQuery: p0.name, tfAmt: {} }) };
+          }),
+          tfNoWares: !wares.length,
+          tfHasWare: !!ware,
+          tfWareName: ware ? "— " + ware[0].name : "",
+          tfHasSources: sources.length > 0, tfNoSources: !!ware && !sources.length,
+          tfSources: sources.map(p => {
+            const free = Math.max(0, (Number(p.ist) || 0) - this.tfPlanned(p.id));
+            const raw = (st.tfAmt || {})[p.id];
+            const n = Math.floor(Number(raw) || 0);
+            return { ort: p.ort, free: this.fmtStock(p, free) + (this.tfPlanned(p.id) ? " (" + this.tr("bereits eingeplant") + " " + this.fmtStock(p, this.tfPlanned(p.id)) + ")" : ""),
+              max: String(free), amt: raw == null ? "" : String(raw), unit: this.baseUnitName(p),
+              setAmt: e => { let v = e.target.value; if (v !== "" && Number(v) > free) v = String(free); if (v !== "" && Number(v) < 0) v = "0"; const id = p.id; this.setState(prev => ({ tfAmt: Object.assign({}, prev.tfAmt, { [id]: v }) })); },
+              all: () => { const id = p.id; this.setState(prev => ({ tfAmt: Object.assign({}, prev.tfAmt, { [id]: String(free) }) })); },
+              addOff: n <= 0 || n > free,
+              add: () => this.tfAdd(p, n) };
+          }),
+          tfHasLines: lines.length > 0, tfNoLines: !lines.length,
+          tfLines: lines.map(x => ({ name: x.p.name, from: x.p.ort, qty: this.fmtStock(x.p, x.l.qty),
+            remove: () => this.setState(prev => ({ tfLines: (prev.tfLines || []).filter(l => l.srcId !== x.l.srcId) })) })),
+          tfBookOff: !lines.length || !!st.tfBusy,
+          tfBookLabel: st.tfBusy ? this.tr("Wird gebucht …") : this.tr("Umlagern buchen") + (lines.length ? " (" + lines.length + ")" : ""),
+          tfBook: () => this.doTransfer()
+        };
+      })(),
       fcOpen: !!st.fcOpen,
       fcShow: () => this.setState({ fcOpen: true, aiToday: Math.max(st.aiToday || 0, this.aiCount()) }),
       fcClose: () => this.setState({ fcOpen: false }),
