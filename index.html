@@ -354,17 +354,6 @@
               <span data-i18n>Schnell umlagern</span>
             </button>
           </sc-if>
-          <sc-if value="{{ tfCan }}" hint-placeholder-val="{{ false }}">
-            <div class="field" style="width: 200px">
-              <label data-i18n>Umlagern nach</label>
-              <select class="input" value="" onChange="{{ tfPickTarget }}">
-                <option value="" data-i18n>Ziellager wählen …</option>
-                <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
-                  <option value="{{ pl }}">{{ pl }}</option>
-                </sc-for>
-              </select>
-            </div>
-          </sc-if>
           <button class="btn btn-primary" style="white-space: nowrap; flex: none" onClick="{{ goNew }}"><span data-i18n>Neues Produkt</span></button>
         </div>
 
