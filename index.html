@@ -349,6 +349,12 @@
             </select>
           </div>
           <sc-if value="{{ tfCan }}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-secondary" style="white-space: nowrap; flex: none; gap: 7px" onClick="{{ bqShow }}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 4 4-4 4"></path><path d="M20 7H4"></path><path d="m8 21-4-4 4-4"></path><path d="M4 17h16"></path></svg>
+              <span data-i18n>Schnell umlagern</span>
+            </button>
+          </sc-if>
+          <sc-if value="{{ tfCan }}" hint-placeholder-val="{{ false }}">
             <div class="field" style="width: 200px">
               <label data-i18n>Umlagern nach</label>
               <select class="input" value="" onChange="{{ tfPickTarget }}">
@@ -3890,6 +3896,107 @@
   </div>
 </sc-if>
 
+<sc-if value="{{ bqOpen }}" hint-placeholder-val="{{ false }}">
+  <div data-print-hide style="position: fixed; inset: 0; z-index: 63; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
+    <div class="blueprint elev-lg" style="width: min(1180px, 100%); height: calc(100vh - 32px); padding: var(--space-6); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-3); animation: sc-in .18s ease-out">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: flex-start; gap: var(--space-3); flex-wrap: wrap">
+        <div style="flex: 1; min-width: 220px">
+          <div class="card-kicker" data-i18n>Schnell umlagern</div>
+          <h3 style="margin: 0; font-family: var(--font-heading)" data-i18n>Viele Waren auf einmal</h3>
+          <p style="margin: 4px 0 0; font-size: 13px; color: var(--sc-ink-2)" data-i18n>Ziel wählen, dann bei jeder Ware die Menge eintragen und einmal buchen. Angezeigt werden alle Lager mit Bestand aus allen Abteilungen, für die du freigegeben bist.</p>
+        </div>
+        <button class="btn btn-ghost btn-icon" onClick="{{ bqClose }}" aria-label="Schließen" title="Schließen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); align-items: end">
+        <div class="field" style="margin: 0"><label data-i18n>Ziellager</label>
+          <select class="input" value="{{ bqTo }}" onChange="{{ bqSetTo }}">
+            <option value="" data-i18n>Ziellager wählen …</option>
+            <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+              <option value="{{ pl }}">{{ pl }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <sc-if value="{{ bqDeptOn }}" hint-placeholder-val="{{ false }}">
+          <div class="field" style="margin: 0"><label data-i18n>Zielabteilung</label>
+            <select class="input" value="{{ bqToDept }}" onChange="{{ bqSetToDept }}">
+              <sc-for list="{{ bqDepts }}" as="bd" hint-placeholder-count="2">
+                <option value="{{ bd.id }}">{{ bd.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+        </sc-if>
+        <div class="field" style="margin: 0"><label data-i18n>Suchen</label>
+          <input class="input" type="search" data-i18n-ph placeholder="Ware suchen …" value="{{ bqQuery }}" onInput="{{ bqSetQuery }}">
+        </div>
+        <div class="field" style="margin: 0"><label data-i18n>Aus Lager</label>
+          <select class="input" value="{{ bqFrom }}" onChange="{{ bqSetFrom }}">
+            <option value="" data-i18n>Alle Lager</option>
+            <sc-for list="{{ places }}" as="pl" hint-placeholder-count="4">
+              <option value="{{ pl }}">{{ pl }}</option>
+            </sc-for>
+          </select>
+        </div>
+        <sc-if value="{{ bqDeptOn }}" hint-placeholder-val="{{ false }}">
+          <div class="field" style="margin: 0"><label data-i18n>Aus Abteilung</label>
+            <select class="input" value="{{ bqFromDept }}" onChange="{{ bqSetFromDept }}">
+              <option value="" data-i18n>Alle Abteilungen</option>
+              <sc-for list="{{ bqDepts }}" as="bd" hint-placeholder-count="2">
+                <option value="{{ bd.id }}">{{ bd.name }}</option>
+              </sc-for>
+            </select>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ bqNoTarget }}" hint-placeholder-val="{{ true }}">
+        <div style="flex: 1; display: grid; place-items: center; border: 1px dashed var(--color-neutral-300); font-size: 14px; color: var(--sc-ink-2); padding: var(--space-6); text-align: center" data-i18n>Zuerst das Ziellager wählen.</div>
+      </sc-if>
+      <sc-if value="{{ bqHasTarget }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1; min-height: 0; overflow: auto; border: 1px solid var(--color-neutral-300)">
+          <table class="table" data-zebra style="min-width: 760px; font-size: 13px">
+            <thead style="position: sticky; top: 0; background: var(--sc-card); z-index: 1"><tr>
+              <th data-i18n>Ware</th>
+              <sc-if value="{{ bqDeptOn }}" hint-placeholder-val="{{ false }}"><th data-i18n>Abteilung</th></sc-if>
+              <th data-i18n>Lager</th><th style="text-align: right" data-i18n>Verfügbar</th><th data-i18n>Menge</th><th></th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ bqRows }}" as="br" hint-placeholder-count="8">
+                <tr style="{{ br.rowStyle }}">
+                  <td><div style="font-weight: 500">{{ br.name }}</div><div data-i18n-keep style="font-size: 11.5px; color: var(--sc-ink-2)">{{ br.meta }}</div></td>
+                  <sc-if value="{{ bqDeptOn }}" hint-placeholder-val="{{ false }}"><td>{{ br.dept }}</td></sc-if>
+                  <td>{{ br.ort }}</td>
+                  <td data-i18n-keep style="text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap">{{ br.free }}</td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 6px">
+                      <input class="input" type="number" min="0" max="{{ br.max }}" step="1" inputmode="numeric" data-bq-input style="width: 96px; min-height: 38px" value="{{ br.amt }}" onInput="{{ br.setAmt }}" onKeyDown="{{ br.key }}">
+                      <span data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2); white-space: nowrap">{{ br.unit }}</span>
+                    </div>
+                  </td>
+                  <td style="text-align: right"><button class="btn btn-ghost" style="padding: 2px 8px; font-size: 12px" onClick="{{ br.all }}"><span data-i18n>Alles</span></button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <sc-if value="{{ bqNoRows }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: var(--space-4); font-size: 13px; color: var(--sc-ink-2); text-align: center" data-i18n>Keine Ware mit Bestand in anderen Lagern.</div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ bqCapped }}" hint-placeholder-val="{{ false }}">
+          <div data-i18n-keep style="font-size: 12px; color: var(--sc-ink-2)">{{ bqCapText }}</div>
+        </sc-if>
+      </sc-if>
+      <div style="display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap">
+        <span data-i18n-keep style="margin-right: auto; min-width: 0; font-size: 13px; font-weight: 600; color: var(--color-accent-800)">{{ bqSummary }}</span>
+        <button class="btn btn-ghost" style="white-space: nowrap; flex: none" disabled="{{ bqClearOff }}" onClick="{{ bqClear }}"><span data-i18n>Mengen leeren</span></button>
+        <button class="btn btn-secondary" style="white-space: nowrap; flex: none" onClick="{{ bqClose }}"><span data-i18n>Abbrechen</span></button>
+        <button class="btn btn-primary" style="white-space: nowrap; flex: none" disabled="{{ bqBookOff }}" onClick="{{ bqBook }}"><span data-i18n-keep>{{ bqBookLabel }}</span></button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ tfOpen }}" hint-placeholder-val="{{ false }}">
   <div data-print-hide style="position: fixed; inset: 0; z-index: 63; background: color-mix(in srgb, var(--color-text) 55%, transparent); display: grid; place-items: center; padding: var(--space-4)">
     <div class="blueprint elev-lg" style="width: min(860px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: var(--space-6); background: var(--sc-card); display: flex; flex-direction: column; gap: var(--space-4); animation: sc-in .18s ease-out">
@@ -4297,6 +4404,7 @@ class Component extends DCLogic {
       hProduct: "", hCategory: "", hPlace: "", hResp: "", hSupplier: "", hRange: "90",
       hFrom: new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10), hTo: new Date().toISOString().slice(0, 10),
       orderHist: null,
+      bqOpen: false, bqTo: "", bqToDept: "", bqQuery: "", bqFrom: "", bqFromDept: "", bqAmt: {},
       tfOpen: false, tfTo: "", tfQuery: "", tfWare: null, tfAmt: {}, tfLines: [], tfBusy: false,
       fcOpen: false, fcBusy: false, fcResult: null, fcQuery: "", aiToday: 0,
       ...(() => { let p = {}; try { p = JSON.parse(localStorage.getItem("sc-fc-prefs") || "{}"); } catch (e) {}
@@ -7218,15 +7326,16 @@ class Component extends DCLogic {
     if (i >= 0) lines[i] = { srcId: src.id, qty: lines[i].qty + n }; else lines.push({ srcId: src.id, qty: n });
     this.setState(prev => ({ tfLines: lines, tfAmt: Object.assign({}, prev.tfAmt, { [src.id]: "" }) }));
   }
-  async doTransfer() {
+  async doTransfer(toArg, linesArg, toDeptArg, after) {
     if (!this.may("withdraw") || !this.may("refill")) { this.say(this.tr("Kein Zugriff"), this.tr("Umlagern"), this.tr("Für dich gesperrt — dafür fehlt dir ein Recht.")); return; }
-    const to = this.state.tfTo;
-    const lines = (this.state.tfLines || []).slice();
+    const to = toArg || this.state.tfTo;
+    const lines = (linesArg || this.state.tfLines || []).slice();
+    const tDept = src => toDeptArg ? toDeptArg : this.deptOf(src);
     if (!to || !lines.length || this._tfBusy) return;
     const byId = id => (this.state.products || []).find(p => p.id === id);
     for (const l of lines) {
       const src = byId(l.srcId);
-      if (!src || l.qty > (Number(src.ist) || 0) || src.ort === to) {
+      if (!src || l.qty > (Number(src.ist) || 0) || (src.ort === to && this.deptOf(src) === tDept(src))) {
         this.say(this.tr("Umlagern"), this.tr("Nicht gebucht"), (src ? src.name + " · " + src.ort + ": " : "") + this.tr("Bestand reicht nicht mehr. Bitte neu auswählen."));
         return;
       }
@@ -7240,7 +7349,7 @@ class Component extends DCLogic {
     try {
       for (const l of lines) {
         const src = byId(l.srcId);
-        const dept = this.deptOf(src);
+        const dept = tDept(src);
         const tk = this.wareKey(src) + "#" + (dept || "");
         let tgt = targets[tk] || (this.state.products || []).find(p => p.ort === to && this.wareKey(p) === this.wareKey(src) && this.deptOf(p) === dept);
         if (!tgt) {
@@ -7251,7 +7360,7 @@ class Component extends DCLogic {
             tgt = Object.assign({}, src, { id: row.id, ort: to, ist: 0, _new: true });
           } else {
             const id = "SC-" + (Date.now().toString(36).slice(-4) + Object.keys(targets).length).toUpperCase();
-            tgt = Object.assign({}, src, { id: id, code: id, ist: 0, ort: to, hist: [0], entnahme: "—", auffuell: "—", status: (Number(src.min) || 0) > 0 ? "low" : "ok" });
+            tgt = Object.assign({}, src, { id: id, code: id, ist: 0, ort: to, department: dept || src.department, hist: [0], entnahme: "—", auffuell: "—", status: (Number(src.min) || 0) > 0 ? "low" : "ok" });
             const nt = tgt;
             this.setState(prev => ({ products: prev.products.concat(nt) }));
           }
@@ -7269,6 +7378,7 @@ class Component extends DCLogic {
       this.say(this.tr("Umlagern"), this.tr("Nicht gespeichert"), String((err && err.message) || err));
     }
     this._tfBusy = false;
+    if (after) { this.setState({ tfBusy: false }); after(moved, lines.length); if (moved) this.say(this.tr("Umlagern"), moved + " " + (moved === 1 ? this.tr("Position umgelagert") : this.tr("Positionen umgelagert")), this.tr("nach ") + to + (toDeptArg ? " · " + this.deptName(toDeptArg) : "")); return; }
     if (moved) {
       this.setState({ tfBusy: false, tfOpen: moved === lines.length ? false : this.state.tfOpen, tfLines: lines.slice(moved), tfWare: null, tfQuery: "", tfAmt: {} });
       this.say(this.tr("Umlagern"), moved + " " + (moved === 1 ? this.tr("Position umgelagert") : this.tr("Positionen umgelagert")), this.tr("nach ") + to);
@@ -9712,6 +9822,77 @@ class Component extends DCLogic {
           tfBookOff: !lines.length || !!st.tfBusy,
           tfBookLabel: st.tfBusy ? this.tr("Wird gebucht …") : this.tr("Umlagern buchen") + (lines.length ? " (" + lines.length + ")" : ""),
           tfBook: () => this.doTransfer()
+        };
+      })(),
+      ...(() => {
+        const D = this.depts();
+        const deptOn = D.length > 1;
+        const to = st.bqTo || "";
+        const toDept = deptOn ? (D.some(d => d.id === st.bqToDept) ? st.bqToDept : (this.activeDeptId() || D[0].id)) : null;
+        const q = String(st.bqQuery || "").trim().toLowerCase();
+        const amt = st.bqAmt || {};
+        // Alle freigegebenen Abteilungen, unabhängig von der Auswahl oben.
+        const pool = (this.state.products || []).filter(p => p.aktiv !== false && (Number(p.ist) || 0) > 0
+          && !(p.ort === to && (!deptOn || this.deptOf(p) === toDept))
+          && (!st.bqFrom || p.ort === st.bqFrom)
+          && (!st.bqFromDept || this.deptOf(p) === st.bqFromDept)
+          && (!q || [p.name, p.ean, this.codeOf(p), p.lieferant, p.ort].join(" ").toLowerCase().indexOf(q) >= 0))
+          .sort((a, b) => a.name.localeCompare(b.name) || String(a.ort).localeCompare(String(b.ort)));
+        const CAP = 300;
+        const all = (this.state.products || []);
+        const picked = Object.keys(amt).map(id => ({ p: all.find(x => x.id === id), n: Math.floor(Number(amt[id]) || 0) }))
+          .filter(x => x.p && x.n > 0 && x.n <= (Number(x.p.ist) || 0) && !(x.p.ort === to && (!deptOn || this.deptOf(x.p) === toDept)));
+        const wares = new Set(picked.map(x => this.wareKey(x.p))).size;
+        const focusNext = e => {
+          if (e.key !== "Enter") return;
+          e.preventDefault();
+          const list = Array.from(document.querySelectorAll("[data-bq-input]"));
+          const i = list.indexOf(e.target);
+          if (list[i + 1]) { list[i + 1].focus(); list[i + 1].select(); }
+        };
+        return {
+          bqShow: () => this.setState({ bqOpen: true, bqAmt: {}, bqQuery: "", bqFrom: "", bqFromDept: "" }),
+          bqOpen: !!st.bqOpen,
+          bqClose: () => this.setState({ bqOpen: false }),
+          bqDeptOn: deptOn,
+          bqDepts: D.map(d => ({ id: d.id, name: d.name })),
+          bqTo: to, bqSetTo: e => this.setState({ bqTo: e.target.value }),
+          bqToDept: toDept || "", bqSetToDept: e => this.setState({ bqToDept: e.target.value }),
+          bqQuery: st.bqQuery || "", bqSetQuery: e => this.setState({ bqQuery: e.target.value }),
+          bqFrom: st.bqFrom || "", bqSetFrom: e => this.setState({ bqFrom: e.target.value }),
+          bqFromDept: st.bqFromDept || "", bqSetFromDept: e => this.setState({ bqFromDept: e.target.value }),
+          bqNoTarget: !to, bqHasTarget: !!to,
+          bqRows: pool.slice(0, CAP).map(p => {
+            const free = Number(p.ist) || 0;
+            const raw = amt[p.id];
+            const on = Math.floor(Number(raw) || 0) > 0;
+            const id = p.id;
+            return {
+              name: p.name, meta: [p.quantitaet && p.quantitaet !== "—" ? p.quantitaet : "", p.ean && p.ean !== "—" ? "EAN " + p.ean : "", this.codeOf(p)].filter(Boolean).join(" · "),
+              dept: this.deptName(this.deptOf(p)), ort: p.ort || "—",
+              free: this.fmtStock(p, free), max: String(free), unit: this.baseUnitName(p),
+              amt: raw == null ? "" : String(raw),
+              rowStyle: on ? "background: color-mix(in srgb, var(--color-accent) 12%, transparent)" : "",
+              setAmt: e => { let v = e.target.value; if (v !== "" && Number(v) > free) v = String(free); if (v !== "" && Number(v) < 0) v = "0"; this.setState(prev => ({ bqAmt: Object.assign({}, prev.bqAmt, { [id]: v }) })); },
+              key: focusNext,
+              all: () => this.setState(prev => ({ bqAmt: Object.assign({}, prev.bqAmt, { [id]: String(free) }) }))
+            };
+          }),
+          bqNoRows: !!to && !pool.length,
+          bqCapped: pool.length > CAP,
+          bqCapText: this.tr("Gezeigt werden die ersten") + " " + CAP + " " + this.tr("von") + " " + pool.length + " — " + this.tr("Suche oder Filter eingrenzen."),
+          bqSummary: picked.length ? picked.length + " " + (picked.length === 1 ? this.tr("Position") : this.tr("Positionen")) + " · " + wares + " " + (wares === 1 ? this.tr("Ware") : this.tr("Waren")) : this.tr("Noch keine Menge eingetragen."),
+          bqClearOff: !Object.keys(amt).length,
+          bqClear: () => this.setState({ bqAmt: {} }),
+          bqBookOff: !to || !picked.length || !!st.tfBusy,
+          bqBookLabel: st.tfBusy ? this.tr("Wird gebucht …") : this.tr("Umlagern buchen") + (picked.length ? " (" + picked.length + ")" : ""),
+          bqBook: () => this.doTransfer(to, picked.map(x => ({ srcId: x.p.id, qty: x.n })), toDept || null, (moved, total) => {
+            const doneIds = new Set(picked.slice(0, moved).map(x => x.p.id));
+            this.setState(prev => {
+              const left = {}; Object.keys(prev.bqAmt || {}).forEach(k => { if (!doneIds.has(k)) left[k] = prev.bqAmt[k]; });
+              return { bqAmt: left, bqOpen: moved === total ? false : prev.bqOpen };
+            });
+          })
         };
       })(),
       fcOpen: !!st.fcOpen,
